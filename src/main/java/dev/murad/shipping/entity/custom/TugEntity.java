@@ -1,7 +1,7 @@
 package dev.murad.shipping.entity.custom;
 
 import dev.murad.shipping.setup.ModEntityTypes;
-import dev.murad.shipping.setup.ModItems;
+import javafx.util.Pair;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.LilyPadBlock;
 import net.minecraft.entity.EntityType;
@@ -12,8 +12,6 @@ import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.item.Item;
-import net.minecraft.pathfinding.GroundPathNavigator;
 import net.minecraft.pathfinding.PathNavigator;
 import net.minecraft.pathfinding.SwimmerPathNavigator;
 import net.minecraft.tags.FluidTags;
@@ -26,12 +24,12 @@ import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
-public class TugEntity extends MobEntity {
+public class TugEntity extends MobEntity implements ISpringableEntity {
 
     private float invFriction;
     private float outOfControlTicks;
@@ -56,6 +54,7 @@ public class TugEntity extends MobEntity {
     private float bubbleMultiplier;
     private float bubbleAngle;
     private float bubbleAngleO;
+    private Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
 
     public TugEntity(EntityType<? extends MobEntity> type, World world) {
         super(type, world);
@@ -299,6 +298,21 @@ public class TugEntity extends MobEntity {
         return flag ? BoatEntity.Status.UNDER_WATER : null;
     }
 
+
+    @Override
+    public Optional<Pair<ISpringableEntity, SpringEntity>> getDominated() {
+        return this.dominated;
+    }
+
+    @Override
+    public void dominate(ISpringableEntity entity, SpringEntity spring) {
+        this.dominated = Optional.of(new Pair<>(entity, spring));
+    }
+
+    @Override
+    public void unDominate() {
+        this.dominated = Optional.empty();
+    }
 
 
 //    @Override

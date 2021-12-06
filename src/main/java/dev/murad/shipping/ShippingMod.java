@@ -1,6 +1,7 @@
 package dev.murad.shipping;
 
 import dev.murad.shipping.entity.render.ModBargeRenderer;
+import dev.murad.shipping.entity.render.SpringEntityRenderer;
 import dev.murad.shipping.entity.render.TugRenderer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.Registration;
@@ -58,6 +59,7 @@ public class ShippingMod
         // do something that can only be done on the client
         LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().options);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.BARGE.get(), ModBargeRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SPRING.get(), SpringEntityRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TUG.get(), TugRenderer::new);
     }
 

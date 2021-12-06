@@ -3,6 +3,7 @@ package dev.murad.shipping.entity.custom;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import javafx.util.Pair;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.BoatEntity;
@@ -21,8 +22,11 @@ import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
-public class ModBargeEntity extends BoatEntity {
+public class ModBargeEntity extends BoatEntity implements ISpringableEntity{
+    private Optional<Pair<ISpringableEntity, SpringEntity>> dominated;
+
     public ModBargeEntity(EntityType<? extends BoatEntity> type, World world) {
         super(type, world);
         this.blocksBuilding = true;
@@ -81,4 +85,20 @@ public class ModBargeEntity extends BoatEntity {
     protected void doInteract(PlayerEntity player) {
         player.sendMessage(new StringTextComponent("Hello World"), null);
     }
+
+    @Override
+    public Optional<Pair<ISpringableEntity, SpringEntity>> getDominated() {
+        return this.dominated;
+    }
+
+    @Override
+    public void dominate(ISpringableEntity entity, SpringEntity spring) {
+        this.dominated = Optional.of(new Pair<>(entity, spring));
+    }
+
+    @Override
+    public void unDominate() {
+        this.dominated = Optional.empty();
+    }
+
 }

@@ -2,7 +2,11 @@ package dev.murad.shipping.data.client;
 
 
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.item.SpringItem;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.generators.ItemModelBuilder;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
@@ -23,7 +27,13 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "ship_link");
         builder(itemGenerated, "barge");
         builder(itemGenerated, "tug");
+        builder(itemGenerated, "cutter");
+        builder(itemGenerated, "spring");
+//                .override()
+//                .predicate(new ResourceLocation("first_selected"), 1f);
     }
+
+
 
     private ItemModelBuilder builder(ModelFile itemGenerated, String name) {
         return getBuilder(name).parent(itemGenerated).texture("layer0", "item/" + name);
