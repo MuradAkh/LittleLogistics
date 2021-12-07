@@ -1,6 +1,5 @@
 package dev.murad.shipping.entity.custom;
 
-import dev.murad.shipping.item.SpringItem;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.EntitySpringAPI;
@@ -19,6 +18,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -52,15 +52,17 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
     }
 
     public void setDominant(Entity dominant){
-        if(dominated instanceof ISpringableEntity && dominant instanceof  ISpringableEntity){
-            ((ISpringableEntity) dominant).dominate((ISpringableEntity) dominated, this);
+        if(dominated instanceof ISpringableEntity && dominant instanceof ISpringableEntity){
+            ((ISpringableEntity) dominant).setDominated((ISpringableEntity) dominated, this);
+            ((ISpringableEntity) dominated).setDominant((ISpringableEntity) dominant, this);
         }
         this.dominant = dominant;
     }
 
     public void setDominated(Entity dominated){
         if(dominated instanceof ISpringableEntity && dominant instanceof  ISpringableEntity){
-            ((ISpringableEntity) dominant).dominate((ISpringableEntity) dominated, this);
+            ((ISpringableEntity) dominant).setDominated((ISpringableEntity) dominated, this);
+            ((ISpringableEntity) dominated).setDominant((ISpringableEntity) dominant, this);
         }
         this.dominated = dominated;
     }
@@ -93,11 +95,11 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
 //        return false;
 //    }
 
-    @Nullable
-    @Override
-    public AxisAlignedBB getBoundingBox() {
-        return nullBB;
-    }
+//    @Nullable
+//    @Override
+//    public AxisAlignedBB getBoundingBox() {
+//        return nullBB;
+//    }
 
 //    @Nullable
 //    @Override
@@ -130,9 +132,15 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
     }
 
     @Override
+    public Direction getDirection(){
+        return this.dominated.getDirection();
+    }
+
+    @Override
     public void baseTick() {
         setDeltaMovement(0, 0, 0);
         super.baseTick();
+
         if(dominant != null && dominated != null) {
             if( ! dominant.isAlive() || ! dominated.isAlive()) {
                 kill();
@@ -142,11 +150,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
 
 
             double distSq = dominant.distanceToSqr(dominated);
-            double maxDstSq;
-//            if(dominated instanceof MinecartEntity && dominant instanceof MinecartEntity && AbstractRailBlock.isRail(level, dominant.blockPosition()))
-                maxDstSq = 1.5;
-//            else
-//                maxDstSq = 9.0;
+            double maxDstSq = 0.2;
             if(distSq > maxDstSq) {
                 Vector3d frontAnchor = calculateAnchorPosition(dominant, SpringSide.DOMINATED);
                 Vector3d backAnchor = calculateAnchorPosition(dominated, SpringSide.DOMINANT);
@@ -154,11 +158,11 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
                 double dx = (frontAnchor.x - backAnchor.x) / dist;
                 double dy = (frontAnchor.y - backAnchor.y) / dist;
                 double dz = (frontAnchor.z - backAnchor.z) / dist;
-                final double alpha = 0.5;
+                final double alpha = 0.1;
 
                 float targetYaw = computeTargetYaw(dominated.yRot, frontAnchor, backAnchor);
                 dominated.yRot = (float) (alpha * dominated.yRot + targetYaw * (1f-alpha));
-
+                this.yRot = dominated.yRot;
                 /*double speed;
                 if(dominated instanceof EntityMinecart && dominant instanceof EntityMinecart)
                     speed = 1.65;
@@ -337,7 +341,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
     public void kill() {
         super.remove();
         if(dominant instanceof ISpringableEntity){
-            ((ISpringableEntity) dominant).unDominate();
+            ((ISpringableEntity) dominant).removeDominated();
         }
         if(!level.isClientSide)
             InventoryHelper.dropItemStack(level, getX(), getY(), getZ(), new ItemStack(ModItems.SPRING.get()));

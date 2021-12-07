@@ -305,13 +305,28 @@ public class TugEntity extends MobEntity implements ISpringableEntity {
     }
 
     @Override
-    public void dominate(ISpringableEntity entity, SpringEntity spring) {
+    public Optional<Pair<ISpringableEntity, SpringEntity>> getDominant() {
+        return Optional.empty();
+    }
+
+    @Override
+    public void setDominated(ISpringableEntity entity, SpringEntity spring) {
         this.dominated = Optional.of(new Pair<>(entity, spring));
     }
 
     @Override
-    public void unDominate() {
+    public void setDominant(ISpringableEntity entity, SpringEntity spring) {
+
+    }
+
+    @Override
+    public void removeDominated() {
         this.dominated = Optional.empty();
+    }
+
+    @Override
+    public void removeDominant() {
+
     }
 
 

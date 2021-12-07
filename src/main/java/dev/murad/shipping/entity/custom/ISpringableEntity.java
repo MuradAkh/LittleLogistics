@@ -7,8 +7,13 @@ import java.util.Optional;
 public interface ISpringableEntity {
 
     public Optional<Pair<ISpringableEntity, SpringEntity>> getDominated();
+    public Optional<Pair<ISpringableEntity, SpringEntity>> getDominant();
 
-    public void dominate(ISpringableEntity entity, SpringEntity spring);
+    public void setDominated(ISpringableEntity entity, SpringEntity spring);
 
-    public void unDominate();
+    public void setDominant(ISpringableEntity entity, SpringEntity spring);
+
+    public void removeDominated();
+
+    public void removeDominant();
 }

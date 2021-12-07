@@ -25,7 +25,8 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 
 public class ModBargeEntity extends BoatEntity implements ISpringableEntity{
-    private Optional<Pair<ISpringableEntity, SpringEntity>> dominated;
+    private Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
+    private Optional<Pair<ISpringableEntity, SpringEntity>> dominant = Optional.empty();
 
     public ModBargeEntity(EntityType<? extends BoatEntity> type, World world) {
         super(type, world);
@@ -92,13 +93,28 @@ public class ModBargeEntity extends BoatEntity implements ISpringableEntity{
     }
 
     @Override
-    public void dominate(ISpringableEntity entity, SpringEntity spring) {
+    public Optional<Pair<ISpringableEntity, SpringEntity>> getDominant() {
+        return this.dominant;
+    }
+
+    @Override
+    public void setDominated(ISpringableEntity entity, SpringEntity spring) {
         this.dominated = Optional.of(new Pair<>(entity, spring));
     }
 
     @Override
-    public void unDominate() {
+    public void setDominant(ISpringableEntity entity, SpringEntity spring) {
+        this.dominant = Optional.of(new Pair<>(entity, spring));
+    }
+
+    @Override
+    public void removeDominated() {
         this.dominated = Optional.empty();
+    }
+
+    @Override
+    public void removeDominant() {
+        this.dominant = Optional.empty();
     }
 
 }
