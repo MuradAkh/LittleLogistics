@@ -27,5 +27,6 @@ public interface ISpringableEntity {
             dominated.setTrain(new Train(dominated));
             dominated.removeDominant();
         });
+        this.getDominant().flatMap(pair -> Optional.of(pair.getKey())).ifPresent(ISpringableEntity::removeDominated);
     }
 }
