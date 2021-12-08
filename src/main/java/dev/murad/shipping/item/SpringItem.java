@@ -1,7 +1,9 @@
 package dev.murad.shipping.item;
 
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
+import dev.murad.shipping.util.Train;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -35,18 +37,7 @@ public class SpringItem extends Item {
             return;
         switch(getState(stack)) {
             case WAITING_NEXT: {
-                Entity dominant = getDominant(world, stack);
-                if(dominant == null)
-                    return;
-                if(dominant == target) {
-                    player.displayClientMessage(new TranslationTextComponent("item.spring.notToSelf"), true);
-                } else {
-                    // First entity clicked is the dominant
-                    SpringEntity.createSpring(dominant, target);
-                    if(!player.isCreative())
-                        stack.shrink(1);
-                }
-                resetLinked(stack);
+                createSpringHelper(stack, player, world, target);
             }
             break;
 
@@ -55,6 +46,33 @@ public class SpringItem extends Item {
             }
             break;
         }
+    }
+
+    private void createSpringHelper(ItemStack stack, PlayerEntity player, World world, Entity target) {
+        Entity dominant = getDominant(world, stack);
+        if(dominant == null)
+            return;
+        if(dominant == target) {
+            player.displayClientMessage(new TranslationTextComponent("item.spring.notToSelf"), true);
+        } else if(dominant instanceof ISpringableEntity) {
+            Train firstTrain =  ((ISpringableEntity) dominant).getTrain();
+            Train secondTrain = ((ISpringableEntity) target).getTrain();
+            if (firstTrain.getTug().isPresent() && secondTrain.getTug().isPresent()) {
+                player.displayClientMessage(new TranslationTextComponent("item.spring.noTwoTugs"), true);
+            } else if (secondTrain.equals(firstTrain)){
+                player.displayClientMessage(new TranslationTextComponent("item.spring.noLoops"), true);
+            } else if (firstTrain.getTug().isPresent()) {
+                SpringEntity.createSpring((Entity) firstTrain.getTail(), (Entity) secondTrain.getHead());
+            } else {
+                SpringEntity.createSpring((Entity) secondTrain.getTail(), (Entity) firstTrain.getHead());
+            }
+            // First entity clicked is the dominant
+            if(!player.isCreative())
+                stack.shrink(1);
+
+
+        }
+        resetLinked(stack);
     }
 
     @Override
@@ -72,7 +90,7 @@ public class SpringItem extends Item {
         return worldIn.getEntity(id);
     }
 
-    private CompoundNBT nbt(ItemStack stack)  {
+    private static CompoundNBT nbt(ItemStack stack)  {
         if(stack.getTag() == null) {
             stack.setTag(new CompoundNBT());
         }
@@ -89,7 +107,7 @@ public class SpringItem extends Item {
         return super.use(worldIn, playerIn, handIn);
     }
 
-    public State getState(ItemStack stack) {
+    public static State getState(ItemStack stack) {
         if(nbt(stack).contains("linked"))
             return State.WAITING_NEXT;
         return State.READY;

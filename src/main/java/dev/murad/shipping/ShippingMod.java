@@ -3,10 +3,14 @@ package dev.murad.shipping;
 import dev.murad.shipping.entity.render.ModBargeRenderer;
 import dev.murad.shipping.entity.render.SpringEntityRenderer;
 import dev.murad.shipping.entity.render.TugRenderer;
+import dev.murad.shipping.item.SpringItem;
 import dev.murad.shipping.setup.ModEntityTypes;
+import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.Registration;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.item.ItemModelsProperties;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -61,6 +65,14 @@ public class ShippingMod
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.BARGE.get(), ModBargeRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SPRING.get(), SpringEntityRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TUG.get(), TugRenderer::new);
+
+        event.enqueueWork(() ->
+        {
+            ItemModelsProperties.register(ModItems.SPRING.get(),
+                    new ResourceLocation(ShippingMod.MOD_ID, "springstate"), (stack, world, entity) -> {
+                        return SpringItem.getState(stack).equals(SpringItem.State.READY) ? 0 : 1;
+                    });
+        });
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event)

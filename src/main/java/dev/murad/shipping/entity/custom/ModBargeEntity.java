@@ -3,6 +3,7 @@ package dev.murad.shipping.entity.custom;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import dev.murad.shipping.util.Train;
 import javafx.util.Pair;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -27,10 +28,12 @@ import java.util.Optional;
 public class ModBargeEntity extends BoatEntity implements ISpringableEntity{
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominant = Optional.empty();
+    private Train train;
 
     public ModBargeEntity(EntityType<? extends BoatEntity> type, World world) {
         super(type, world);
         this.blocksBuilding = true;
+        this.train = new Train(this);
     }
 
     public ModBargeEntity(World worldIn, double x, double y, double z) {
@@ -104,6 +107,7 @@ public class ModBargeEntity extends BoatEntity implements ISpringableEntity{
 
     @Override
     public void setDominant(ISpringableEntity entity, SpringEntity spring) {
+        this.setTrain(entity.getTrain());
         this.dominant = Optional.of(new Pair<>(entity, spring));
     }
 
@@ -116,5 +120,29 @@ public class ModBargeEntity extends BoatEntity implements ISpringableEntity{
     public void removeDominant() {
         this.dominant = Optional.empty();
     }
+
+    @Override
+    public Train getTrain() {
+        return train;
+    }
+
+    @Override
+    public void setTrain(Train train) {
+        this.train = train;
+        train.setTail(this);
+        dominated.ifPresent(dominated -> {
+            // avoid recursion loops
+            if(!dominated.getKey().getTrain().equals(train)){
+                dominated.getKey().setTrain(train);
+            }
+        });
+    }
+
+    @Override
+    public void remove(){
+        handleKill();
+        super.remove();
+    }
+
 
 }

@@ -1,6 +1,8 @@
 package dev.murad.shipping.entity.custom;
 
 import dev.murad.shipping.setup.ModEntityTypes;
+import dev.murad.shipping.setup.ModItems;
+import dev.murad.shipping.util.Train;
 import javafx.util.Pair;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.LilyPadBlock;
@@ -12,10 +14,12 @@ import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.item.Item;
 import net.minecraft.pathfinding.PathNavigator;
 import net.minecraft.pathfinding.SwimmerPathNavigator;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -24,6 +28,7 @@ import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -54,11 +59,15 @@ public class TugEntity extends MobEntity implements ISpringableEntity {
     private float bubbleMultiplier;
     private float bubbleAngle;
     private float bubbleAngleO;
+
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
+    private Train train;
+
 
     public TugEntity(EntityType<? extends MobEntity> type, World world) {
         super(type, world);
         this.blocksBuilding = true;
+        this.train = new Train(this);
     }
 
     public TugEntity(World worldIn, double x, double y, double z) {
@@ -72,13 +81,13 @@ public class TugEntity extends MobEntity implements ISpringableEntity {
 
     public static AttributeModifierMap.MutableAttribute setCustomAttributes() {
         return MobEntity.createMobAttributes()
-                .add(Attributes.MAX_HEALTH,1.0D)
-                .add(Attributes.MOVEMENT_SPEED,1.6D);
+                .add(Attributes.MAX_HEALTH, 1.0D)
+                .add(Attributes.MOVEMENT_SPEED, 1.6D);
 
     }
 
     @Override
-    public boolean canBreatheUnderwater(){
+    public boolean canBreatheUnderwater() {
         return true;
     }
 
@@ -94,7 +103,7 @@ public class TugEntity extends MobEntity implements ISpringableEntity {
         return ActionResultType.PASS;
     }
 
-    public void tick(){
+    public void tick() {
         this.oldStatus = this.status;
         this.status = this.getStatus();
 
@@ -102,30 +111,29 @@ public class TugEntity extends MobEntity implements ISpringableEntity {
         this.move(MoverType.SELF, this.getDeltaMovement());
 
 
-
         super.tick();
     }
 
     private void floatBoat() {
-        double d0 = (double)-0.04F;
-        double d1 = this.isNoGravity() ? 0.0D : (double)-0.04F;
+        double d0 = (double) -0.04F;
+        double d1 = this.isNoGravity() ? 0.0D : (double) -0.04F;
         double d2 = 0.0D;
         this.invFriction = 0.05F;
         if (this.oldStatus == BoatEntity.Status.IN_AIR && this.status != BoatEntity.Status.IN_AIR && this.status != BoatEntity.Status.ON_LAND) {
             this.waterLevel = this.getY(1.0D);
-            this.setPos(this.getX(), (double)(this.getWaterLevelAbove() - this.getBbHeight()) + 0.101D, this.getZ());
+            this.setPos(this.getX(), (double) (this.getWaterLevelAbove() - this.getBbHeight()) + 0.101D, this.getZ());
             this.setDeltaMovement(this.getDeltaMovement().multiply(1.0D, 0.0D, 1.0D));
             this.lastYd = 0.0D;
             this.status = BoatEntity.Status.IN_WATER;
         } else {
             if (this.status == BoatEntity.Status.IN_WATER) {
-                d2 = (this.waterLevel - this.getY()) / (double)this.getBbHeight();
+                d2 = (this.waterLevel - this.getY()) / (double) this.getBbHeight();
                 this.invFriction = 0.9F;
             } else if (this.status == BoatEntity.Status.UNDER_FLOWING_WATER) {
                 d1 = -7.0E-4D;
                 this.invFriction = 0.9F;
             } else if (this.status == BoatEntity.Status.UNDER_WATER) {
-                d2 = (double)0.01F;
+                d2 = (double) 0.01F;
                 this.invFriction = 0.45F;
             } else if (this.status == BoatEntity.Status.IN_AIR) {
                 this.invFriction = 0.9F;
@@ -137,7 +145,7 @@ public class TugEntity extends MobEntity implements ISpringableEntity {
             }
 
             Vector3d vector3d = this.getDeltaMovement();
-            this.setDeltaMovement(vector3d.x * (double)this.invFriction, vector3d.y + d1, vector3d.z * (double)this.invFriction);
+            this.setDeltaMovement(vector3d.x * (double) this.invFriction, vector3d.y + d1, vector3d.z * (double) this.invFriction);
             this.deltaRotation *= this.invFriction;
             if (d2 > 0.0D) {
                 Vector3d vector3d1 = this.getDeltaMovement();
@@ -159,11 +167,11 @@ public class TugEntity extends MobEntity implements ISpringableEntity {
         BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
 
         label39:
-        for(int k1 = k; k1 < l; ++k1) {
+        for (int k1 = k; k1 < l; ++k1) {
             float f = 0.0F;
 
-            for(int l1 = i; l1 < j; ++l1) {
-                for(int i2 = i1; i2 < j1; ++i2) {
+            for (int l1 = i; l1 < j; ++l1) {
+                for (int i2 = i1; i2 < j1; ++i2) {
                     blockpos$mutable.set(l1, k1, i2);
                     FluidState fluidstate = this.level.getFluidState(blockpos$mutable);
                     if (fluidstate.is(FluidTags.WATER)) {
@@ -177,11 +185,11 @@ public class TugEntity extends MobEntity implements ISpringableEntity {
             }
 
             if (f < 1.0F) {
-                return (float)blockpos$mutable.getY() + f;
+                return (float) blockpos$mutable.getY() + f;
             }
         }
 
-        return (float)(l + 1);
+        return (float) (l + 1);
     }
 
     private BoatEntity.Status getStatus() {
@@ -216,15 +224,15 @@ public class TugEntity extends MobEntity implements ISpringableEntity {
         int k1 = 0;
         BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
 
-        for(int l1 = i; l1 < j; ++l1) {
-            for(int i2 = i1; i2 < j1; ++i2) {
+        for (int l1 = i; l1 < j; ++l1) {
+            for (int i2 = i1; i2 < j1; ++i2) {
                 int j2 = (l1 != i && l1 != j - 1 ? 0 : 1) + (i2 != i1 && i2 != j1 - 1 ? 0 : 1);
                 if (j2 != 2) {
-                    for(int k2 = k; k2 < l; ++k2) {
+                    for (int k2 = k; k2 < l; ++k2) {
                         if (j2 <= 0 || k2 != k && k2 != l - 1) {
                             blockpos$mutable.set(l1, k2, i2);
                             BlockState blockstate = this.level.getBlockState(blockpos$mutable);
-                            if (!(blockstate.getBlock() instanceof LilyPadBlock) && VoxelShapes.joinIsNotEmpty(blockstate.getCollisionShape(this.level, blockpos$mutable).move((double)l1, (double)k2, (double)i2), voxelshape, IBooleanFunction.AND)) {
+                            if (!(blockstate.getBlock() instanceof LilyPadBlock) && VoxelShapes.joinIsNotEmpty(blockstate.getCollisionShape(this.level, blockpos$mutable).move((double) l1, (double) k2, (double) i2), voxelshape, IBooleanFunction.AND)) {
                                 f += blockstate.getSlipperiness(this.level, blockpos$mutable, this);
                                 ++k1;
                             }
@@ -234,7 +242,7 @@ public class TugEntity extends MobEntity implements ISpringableEntity {
             }
         }
 
-        return f / (float)k1;
+        return f / (float) k1;
     }
 
     private boolean checkInWater() {
@@ -249,15 +257,15 @@ public class TugEntity extends MobEntity implements ISpringableEntity {
         this.waterLevel = Double.MIN_VALUE;
         BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
 
-        for(int k1 = i; k1 < j; ++k1) {
-            for(int l1 = k; l1 < l; ++l1) {
-                for(int i2 = i1; i2 < j1; ++i2) {
+        for (int k1 = i; k1 < j; ++k1) {
+            for (int l1 = k; l1 < l; ++l1) {
+                for (int i2 = i1; i2 < j1; ++i2) {
                     blockpos$mutable.set(k1, l1, i2);
                     FluidState fluidstate = this.level.getFluidState(blockpos$mutable);
                     if (fluidstate.is(FluidTags.WATER)) {
-                        float f = (float)l1 + fluidstate.getHeight(this.level, blockpos$mutable);
-                        this.waterLevel = Math.max((double)f, this.waterLevel);
-                        flag |= axisalignedbb.minY < (double)f;
+                        float f = (float) l1 + fluidstate.getHeight(this.level, blockpos$mutable);
+                        this.waterLevel = Math.max((double) f, this.waterLevel);
+                        flag |= axisalignedbb.minY < (double) f;
                     }
                 }
             }
@@ -279,12 +287,12 @@ public class TugEntity extends MobEntity implements ISpringableEntity {
         boolean flag = false;
         BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
 
-        for(int k1 = i; k1 < j; ++k1) {
-            for(int l1 = k; l1 < l; ++l1) {
-                for(int i2 = i1; i2 < j1; ++i2) {
+        for (int k1 = i; k1 < j; ++k1) {
+            for (int l1 = k; l1 < l; ++l1) {
+                for (int i2 = i1; i2 < j1; ++i2) {
                     blockpos$mutable.set(k1, l1, i2);
                     FluidState fluidstate = this.level.getFluidState(blockpos$mutable);
-                    if (fluidstate.is(FluidTags.WATER) && d0 < (double)((float)blockpos$mutable.getY() + fluidstate.getHeight(this.level, blockpos$mutable))) {
+                    if (fluidstate.is(FluidTags.WATER) && d0 < (double) ((float) blockpos$mutable.getY() + fluidstate.getHeight(this.level, blockpos$mutable))) {
                         if (!fluidstate.isSource()) {
                             return BoatEntity.Status.UNDER_FLOWING_WATER;
                         }
@@ -312,6 +320,7 @@ public class TugEntity extends MobEntity implements ISpringableEntity {
     @Override
     public void setDominated(ISpringableEntity entity, SpringEntity spring) {
         this.dominated = Optional.of(new Pair<>(entity, spring));
+        entity.setTrain(this.train);
     }
 
     @Override
@@ -329,19 +338,39 @@ public class TugEntity extends MobEntity implements ISpringableEntity {
 
     }
 
+    @Override
+    public Train getTrain() {
+        return train;
+    }
 
-//    @Override
-//    public ActionResultType interact(PlayerEntity player, Hand hand) {
-//        if (player.isSecondaryUseActive()) {
-//            return ActionResultType.PASS;
-//        } else {
-//            if (!this.level.isClientSide) {
-//                doInteract(player);
-//            }
-//            return ActionResultType.PASS;
-//        }
-//
-//    }
+    @Override
+    public void setTrain(Train train) {
+        this.train = train;
+    }
+
+
+    @Override
+    public boolean hurt(DamageSource p_70097_1_, float p_70097_2_) {
+        if (this.isInvulnerableTo(p_70097_1_)) {
+            return false;
+        } else if (!this.level.isClientSide && !this.removed) {
+            this.spawnAtLocation(this.getDropItem());
+            this.remove();
+            return true;
+        } else {
+            return true;
+        }
+    }
+
+    @Override
+    public void remove(){
+        handleKill();
+        super.remove();
+    }
+
+    public Item getDropItem() {
+        return ModItems.TUG.get();
+    }
 
 
 }

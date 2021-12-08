@@ -28,9 +28,10 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "barge");
         builder(itemGenerated, "tug");
         builder(itemGenerated, "cutter");
-        builder(itemGenerated, "spring");
-//                .override()
-//                .predicate(new ResourceLocation("first_selected"), 1f);
+        builder(itemGenerated, "spring")
+                .override()
+                .model(builder(itemGenerated, "spring_dominant_selected"))
+                .predicate(new ResourceLocation(ShippingMod.MOD_ID, "springstate"), 1f).end();
     }
 
 

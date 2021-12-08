@@ -30,8 +30,7 @@ public class ModEventHandler {
             Item item = event.getItemStack().getItem();
             if(item instanceof SpringItem) {
                 SpringItem springItem = (SpringItem) item;
-                SpringItem.State state = springItem.getState(event.getItemStack());
-                if(EntitySpringAPI.isValidTarget(target, state)) {
+                if(EntitySpringAPI.isValidTarget(target)) {
                     springItem.onUsedOnEntity(event.getItemStack(), event.getPlayer(), event.getWorld(), target);
                     event.setCanceled(true);
                     event.setCancellationResult(ActionResultType.SUCCESS);

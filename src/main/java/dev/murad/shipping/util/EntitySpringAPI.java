@@ -34,8 +34,8 @@ public class EntitySpringAPI {
         addGenericAnchorMapping(BoatEntity.class, DEFAULT_BOAT_ANCHOR);
     }
 
-    public static boolean isValidTarget(Entity target, SpringItem.State state) {
-        return (target instanceof TugEntity && state == SpringItem.State.READY) || target instanceof ModBargeEntity;
+    public static boolean isValidTarget(Entity target) {
+        return target instanceof TugEntity || target instanceof ModBargeEntity;
     }
 
     public static void addGenericAnchorMapping(Class<? extends Entity> entity, BiFunction<Entity, SpringEntity.SpringSide, Vector3d> function) {
