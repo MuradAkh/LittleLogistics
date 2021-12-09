@@ -320,7 +320,6 @@ public class TugEntity extends MobEntity implements ISpringableEntity {
     @Override
     public void setDominated(ISpringableEntity entity, SpringEntity spring) {
         this.dominated = Optional.of(new Pair<>(entity, spring));
-        entity.setTrain(this.train);
     }
 
     @Override
