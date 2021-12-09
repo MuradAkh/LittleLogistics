@@ -13,7 +13,7 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<ModBargeEntity>> BARGE =
             Registration.ENTITIES.register("barge",
                     () -> EntityType.Builder.<ModBargeEntity>of(ModBargeEntity::new,
-                                    EntityClassification.MISC).sized(0.8f, 0.5f)
+                                    EntityClassification.MISC).sized(0.7f, 0.5f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "barge").toString()));
 
     public static final RegistryObject<EntityType<TugEntity>> TUG =

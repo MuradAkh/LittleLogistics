@@ -172,8 +172,8 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
                 dominated.motionY += dy * Math.abs(dy) * speed;
                 dominated.motionZ += dz * Math.abs(dz) * speed;*/
                 double k = 0.1;
-                double l0 = 1.5;
-                dominated.push(k*(dist-l0)*dx, k*(dist-l0)*dy, k*(dist-l0)*dz);
+                double l0 = 1.1;
+                dominated.setDeltaMovement(k*(dist-l0)*dx, k*(dist-l0)*dy, k*(dist-l0)*dz);
             }
 
             if(!level.isClientSide) { // send update every tick to ensure client has infos
