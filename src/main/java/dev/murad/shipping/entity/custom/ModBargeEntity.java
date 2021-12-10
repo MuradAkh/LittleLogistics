@@ -9,11 +9,19 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.ItemStackHelper;
+import net.minecraft.inventory.container.ChestContainer;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
@@ -23,12 +31,14 @@ import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class ModBargeEntity extends BoatEntity implements ISpringableEntity{
+public class ModBargeEntity extends BoatEntity implements ISpringableEntity, IInventory, INamedContainerProvider {
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominant = Optional.empty();
     private Train train;
+    private NonNullList<ItemStack> itemStacks = NonNullList.withSize(36, ItemStack.EMPTY);
 
     public ModBargeEntity(EntityType<? extends BoatEntity> type, World world) {
         super(type, world);
@@ -76,18 +86,15 @@ public class ModBargeEntity extends BoatEntity implements ISpringableEntity{
 
     @Override
     public ActionResultType interact(PlayerEntity player, Hand hand) {
-        if (player.isSecondaryUseActive()) {
-            return ActionResultType.PASS;
-        } else {
-            if (!this.level.isClientSide) {
-                doInteract(player);
-            }
+        if (!this.level.isClientSide) {
+            doInteract(player);
             return ActionResultType.PASS;
         }
+        return ActionResultType.SUCCESS;
     }
 
     protected void doInteract(PlayerEntity player) {
-        player.sendMessage(new StringTextComponent("Hello World"), null);
+        player.openMenu(this);
     }
 
     @Override
@@ -145,4 +152,89 @@ public class ModBargeEntity extends BoatEntity implements ISpringableEntity{
     }
 
 
+    @Override
+    public int getContainerSize() {
+        return 27;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        for(ItemStack itemstack : this.itemStacks) {
+            if (!itemstack.isEmpty()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public ItemStack getItem(int p_70301_1_) {
+        return this.itemStacks.get(p_70301_1_);
+    }
+
+    @Override
+    public ItemStack removeItem(int p_70298_1_, int p_70298_2_) {
+        return ItemStackHelper.removeItem(this.itemStacks, p_70298_1_, p_70298_2_);
+
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int p_70304_1_) {
+        ItemStack itemstack = this.itemStacks.get(p_70304_1_);
+        if (itemstack.isEmpty()) {
+            return ItemStack.EMPTY;
+        } else {
+            this.itemStacks.set(p_70304_1_, ItemStack.EMPTY);
+            return itemstack;
+        }
+    }
+
+    @Override
+    public void setItem(int p_70299_1_, ItemStack p_70299_2_) {
+        this.itemStacks.set(p_70299_1_, p_70299_2_);
+        if (!p_70299_2_.isEmpty() && p_70299_2_.getCount() > this.getMaxStackSize()) {
+            p_70299_2_.setCount(this.getMaxStackSize());
+        }
+    }
+
+    @Override
+    public void setChanged() {
+
+    }
+
+    @Override
+    public boolean stillValid(PlayerEntity p_70300_1_) {
+        if (this.removed) {
+            return false;
+        } else {
+            return !(p_70300_1_.distanceToSqr(this) > 64.0D);
+        }
+    }
+
+    @Override
+    public void clearContent() {
+        this.itemStacks.clear();
+    }
+
+    @Nullable
+    @Override
+    public Container createMenu(int p_createMenu_1_, PlayerInventory p_createMenu_2_, PlayerEntity p_createMenu_3_) {
+        if (p_createMenu_3_.isSpectator()) {
+            return null;
+        }
+        return ChestContainer.threeRows(p_createMenu_1_, p_createMenu_2_, this);
+
+    }
+
+    @Override
+    protected void addAdditionalSaveData(CompoundNBT p_213281_1_) {
+        ItemStackHelper.saveAllItems(p_213281_1_, this.itemStacks);
+
+    }
+
+    @Override
+    protected void readAdditionalSaveData(CompoundNBT p_70037_1_) {
+        ItemStackHelper.loadAllItems(p_70037_1_, this.itemStacks);
+    }
 }
