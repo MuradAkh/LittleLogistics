@@ -379,15 +379,19 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
     }
 
     @Override
-    public void remove(){
+    public void remove() {
         handleKill();
         super.remove();
+    }
+
+    @Override
+    public void checkDespawn() {
+
     }
 
     public Item getDropItem() {
         return ModItems.TUG.get();
     }
-
 
 
     // LivingEntity override, to avoid jumping out of water
@@ -422,7 +426,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
                     f5 = 0.96F;
                 }
 
-                f6 *= (float)this.getAttribute(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get()).getValue();
+                f6 *= (float) this.getAttribute(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get()).getValue();
                 this.moveRelative(f6, p_213352_1_);
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 Vector3d vector3d6 = this.getDeltaMovement();
@@ -430,7 +434,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
                     vector3d6 = new Vector3d(vector3d6.x, 0.2D, vector3d6.z);
                 }
 
-                this.setDeltaMovement(vector3d6.multiply((double)f5, (double)0.8F, (double)f5));
+                this.setDeltaMovement(vector3d6.multiply((double) f5, (double) 0.8F, (double) f5));
                 Vector3d vector3d2 = this.getFluidFallingAdjustedMovement(d0, flag, this.getDeltaMovement());
                 this.setDeltaMovement(vector3d2);
 //                if (this.horizontalCollision && this.isFree(vector3d2.x, vector3d2.y + (double)0.6F - this.getY() + d8, vector3d2.z)) {
@@ -441,7 +445,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
                 this.moveRelative(0.02F, p_213352_1_);
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 if (this.getFluidHeight(FluidTags.LAVA) <= this.getFluidJumpThreshold()) {
-                    this.setDeltaMovement(this.getDeltaMovement().multiply(0.5D, (double)0.8F, 0.5D));
+                    this.setDeltaMovement(this.getDeltaMovement().multiply(0.5D, (double) 0.8F, 0.5D));
                     Vector3d vector3d3 = this.getFluidFallingAdjustedMovement(d0, flag, this.getDeltaMovement());
                     this.setDeltaMovement(vector3d3);
                 } else {
@@ -453,8 +457,8 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
                 }
 
                 Vector3d vector3d4 = this.getDeltaMovement();
-                if (this.horizontalCollision && this.isFree(vector3d4.x, vector3d4.y + (double)0.6F - this.getY() + d7, vector3d4.z)) {
-                    this.setDeltaMovement(vector3d4.x, (double)0.3F, vector3d4.z);
+                if (this.horizontalCollision && this.isFree(vector3d4.x, vector3d4.y + (double) 0.6F - this.getY() + d7, vector3d4.z)) {
+                    this.setDeltaMovement(vector3d4.x, (double) 0.3F, vector3d4.z);
                 }
             } else if (this.isFallFlying()) {
                 Vector3d vector3d = this.getDeltaMovement();
@@ -463,20 +467,20 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
                 }
 
                 Vector3d vector3d1 = this.getLookAngle();
-                float f = this.xRot * ((float)Math.PI / 180F);
+                float f = this.xRot * ((float) Math.PI / 180F);
                 double d1 = Math.sqrt(vector3d1.x * vector3d1.x + vector3d1.z * vector3d1.z);
                 double d3 = Math.sqrt(getHorizontalDistanceSqr(vector3d));
                 double d4 = vector3d1.length();
                 float f1 = MathHelper.cos(f);
-                f1 = (float)((double)f1 * (double)f1 * Math.min(1.0D, d4 / 0.4D));
-                vector3d = this.getDeltaMovement().add(0.0D, d0 * (-1.0D + (double)f1 * 0.75D), 0.0D);
+                f1 = (float) ((double) f1 * (double) f1 * Math.min(1.0D, d4 / 0.4D));
+                vector3d = this.getDeltaMovement().add(0.0D, d0 * (-1.0D + (double) f1 * 0.75D), 0.0D);
                 if (vector3d.y < 0.0D && d1 > 0.0D) {
-                    double d5 = vector3d.y * -0.1D * (double)f1;
+                    double d5 = vector3d.y * -0.1D * (double) f1;
                     vector3d = vector3d.add(vector3d1.x * d5 / d1, d5, vector3d1.z * d5 / d1);
                 }
 
                 if (f < 0.0F && d1 > 0.0D) {
-                    double d9 = d3 * (double)(-MathHelper.sin(f)) * 0.04D;
+                    double d9 = d3 * (double) (-MathHelper.sin(f)) * 0.04D;
                     vector3d = vector3d.add(-vector3d1.x * d9 / d1, d9 * 3.2D, -vector3d1.z * d9 / d1);
                 }
 
@@ -484,14 +488,14 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
                     vector3d = vector3d.add((vector3d1.x / d1 * d3 - vector3d.x) * 0.1D, 0.0D, (vector3d1.z / d1 * d3 - vector3d.z) * 0.1D);
                 }
 
-                this.setDeltaMovement(vector3d.multiply((double)0.99F, (double)0.98F, (double)0.99F));
+                this.setDeltaMovement(vector3d.multiply((double) 0.99F, (double) 0.98F, (double) 0.99F));
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 if (this.horizontalCollision && !this.level.isClientSide) {
                     double d10 = Math.sqrt(getHorizontalDistanceSqr(this.getDeltaMovement()));
                     double d6 = d3 - d10;
-                    float f2 = (float)(d6 * 10.0D - 3.0D);
+                    float f2 = (float) (d6 * 10.0D - 3.0D);
                     if (f2 > 0.0F) {
-                        this.playSound(this.getFallDamageSound((int)f2), 1.0F, 1.0F);
+                        this.playSound(this.getFallDamageSound((int) f2), 1.0F, 1.0F);
                         this.hurt(DamageSource.FLY_INTO_WALL, f2);
                     }
                 }
@@ -506,7 +510,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
                 Vector3d vector3d5 = this.handleRelativeFrictionAndCalculateMovement(p_213352_1_, f3);
                 double d2 = vector3d5.y;
                 if (this.hasEffect(Effects.LEVITATION)) {
-                    d2 += (0.05D * (double)(this.getEffect(Effects.LEVITATION).getAmplifier() + 1) - vector3d5.y) * 0.2D;
+                    d2 += (0.05D * (double) (this.getEffect(Effects.LEVITATION).getAmplifier() + 1) - vector3d5.y) * 0.2D;
                     this.fallDistance = 0.0F;
                 } else if (this.level.isClientSide && !this.level.hasChunkAt(blockpos)) {
                     if (this.getY() > 0.0D) {
@@ -518,7 +522,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
                     d2 -= d0;
                 }
 
-                this.setDeltaMovement(vector3d5.x * (double)f4, d2 * (double)0.98F, vector3d5.z * (double)f4);
+                this.setDeltaMovement(vector3d5.x * (double) f4, d2 * (double) 0.98F, vector3d5.z * (double) f4);
             }
         }
 
