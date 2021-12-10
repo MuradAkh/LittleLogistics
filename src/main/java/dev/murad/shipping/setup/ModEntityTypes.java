@@ -19,7 +19,7 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<TugEntity>> TUG =
             Registration.ENTITIES.register("tug",
                     () -> EntityType.Builder.<TugEntity>of(TugEntity::new,
-                                    EntityClassification.MISC).sized(0.8f, 0.5f)
+                                    EntityClassification.MISC).sized(0.75f, 0.5f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "tug").toString()));
 
     public static final RegistryObject<EntityType<SpringEntity>> SPRING =
