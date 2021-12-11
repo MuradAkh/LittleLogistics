@@ -163,14 +163,6 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
                 float targetYaw = computeTargetYaw(dominated.yRot, frontAnchor, backAnchor);
                 dominated.yRot = (float) (alpha * dominated.yRot + targetYaw * (1f-alpha));
                 this.yRot = dominated.yRot;
-                /*double speed;
-                if(dominated instanceof EntityMinecart && dominant instanceof EntityMinecart)
-                    speed = 1.65;
-                else
-                    speed = 0.2;
-                dominated.motionX += dx * Math.abs(dx) * speed;
-                dominated.motionY += dy * Math.abs(dy) * speed;
-                dominated.motionZ += dz * Math.abs(dz) * speed;*/
                 double k = 0.1;
                 double l0 = 1.1;
                 dominated.setDeltaMovement(k*(dist-l0)*dx, k*(dist-l0)*dy, k*(dist-l0)*dz);
@@ -179,9 +171,6 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
             if(!level.isClientSide) { // send update every tick to ensure client has infos
                 entityData.set(DOMINANT_ID, dominant.getId());
                 entityData.set(DOMINATED_ID, dominated.getId());
-//                entityData.get(DOMINANT_ID).setDirty(true);
-//                entityData.get(DOMINATED_ID).setDirty(true);
-//                entityData.di = true;
             }
         } else { // front and back entities have not been loaded yet
             if(dominantNBT != null && dominatedNBT != null) {
@@ -194,7 +183,27 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
                     entityData.set(DOMINATED_ID, e.getId());
                 });
             }
+            updateClient();
         }
+    }
+
+    private void updateClient(){
+        if(this.level.isClientSide) {
+            if(this.dominant == null) {
+                Entity potential = level.getEntity(getEntityData().get(DOMINANT_ID));
+                if (potential != null) {
+                    setDominant(potential);
+                }
+            }
+
+            if(this.dominated == null) {
+                Entity potential_dominated = level.getEntity(getEntityData().get(DOMINATED_ID));
+                if (potential_dominated != null) {
+                    setDominated(potential_dominated);
+                }
+            }
+        }
+
     }
 
     private float computeTargetYaw(Float currentYaw, Vector3d anchorPos, Vector3d otherAnchorPos) {
