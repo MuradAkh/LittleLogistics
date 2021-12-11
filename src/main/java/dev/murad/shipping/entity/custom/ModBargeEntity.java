@@ -8,9 +8,11 @@ import javafx.util.Pair;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.BoatEntity;
+import net.minecraft.entity.monster.piglin.PiglinTasks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.ChestContainer;
 import net.minecraft.inventory.container.Container;
@@ -19,13 +21,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.*;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -95,6 +95,28 @@ public class ModBargeEntity extends BoatEntity implements ISpringableEntity, IIn
 
     protected void doInteract(PlayerEntity player) {
         player.openMenu(this);
+    }
+
+    @Override
+    public void remove(boolean keepData) {
+        if (!this.level.isClientSide) {
+            InventoryHelper.dropContents(this.level, this, this);
+        }
+
+        super.remove(keepData);
+    }
+
+    @Override
+    public boolean hurt(DamageSource p_70097_1_, float p_70097_2_) {
+        if (this.isInvulnerableTo(p_70097_1_)) {
+            return false;
+        } else if (!this.level.isClientSide && !this.removed) {
+            this.spawnAtLocation(this.getDropItem());
+            this.remove();
+            return true;
+        } else {
+            return true;
+        }
     }
 
     @Override
