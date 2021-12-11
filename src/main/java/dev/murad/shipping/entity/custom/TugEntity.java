@@ -33,11 +33,14 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class TugEntity extends WaterMobEntity implements ISpringableEntity {
@@ -68,12 +71,15 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
 
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
     private Train train;
+    private List<Vector2f> path;
+    private int nextStop;
 
 
     public TugEntity(EntityType<? extends WaterMobEntity> type, World world) {
         super(type, world);
         this.blocksBuilding = true;
         this.train = new Train(this);
+        this.path = new ArrayList<>();
     }
 
     public TugEntity(World worldIn, double x, double y, double z) {
@@ -95,6 +101,10 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
     @Override
     public boolean canBreatheUnderwater() {
         return true;
+    }
+
+    public boolean isInvulnerableTo(DamageSource p_180431_1_) {
+        return  p_180431_1_.equals(DamageSource.IN_WALL) || super.isInvulnerableTo(p_180431_1_);
     }
 
     @Override
@@ -119,6 +129,34 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
         this.horizontalCollision = false;
         super.tick();
         this.horizontalCollision = false;
+        followPath();
+    }
+
+    private void followPath(){
+        if (!this.path.isEmpty()){
+            Vector2f stop = path.get(nextStop);
+            navigation.moveTo(stop.x, this.getY(), stop.y, 1);
+            double distance = Math.abs(Math.hypot(this.getX()-stop.x, this.getZ()-stop.y));
+            if (distance < 2.2) {
+                incrementStop();
+            }
+
+        }else{
+            this.nextStop = 0;
+        }
+    }
+
+    public void setPath(List<Vector2f> path){
+        this.path = path;
+    }
+
+    private void incrementStop(){
+        if(this.path.size() == 1) {
+            nextStop = 0;
+        }
+        else if (!this.path.isEmpty()){
+            nextStop = (nextStop + 1) % (this.path.size());
+        }
     }
 
     private void floatBoat() {
@@ -437,9 +475,9 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
                 this.setDeltaMovement(vector3d6.multiply((double) f5, (double) 0.8F, (double) f5));
                 Vector3d vector3d2 = this.getFluidFallingAdjustedMovement(d0, flag, this.getDeltaMovement());
                 this.setDeltaMovement(vector3d2);
-//                if (this.horizontalCollision && this.isFree(vector3d2.x, vector3d2.y + (double)0.6F - this.getY() + d8, vector3d2.z)) {
-//                    this.setDeltaMovement(vector3d2.x, (double)0.3F, vector3d2.z);
-//                }
+                if (this.horizontalCollision && this.isFree(vector3d2.x, vector3d2.y + (double)0.6F - this.getY() + d8, vector3d2.z)) {
+                    this.moveTo(Math.round(this.getX()), this.getY(), (Math.round(this.getZ())));
+                }
             } else if (this.isInLava() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidstate.getType())) {
                 double d7 = this.getY();
                 this.moveRelative(0.02F, p_213352_1_);

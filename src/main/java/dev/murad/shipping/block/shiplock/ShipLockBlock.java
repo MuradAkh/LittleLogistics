@@ -23,7 +23,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 
-public class ShipLockBlock extends Block {
+public class   ShipLockBlock extends Block {
     public static final DirectionProperty FACING = HorizontalBlock.FACING;
 
     public ShipLockBlock(Properties properties) {

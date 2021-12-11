@@ -28,6 +28,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "barge");
         builder(itemGenerated, "tug");
         builder(itemGenerated, "cutter");
+        builder(itemGenerated, "tug_route");
         builder(itemGenerated, "spring")
                 .override()
                 .model(builder(itemGenerated, "spring_dominant_selected"))

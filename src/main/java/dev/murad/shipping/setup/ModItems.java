@@ -1,8 +1,5 @@
 package dev.murad.shipping.setup;
-import dev.murad.shipping.item.ModBargeItem;
-import dev.murad.shipping.item.SpringCutterItem;
-import dev.murad.shipping.item.SpringItem;
-import dev.murad.shipping.item.TugItem;
+import dev.murad.shipping.item.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraftforge.fml.RegistryObject;
@@ -22,6 +19,9 @@ public class ModItems {
 
     public static final RegistryObject<Item> SPRING = Registration.ITEMS.register("spring",
             () -> new SpringItem(new Item.Properties().stacksTo(1).tab(ItemGroup.TAB_TRANSPORTATION)));
+
+    public static final RegistryObject<Item> TUG_ROUTE = Registration.ITEMS.register("tug_route",
+            () -> new TugRouteItem(new Item.Properties().stacksTo(1).tab(ItemGroup.TAB_TRANSPORTATION)));
 
     public static void register () {
 
