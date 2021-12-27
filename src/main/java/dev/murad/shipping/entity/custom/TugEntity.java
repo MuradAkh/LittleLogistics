@@ -1,5 +1,6 @@
 package dev.murad.shipping.entity.custom;
 
+import dev.murad.shipping.entity.navigation.TugPathNavigator;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.Train;
@@ -46,6 +47,7 @@ import java.util.Optional;
 public class TugEntity extends WaterMobEntity implements ISpringableEntity {
 
     private float invFriction;
+    int stuckCounter;
     private float outOfControlTicks;
     private float deltaRotation;
     private int lerpSteps;
@@ -80,6 +82,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
         this.blocksBuilding = true;
         this.train = new Train(this);
         this.path = new ArrayList<>();
+        stuckCounter = 0;
     }
 
     public TugEntity(World worldIn, double x, double y, double z) {
@@ -109,7 +112,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
 
     @Override
     protected PathNavigator createNavigation(World p_175447_1_) {
-        return new SwimmerPathNavigator(this, p_175447_1_);
+        return new TugPathNavigator(this, p_175447_1_);
     }
 
     @Override
@@ -476,7 +479,15 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
                 Vector3d vector3d2 = this.getFluidFallingAdjustedMovement(d0, flag, this.getDeltaMovement());
                 this.setDeltaMovement(vector3d2);
                 if (this.horizontalCollision && this.isFree(vector3d2.x, vector3d2.y + (double)0.6F - this.getY() + d8, vector3d2.z)) {
-                    this.moveTo(Math.round(this.getX()), this.getY(), (Math.round(this.getZ())));
+                    if (stuckCounter > 10){
+//                        this.moveTo(Math.floor(this.getX()), this.getY(), (Math.floor(this.getZ())));
+                        this.setDeltaMovement(this.getDeltaMovement().multiply(new Vector3d(5, 1, 5)));
+//                        stuckCounter = 0;
+                    } else {
+                        stuckCounter++;
+                    }
+                }else{
+                    stuckCounter = 0;
                 }
             } else if (this.isInLava() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidstate.getType())) {
                 double d7 = this.getY();
