@@ -3,6 +3,7 @@ package dev.murad.shipping.setup;
 import dev.murad.shipping.ShippingMod;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.IRecipeSerializer;

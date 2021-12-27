@@ -1,6 +1,8 @@
 package dev.murad.shipping.entity.custom;
 
+import dev.murad.shipping.entity.container.TugContainer;
 import dev.murad.shipping.entity.navigation.TugPathNavigator;
+import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.Train;
@@ -17,16 +19,25 @@ import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.pathfinding.PathNavigator;
 import net.minecraft.pathfinding.SwimmerPathNavigator;
 import net.minecraft.potion.Effects;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ITag;
+import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -36,9 +47,21 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +69,14 @@ import java.util.Optional;
 
 public class TugEntity extends WaterMobEntity implements ISpringableEntity {
 
+    // CONTAINER STUFF
+    private final ItemStackHandler itemHandler = createHandler();
+    private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
+    private boolean contentsChanged = false;
+    private int burnTime = 0;
+    private int burnCapacity = 0;
+
+    // MOB STUFF
     private float invFriction;
     int stuckCounter;
     private float outOfControlTicks;
@@ -71,6 +102,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
     private float bubbleAngle;
     private float bubbleAngleO;
 
+    // Navigation/train
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
     private Train train;
     private List<Vector2f> path;
@@ -101,6 +133,127 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
 
     }
 
+
+    // CONTAINER STUFF
+    @OnlyIn(Dist.CLIENT)
+    public int getBurnProgress(){
+        int i = burnCapacity;
+        if (i == 0) {
+            i = 200;
+        }
+
+        return burnTime * 13 / i;
+    }
+
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        if(cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return handler.cast();
+        }
+
+        return super.getCapability(cap, side);
+    }
+
+    private ItemStackHandler createHandler() {
+        return new ItemStackHandler(2) {
+            @Override
+            protected void onContentsChanged(int slot) {
+                contentsChanged = true;
+            }
+
+            @Override
+            public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+                switch (slot) {
+                    case 0: return stack.getItem() == ModItems.TUG_ROUTE.get();
+                    case 1: return FurnaceTileEntity.isFuel(stack);
+                    default:
+                        return false;
+                }
+            }
+
+            @Override
+            public int getSlotLimit(int slot) {
+                switch (slot) {
+                    case 0: return 1;
+                    case 1: return 64;
+                    default:
+                        return 0;
+                }
+            }
+
+            @Nonnull
+            @Override
+            public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+                if(!isItemValid(slot, stack)) {
+                    return stack;
+                }
+
+                return super.insertItem(slot, stack, simulate);
+            }
+        };
+    }
+
+    private INamedContainerProvider createContainerProvider() {
+        return new INamedContainerProvider() {
+            @Override
+            public ITextComponent getDisplayName() {
+                return new TranslationTextComponent("screen.shipping.tug");
+            }
+
+            @Nullable
+            @Override
+            public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
+                return new TugContainer(i, level, getId(), playerInventory, playerEntity);
+            }
+        };
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundNBT compound) {
+        itemHandler.deserializeNBT(compound.getCompound("inv"));
+        burnTime = compound.contains("burn") ? compound.getInt("burn") : 0;
+        burnCapacity = compound.contains("burn_capacity") ? compound.getInt("burn_capacity") : 0;
+        contentsChanged = true;
+        super.readAdditionalSaveData(compound);
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundNBT compound) {
+        compound.put("inv", itemHandler.serializeNBT());
+        compound.putInt("burn", burnTime);
+        compound.putInt("burn_capacity", burnCapacity);
+        super.addAdditionalSaveData(compound);
+    }
+
+    private void tickRouteCheck(){
+        if (contentsChanged){
+            ItemStack stack = itemHandler.getStackInSlot(0);
+            this.setPath(TugRouteItem.getRoute(stack));
+        }
+    }
+
+    private boolean tickFuel(){
+        if(burnTime > 0){
+            burnTime--;
+            return true;
+        } else {
+            ItemStack stack = itemHandler.getStackInSlot(1);
+            if(!stack.isEmpty()){
+                burnCapacity = ForgeHooks.getBurnTime(stack, null) - 1;
+                burnTime = burnCapacity - 1;
+                stack.shrink(1);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+
+
+    // MOB STUFF
+
     @Override
     public boolean canBreatheUnderwater() {
         return true;
@@ -117,7 +270,10 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
 
     @Override
     public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
-        navigation.moveTo(navigation.createPath(0, 63, 0, 1), 1);
+
+        if(!player.level.isClientSide()) {
+            NetworkHooks.openGui((ServerPlayerEntity) player, createContainerProvider(), buffer -> buffer.writeInt(this.getId()));
+        }
         return ActionResultType.PASS;
     }
 
@@ -132,11 +288,12 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
         this.horizontalCollision = false;
         super.tick();
         this.horizontalCollision = false;
+        tickRouteCheck();
         followPath();
     }
 
     private void followPath(){
-        if (!this.path.isEmpty()){
+        if (!this.path.isEmpty() && tickFuel()){
             Vector2f stop = path.get(nextStop);
             navigation.moveTo(stop.x, this.getY(), stop.y, 1);
             double distance = Math.abs(Math.hypot(this.getX()-stop.x, this.getZ()-stop.y));

@@ -1,14 +1,18 @@
 package dev.murad.shipping;
 
+import dev.murad.shipping.entity.container.TugScreen;
 import dev.murad.shipping.entity.render.ModBargeRenderer;
 import dev.murad.shipping.entity.render.SpringEntityRenderer;
 import dev.murad.shipping.entity.render.TugRenderer;
 import dev.murad.shipping.item.SpringItem;
+import dev.murad.shipping.setup.ModContainerTypes;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.Registration;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.gui.ScreenManager;
+import net.minecraft.client.gui.screen.inventory.FurnaceScreen;
 import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -65,6 +69,8 @@ public class ShippingMod
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.BARGE.get(), ModBargeRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SPRING.get(), SpringEntityRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TUG.get(), TugRenderer::new);
+
+        ScreenManager.register(ModContainerTypes.TUG_CONTAINER.get(), TugScreen::new);
 
         event.enqueueWork(() ->
         {

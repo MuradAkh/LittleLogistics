@@ -35,15 +35,14 @@ public class TugRouteItem extends Item {
         if(!player.level.isClientSide){
             int x = (int) Math.round(player.getX());
             int z = (int) Math.round(player.getZ());
-            if(!player.getPose().equals(Pose.CROUCHING)) {
-                if (hand.equals(Hand.MAIN_HAND)) {
-                    player.displayClientMessage(new StringTextComponent(MessageFormat.format("Added Route Node X:{0} Z:{1}", x, z)), false);
-                    pushRoute(itemstack, x, z);
-                } else {
-                    player.displayClientMessage(new StringTextComponent("Removed last node from path"), false);
-                    popRoute(itemstack);
-                }
+            if (!player.getPose().equals(Pose.CROUCHING)) {
+                player.displayClientMessage(new StringTextComponent(MessageFormat.format("Added Route Node X:{0} Z:{1}", x, z)), false);
+                pushRoute(itemstack, x, z);
+            } else {
+                player.displayClientMessage(new StringTextComponent("Removed last node from path"), false);
+                popRoute(itemstack);
             }
+
         }
 
         return ActionResult.pass(itemstack);
@@ -53,24 +52,6 @@ public class TugRouteItem extends Item {
     public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.appendHoverText(stack, worldIn, tooltip, flagIn);
         tooltip.add(new StringTextComponent(formatRoute(getRoute(stack))));
-    }
-
-    @Override
-    public ActionResultType interactLivingEntity(ItemStack itemStack, PlayerEntity player, LivingEntity entity, Hand hand) {
-        if (player.level.isClientSide){
-            return ActionResultType.PASS;
-        }
-        if(!player.getPose().equals(Pose.CROUCHING)){
-            player.displayClientMessage(new StringTextComponent("Crouch click to assign to Tug, use in off hand to remove last stop"), false);
-        }
-        else if(entity instanceof TugEntity){
-            TugEntity tug = (TugEntity) entity;
-            tug.setPath(getRoute(itemStack));
-
-        }
-
-
-        return ActionResultType.PASS;
     }
 
     public static List<Vector2f> getRoute(ItemStack itemStack){
