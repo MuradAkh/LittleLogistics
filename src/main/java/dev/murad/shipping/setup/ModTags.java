@@ -25,8 +25,6 @@ public class ModTags {
 
         public static final ITag.INamedTag<Item> SHIP_LOCK = forge("chests/ship_lock");
 
-        public static final ITag.INamedTag<Item> SHIP_LINK = forge("string/ship_link");
-
         private static ITag.INamedTag<Item> forge(String path) {
             return ItemTags.bind(new ResourceLocation("forge", path).toString());
         }

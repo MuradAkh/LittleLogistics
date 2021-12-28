@@ -1,4 +1,4 @@
-package dev.murad.shipping.block.shiplock;
+package dev.murad.shipping.block.dock;
 
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.block.Block;
@@ -20,14 +20,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 
-public class ShipLockBlock extends Block {
+public class TugDockBlock extends Block {
     public static final DirectionProperty FACING = HorizontalBlock.FACING;
 
-    public ShipLockBlock(Properties properties) {
+    public TugDockBlock(Properties properties) {
         super(properties);
     }
 
@@ -39,7 +38,7 @@ public class ShipLockBlock extends Block {
     @Nullable
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return ModTileEntitiesTypes.SHIP_LOCK.get().create();
+        return ModTileEntitiesTypes.TUG_DOCK.get().create();
     }
 
     @SuppressWarnings("deprecation")
@@ -55,8 +54,8 @@ public class ShipLockBlock extends Block {
 
     private void interactWith(World world, BlockPos pos, PlayerEntity player) {
         TileEntity tileEntity = world.getBlockEntity(pos);
-        if (tileEntity instanceof ShipLockTileEntity && player instanceof ServerPlayerEntity){
-            ShipLockTileEntity te = (ShipLockTileEntity) tileEntity;
+        if (tileEntity instanceof TugDockTileEntity && player instanceof ServerPlayerEntity){
+            TugDockTileEntity te = (TugDockTileEntity) tileEntity;
 //            NetworkHooks.openGui((ServerPlayerEntity) player, te, te::encodeExtraData);
         }
 

@@ -20,11 +20,8 @@ public class ModItemModelProvider extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
-        withExistingParent("ship_lock", modLoc("block/ship_lock"));
-
         ModelFile itemGenerated = getExistingFile(mcLoc("item/generated"));
 
-        builder(itemGenerated, "ship_link");
         builder(itemGenerated, "barge");
         builder(itemGenerated, "tug");
         builder(itemGenerated, "cutter");

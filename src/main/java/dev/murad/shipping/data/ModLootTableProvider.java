@@ -41,7 +41,7 @@ public class ModLootTableProvider extends LootTableProvider {
     public static class ModBlockLootTables extends BlockLootTables {
         @Override
         protected void addTables() {
-            dropSelf(ModBlocks.SHIP_LOCK.get());
+            dropSelf(ModBlocks.TUG_DOCK.get());
         }
 
         @Override

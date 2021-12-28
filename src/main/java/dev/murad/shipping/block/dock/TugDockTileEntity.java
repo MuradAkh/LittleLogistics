@@ -1,32 +1,22 @@
-package dev.murad.shipping.block.shiplock;
+package dev.murad.shipping.block.dock;
 
+import dev.murad.shipping.entity.custom.TugEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.ISidedInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.LockableLootTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.text.ITextComponent;
 
-import javax.annotation.Nullable;
+public class TugDockTileEntity extends TileEntity implements ITickableTileEntity {
 
-public class ShipLockTileEntity extends TileEntity implements ITickableTileEntity {
-
-    public ShipLockTileEntity(TileEntityType<?> tileEntityTypeIn) {
+    public TugDockTileEntity(TileEntityType<?> tileEntityTypeIn) {
         super(tileEntityTypeIn);
     }
-    public ShipLockTileEntity() {
-        super(ModTileEntitiesTypes.SHIP_LOCK.get());
+    public TugDockTileEntity() {
+        super(ModTileEntitiesTypes.TUG_DOCK.get());
     }
 
-    public boolean holdTug(){
+    public boolean holdTug(TugEntity tug){
         return true;
     }
 

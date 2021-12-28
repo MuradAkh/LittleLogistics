@@ -14,6 +14,6 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
     @Override
     protected void registerStatesAndModels() {
-        simpleBlock(ModBlocks.SHIP_LOCK.get());
+        simpleBlock(ModBlocks.TUG_DOCK.get());
     }
 }

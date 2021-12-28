@@ -150,7 +150,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
 
 
             double distSq = dominant.distanceToSqr(dominated);
-            double maxDstSq = 0.2;
+            double maxDstSq = 0.1;
             if(distSq > maxDstSq) {
                 Vector3d frontAnchor = calculateAnchorPosition(dominant, SpringSide.DOMINATED);
                 Vector3d backAnchor = calculateAnchorPosition(dominated, SpringSide.DOMINANT);
@@ -164,7 +164,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
                 dominated.yRot = (float) (alpha * dominated.yRot + targetYaw * (1f-alpha));
                 this.yRot = dominated.yRot;
                 double k = 0.1;
-                double l0 = 1.1;
+                double l0 = 1.0;
                 dominated.setDeltaMovement(k*(dist-l0)*dx, k*(dist-l0)*dy, k*(dist-l0)*dz);
             }
 

@@ -20,8 +20,5 @@ public class ModItemTagsProvider extends ItemTagsProvider {
     protected void addTags() {
         copy(ModTags.Blocks.SHIP_LOCK, ModTags.Items.SHIP_LOCK);
         copy(Tags.Blocks.CHESTS, Tags.Items.CHESTS);
-
-        tag(ModTags.Items.SHIP_LINK).add(ModItems.SHIP_LINK.get());
-        tag(Tags.Items.STRING).addTag(ModTags.Items.SHIP_LINK);
     }
 }

@@ -15,7 +15,7 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
 
     @Override
     protected void addTags() {
-        tag(ModTags.Blocks.SHIP_LOCK).add(ModBlocks.SHIP_LOCK.get());
+        tag(ModTags.Blocks.SHIP_LOCK).add(ModBlocks.TUG_DOCK.get());
         tag(Tags.Blocks.CHESTS).addTag(ModTags.Blocks.SHIP_LOCK);
 
     }

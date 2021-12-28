@@ -5,9 +5,6 @@ import net.minecraft.item.ItemGroup;
 import net.minecraftforge.fml.RegistryObject;
 
 public class ModItems {
-    public static final RegistryObject<Item> SHIP_LINK = Registration.ITEMS.register("ship_link",
-            () -> new Item(new Item.Properties().tab(ItemGroup.TAB_TOOLS)));
-
     public static final RegistryObject<Item> BARGE = Registration.ITEMS.register("barge",
             () -> new ModBargeItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));
 

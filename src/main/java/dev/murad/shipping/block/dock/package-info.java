@@ -1,6 +1,6 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-package dev.murad.shipping.block.shiplock;
+package dev.murad.shipping.block.dock;
 
 import mcp.MethodsReturnNonnullByDefault;
 

@@ -1,6 +1,6 @@
 package dev.murad.shipping.entity.custom;
 
-import dev.murad.shipping.block.shiplock.ShipLockTileEntity;
+import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.entity.container.TugContainer;
 import dev.murad.shipping.entity.navigation.TugPathNavigator;
 import dev.murad.shipping.item.TugRouteItem;
@@ -10,7 +10,6 @@ import dev.murad.shipping.util.Train;
 import javafx.util.Pair;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.LilyPadBlock;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.MoverType;
@@ -29,10 +28,8 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.pathfinding.PathNavigator;
-import net.minecraft.pathfinding.SwimmerPathNavigator;
 import net.minecraft.potion.Effects;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ITag;
@@ -51,7 +48,6 @@ import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -78,32 +74,17 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
     private boolean contentsChanged = false;
     private int burnTime = 0;
     private int burnCapacity = 0;
+    private boolean docked = false;
+    private int dockCheckCooldown = 0;
 
     // MOB STUFF
     private float invFriction;
     int stuckCounter;
-    private float outOfControlTicks;
-    private float deltaRotation;
-    private int lerpSteps;
-    private double lerpX;
-    private double lerpY;
-    private double lerpZ;
-    private double lerpYRot;
-    private double lerpXRot;
-    private boolean inputLeft;
-    private boolean inputRight;
-    private boolean inputUp;
-    private boolean inputDown;
     private double waterLevel;
     private float landFriction;
     private BoatEntity.Status status;
     private BoatEntity.Status oldStatus;
     private double lastYd;
-    private boolean isAboveBubbleColumn;
-    private boolean bubbleColumnDirectionIsDown;
-    private float bubbleMultiplier;
-    private float bubbleAngle;
-    private float bubbleAngleO;
 
     // Navigation/train
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
@@ -267,18 +248,36 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
     }
 
 
-    private boolean tickCheckLock() {
+    private void tickCheckDock() {
         int x = (int) Math.floor(this.getX());
         int y = (int) Math.floor(this.getY());
         int z = (int) Math.floor(this.getZ());
 
-        return this.getSideDirections().stream().map((curr) ->
-                Optional.ofNullable(level.getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
-                        .filter(entity -> entity instanceof ShipLockTileEntity)
-                        .map(entity -> (ShipLockTileEntity) entity)
-                        .map(ShipLockTileEntity::holdTug)
-                        .orElse(false)
-        ).reduce(false, (acc, curr) -> acc || curr);
+        if (this.docked && dockCheckCooldown > 0){
+            dockCheckCooldown--;
+            this.setDeltaMovement(Vector3d.ZERO);
+            this.moveTo(x + 0.5 ,getY(),z + 0.5);
+            return;
+        }
+
+        // Check docks
+        this.docked = this.getSideDirections()
+                .stream()
+                .map((curr) ->
+                    Optional.ofNullable(level.getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
+                            .filter(entity -> entity instanceof TugDockTileEntity)
+                            .map(entity -> (TugDockTileEntity) entity)
+                            .map(dock -> dock.holdTug(this))
+                            .orElse(false))
+                .reduce(false, (acc, curr) -> acc || curr);
+
+        if(this.docked) {
+            dockCheckCooldown = 20;
+            this.setDeltaMovement(Vector3d.ZERO);
+            this.moveTo(x + 0.5 ,getY(),z + 0.5);
+        } else {
+            dockCheckCooldown = 0;
+        }
     }
 
     @Override
@@ -316,11 +315,12 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
         super.tick();
         this.horizontalCollision = false;
         tickRouteCheck();
+        tickCheckDock();
         followPath();
     }
 
     private void followPath() {
-        if (!this.path.isEmpty() && !tickCheckLock() && tickFuel()) {
+        if (!this.path.isEmpty() && !this.docked && tickFuel()) {
             Vector2f stop = path.get(nextStop);
             navigation.moveTo(stop.x, this.getY(), stop.y, 1);
             double distance = Math.abs(Math.hypot(this.getX() - stop.x, this.getZ() - stop.y));
@@ -328,7 +328,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
                 incrementStop();
             }
 
-        } else {
+        } else if (this.path.isEmpty()){
             this.nextStop = 0;
         }
     }
@@ -377,7 +377,6 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
 
             Vector3d vector3d = this.getDeltaMovement();
             this.setDeltaMovement(vector3d.x * (double) this.invFriction, vector3d.y + d1, vector3d.z * (double) this.invFriction);
-            this.deltaRotation *= this.invFriction;
             if (d2 > 0.0D) {
                 Vector3d vector3d1 = this.getDeltaMovement();
                 this.setDeltaMovement(vector3d1.x, (vector3d1.y + d2 * 0.06153846016296973D) * 0.75D, vector3d1.z);
@@ -663,9 +662,8 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
                 this.setDeltaMovement(vector3d2);
                 if (this.horizontalCollision && this.isFree(vector3d2.x, vector3d2.y + (double) 0.6F - this.getY() + d8, vector3d2.z)) {
                     if (stuckCounter > 10) {
-//                        this.moveTo(Math.floor(this.getX()), this.getY(), (Math.floor(this.getZ())));
-                        this.setDeltaMovement(this.getDeltaMovement().multiply(new Vector3d(5, 1, 5)));
-//                        stuckCounter = 0;
+                        this.moveTo(Math.floor(this.getX()) + 0.5, this.getY(), Math.floor(this.getZ() + 0.5));
+                        stuckCounter = 0;
                     } else {
                         stuckCounter++;
                     }
@@ -810,6 +808,11 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
             return !(p_70300_1_.distanceToSqr(this) > 64.0D);
         }
     }
+
+    public boolean canPlaceItem(int p_94041_1_, ItemStack p_94041_2_) {
+        return true;
+    }
+
 
     @Override
     public void clearContent() {

@@ -15,18 +15,13 @@ public class ModRecipeProvider extends RecipeProvider {
 
     @Override
     protected void buildShapelessRecipes(Consumer<IFinishedRecipe> consumer) {
-        ShapelessRecipeBuilder.shapeless(ModItems.SHIP_LINK.get(), 2)
-                .requires(Items.IRON_NUGGET)
-                .unlockedBy("has_item", has(Items.IRON_NUGGET))
-                .save(consumer);
-
-        ShapedRecipeBuilder.shaped(ModBlocks.SHIP_LOCK.get())
-                .define('#', ModItems.SHIP_LINK.get())
+        ShapedRecipeBuilder.shaped(ModBlocks.TUG_DOCK.get())
+                .define('#', ModItems.SPRING.get())
                 .define('$', Items.IRON_INGOT)
                 .pattern("$$$")
                 .pattern("###")
                 .pattern("$$$")
-                .unlockedBy("has_item", has(ModItems.SHIP_LINK.get()))
+                .unlockedBy("has_item", has(ModItems.SPRING.get()))
                 .save(consumer);
 
     }
