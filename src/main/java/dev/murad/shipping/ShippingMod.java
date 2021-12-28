@@ -68,6 +68,7 @@ public class ShippingMod
         LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().options);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.BARGE.get(), ModBargeRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SPRING.get(), SpringEntityRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TUG_DUMMY_HITBOX.get(), SpringEntityRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TUG.get(), TugRenderer::new);
 
         ScreenManager.register(ModContainerTypes.TUG_CONTAINER.get(), TugScreen::new);

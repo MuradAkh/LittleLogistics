@@ -3,6 +3,7 @@ package dev.murad.shipping.setup;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.ModBargeEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
+import dev.murad.shipping.entity.custom.TugDummyHitboxEntity;
 import dev.murad.shipping.entity.custom.TugEntity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
@@ -21,6 +22,12 @@ public class ModEntityTypes {
                     () -> EntityType.Builder.<TugEntity>of(TugEntity::new,
                                     EntityClassification.MISC).sized(0.75f, 0.5f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "tug").toString()));
+
+    public static final RegistryObject<EntityType<TugDummyHitboxEntity>> TUG_DUMMY_HITBOX =
+            Registration.ENTITIES.register("tug_dummy_hitbox",
+                    () -> EntityType.Builder.<TugDummyHitboxEntity>of(TugDummyHitboxEntity::new,
+                                    EntityClassification.MISC).sized(0.75f, 0.5f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "tug_dummy_hitbox").toString()));
 
     public static final RegistryObject<EntityType<SpringEntity>> SPRING =
             Registration.ENTITIES.register("spring",

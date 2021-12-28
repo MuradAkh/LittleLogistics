@@ -12,11 +12,12 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class SpringEntityRenderer extends EntityRenderer<SpringEntity> {
+public class SpringEntityRenderer extends EntityRenderer<Entity> {
     private static final ResourceLocation TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/chain.png");
 
@@ -43,7 +44,7 @@ public class SpringEntityRenderer extends EntityRenderer<SpringEntity> {
     }
 
     @Override
-    public ResourceLocation getTextureLocation(SpringEntity p_110775_1_) {
+    public ResourceLocation getTextureLocation(Entity p_110775_1_) {
         return TEXTURE;
     }
 

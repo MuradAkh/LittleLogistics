@@ -3,6 +3,7 @@ package dev.murad.shipping.block.dock;
 import dev.murad.shipping.entity.custom.TugEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.HopperTileEntity;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
@@ -23,6 +24,7 @@ public class TugDockTileEntity extends TileEntity implements ITickableTileEntity
 
     @Override
     public void tick() {
+        HopperTileEntity hopper = null;
 
     }
 

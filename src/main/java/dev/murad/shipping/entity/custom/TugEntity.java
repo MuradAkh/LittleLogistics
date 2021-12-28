@@ -85,6 +85,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
     private BoatEntity.Status status;
     private BoatEntity.Status oldStatus;
     private double lastYd;
+    private TugDummyHitboxEntity extraHitbox = null;
 
     // Navigation/train
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
@@ -108,6 +109,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
         this.xo = x;
         this.yo = y;
         this.zo = z;
+
     }
 
     public static AttributeModifierMap.MutableAttribute setCustomAttributes() {
@@ -304,6 +306,10 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
     }
 
     public void tick() {
+        if(!level.isClientSide && extraHitbox == null){
+            this.extraHitbox = new TugDummyHitboxEntity(this);
+            level.addFreshEntity(this.extraHitbox);
+        }
         this.oldStatus = this.status;
         this.status = this.getStatus();
 
