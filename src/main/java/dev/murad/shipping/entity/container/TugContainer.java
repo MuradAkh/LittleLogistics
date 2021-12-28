@@ -1,6 +1,6 @@
 package dev.murad.shipping.entity.container;
 
-import dev.murad.shipping.entity.custom.TugEntity;
+import dev.murad.shipping.entity.custom.tug.TugEntity;
 import dev.murad.shipping.setup.ModContainerTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;

@@ -1,7 +1,10 @@
-package dev.murad.shipping.entity.custom;
+package dev.murad.shipping.entity.custom.tug;
 
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.entity.container.TugContainer;
+import dev.murad.shipping.entity.custom.ISpringableEntity;
+import dev.murad.shipping.entity.custom.SpringEntity;
+import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
 import dev.murad.shipping.entity.navigation.TugPathNavigator;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModEntityTypes;
@@ -85,7 +88,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
     private BoatEntity.Status status;
     private BoatEntity.Status oldStatus;
     private double lastYd;
-    private TugDummyHitboxEntity extraHitbox = null;
+    TugDummyHitboxEntity extraHitbox = null;
 
     // Navigation/train
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
@@ -269,7 +272,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
                     Optional.ofNullable(level.getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
                             .filter(entity -> entity instanceof TugDockTileEntity)
                             .map(entity -> (TugDockTileEntity) entity)
-                            .map(dock -> dock.holdTug(this))
+                            .map(dock -> dock.holdVessel(this, curr))
                             .orElse(false))
                 .reduce(false, (acc, curr) -> acc || curr);
 

@@ -1,4 +1,4 @@
-package dev.murad.shipping.entity.custom;
+package dev.murad.shipping.entity.custom.tug;
 
 import dev.murad.shipping.setup.ModEntityTypes;
 import net.minecraft.entity.Entity;
@@ -75,11 +75,18 @@ public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpa
     @Override
     public void readAdditionalSaveData(CompoundNBT nbt) {
         tugEntity = nbt.contains("parent") ? (TugEntity) this.level.getEntity(nbt.getInt("parent")) : null;
+        if (tugEntity != null && tugEntity.extraHitbox == null) {
+            tugEntity.extraHitbox = this;
+        } else if (tugEntity != null && !tugEntity.extraHitbox.equals(this)){
+            this.remove();
+        }
     }
 
     @Override
     public void addAdditionalSaveData(CompoundNBT nbt) {
-        nbt.putInt("parent", tugEntity.getId());
+        if (tugEntity != null) {
+            nbt.putInt("parent", tugEntity.getId());
+        }
     }
 
     @Override
@@ -91,7 +98,11 @@ public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpa
 
     @Override
     public void readSpawnData(PacketBuffer buffer) {
-        tugEntity = (TugEntity) this.level.getEntity(buffer.readInt());
+        try {
+            tugEntity = (TugEntity) this.level.getEntity(buffer.readInt());
+        } catch (IndexOutOfBoundsException e){
+
+        }
     }
 
     @Override

@@ -1,6 +1,6 @@
 package dev.murad.shipping.item;
 
-import dev.murad.shipping.entity.custom.TugEntity;
+import dev.murad.shipping.entity.custom.tug.TugEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;

@@ -2,12 +2,9 @@ package dev.murad.shipping.util;
 
 import dev.murad.shipping.entity.custom.ModBargeEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.entity.custom.TugEntity;
-import dev.murad.shipping.item.SpringItem;
+import dev.murad.shipping.entity.custom.tug.TugEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.*;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 

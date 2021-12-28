@@ -1,14 +1,19 @@
 package dev.murad.shipping.block.dock;
 
-import dev.murad.shipping.entity.custom.TugEntity;
+import dev.murad.shipping.entity.custom.tug.TugEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.state.DirectionProperty;
 import net.minecraft.tileentity.HopperTileEntity;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.Direction;
 
-public class TugDockTileEntity extends TileEntity implements ITickableTileEntity {
+import java.util.Optional;
+
+public class TugDockTileEntity extends AbstractDockTileEntity implements ITickableTileEntity {
 
     public TugDockTileEntity(TileEntityType<?> tileEntityTypeIn) {
         super(tileEntityTypeIn);
@@ -17,14 +22,23 @@ public class TugDockTileEntity extends TileEntity implements ITickableTileEntity
         super(ModTileEntitiesTypes.TUG_DOCK.get());
     }
 
-    public boolean holdTug(TugEntity tug){
-        return true;
+    private boolean checkTugFull(TugEntity tug){
+        return tug.getItem(1).getCount() == tug.getItem(1).getMaxStackSize();
+    }
+
+
+
+    public boolean holdVessel(IInventory tug, Direction direction){
+        if (!(tug instanceof TugEntity) || !getBlockState().getValue(TugDockBlock.FACING).getOpposite().equals(direction)){
+            return false;
+        }
+
+        return getHopper().map(hopper -> mayMoveIntoInventory(tug, hopper)).orElse(false);
     }
 
 
     @Override
     public void tick() {
-        HopperTileEntity hopper = null;
 
     }
 

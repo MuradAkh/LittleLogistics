@@ -1,8 +1,7 @@
 package dev.murad.shipping.util;
 
 import dev.murad.shipping.entity.custom.ISpringableEntity;
-import dev.murad.shipping.entity.custom.ModBargeEntity;
-import dev.murad.shipping.entity.custom.TugEntity;
+import dev.murad.shipping.entity.custom.tug.TugEntity;
 
 import java.util.Optional;
 

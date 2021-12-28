@@ -5,10 +5,9 @@ package dev.murad.shipping.entity.models;// Made with Blockbench 4.0.5
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import dev.murad.shipping.entity.custom.TugEntity;
+import dev.murad.shipping.entity.custom.tug.TugEntity;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.entity.Entity;
 
 public class TugModel extends EntityModel<TugEntity> {
     private final ModelRenderer bb_main;

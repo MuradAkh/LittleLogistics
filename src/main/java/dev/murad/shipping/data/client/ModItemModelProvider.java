@@ -7,6 +7,7 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ItemModelBuilder;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
@@ -21,6 +22,9 @@ public class ModItemModelProvider extends ItemModelProvider {
     @Override
     protected void registerModels() {
         ModelFile itemGenerated = getExistingFile(mcLoc("item/generated"));
+        withExistingParent("tug_dock", modLoc("block/tug_dock"));
+
+
 
         builder(itemGenerated, "barge");
         builder(itemGenerated, "tug");
