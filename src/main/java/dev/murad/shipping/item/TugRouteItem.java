@@ -33,8 +33,8 @@ public class TugRouteItem extends Item {
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
         if(!player.level.isClientSide){
-            int x = (int) Math.round(player.getX());
-            int z = (int) Math.round(player.getZ());
+            int x = (int) Math.floor(player.getX());
+            int z = (int) Math.floor(player.getZ());
             if (!player.getPose().equals(Pose.CROUCHING)) {
                 player.displayClientMessage(new StringTextComponent(MessageFormat.format("Added Route Node X:{0} Z:{1}", x, z)), false);
                 pushRoute(itemstack, x, z);
@@ -108,7 +108,7 @@ public class TugRouteItem extends Item {
         AtomicInteger index = new AtomicInteger();
         return route
                 .stream()
-                .map(vector -> String.format("Stop %d. X:%d, Y:%d", index.incrementAndGet(), Math.round(vector.x), Math.round(vector.y)))
+                .map(vector -> String.format("Stop %d. X:%d, Y:%d", index.incrementAndGet(), (int) Math.floor(vector.x), (int) Math.floor(vector.y)))
                 .reduce((acc, curr) -> acc + "\n" + curr)
                 .orElse("");
     }

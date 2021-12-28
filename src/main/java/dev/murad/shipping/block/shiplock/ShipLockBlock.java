@@ -1,5 +1,6 @@
 package dev.murad.shipping.block.shiplock;
 
+import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalBlock;
@@ -23,7 +24,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 
-public class   ShipLockBlock extends Block {
+public class ShipLockBlock extends Block {
     public static final DirectionProperty FACING = HorizontalBlock.FACING;
 
     public ShipLockBlock(Properties properties) {
@@ -38,7 +39,7 @@ public class   ShipLockBlock extends Block {
     @Nullable
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return new ShipLockTileEntity();
+        return ModTileEntitiesTypes.SHIP_LOCK.get().create();
     }
 
     @SuppressWarnings("deprecation")
@@ -56,7 +57,7 @@ public class   ShipLockBlock extends Block {
         TileEntity tileEntity = world.getBlockEntity(pos);
         if (tileEntity instanceof ShipLockTileEntity && player instanceof ServerPlayerEntity){
             ShipLockTileEntity te = (ShipLockTileEntity) tileEntity;
-            NetworkHooks.openGui((ServerPlayerEntity) player, te, te::encodeExtraData);
+//            NetworkHooks.openGui((ServerPlayerEntity) player, te, te::encodeExtraData);
         }
 
 

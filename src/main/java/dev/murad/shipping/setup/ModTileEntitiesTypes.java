@@ -9,7 +9,7 @@ import net.minecraftforge.fml.RegistryObject;
 import java.util.function.Supplier;
 
 public class ModTileEntitiesTypes {
-    public static final RegistryObject<TileEntityType<ShipLockTileEntity>> METAL_PRESS = register(
+    public static final RegistryObject<TileEntityType<ShipLockTileEntity>> SHIP_LOCK = register(
             "ship_lock",
             ShipLockTileEntity::new,
             ModBlocks.SHIP_LOCK

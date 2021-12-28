@@ -1,5 +1,6 @@
 package dev.murad.shipping.entity.custom;
 
+import dev.murad.shipping.block.shiplock.ShipLockTileEntity;
 import dev.murad.shipping.entity.container.TugContainer;
 import dev.murad.shipping.entity.navigation.TugPathNavigator;
 import dev.murad.shipping.item.TugRouteItem;
@@ -64,6 +65,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -214,6 +216,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
         itemHandler.deserializeNBT(compound.getCompound("inv"));
         burnTime = compound.contains("burn") ? compound.getInt("burn") : 0;
         burnCapacity = compound.contains("burn_capacity") ? compound.getInt("burn_capacity") : 0;
+        nextStop = compound.contains("next_stop") ? compound.getInt("next_stop") : 0;
         contentsChanged = true;
         super.readAdditionalSaveData(compound);
     }
@@ -222,7 +225,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
     public void addAdditionalSaveData(CompoundNBT compound) {
         compound.put("inv", itemHandler.serializeNBT());
         compound.putInt("burn", burnTime);
-        compound.putInt("burn_capacity", burnCapacity);
+        compound.putInt("next_stop", nextStop);
         super.addAdditionalSaveData(compound);
     }
 
@@ -253,6 +256,26 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
 
 
     // MOB STUFF
+    private List<Direction> getSideDirections(){
+        return this.getDirection() == Direction.NORTH || this.getDirection() == Direction.SOUTH ?
+                Arrays.asList(Direction.EAST, Direction.WEST) :
+                Arrays.asList(Direction.NORTH, Direction.SOUTH);
+    }
+
+
+    private boolean tickCheckLock(){
+        int x = (int) Math.floor(this.getX());
+        int y = (int) Math.floor(this.getY());
+        int z = (int) Math.floor(this.getZ());
+
+        return this.getSideDirections().stream().map((curr) ->
+            Optional.ofNullable(level.getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
+                    .filter(entity -> entity instanceof ShipLockTileEntity)
+                    .map(entity -> (ShipLockTileEntity) entity)
+                    .map(ShipLockTileEntity::holdTug)
+                    .orElse(false)
+        ).reduce(false, (acc, curr) -> acc || curr);
+    }
 
     @Override
     public boolean canBreatheUnderwater() {
@@ -293,7 +316,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
     }
 
     private void followPath(){
-        if (!this.path.isEmpty() && tickFuel()){
+        if (!this.path.isEmpty() && !tickCheckLock() && tickFuel()){
             Vector2f stop = path.get(nextStop);
             navigation.moveTo(stop.x, this.getY(), stop.y, 1);
             double distance = Math.abs(Math.hypot(this.getX()-stop.x, this.getZ()-stop.y));

@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 public class ModBlocks {
     public static final RegistryObject<Block> SHIP_LOCK = register(
             "ship_lock",
-            () -> new Block(AbstractBlock.Properties.of(Material.METAL)
+            () -> new ShipLockBlock(AbstractBlock.Properties.of(Material.METAL)
                     .harvestLevel(1)
             ),
             ItemGroup.TAB_TRANSPORTATION);
