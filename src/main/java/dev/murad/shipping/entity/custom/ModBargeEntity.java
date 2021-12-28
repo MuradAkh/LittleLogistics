@@ -12,6 +12,7 @@ import net.minecraft.entity.monster.piglin.PiglinTasks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.ChestContainer;
@@ -33,8 +34,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
-public class ModBargeEntity extends BoatEntity implements ISpringableEntity, IInventory, INamedContainerProvider {
+public class ModBargeEntity extends BoatEntity implements ISpringableEntity, IInventory, INamedContainerProvider, ISidedInventory {
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominant = Optional.empty();
     private Train train;
@@ -258,5 +260,23 @@ public class ModBargeEntity extends BoatEntity implements ISpringableEntity, IIn
     @Override
     protected void readAdditionalSaveData(CompoundNBT p_70037_1_) {
         ItemStackHelper.loadAllItems(p_70037_1_, this.itemStacks);
+    }
+
+
+    // hack to disable hoppers
+
+    @Override
+    public int[] getSlotsForFace(Direction p_180463_1_) {
+        return IntStream.rangeClosed(0, 27).toArray();
+    }
+
+    @Override
+    public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
+        return false;
+    }
+
+    @Override
+    public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack p_180461_2_, Direction p_180461_3_) {
+        return false;
     }
 }

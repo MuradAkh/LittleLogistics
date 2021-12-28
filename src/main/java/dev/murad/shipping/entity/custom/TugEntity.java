@@ -24,6 +24,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.Item;
@@ -69,7 +70,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class TugEntity extends WaterMobEntity implements ISpringableEntity {
+public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInventory {
 
     // CONTAINER STUFF
     private final ItemStackHandler itemHandler = createHandler();
@@ -138,7 +139,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
 
     // CONTAINER STUFF
     @OnlyIn(Dist.CLIENT)
-    public int getBurnProgress(){
+    public int getBurnProgress() {
         int i = burnCapacity;
         if (i == 0) {
             i = 200;
@@ -150,7 +151,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if(cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
             return handler.cast();
         }
 
@@ -167,8 +168,10 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
             @Override
             public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
                 switch (slot) {
-                    case 0: return stack.getItem() == ModItems.TUG_ROUTE.get();
-                    case 1: return FurnaceTileEntity.isFuel(stack);
+                    case 0:
+                        return stack.getItem() == ModItems.TUG_ROUTE.get();
+                    case 1:
+                        return FurnaceTileEntity.isFuel(stack);
                     default:
                         return false;
                 }
@@ -177,8 +180,10 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
             @Override
             public int getSlotLimit(int slot) {
                 switch (slot) {
-                    case 0: return 1;
-                    case 1: return 64;
+                    case 0:
+                        return 1;
+                    case 1:
+                        return 64;
                     default:
                         return 0;
                 }
@@ -187,7 +192,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
             @Nonnull
             @Override
             public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-                if(!isItemValid(slot, stack)) {
+                if (!isItemValid(slot, stack)) {
                     return stack;
                 }
 
@@ -229,20 +234,20 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
         super.addAdditionalSaveData(compound);
     }
 
-    private void tickRouteCheck(){
-        if (contentsChanged){
+    private void tickRouteCheck() {
+        if (contentsChanged) {
             ItemStack stack = itemHandler.getStackInSlot(0);
             this.setPath(TugRouteItem.getRoute(stack));
         }
     }
 
-    private boolean tickFuel(){
-        if(burnTime > 0){
+    private boolean tickFuel() {
+        if (burnTime > 0) {
             burnTime--;
             return true;
         } else {
             ItemStack stack = itemHandler.getStackInSlot(1);
-            if(!stack.isEmpty()){
+            if (!stack.isEmpty()) {
                 burnCapacity = ForgeHooks.getBurnTime(stack, null) - 1;
                 burnTime = burnCapacity - 1;
                 stack.shrink(1);
@@ -254,26 +259,25 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
     }
 
 
-
     // MOB STUFF
-    private List<Direction> getSideDirections(){
+    private List<Direction> getSideDirections() {
         return this.getDirection() == Direction.NORTH || this.getDirection() == Direction.SOUTH ?
                 Arrays.asList(Direction.EAST, Direction.WEST) :
                 Arrays.asList(Direction.NORTH, Direction.SOUTH);
     }
 
 
-    private boolean tickCheckLock(){
+    private boolean tickCheckLock() {
         int x = (int) Math.floor(this.getX());
         int y = (int) Math.floor(this.getY());
         int z = (int) Math.floor(this.getZ());
 
         return this.getSideDirections().stream().map((curr) ->
-            Optional.ofNullable(level.getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
-                    .filter(entity -> entity instanceof ShipLockTileEntity)
-                    .map(entity -> (ShipLockTileEntity) entity)
-                    .map(ShipLockTileEntity::holdTug)
-                    .orElse(false)
+                Optional.ofNullable(level.getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
+                        .filter(entity -> entity instanceof ShipLockTileEntity)
+                        .map(entity -> (ShipLockTileEntity) entity)
+                        .map(ShipLockTileEntity::holdTug)
+                        .orElse(false)
         ).reduce(false, (acc, curr) -> acc || curr);
     }
 
@@ -283,7 +287,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
     }
 
     public boolean isInvulnerableTo(DamageSource p_180431_1_) {
-        return  p_180431_1_.equals(DamageSource.IN_WALL) || super.isInvulnerableTo(p_180431_1_);
+        return p_180431_1_.equals(DamageSource.IN_WALL) || super.isInvulnerableTo(p_180431_1_);
     }
 
     @Override
@@ -294,7 +298,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
     @Override
     public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
 
-        if(!player.level.isClientSide()) {
+        if (!player.level.isClientSide()) {
             NetworkHooks.openGui((ServerPlayerEntity) player, createContainerProvider(), buffer -> buffer.writeInt(this.getId()));
         }
         return ActionResultType.PASS;
@@ -315,29 +319,28 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
         followPath();
     }
 
-    private void followPath(){
-        if (!this.path.isEmpty() && !tickCheckLock() && tickFuel()){
+    private void followPath() {
+        if (!this.path.isEmpty() && !tickCheckLock() && tickFuel()) {
             Vector2f stop = path.get(nextStop);
             navigation.moveTo(stop.x, this.getY(), stop.y, 1);
-            double distance = Math.abs(Math.hypot(this.getX()-stop.x, this.getZ()-stop.y));
+            double distance = Math.abs(Math.hypot(this.getX() - stop.x, this.getZ() - stop.y));
             if (distance < 2.2) {
                 incrementStop();
             }
 
-        }else{
+        } else {
             this.nextStop = 0;
         }
     }
 
-    public void setPath(List<Vector2f> path){
+    public void setPath(List<Vector2f> path) {
         this.path = path;
     }
 
-    private void incrementStop(){
-        if(this.path.size() == 1) {
+    private void incrementStop() {
+        if (this.path.size() == 1) {
             nextStop = 0;
-        }
-        else if (!this.path.isEmpty()){
+        } else if (!this.path.isEmpty()) {
             nextStop = (nextStop + 1) % (this.path.size());
         }
     }
@@ -658,15 +661,15 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
                 this.setDeltaMovement(vector3d6.multiply((double) f5, (double) 0.8F, (double) f5));
                 Vector3d vector3d2 = this.getFluidFallingAdjustedMovement(d0, flag, this.getDeltaMovement());
                 this.setDeltaMovement(vector3d2);
-                if (this.horizontalCollision && this.isFree(vector3d2.x, vector3d2.y + (double)0.6F - this.getY() + d8, vector3d2.z)) {
-                    if (stuckCounter > 10){
+                if (this.horizontalCollision && this.isFree(vector3d2.x, vector3d2.y + (double) 0.6F - this.getY() + d8, vector3d2.z)) {
+                    if (stuckCounter > 10) {
 //                        this.moveTo(Math.floor(this.getX()), this.getY(), (Math.floor(this.getZ())));
                         this.setDeltaMovement(this.getDeltaMovement().multiply(new Vector3d(5, 1, 5)));
 //                        stuckCounter = 0;
                     } else {
                         stuckCounter++;
                     }
-                }else{
+                } else {
                     stuckCounter = 0;
                 }
             } else if (this.isInLava() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidstate.getType())) {
@@ -759,4 +762,57 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity {
     }
 
 
+    // Have to implement IInventory to work with hoppers
+
+    @Override
+    public int getContainerSize() {
+        return 1;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return itemHandler.getStackInSlot(1).isEmpty();
+    }
+
+    @Override
+    public ItemStack getItem(int p_70301_1_) {
+        return itemHandler.getStackInSlot(1);
+    }
+
+    @Override
+    public ItemStack removeItem(int p_70298_1_, int p_70298_2_) {
+        return null;
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int p_70304_1_) {
+        return null;
+    }
+
+    @Override
+    public void setItem(int p_70299_1_, ItemStack p_70299_2_) {
+        this.itemHandler.insertItem(1, p_70299_2_, false);
+        if (!p_70299_2_.isEmpty() && p_70299_2_.getCount() > this.getMaxStackSize()) {
+            p_70299_2_.setCount(this.getMaxStackSize());
+        }
+    }
+
+    @Override
+    public void setChanged() {
+        contentsChanged = true;
+    }
+
+    @Override
+    public boolean stillValid(PlayerEntity p_70300_1_) {
+        if (this.removed) {
+            return false;
+        } else {
+            return !(p_70300_1_.distanceToSqr(this) > 64.0D);
+        }
+    }
+
+    @Override
+    public void clearContent() {
+
+    }
 }
