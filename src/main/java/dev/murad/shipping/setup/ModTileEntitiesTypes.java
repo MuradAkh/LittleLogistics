@@ -1,5 +1,6 @@
 package dev.murad.shipping.setup;
 
+import dev.murad.shipping.block.dock.BargeDockTileEntity;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
@@ -13,6 +14,12 @@ public class ModTileEntitiesTypes {
             "tug_dock",
             TugDockTileEntity::new,
             ModBlocks.TUG_DOCK
+    );
+
+    public static final RegistryObject<TileEntityType<BargeDockTileEntity>> BARGE_DOCK = register(
+            "barge_dock",
+            BargeDockTileEntity::new,
+            ModBlocks.BARGE_DOCK
     );
 
     private static <T extends TileEntity> RegistryObject<TileEntityType<T>> register(String name, Supplier<T> factory, RegistryObject<? extends Block> block) {

@@ -1,9 +1,13 @@
 package dev.murad.shipping.block.dock;
 
 import dev.murad.shipping.entity.custom.tug.TugEntity;
+import net.minecraft.block.HorizontalBlock;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.BooleanProperty;
+import net.minecraft.state.DirectionProperty;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.HopperTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
@@ -68,4 +72,5 @@ public abstract class AbstractDockTileEntity extends TileEntity {
             return ItemStack.tagMatches(p_145894_0_, p_145894_1_);
         }
     }
+
 }

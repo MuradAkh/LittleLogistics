@@ -1,6 +1,7 @@
 package dev.murad.shipping.setup;
 
 
+import dev.murad.shipping.block.dock.BargeDockBlock;
 import dev.murad.shipping.block.dock.TugDockBlock;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
@@ -16,6 +17,13 @@ public class ModBlocks {
     public static final RegistryObject<Block> TUG_DOCK = register(
             "tug_dock",
             () -> new TugDockBlock(AbstractBlock.Properties.of(Material.METAL)
+                    .harvestLevel(1)
+            ),
+            ItemGroup.TAB_TRANSPORTATION);
+
+    public static final RegistryObject<Block> BARGE_DOCK = register(
+            "barge_dock",
+            () -> new BargeDockBlock(AbstractBlock.Properties.of(Material.METAL)
                     .harvestLevel(1)
             ),
             ItemGroup.TAB_TRANSPORTATION);

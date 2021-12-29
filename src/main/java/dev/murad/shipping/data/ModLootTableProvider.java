@@ -42,6 +42,7 @@ public class ModLootTableProvider extends LootTableProvider {
         @Override
         protected void addTables() {
             dropSelf(ModBlocks.TUG_DOCK.get());
+            dropSelf(ModBlocks.BARGE_DOCK.get());
         }
 
         @Override

@@ -18,8 +18,8 @@ public final class DataGenerators {
         DataGenerator gen = gatherDataEvent.getGenerator();
         ExistingFileHelper existingFileHelper = gatherDataEvent.getExistingFileHelper();
 
-        gen.addProvider(new ModItemModelProvider(gen, existingFileHelper));
         gen.addProvider(new ModBlockStateProvider(gen, existingFileHelper));
+        gen.addProvider(new ModItemModelProvider(gen, existingFileHelper));
 
         ModBlockTagsProvider modBlockTagsProvider = new ModBlockTagsProvider(gen, existingFileHelper);
         gen.addProvider(modBlockTagsProvider);
