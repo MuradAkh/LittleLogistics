@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 
 public class ModBlocks {
     public static final RegistryObject<Block> TUG_DOCK = register(
-            "ship_lock",
+            "tug_dock",
             () -> new TugDockBlock(AbstractBlock.Properties.of(Material.METAL)
                     .harvestLevel(1)
             ),

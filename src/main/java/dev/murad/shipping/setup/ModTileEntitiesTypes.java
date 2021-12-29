@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 
 public class ModTileEntitiesTypes {
     public static final RegistryObject<TileEntityType<TugDockTileEntity>> TUG_DOCK = register(
-            "ship_lock",
+            "tug_dock",
             TugDockTileEntity::new,
             ModBlocks.TUG_DOCK
     );
