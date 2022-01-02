@@ -27,6 +27,7 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.Item;
@@ -609,7 +610,10 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
 
     @Override
     public void remove() {
-        handleKill();
+        if (!this.level.isClientSide) {
+            InventoryHelper.dropContents(this.level, this, this);
+        }
+        handleSpringableKill();
         super.remove();
     }
 
@@ -770,7 +774,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
 
     @Override
     public int getContainerSize() {
-        return 1;
+        return 2;
     }
 
     @Override
@@ -780,7 +784,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
 
     @Override
     public ItemStack getItem(int p_70301_1_) {
-        return itemHandler.getStackInSlot(1);
+        return itemHandler.getStackInSlot(p_70301_1_);
     }
 
     @Override

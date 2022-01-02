@@ -169,7 +169,7 @@ public class ModBargeEntity extends BoatEntity implements ISpringableEntity, IIn
 
     @Override
     public void remove(){
-        handleKill();
+        handleSpringableKill();
         super.remove();
     }
 
