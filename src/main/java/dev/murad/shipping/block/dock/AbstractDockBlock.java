@@ -1,8 +1,8 @@
 package dev.murad.shipping.block.dock;
 
-import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.HopperBlock;
 import net.minecraft.block.HorizontalBlock;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.state.DirectionProperty;
@@ -11,7 +11,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -35,6 +34,15 @@ public abstract class AbstractDockBlock extends Block {
             return Optional.of((AbstractDockTileEntity) tileEntity);
         else
             return Optional.empty();
+
+    }
+
+    @Deprecated
+    public void neighborChanged(BlockState state, World world, BlockPos p_220069_3_, Block p_220069_4_, BlockPos p_220069_5_, boolean p_220069_6_) {
+        super.neighborChanged(state, world, p_220069_3_, p_220069_4_, p_220069_5_, p_220069_6_);
+        getTileEntity(world, p_220069_3_).flatMap(AbstractDockTileEntity::getInsertHopper).ifPresent(te -> {
+            world.setBlockAndUpdate(te.getBlockPos(), te.getBlockState().setValue(HopperBlock.FACING, state.getValue(FACING)));
+        });
 
     }
 

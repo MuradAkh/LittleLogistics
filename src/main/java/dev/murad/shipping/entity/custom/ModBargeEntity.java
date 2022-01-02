@@ -8,7 +8,6 @@ import javafx.util.Pair;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.BoatEntity;
-import net.minecraft.entity.monster.piglin.PiglinTasks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
@@ -25,8 +24,6 @@ import net.minecraft.network.IPacket;
 import net.minecraft.util.*;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -40,6 +37,7 @@ public class ModBargeEntity extends BoatEntity implements ISpringableEntity, IIn
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominant = Optional.empty();
     private Train train;
+    private boolean docked;
     private NonNullList<ItemStack> itemStacks = NonNullList.withSize(36, ItemStack.EMPTY);
 
     public ModBargeEntity(EntityType<? extends BoatEntity> type, World world) {
@@ -264,6 +262,10 @@ public class ModBargeEntity extends BoatEntity implements ISpringableEntity, IIn
 
 
     // hack to disable hoppers
+    public boolean isDockable() {
+        return this.dominant.map(dom -> this.distanceToSqr((Entity) dom.getKey()) < 1.1).orElse(true);
+    }
+
 
     @Override
     public int[] getSlotsForFace(Direction p_180463_1_) {
@@ -272,11 +274,11 @@ public class ModBargeEntity extends BoatEntity implements ISpringableEntity, IIn
 
     @Override
     public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
-        return false;
+        return isDockable();
     }
 
     @Override
     public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack p_180461_2_, Direction p_180461_3_) {
-        return false;
+        return isDockable();
     }
 }

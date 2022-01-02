@@ -158,7 +158,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
                 double dx = (frontAnchor.x - backAnchor.x) / dist;
                 double dy = (frontAnchor.y - backAnchor.y) / dist;
                 double dz = (frontAnchor.z - backAnchor.z) / dist;
-                final double alpha = 0.1;
+                final double alpha = 0.5;
 
                 float targetYaw = computeTargetYaw(dominated.yRot, frontAnchor, backAnchor);
                 dominated.yRot = (float) (alpha * dominated.yRot + targetYaw * (1f-alpha));

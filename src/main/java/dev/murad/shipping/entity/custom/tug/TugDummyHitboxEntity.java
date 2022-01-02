@@ -74,12 +74,13 @@ public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpa
 
     @Override
     public void readAdditionalSaveData(CompoundNBT nbt) {
-        tugEntity = nbt.contains("parent") ? (TugEntity) this.level.getEntity(nbt.getInt("parent")) : null;
-        if (tugEntity != null && tugEntity.extraHitbox == null) {
-            tugEntity.extraHitbox = this;
-        } else if (tugEntity != null && !tugEntity.extraHitbox.equals(this)){
-            this.remove();
-        }
+//        tugEntity = nbt.contains("parent") ? (TugEntity) this.level.getEntity(nbt.getInt("parent")) : null;
+//        if (tugEntity != null && tugEntity.extraHitbox == null) {
+//            tugEntity.extraHitbox = this;
+//        } else if (tugEntity != null && !tugEntity.extraHitbox.equals(this)){
+//            this.remove();
+//        }
+        this.remove();
     }
 
     @Override

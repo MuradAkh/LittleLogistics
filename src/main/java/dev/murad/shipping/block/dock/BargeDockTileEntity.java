@@ -1,5 +1,7 @@
 package dev.murad.shipping.block.dock;
 
+import dev.murad.shipping.entity.custom.ModBargeEntity;
+import dev.murad.shipping.entity.custom.tug.TugEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntityType;
@@ -17,6 +19,10 @@ public class BargeDockTileEntity extends AbstractDockTileEntity {
 
     @Override
     public boolean holdVessel(IInventory vessel, Direction direction) {
-        return false;
+        if (!(vessel instanceof ModBargeEntity) || !getBlockState().getValue(BargeDockBlock.FACING).getOpposite().equals(direction)){
+            return false;
+        }
+
+        return getInsertHopper().map(hopper -> mayMoveIntoInventory(vessel, hopper)).orElse(false);
     }
 }

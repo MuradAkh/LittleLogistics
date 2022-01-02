@@ -1,17 +1,21 @@
 package dev.murad.shipping.block.dock;
 
+import dev.murad.shipping.entity.custom.ModBargeEntity;
 import dev.murad.shipping.entity.custom.tug.TugEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import javafx.util.Pair;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.tileentity.HopperTileEntity;
 import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class TugDockTileEntity extends AbstractDockTileEntity implements ITickableTileEntity {
 
@@ -33,7 +37,49 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
             return false;
         }
 
-        return getHopper().map(hopper -> mayMoveIntoInventory(tug, hopper)).orElse(false);
+        // Tug needs to be loaded
+        if(getInsertHopper().map(hopper -> mayMoveIntoInventory(tug, hopper)).orElse(false)){
+            return true;
+        }
+        List<Pair<ModBargeEntity, BargeDockTileEntity>> barges = getBargeDockPairs((TugEntity) tug);
+
+        // Barges with corresponding docks for docking aren't dockable yet
+//        if(!barges.stream().map(pair -> pair.getKey().isDockable()).reduce(true, Boolean::logicalAnd)){
+//            return true;
+//        }
+
+        if (barges.stream().map(pair -> pair.getValue().holdVessel(pair.getKey(), direction)).reduce(false, Boolean::logicalOr)){
+            return true;
+        }
+
+        return false;
+    }
+
+    private List<Pair<ModBargeEntity, BargeDockTileEntity>> getBargeDockPairs(TugEntity tug){
+        List<ModBargeEntity> barges = tug.getTrain().getBarges();
+        List<BargeDockTileEntity> docks = getBargeDocks();
+        return IntStream.range(0, Math.min(barges.size(), docks.size()))
+                .mapToObj(i -> new Pair<>(barges.get(i), docks.get(i)))
+                .collect(Collectors.toList());
+    }
+
+    private List<BargeDockTileEntity> getBargeDocks(){
+        Direction facing = this.getBlockState().getValue(TugDockBlock.FACING);
+        Direction rowDirection = this.getBlockState().getValue(TugDockBlock.INVERTED) ? facing.getClockWise() : facing.getCounterClockWise();
+        List<BargeDockTileEntity> docks = new ArrayList<>();
+        for (Optional<BargeDockTileEntity> dock = getNextBargeDock(rowDirection, this.getBlockPos());
+             dock.isPresent();
+             dock = getNextBargeDock(rowDirection, dock.get().getBlockPos())) {
+            docks.add(dock.get());
+        }
+        return docks;
+    }
+
+    private Optional<BargeDockTileEntity> getNextBargeDock(Direction rowDirection, BlockPos pos) {
+        BlockPos next = pos.relative(rowDirection);
+        return Optional.ofNullable(this.level.getBlockEntity(next))
+                .filter(e -> e instanceof BargeDockTileEntity)
+                .map(e -> (BargeDockTileEntity) e);
     }
 
 

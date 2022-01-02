@@ -4,7 +4,6 @@ import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.entity.container.TugContainer;
 import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
 import dev.murad.shipping.entity.navigation.TugPathNavigator;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModEntityTypes;
@@ -27,6 +26,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.Item;
@@ -64,12 +64,9 @@ import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInventory {
+public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInventory, ISidedInventory {
 
     // CONTAINER STUFF
     private final ItemStackHandler itemHandler = createHandler();
@@ -798,6 +795,9 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
 
     @Override
     public void setItem(int p_70299_1_, ItemStack p_70299_2_) {
+        if (!this.itemHandler.isItemValid(1, p_70299_2_)){
+            return;
+        }
         this.itemHandler.insertItem(1, p_70299_2_, false);
         if (!p_70299_2_.isEmpty() && p_70299_2_.getCount() > this.getMaxStackSize()) {
             p_70299_2_.setCount(this.getMaxStackSize());
@@ -819,12 +819,27 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
     }
 
     public boolean canPlaceItem(int p_94041_1_, ItemStack p_94041_2_) {
-        return true;
+        return this.docked;
     }
 
 
     @Override
     public void clearContent() {
 
+    }
+
+    @Override
+    public int[] getSlotsForFace(Direction p_180463_1_) {
+        return new int[]{1};
+    }
+
+    @Override
+    public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
+        return this.docked;
+    }
+
+    @Override
+    public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack p_180461_2_, Direction p_180461_3_) {
+        return false;
     }
 }
