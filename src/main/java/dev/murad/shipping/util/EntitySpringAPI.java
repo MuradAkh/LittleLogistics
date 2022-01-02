@@ -1,6 +1,6 @@
 package dev.murad.shipping.util;
 
-import dev.murad.shipping.entity.custom.ModBargeEntity;
+import dev.murad.shipping.entity.custom.BargeEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.tug.TugEntity;
 import net.minecraft.entity.Entity;
@@ -32,7 +32,7 @@ public class EntitySpringAPI {
     }
 
     public static boolean isValidTarget(Entity target) {
-        return target instanceof TugEntity || target instanceof ModBargeEntity;
+        return target instanceof TugEntity || target instanceof BargeEntity;
     }
 
     public static void addGenericAnchorMapping(Class<? extends Entity> entity, BiFunction<Entity, SpringEntity.SpringSide, Vector3d> function) {

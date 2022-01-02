@@ -15,21 +15,21 @@ public class TugModel extends EntityModel<TugEntity> {
     public TugModel() {
         texWidth = 128;
         texHeight = 128;
-
         bb_main = new ModelRenderer(this);
         bb_main.setPos(0.0F, 24.0F, 0.0F);
-        bb_main.texOffs(0, 0).addBox(-7.0F, -27.0F, -19.0F, 14.0F, 3.0F, 24.0F, 0.0F, false);
-        bb_main.texOffs(0, 4).addBox(-5.0F, -28.0F, -21.0F, 10.0F, 2.0F, 2.0F, 0.0F, false);
-        bb_main.texOffs(0, 0).addBox(-5.0F, -28.0F, 5.0F, 10.0F, 2.0F, 2.0F, 0.0F, false);
-        bb_main.texOffs(24, 30).addBox(-8.0F, -29.0F, -18.0F, 1.0F, 3.0F, 22.0F, 0.0F, false);
-        bb_main.texOffs(0, 27).addBox(-4.0F, -30.0F, -22.0F, 8.0F, 3.0F, 1.0F, 0.0F, false);
-        bb_main.texOffs(0, 27).addBox(7.0F, -29.0F, -18.0F, 1.0F, 3.0F, 22.0F, 0.0F, false);
-        bb_main.texOffs(0, 19).addBox(-4.0F, -30.0F, 7.0F, 8.0F, 3.0F, 1.0F, 0.0F, false);
-        bb_main.texOffs(48, 27).addBox(-6.0F, -36.0F, -12.0F, 12.0F, 9.0F, 11.0F, 0.0F, false);
-        bb_main.texOffs(0, 52).addBox(-3.0F, -33.0F, -8.0F, 6.0F, 6.0F, 12.0F, 0.0F, false);
-        bb_main.texOffs(52, 0).addBox(-3.0F, -33.0F, -18.0F, 6.0F, 6.0F, 11.0F, 0.0F, false);
-        bb_main.texOffs(0, 8).addBox(-2.0F, -41.0F, -8.0F, 4.0F, 7.0F, 4.0F, 0.0F, false);
-    }
+        bb_main.texOffs(0, 0).addBox(-7.0F, -30.0F, -19.0F, 14.0F, 6.0F, 24.0F, 0.0F, false);
+        bb_main.texOffs(0, 50).addBox(-9.0F, -32.0F, -19.0F, 2.0F, 4.0F, 24.0F, 0.0F, false);
+        bb_main.texOffs(44, 30).addBox(7.0F, -32.0F, -19.0F, 2.0F, 4.0F, 24.0F, 0.0F, false);
+        bb_main.texOffs(60, 66).addBox(-7.0F, -32.0F, 5.0F, 14.0F, 4.0F, 2.0F, 0.0F, false);
+        bb_main.texOffs(28, 66).addBox(-7.0F, -32.0F, -21.0F, 14.0F, 4.0F, 2.0F, 0.0F, false);
+        bb_main.texOffs(53, 0).addBox(-6.0F, -38.0F, -13.0F, 12.0F, 8.0F, 14.0F, 0.0F, false);
+        bb_main.texOffs(0, 30).addBox(-8.0F, -40.0F, -15.0F, 16.0F, 2.0F, 18.0F, 0.0F, false);
+        bb_main.texOffs(0, 0).addBox(-2.0F, -46.0F, -5.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        bb_main.texOffs(0, 10).addBox(-2.0F, -45.25F, -5.0F, 4.0F, 2.0F, 4.0F, 0.5F, false);
+        bb_main.texOffs(28, 58).addBox(-9.0F, -31.0F, -21.0F, 18.0F, 2.0F, 6.0F, 0.25F, false);
+        bb_main.texOffs(0, 0).addBox(-2.0F, -46.0F, -11.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        bb_main.texOffs(0, 10).addBox(-2.0F, -45.25F, -11.0F, 4.0F, 2.0F, 4.0F, 0.5F, false);
+        }
 
     @Override
     public void setupAnim(TugEntity p_225597_1_, float p_225597_2_, float p_225597_3_, float p_225597_4_, float p_225597_5_, float p_225597_6_) {

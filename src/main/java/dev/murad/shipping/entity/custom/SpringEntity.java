@@ -1,5 +1,6 @@
 package dev.murad.shipping.entity.custom;
 
+import dev.murad.shipping.entity.custom.tug.TugEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.EntitySpringAPI;
@@ -163,7 +164,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
                 float targetYaw = computeTargetYaw(dominated.yRot, frontAnchor, backAnchor);
                 dominated.yRot = (float) (alpha * dominated.yRot + targetYaw * (1f-alpha));
                 this.yRot = dominated.yRot;
-                double k = 0.1;
+                double k = dominant instanceof TugEntity ? 0.2 : 0.13;
                 double l0 = 1.0;
                 dominated.setDeltaMovement(k*(dist-l0)*dx, k*(dist-l0)*dy, k*(dist-l0)*dz);
             }
@@ -352,8 +353,8 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
         if(dominant instanceof ISpringableEntity){
             ((ISpringableEntity) dominant).removeDominated();
         }
-        if(!level.isClientSide)
-            InventoryHelper.dropItemStack(level, getX(), getY(), getZ(), new ItemStack(ModItems.SPRING.get()));
+//        if(!level.isClientSide)
+//            InventoryHelper.dropItemStack(level, getX(), getY(), getZ(), new ItemStack(ModItems.SPRING.get()));
     }
 
     public enum SpringSide {

@@ -1,6 +1,5 @@
 package dev.murad.shipping.item;
 
-import dev.murad.shipping.entity.custom.ModBargeEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;

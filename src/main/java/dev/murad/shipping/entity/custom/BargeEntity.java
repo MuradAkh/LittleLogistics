@@ -33,20 +33,19 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-public class ModBargeEntity extends BoatEntity implements ISpringableEntity, IInventory, INamedContainerProvider, ISidedInventory {
+public class BargeEntity extends BoatEntity implements ISpringableEntity, IInventory, INamedContainerProvider, ISidedInventory {
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominant = Optional.empty();
     private Train train;
-    private boolean docked;
     private NonNullList<ItemStack> itemStacks = NonNullList.withSize(36, ItemStack.EMPTY);
 
-    public ModBargeEntity(EntityType<? extends BoatEntity> type, World world) {
+    public BargeEntity(EntityType<? extends BoatEntity> type, World world) {
         super(type, world);
         this.blocksBuilding = true;
         this.train = new Train(this);
     }
 
-    public ModBargeEntity(World worldIn, double x, double y, double z) {
+    public BargeEntity(World worldIn, double x, double y, double z) {
         this(ModEntityTypes.BARGE.get(), worldIn);
         this.setPos(x, y, z);
         this.setDeltaMovement(Vector3d.ZERO);

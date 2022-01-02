@@ -1,7 +1,7 @@
 package dev.murad.shipping.util;
 
+import dev.murad.shipping.entity.custom.BargeEntity;
 import dev.murad.shipping.entity.custom.ISpringableEntity;
-import dev.murad.shipping.entity.custom.ModBargeEntity;
 import dev.murad.shipping.entity.custom.tug.TugEntity;
 import javafx.util.Pair;
 
@@ -36,18 +36,18 @@ public class Train {
         return head;
     }
 
-    public List<ModBargeEntity> getBarges(){
+    public List<BargeEntity> getBarges(){
         return tug.map(tugEntity -> {
-            List<ModBargeEntity> barges = new ArrayList<>();
-            for (Optional<ModBargeEntity> barge = getNextBarge(tugEntity); barge.isPresent(); barge = getNextBarge(barge.get())){
+            List<BargeEntity> barges = new ArrayList<>();
+            for (Optional<BargeEntity> barge = getNextBarge(tugEntity); barge.isPresent(); barge = getNextBarge(barge.get())){
                 barges.add(barge.get());
             }
             return barges;
         }).orElse(new ArrayList<>());
     }
 
-    public Optional<ModBargeEntity> getNextBarge(ISpringableEntity entity){
-        return entity.getDominated().map(Pair::getKey).map(e -> (ModBargeEntity) e);
+    public Optional<BargeEntity> getNextBarge(ISpringableEntity entity){
+        return entity.getDominated().map(Pair::getKey).map(e -> (BargeEntity) e);
     }
 
     public void setHead(ISpringableEntity head) {

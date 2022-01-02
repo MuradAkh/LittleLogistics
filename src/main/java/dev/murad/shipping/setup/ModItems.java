@@ -6,7 +6,7 @@ import net.minecraftforge.fml.RegistryObject;
 
 public class ModItems {
     public static final RegistryObject<Item> BARGE = Registration.ITEMS.register("barge",
-            () -> new ModBargeItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));
+            () -> new BargeItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));
 
     public static final RegistryObject<Item> TUG = Registration.ITEMS.register("tug",
             () -> new TugItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));

@@ -1,6 +1,6 @@
 package dev.murad.shipping.block.dock;
 
-import dev.murad.shipping.entity.custom.ModBargeEntity;
+import dev.murad.shipping.entity.custom.BargeEntity;
 import dev.murad.shipping.entity.custom.tug.TugEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import javafx.util.Pair;
@@ -41,7 +41,7 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
         if(getInsertHopper().map(hopper -> mayMoveIntoInventory(tug, hopper)).orElse(false)){
             return true;
         }
-        List<Pair<ModBargeEntity, BargeDockTileEntity>> barges = getBargeDockPairs((TugEntity) tug);
+        List<Pair<BargeEntity, BargeDockTileEntity>> barges = getBargeDockPairs((TugEntity) tug);
 
         // Barges with corresponding docks for docking aren't dockable yet
 //        if(!barges.stream().map(pair -> pair.getKey().isDockable()).reduce(true, Boolean::logicalAnd)){
@@ -55,8 +55,8 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
         return false;
     }
 
-    private List<Pair<ModBargeEntity, BargeDockTileEntity>> getBargeDockPairs(TugEntity tug){
-        List<ModBargeEntity> barges = tug.getTrain().getBarges();
+    private List<Pair<BargeEntity, BargeDockTileEntity>> getBargeDockPairs(TugEntity tug){
+        List<BargeEntity> barges = tug.getTrain().getBarges();
         List<BargeDockTileEntity> docks = getBargeDocks();
         return IntStream.range(0, Math.min(barges.size(), docks.size()))
                 .mapToObj(i -> new Pair<>(barges.get(i), docks.get(i)))
