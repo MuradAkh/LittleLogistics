@@ -4,14 +4,14 @@ package dev.murad.shipping.entity.models;// Made with Blockbench 4.0.5
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import dev.murad.shipping.entity.custom.BargeEntity;
+import dev.murad.shipping.entity.custom.barge.ChestBargeEntity;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 
-public class BargeModel extends EntityModel<BargeEntity> {
+public class ChestBargeModel extends EntityModel<ChestBargeEntity> {
 	private final ModelRenderer bb_main;
 
-	public BargeModel() {
+	public ChestBargeModel() {
 		texWidth = 128;
 		texHeight = 128;
 
@@ -26,7 +26,7 @@ public class BargeModel extends EntityModel<BargeEntity> {
 	}
 
 	@Override
-	public void setupAnim(BargeEntity p_225597_1_, float p_225597_2_, float p_225597_3_, float p_225597_4_, float p_225597_5_, float p_225597_6_) {
+	public void setupAnim(ChestBargeEntity p_225597_1_, float p_225597_2_, float p_225597_3_, float p_225597_4_, float p_225597_5_, float p_225597_6_) {
 
 	}
 

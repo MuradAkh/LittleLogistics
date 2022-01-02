@@ -1,18 +1,14 @@
-package dev.murad.shipping.entity.custom;
+package dev.murad.shipping.entity.custom.barge;
 
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
-import dev.murad.shipping.util.Train;
-import javafx.util.Pair;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
-import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.ChestContainer;
 import net.minecraft.inventory.container.Container;
@@ -20,44 +16,29 @@ import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.IPacket;
 import net.minecraft.util.*;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Optional;
 import java.util.stream.IntStream;
 
-public class BargeEntity extends BoatEntity implements ISpringableEntity, IInventory, INamedContainerProvider, ISidedInventory {
-    private Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
-    private Optional<Pair<ISpringableEntity, SpringEntity>> dominant = Optional.empty();
-    private Train train;
+public class ChestBargeEntity extends AbstractBargeEntity implements IInventory, INamedContainerProvider, ISidedInventory {
     private NonNullList<ItemStack> itemStacks = NonNullList.withSize(36, ItemStack.EMPTY);
 
-    public BargeEntity(EntityType<? extends BoatEntity> type, World world) {
+    public ChestBargeEntity(EntityType<? extends BoatEntity> type, World world) {
         super(type, world);
-        this.blocksBuilding = true;
-        this.train = new Train(this);
     }
 
-    public BargeEntity(World worldIn, double x, double y, double z) {
-        this(ModEntityTypes.BARGE.get(), worldIn);
-        this.setPos(x, y, z);
-        this.setDeltaMovement(Vector3d.ZERO);
-        this.xo = x;
-        this.yo = y;
-        this.zo = z;
+    public ChestBargeEntity(World worldIn, double x, double y, double z) {
+        super(ModEntityTypes.CHEST_BARGE.get(), worldIn, x, y, z);
     }
 
 
     @Override
     public Item getDropItem() {
-        return ModItems.BARGE.get();
+        return ModItems.CHEST_BARGE.get();
     }
 
     @Override
@@ -66,110 +47,8 @@ public class BargeEntity extends BoatEntity implements ISpringableEntity, IInven
                 new ResourceLocation(ShippingMod.MOD_ID, "barge")));
     }
 
-    @Override
-    protected void addPassenger(Entity passenger){
-
-    }
-
-    @Override
-    protected boolean canAddPassenger(Entity passenger) {
-        return false;
-    }
-
-
-    @Nonnull
-    @Override
-    public IPacket<?> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
-
-    @Override
-    public ActionResultType interact(PlayerEntity player, Hand hand) {
-        if (!this.level.isClientSide) {
-            doInteract(player);
-            return ActionResultType.PASS;
-        }
-        return ActionResultType.SUCCESS;
-    }
-
     protected void doInteract(PlayerEntity player) {
         player.openMenu(this);
-    }
-
-    @Override
-    public void remove(boolean keepData) {
-        if (!this.level.isClientSide) {
-            InventoryHelper.dropContents(this.level, this, this);
-        }
-
-        super.remove(keepData);
-    }
-
-    @Override
-    public boolean hurt(DamageSource p_70097_1_, float p_70097_2_) {
-        if (this.isInvulnerableTo(p_70097_1_)) {
-            return false;
-        } else if (!this.level.isClientSide && !this.removed) {
-            this.spawnAtLocation(this.getDropItem());
-            this.remove();
-            return true;
-        } else {
-            return true;
-        }
-    }
-
-    @Override
-    public Optional<Pair<ISpringableEntity, SpringEntity>> getDominated() {
-        return this.dominated;
-    }
-
-    @Override
-    public Optional<Pair<ISpringableEntity, SpringEntity>> getDominant() {
-        return this.dominant;
-    }
-
-    @Override
-    public void setDominated(ISpringableEntity entity, SpringEntity spring) {
-        this.dominated = Optional.of(new Pair<>(entity, spring));
-    }
-
-    @Override
-    public void setDominant(ISpringableEntity entity, SpringEntity spring) {
-        this.setTrain(entity.getTrain());
-        this.dominant = Optional.of(new Pair<>(entity, spring));
-    }
-
-    @Override
-    public void removeDominated() {
-        this.dominated = Optional.empty();
-    }
-
-    @Override
-    public void removeDominant() {
-        this.dominant = Optional.empty();
-    }
-
-    @Override
-    public Train getTrain() {
-        return train;
-    }
-
-    @Override
-    public void setTrain(Train train) {
-        this.train = train;
-        train.setTail(this);
-        dominated.ifPresent(dominated -> {
-            // avoid recursion loops
-            if(!dominated.getKey().getTrain().equals(train)){
-                dominated.getKey().setTrain(train);
-            }
-        });
-    }
-
-    @Override
-    public void remove(){
-        handleSpringableKill();
-        super.remove();
     }
 
 
@@ -258,13 +137,6 @@ public class BargeEntity extends BoatEntity implements ISpringableEntity, IInven
     protected void readAdditionalSaveData(CompoundNBT p_70037_1_) {
         ItemStackHelper.loadAllItems(p_70037_1_, this.itemStacks);
     }
-
-
-    // hack to disable hoppers
-    public boolean isDockable() {
-        return this.dominant.map(dom -> this.distanceToSqr((Entity) dom.getKey()) < 1.1).orElse(true);
-    }
-
 
     @Override
     public int[] getSlotsForFace(Direction p_180463_1_) {

@@ -1,8 +1,9 @@
 package dev.murad.shipping.setup;
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.custom.BargeEntity;
+import dev.murad.shipping.entity.custom.barge.ChestBargeEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
+import dev.murad.shipping.entity.custom.barge.ChunkLoaderBargeEntity;
 import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
 import dev.murad.shipping.entity.custom.tug.TugEntity;
 import net.minecraft.entity.EntityClassification;
@@ -11,11 +12,17 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.RegistryObject;
 
 public class ModEntityTypes {
-    public static final RegistryObject<EntityType<BargeEntity>> BARGE =
+    public static final RegistryObject<EntityType<ChestBargeEntity>> CHEST_BARGE =
             Registration.ENTITIES.register("barge",
-                    () -> EntityType.Builder.<BargeEntity>of(BargeEntity::new,
+                    () -> EntityType.Builder.<ChestBargeEntity>of(ChestBargeEntity::new,
                                     EntityClassification.MISC).sized(0.6f, 0.6f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "barge").toString()));
+
+    public static final RegistryObject<EntityType<ChunkLoaderBargeEntity>> CHUNK_LOADER_BARGE =
+            Registration.ENTITIES.register("chunk_loader_barge",
+                    () -> EntityType.Builder.<ChunkLoaderBargeEntity>of(ChunkLoaderBargeEntity::new,
+                                    EntityClassification.MISC).sized(0.6f, 0.6f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "chunk_loader_barge").toString()));
 
     public static final RegistryObject<EntityType<TugEntity>> TUG =
             Registration.ENTITIES.register("tug",

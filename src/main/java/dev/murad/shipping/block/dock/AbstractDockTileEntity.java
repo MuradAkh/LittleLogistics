@@ -20,7 +20,7 @@ public abstract class AbstractDockTileEntity extends TileEntity {
         super(p_i48289_1_);
     }
 
-    public abstract boolean holdVessel(IInventory vessel, Direction direction);
+    public abstract boolean holdVessel(Entity vessel, Direction direction);
 
     protected static boolean mayMoveIntoInventory(IInventory target, IInventory source) {
         if (source.isEmpty()){

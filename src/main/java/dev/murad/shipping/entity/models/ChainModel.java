@@ -5,12 +5,11 @@ package dev.murad.shipping.entity.models;// Made with Blockbench 4.0.5
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import dev.murad.shipping.entity.custom.BargeEntity;
-import dev.murad.shipping.entity.custom.SpringEntity;
+import dev.murad.shipping.entity.custom.barge.ChestBargeEntity;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 
-public class ChainModel extends EntityModel<BargeEntity> {
+public class ChainModel extends EntityModel<ChestBargeEntity> {
 	private final ModelRenderer bb_main;
 	private final ModelRenderer cube_r1;
 
@@ -45,7 +44,7 @@ public class ChainModel extends EntityModel<BargeEntity> {
 	}
 
 	@Override
-	public void setupAnim(BargeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch){
+	public void setupAnim(ChestBargeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch){
 		//previously the render function, render code was moved to a method below
 	}
 

@@ -5,8 +5,11 @@ import net.minecraft.item.ItemGroup;
 import net.minecraftforge.fml.RegistryObject;
 
 public class ModItems {
-    public static final RegistryObject<Item> BARGE = Registration.ITEMS.register("barge",
-            () -> new BargeItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));
+    public static final RegistryObject<Item> CHEST_BARGE = Registration.ITEMS.register("barge",
+            () -> new ChestBargeItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));
+
+    public static final RegistryObject<Item> CHUNK_LOADER_BARGE = Registration.ITEMS.register("chunk_loader_barge",
+            () -> new ChunkLoaderBargeItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));
 
     public static final RegistryObject<Item> TUG = Registration.ITEMS.register("tug",
             () -> new TugItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));

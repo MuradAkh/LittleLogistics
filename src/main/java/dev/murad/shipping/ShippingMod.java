@@ -1,7 +1,9 @@
 package dev.murad.shipping;
 
 import dev.murad.shipping.entity.container.TugScreen;
-import dev.murad.shipping.entity.render.BargeRenderer;
+
+import dev.murad.shipping.entity.render.ChestBargeRenderer;
+import dev.murad.shipping.entity.render.ChunkLoaderBargeRenderer;
 import dev.murad.shipping.entity.render.SpringEntityRenderer;
 import dev.murad.shipping.entity.render.TugRenderer;
 import dev.murad.shipping.item.SpringItem;
@@ -65,7 +67,8 @@ public class ShippingMod
     private void doClientStuff(final FMLClientSetupEvent event) {
         // do something that can only be done on the client
         LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().options);
-        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.BARGE.get(), BargeRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CHEST_BARGE.get(), ChestBargeRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CHUNK_LOADER_BARGE.get(), ChunkLoaderBargeRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SPRING.get(), SpringEntityRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TUG_DUMMY_HITBOX.get(), SpringEntityRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TUG.get(), TugRenderer::new);

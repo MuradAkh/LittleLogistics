@@ -1,9 +1,11 @@
 package dev.murad.shipping.block.dock;
 
-import dev.murad.shipping.entity.custom.BargeEntity;
+import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
+import dev.murad.shipping.entity.custom.barge.ChestBargeEntity;
 import dev.murad.shipping.entity.custom.tug.TugEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import javafx.util.Pair;
+import net.minecraft.entity.Entity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
@@ -32,16 +34,17 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
 
 
 
-    public boolean holdVessel(IInventory tug, Direction direction){
+    public boolean holdVessel(Entity tug, Direction direction){
         if (!(tug instanceof TugEntity) || !getBlockState().getValue(TugDockBlock.FACING).getOpposite().equals(direction)){
             return false;
         }
 
         // Tug needs to be loaded
-        if(getInsertHopper().map(hopper -> mayMoveIntoInventory(tug, hopper)).orElse(false)){
+        // TODO: change for liquid powered tugs
+        if(getInsertHopper().map(hopper -> mayMoveIntoInventory((IInventory) tug, hopper)).orElse(false)){
             return true;
         }
-        List<Pair<BargeEntity, BargeDockTileEntity>> barges = getBargeDockPairs((TugEntity) tug);
+        List<Pair<AbstractBargeEntity, BargeDockTileEntity>> barges = getBargeDockPairs((TugEntity) tug);
 
         // Barges with corresponding docks for docking aren't dockable yet
 //        if(!barges.stream().map(pair -> pair.getKey().isDockable()).reduce(true, Boolean::logicalAnd)){
@@ -55,8 +58,8 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
         return false;
     }
 
-    private List<Pair<BargeEntity, BargeDockTileEntity>> getBargeDockPairs(TugEntity tug){
-        List<BargeEntity> barges = tug.getTrain().getBarges();
+    private List<Pair<AbstractBargeEntity, BargeDockTileEntity>> getBargeDockPairs(TugEntity tug){
+        List<AbstractBargeEntity> barges = tug.getTrain().getBarges();
         List<BargeDockTileEntity> docks = getBargeDocks();
         return IntStream.range(0, Math.min(barges.size(), docks.size()))
                 .mapToObj(i -> new Pair<>(barges.get(i), docks.get(i)))
@@ -92,46 +95,5 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
     public CompoundNBT save(CompoundNBT p_189515_1_) {
         return super.save(p_189515_1_);
     }
-
-
-//    @Override
-//    public int[] getSlotsForFace(Direction p_180463_1_) {
-//        return new int[0];
-//    }
-//
-//    @Override
-//    public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
-//        return false;
-//    }
-//
-//    @Override
-//    public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack p_180461_2_, Direction p_180461_3_) {
-//        return false;
-//    }
-//
-//    @Override
-//    protected NonNullList<ItemStack> getItems() {
-//        return null;
-//    }
-//
-//    @Override
-//    protected void setItems(NonNullList<ItemStack> p_199721_1_) {
-//
-//    }
-//
-//    @Override
-//    protected ITextComponent getDefaultName() {
-//        return null;
-//    }
-//
-//    @Override
-//    protected Container createMenu(int p_213906_1_, PlayerInventory p_213906_2_) {
-//        return null;
-//    }
-//
-//    @Override
-//    public int getContainerSize() {
-//        return 0;
-//    }
 
 }
