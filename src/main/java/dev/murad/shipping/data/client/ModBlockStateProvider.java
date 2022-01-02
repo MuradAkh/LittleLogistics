@@ -30,6 +30,15 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 getBlTx("tug_dock_top" + inv));
     }
 
+    private ModelFile getBargeDockModel(BlockState state){
+        String inv = state.getValue(BargeDockBlock.EXTRACT_MODE) ? "_extract" : "";
+        return  models().orientable("barge_dock" + inv,
+                getBlTx("barge_dock"),
+                getBlTx("barge_dock_front" + inv),
+                getBlTx("barge_dock_top"));
+    }
+
+
     @Override
     protected void registerStatesAndModels() {
         getVariantBuilder(ModBlocks.TUG_DOCK.get()).forAllStates(state -> ConfiguredModel.builder()
@@ -38,13 +47,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .build()
         );
 
-        ModelFile bargeDockModel = models().orientable("barge_dock",
-                getBlTx("barge_dock"),
-                getBlTx("barge_dock_front"),
-                getBlTx("barge_dock_top"));
-
         getVariantBuilder(ModBlocks.BARGE_DOCK.get()).forAllStates(state -> ConfiguredModel.builder()
-                .modelFile(bargeDockModel)
+                .modelFile(getBargeDockModel(state))
                 .rotationY((int) state.getValue(BargeDockBlock.FACING).getOpposite().toYRot())
                 .build()
         );
