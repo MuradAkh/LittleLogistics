@@ -27,6 +27,7 @@ SOFTWARE.
 
 import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
+import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
 import dev.murad.shipping.util.Train;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
@@ -55,6 +56,9 @@ public class SpringItem extends Item {
 
     // because 'itemInteractionForEntity' is only for Living entities
     public void onUsedOnEntity(ItemStack stack, PlayerEntity player, World world, Entity target) {
+        if(target instanceof TugDummyHitboxEntity){
+            target = ((TugDummyHitboxEntity) target).getTug();
+        }
         if(world.isClientSide)
             return;
         switch(getState(stack)) {

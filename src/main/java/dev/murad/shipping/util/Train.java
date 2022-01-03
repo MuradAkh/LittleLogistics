@@ -1,9 +1,8 @@
 package dev.murad.shipping.util;
 
 import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
-import dev.murad.shipping.entity.custom.barge.ChestBargeEntity;
 import dev.murad.shipping.entity.custom.ISpringableEntity;
-import dev.murad.shipping.entity.custom.tug.TugEntity;
+import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
@@ -11,17 +10,17 @@ import java.util.List;
 import java.util.Optional;
 
 public class Train {
-    private final Optional<TugEntity> tug;
+    private final Optional<AbstractTugEntity> tug;
     private ISpringableEntity tail;
     private ISpringableEntity head;
 
     public Train(ISpringableEntity entity){
         head = entity;
         tail = entity;
-        this.tug = entity instanceof TugEntity ? Optional.of((TugEntity) entity) : Optional.empty();
+        this.tug = entity instanceof AbstractTugEntity ? Optional.of((AbstractTugEntity) entity) : Optional.empty();
     }
 
-    public Optional<TugEntity> getTug() {
+    public Optional<AbstractTugEntity> getTug() {
         return tug;
     }
 

@@ -18,7 +18,6 @@ public interface ISpringableEntity {
 
     default void handleSpringableKill(){
         this.getDominated().flatMap(pair -> Optional.of(pair.getKey())).ifPresent(dominated -> {
-            dominated.setTrain(new Train(dominated));
             dominated.removeDominant();
         });
         this.getDominant().flatMap(pair -> Optional.of(pair.getKey())).ifPresent(ISpringableEntity::removeDominated);

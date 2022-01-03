@@ -16,13 +16,13 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpawnData {
-    private TugEntity tugEntity;
+    private AbstractTugEntity tugEntity;
 
     public TugDummyHitboxEntity(EntityType<TugDummyHitboxEntity> p_i48580_1_, World p_i48580_2_) {
         super(p_i48580_1_, p_i48580_2_);
     }
 
-    public TugDummyHitboxEntity(TugEntity tugEntity) {
+    public TugDummyHitboxEntity(AbstractTugEntity tugEntity) {
         this(ModEntityTypes.TUG_DUMMY_HITBOX.get(), tugEntity.level);
         this.tugEntity = tugEntity;
         this.setDeltaMovement(Vector3d.ZERO);
@@ -30,6 +30,10 @@ public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpa
         this.xo = getX();
         this.yo = getY();
         this.zo = getZ();
+    }
+
+    public AbstractTugEntity getTug(){
+        return tugEntity;
     }
 
     private void updatePosition(){
@@ -100,7 +104,7 @@ public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpa
     @Override
     public void readSpawnData(PacketBuffer buffer) {
         try {
-            tugEntity = (TugEntity) this.level.getEntity(buffer.readInt());
+            tugEntity = (AbstractTugEntity) this.level.getEntity(buffer.readInt());
         } catch (IndexOutOfBoundsException e){
 
         }

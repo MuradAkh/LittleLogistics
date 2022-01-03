@@ -1,34 +1,27 @@
 package dev.murad.shipping.entity.custom.tug;
 
 import dev.murad.shipping.block.dock.TugDockTileEntity;
-import dev.murad.shipping.entity.container.TugContainer;
 import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.navigation.TugPathNavigator;
 import dev.murad.shipping.item.TugRouteItem;
-import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.Train;
 import javafx.util.Pair;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.LilyPadBlock;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.MoverType;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap;
-import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -50,12 +43,9 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.network.NetworkHooks;
@@ -67,26 +57,26 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInventory, ISidedInventory {
+public abstract class AbstractTugEntity extends WaterMobEntity implements ISpringableEntity, IInventory, ISidedInventory {
 
     // CONTAINER STUFF
-    private final ItemStackHandler itemHandler = createHandler();
-    private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
-    private boolean contentsChanged = false;
-    private int burnTime = 0;
-    private int burnCapacity = 0;
-    private boolean docked = false;
+    protected final ItemStackHandler itemHandler = createHandler();
+    protected final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
+    protected boolean contentsChanged = false;
+    protected int burnTime = 0;
+    protected int burnCapacity = 0;
+    protected boolean docked = false;
     private int dockCheckCooldown = 0;
 
     // MOB STUFF
     private float invFriction;
-    int stuckCounter;
+    private int stuckCounter;
     private double waterLevel;
     private float landFriction;
     private BoatEntity.Status status;
     private BoatEntity.Status oldStatus;
     private double lastYd;
-    TugDummyHitboxEntity extraHitbox = null;
+    private TugDummyHitboxEntity extraHitbox = null;
 
     // Navigation/train
     private Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
@@ -95,7 +85,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
     private int nextStop;
 
 
-    public TugEntity(EntityType<? extends WaterMobEntity> type, World world) {
+    public AbstractTugEntity(EntityType<? extends WaterMobEntity> type, World world) {
         super(type, world);
         this.blocksBuilding = true;
         this.train = new Train(this);
@@ -103,8 +93,8 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
         stuckCounter = 0;
     }
 
-    public TugEntity(World worldIn, double x, double y, double z) {
-        this(ModEntityTypes.TUG.get(), worldIn);
+    public AbstractTugEntity(EntityType type, World worldIn, double x, double y, double z) {
+        this(type, worldIn);
         this.setPos(x, y, z);
         this.setDeltaMovement(Vector3d.ZERO);
         this.xo = x;
@@ -112,14 +102,6 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
         this.zo = z;
 
     }
-
-    public static AttributeModifierMap.MutableAttribute setCustomAttributes() {
-        return MobEntity.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, 1.0D)
-                .add(Attributes.MOVEMENT_SPEED, 1.6D);
-
-    }
-
 
     // CONTAINER STUFF
     @OnlyIn(Dist.CLIENT)
@@ -143,7 +125,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
     }
 
     private ItemStackHandler createHandler() {
-        return new ItemStackHandler(2) {
+        return new ItemStackHandler(1 + getNonRouteItemSlots()) {
             @Override
             protected void onContentsChanged(int slot) {
                 contentsChanged = true;
@@ -152,24 +134,20 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
             @Override
             public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
                 switch (slot) {
-                    case 0:
+                    case 0: // route
                         return stack.getItem() == ModItems.TUG_ROUTE.get();
-                    case 1:
-                        return FurnaceTileEntity.isFuel(stack);
-                    default:
-                        return false;
+                    default: // up to children
+                        return isTugSlotItemValid(slot, stack);
                 }
             }
 
             @Override
             public int getSlotLimit(int slot) {
                 switch (slot) {
-                    case 0:
+                    case 0: // route
                         return 1;
-                    case 1:
-                        return 64;
-                    default:
-                        return 0;
+                    default: // up to children
+                        return getTugSlotLimit(slot);
                 }
             }
 
@@ -185,20 +163,17 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
         };
     }
 
-    private INamedContainerProvider createContainerProvider() {
-        return new INamedContainerProvider() {
-            @Override
-            public ITextComponent getDisplayName() {
-                return new TranslationTextComponent("screen.shipping.tug");
-            }
+    protected abstract int getNonRouteItemSlots();
 
-            @Nullable
-            @Override
-            public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
-                return new TugContainer(i, level, getId(), playerInventory, playerEntity);
-            }
-        };
+    protected boolean isTugSlotItemValid(int slot, @Nonnull ItemStack stack){
+        return false;
     }
+
+    protected int getTugSlotLimit(int slot){
+        return 0;
+    }
+
+    protected abstract INamedContainerProvider createContainerProvider();
 
     @Override
     public void readAdditionalSaveData(CompoundNBT compound) {
@@ -225,22 +200,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
         }
     }
 
-    private boolean tickFuel() {
-        if (burnTime > 0) {
-            burnTime--;
-            return true;
-        } else {
-            ItemStack stack = itemHandler.getStackInSlot(1);
-            if (!stack.isEmpty()) {
-                burnCapacity = ForgeHooks.getBurnTime(stack, null) - 1;
-                burnTime = burnCapacity - 1;
-                stack.shrink(1);
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }
+    protected abstract boolean tickFuel();
 
 
     // MOB STUFF
@@ -577,6 +537,7 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
     @Override
     public void removeDominated() {
         this.dominated = Optional.empty();
+        this.train.setTail(this);
     }
 
     @Override
@@ -767,83 +728,5 @@ public class TugEntity extends WaterMobEntity implements ISpringableEntity, IInv
         }
 
         this.calculateEntityAnimation(this, false);
-    }
-
-
-    // Have to implement IInventory to work with hoppers
-
-    @Override
-    public int getContainerSize() {
-        return 2;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return itemHandler.getStackInSlot(1).isEmpty();
-    }
-
-    @Override
-    public ItemStack getItem(int p_70301_1_) {
-        return itemHandler.getStackInSlot(p_70301_1_);
-    }
-
-    @Override
-    public ItemStack removeItem(int p_70298_1_, int p_70298_2_) {
-        return null;
-    }
-
-    @Override
-    public ItemStack removeItemNoUpdate(int p_70304_1_) {
-        return null;
-    }
-
-    @Override
-    public void setItem(int p_70299_1_, ItemStack p_70299_2_) {
-        if (!this.itemHandler.isItemValid(1, p_70299_2_)){
-            return;
-        }
-        this.itemHandler.insertItem(1, p_70299_2_, false);
-        if (!p_70299_2_.isEmpty() && p_70299_2_.getCount() > this.getMaxStackSize()) {
-            p_70299_2_.setCount(this.getMaxStackSize());
-        }
-    }
-
-    @Override
-    public void setChanged() {
-        contentsChanged = true;
-    }
-
-    @Override
-    public boolean stillValid(PlayerEntity p_70300_1_) {
-        if (this.removed) {
-            return false;
-        } else {
-            return !(p_70300_1_.distanceToSqr(this) > 64.0D);
-        }
-    }
-
-    public boolean canPlaceItem(int p_94041_1_, ItemStack p_94041_2_) {
-        return this.docked;
-    }
-
-
-    @Override
-    public void clearContent() {
-
-    }
-
-    @Override
-    public int[] getSlotsForFace(Direction p_180463_1_) {
-        return new int[]{1};
-    }
-
-    @Override
-    public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
-        return this.docked;
-    }
-
-    @Override
-    public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack p_180461_2_, Direction p_180461_3_) {
-        return false;
     }
 }

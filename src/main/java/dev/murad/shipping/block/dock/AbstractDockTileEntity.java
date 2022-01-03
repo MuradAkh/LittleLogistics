@@ -1,6 +1,6 @@
 package dev.murad.shipping.block.dock;
 
-import dev.murad.shipping.entity.custom.tug.TugEntity;
+import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
@@ -29,7 +29,7 @@ public abstract class AbstractDockTileEntity extends TileEntity {
 
         HashMap<Item, List<ItemStack>> map = new HashMap<>();
         List<Integer> airList = new ArrayList<>();
-        int init = target instanceof TugEntity ? 1 : 0;
+        int init = target instanceof AbstractTugEntity ? 1 : 0;
         for (int i = init; i < target.getContainerSize(); i++) {
             ItemStack stack = target.getItem(i);
             if(stack.isEmpty() || stack.getItem().equals(Items.AIR)){

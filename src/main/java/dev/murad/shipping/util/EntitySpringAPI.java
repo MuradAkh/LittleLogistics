@@ -24,10 +24,11 @@ SOFTWARE.
  */
 
 
+import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
-import dev.murad.shipping.entity.custom.barge.ChestBargeEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.entity.custom.tug.TugEntity;
+import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
+import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.*;
 import net.minecraft.util.math.MathHelper;
@@ -57,7 +58,7 @@ public class EntitySpringAPI {
     }
 
     public static boolean isValidTarget(Entity target) {
-        return target instanceof TugEntity || target instanceof AbstractBargeEntity;
+        return target instanceof ISpringableEntity || target instanceof TugDummyHitboxEntity;
     }
 
     public static void addGenericAnchorMapping(Class<? extends Entity> entity, BiFunction<Entity, SpringEntity.SpringSide, Vector3d> function) {

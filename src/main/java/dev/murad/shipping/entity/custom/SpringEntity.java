@@ -24,7 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-import dev.murad.shipping.entity.custom.tug.TugEntity;
+import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.util.EntitySpringAPI;
 import net.minecraft.client.world.ClientWorld;
@@ -184,7 +184,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
                 float targetYaw = computeTargetYaw(dominated.yRot, frontAnchor, backAnchor);
                 dominated.yRot = (float) (alpha * dominated.yRot + targetYaw * (1f-alpha));
                 this.yRot = dominated.yRot;
-                double k = dominant instanceof TugEntity ? 0.2 : 0.13;
+                double k = dominant instanceof AbstractTugEntity ? 0.2 : 0.13;
                 double l0 = 1.0;
                 dominated.setDeltaMovement(k*(dist-l0)*dx, k*(dist-l0)*dy, k*(dist-l0)*dz);
             }

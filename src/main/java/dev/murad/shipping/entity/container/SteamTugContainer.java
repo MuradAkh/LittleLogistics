@@ -1,6 +1,6 @@
 package dev.murad.shipping.entity.container;
 
-import dev.murad.shipping.entity.custom.tug.TugEntity;
+import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModContainerTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -13,16 +13,16 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
 
-public class TugContainer extends Container {
-    private final TugEntity tugEntity;
+public class SteamTugContainer extends Container {
+    private final AbstractTugEntity tugEntity;
     private final PlayerEntity playerEntity;
     private final IItemHandler playerInventory;
 
 
-    public TugContainer(int windowId, World world, int entityId,
-                        PlayerInventory playerInventory, PlayerEntity player) {
+    public SteamTugContainer(int windowId, World world, int entityId,
+                             PlayerInventory playerInventory, PlayerEntity player) {
         super(ModContainerTypes.TUG_CONTAINER.get(), windowId);
-        this.tugEntity = (TugEntity) world.getEntity(entityId);
+        this.tugEntity = (AbstractTugEntity) world.getEntity(entityId);
         playerEntity = player;
         this.playerInventory = new InvWrapper(playerInventory);
         layoutPlayerInventorySlots(8, 86);

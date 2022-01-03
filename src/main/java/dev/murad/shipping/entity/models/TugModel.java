@@ -5,11 +5,11 @@ package dev.murad.shipping.entity.models;// Made with Blockbench 4.0.5
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import dev.murad.shipping.entity.custom.tug.TugEntity;
+import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 
-public class TugModel extends EntityModel<TugEntity> {
+public class TugModel extends EntityModel<AbstractTugEntity> {
     private final ModelRenderer bb_main;
 
     public TugModel() {
@@ -32,7 +32,7 @@ public class TugModel extends EntityModel<TugEntity> {
         }
 
     @Override
-    public void setupAnim(TugEntity p_225597_1_, float p_225597_2_, float p_225597_3_, float p_225597_4_, float p_225597_5_, float p_225597_6_) {
+    public void setupAnim(AbstractTugEntity p_225597_1_, float p_225597_2_, float p_225597_3_, float p_225597_4_, float p_225597_5_, float p_225597_6_) {
 
     }
 

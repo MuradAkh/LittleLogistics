@@ -106,11 +106,13 @@ public abstract class AbstractBargeEntity extends BoatEntity implements ISpringa
     @Override
     public void removeDominated() {
         this.dominated = Optional.empty();
+        this.train.setTail(this);
     }
 
     @Override
     public void removeDominant() {
         this.dominant = Optional.empty();
+        this.setTrain(new Train(this));
     }
 
     @Override

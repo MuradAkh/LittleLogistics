@@ -1,8 +1,7 @@
 package dev.murad.shipping.block.dock;
 
 import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
-import dev.murad.shipping.entity.custom.barge.ChestBargeEntity;
-import dev.murad.shipping.entity.custom.tug.TugEntity;
+import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import javafx.util.Pair;
 import net.minecraft.entity.Entity;
@@ -28,14 +27,14 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
         super(ModTileEntitiesTypes.TUG_DOCK.get());
     }
 
-    private boolean checkTugFull(TugEntity tug){
+    private boolean checkTugFull(AbstractTugEntity tug){
         return tug.getItem(1).getCount() == tug.getItem(1).getMaxStackSize();
     }
 
 
 
     public boolean holdVessel(Entity tug, Direction direction){
-        if (!(tug instanceof TugEntity) || !getBlockState().getValue(TugDockBlock.FACING).getOpposite().equals(direction)){
+        if (!(tug instanceof AbstractTugEntity) || !getBlockState().getValue(TugDockBlock.FACING).getOpposite().equals(direction)){
             return false;
         }
 
@@ -44,7 +43,7 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
         if(getInsertHopper().map(hopper -> mayMoveIntoInventory((IInventory) tug, hopper)).orElse(false)){
             return true;
         }
-        List<Pair<AbstractBargeEntity, BargeDockTileEntity>> barges = getBargeDockPairs((TugEntity) tug);
+        List<Pair<AbstractBargeEntity, BargeDockTileEntity>> barges = getBargeDockPairs((AbstractTugEntity) tug);
 
         // Barges with corresponding docks for docking aren't dockable yet
 //        if(!barges.stream().map(pair -> pair.getKey().isDockable()).reduce(true, Boolean::logicalAnd)){
@@ -58,7 +57,7 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
         return false;
     }
 
-    private List<Pair<AbstractBargeEntity, BargeDockTileEntity>> getBargeDockPairs(TugEntity tug){
+    private List<Pair<AbstractBargeEntity, BargeDockTileEntity>> getBargeDockPairs(AbstractTugEntity tug){
         List<AbstractBargeEntity> barges = tug.getTrain().getBarges();
         List<BargeDockTileEntity> docks = getBargeDocks();
         return IntStream.range(0, Math.min(barges.size(), docks.size()))

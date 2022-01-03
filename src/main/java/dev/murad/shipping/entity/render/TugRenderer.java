@@ -4,7 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.entity.custom.tug.TugEntity;
+import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.entity.models.TugModel;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
@@ -15,7 +15,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class TugRenderer extends EntityRenderer<TugEntity> {
+public class TugRenderer extends EntityRenderer<AbstractTugEntity> {
     private static final ResourceLocation BOAT_TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/tug.png");
 
@@ -24,7 +24,7 @@ public class TugRenderer extends EntityRenderer<TugEntity> {
         super(p_i46179_1_);
     }
 
-    public void render(TugEntity boatEntity, float p_225623_2_, float p_225623_3_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int p_225623_6_) {
+    public void render(AbstractTugEntity boatEntity, float p_225623_2_, float p_225623_3_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int p_225623_6_) {
         matrixStack.pushPose();
         matrixStack.translate(0.0D, 0.375D, 0.0D);
         matrixStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - p_225623_2_));
@@ -52,7 +52,7 @@ public class TugRenderer extends EntityRenderer<TugEntity> {
     }
 
     @Override
-    public ResourceLocation getTextureLocation(TugEntity p_110775_1_) {
+    public ResourceLocation getTextureLocation(AbstractTugEntity p_110775_1_) {
         return BOAT_TEXTURE;
     }
 

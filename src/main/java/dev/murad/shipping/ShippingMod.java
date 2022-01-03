@@ -1,6 +1,6 @@
 package dev.murad.shipping;
 
-import dev.murad.shipping.entity.container.TugScreen;
+import dev.murad.shipping.entity.container.SteamTugScreen;
 
 import dev.murad.shipping.entity.render.ChestBargeRenderer;
 import dev.murad.shipping.entity.render.ChunkLoaderBargeRenderer;
@@ -71,9 +71,9 @@ public class ShippingMod
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CHUNK_LOADER_BARGE.get(), ChunkLoaderBargeRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SPRING.get(), DummyEntityRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TUG_DUMMY_HITBOX.get(), DummyEntityRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TUG.get(), TugRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STEAM_TUG.get(), TugRenderer::new);
 
-        ScreenManager.register(ModContainerTypes.TUG_CONTAINER.get(), TugScreen::new);
+        ScreenManager.register(ModContainerTypes.TUG_CONTAINER.get(), SteamTugScreen::new);
 
         event.enqueueWork(() ->
         {
