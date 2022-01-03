@@ -4,7 +4,7 @@ import dev.murad.shipping.entity.container.TugScreen;
 
 import dev.murad.shipping.entity.render.ChestBargeRenderer;
 import dev.murad.shipping.entity.render.ChunkLoaderBargeRenderer;
-import dev.murad.shipping.entity.render.SpringEntityRenderer;
+import dev.murad.shipping.entity.render.DummyEntityRenderer;
 import dev.murad.shipping.entity.render.TugRenderer;
 import dev.murad.shipping.item.SpringItem;
 import dev.murad.shipping.setup.ModContainerTypes;
@@ -69,8 +69,8 @@ public class ShippingMod
         LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().options);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CHEST_BARGE.get(), ChestBargeRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CHUNK_LOADER_BARGE.get(), ChunkLoaderBargeRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SPRING.get(), SpringEntityRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TUG_DUMMY_HITBOX.get(), SpringEntityRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SPRING.get(), DummyEntityRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TUG_DUMMY_HITBOX.get(), DummyEntityRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TUG.get(), TugRenderer::new);
 
         ScreenManager.register(ModContainerTypes.TUG_CONTAINER.get(), TugScreen::new);
