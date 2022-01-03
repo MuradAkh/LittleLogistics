@@ -114,6 +114,12 @@ public abstract class AbstractTugEntity extends WaterMobEntity implements ISprin
         return burnTime * 13 / i;
     }
 
+    // CONTAINER STUFF
+    @OnlyIn(Dist.CLIENT)
+    public boolean isLit() {
+        return burnTime > 0;
+    }
+
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {

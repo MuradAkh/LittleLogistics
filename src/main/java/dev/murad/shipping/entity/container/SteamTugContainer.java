@@ -25,13 +25,13 @@ public class SteamTugContainer extends Container {
         this.tugEntity = (AbstractTugEntity) world.getEntity(entityId);
         playerEntity = player;
         this.playerInventory = new InvWrapper(playerInventory);
-        layoutPlayerInventorySlots(8, 86);
+        layoutPlayerInventorySlots(8, 84);
 
 
         if(tugEntity != null) {
             tugEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
-                addSlot(new SlotItemHandler(h, 0, 80, 31));
-                addSlot(new SlotItemHandler(h, 1, 80, 53));
+                addSlot(new SlotItemHandler(h, 0, 116, 35));
+                addSlot(new SlotItemHandler(h, 1, 42, 40));
             });
         }
     }
@@ -72,6 +72,11 @@ public class SteamTugContainer extends Container {
     public int getBurnProgress(){
         return tugEntity.getBurnProgress();
     }
+
+    public boolean isLit(){
+        return tugEntity.isLit();
+    }
+
 
 
     // CREDIT GOES TO: diesieben07 | https://github.com/diesieben07/SevenCommons
