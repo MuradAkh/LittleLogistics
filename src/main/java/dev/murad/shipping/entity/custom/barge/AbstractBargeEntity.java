@@ -6,6 +6,7 @@ import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.util.Train;
 import javafx.util.Pair;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.BoatEntity;
@@ -80,6 +81,13 @@ public abstract class AbstractBargeEntity extends BoatEntity implements ISpringa
         } else {
             return true;
         }
+    }
+
+    public boolean hasWaterOnSides(){
+        return this.level.getBlockState(this.getOnPos().relative(this.getDirection().getClockWise())).getBlock().equals(Blocks.WATER) &&
+                this.level.getBlockState(this.getOnPos().relative(this.getDirection().getClockWise())).getBlock().equals(Blocks.WATER) &&
+                this.level.getBlockState(this.getOnPos().above().relative(this.getDirection().getClockWise())).getBlock().equals(Blocks.AIR) &&
+                this.level.getBlockState(this.getOnPos().above().relative(this.getDirection().getClockWise())).getBlock().equals(Blocks.AIR);
     }
 
     @Override

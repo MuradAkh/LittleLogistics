@@ -11,6 +11,9 @@ public class ModItems {
     public static final RegistryObject<Item> CHUNK_LOADER_BARGE = Registration.ITEMS.register("chunk_loader_barge",
             () -> new ChunkLoaderBargeItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));
 
+    public static final RegistryObject<Item> FISHING_BARGE = Registration.ITEMS.register("fishing_barge",
+            () -> new FishingBargeItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));
+
     public static final RegistryObject<Item> TUG = Registration.ITEMS.register("tug",
             () -> new TugItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));
 

@@ -9,6 +9,7 @@ import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.Train;
 import javafx.util.Pair;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.LilyPadBlock;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MoverType;
@@ -210,6 +211,14 @@ public abstract class AbstractTugEntity extends WaterMobEntity implements ISprin
 
 
     // MOB STUFF
+
+    public boolean hasWaterOnSides(){
+        return this.level.getBlockState(this.getOnPos().relative(this.getDirection().getClockWise())).getBlock().equals(Blocks.WATER) &&
+                this.level.getBlockState(this.getOnPos().relative(this.getDirection().getClockWise())).getBlock().equals(Blocks.WATER) &&
+                this.level.getBlockState(this.getOnPos().above().relative(this.getDirection().getClockWise())).getBlock().equals(Blocks.AIR) &&
+                this.level.getBlockState(this.getOnPos().above().relative(this.getDirection().getClockWise())).getBlock().equals(Blocks.AIR);
+    }
+
     private List<Direction> getSideDirections() {
         return this.getDirection() == Direction.NORTH || this.getDirection() == Direction.SOUTH ?
                 Arrays.asList(Direction.EAST, Direction.WEST) :
