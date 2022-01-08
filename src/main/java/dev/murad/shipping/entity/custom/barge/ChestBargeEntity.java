@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.ChestContainer;
 import net.minecraft.inventory.container.Container;
@@ -25,7 +26,7 @@ import javax.annotation.Nullable;
 import java.util.stream.IntStream;
 
 public class ChestBargeEntity extends AbstractBargeEntity implements IInventory, INamedContainerProvider, ISidedInventory {
-    private NonNullList<ItemStack> itemStacks = NonNullList.withSize(36, ItemStack.EMPTY);
+    protected final NonNullList<ItemStack> itemStacks = createItemStacks();
 
     public ChestBargeEntity(EntityType<? extends BoatEntity> type, World world) {
         super(type, world);
@@ -33,6 +34,28 @@ public class ChestBargeEntity extends AbstractBargeEntity implements IInventory,
 
     public ChestBargeEntity(World worldIn, double x, double y, double z) {
         super(ModEntityTypes.CHEST_BARGE.get(), worldIn, x, y, z);
+    }
+
+    ChestBargeEntity(EntityType<? extends ChestBargeEntity> type, World worldIn, double x, double y, double z) {
+        super(type, worldIn, x, y, z);
+    }
+
+    protected NonNullList<ItemStack> createItemStacks(){
+        return NonNullList.withSize(36, ItemStack.EMPTY);
+    }
+
+    @Override
+    public boolean hurt(DamageSource p_70097_1_, float p_70097_2_) {
+        if (this.isInvulnerableTo(p_70097_1_)) {
+            return false;
+        } else if (!this.level.isClientSide && !this.removed) {
+            this.spawnAtLocation(this.getDropItem());
+            InventoryHelper.dropContents(this.level, this, this);
+            this.remove();
+            return true;
+        } else {
+            return true;
+        }
     }
 
 
@@ -140,7 +163,7 @@ public class ChestBargeEntity extends AbstractBargeEntity implements IInventory,
 
     @Override
     public int[] getSlotsForFace(Direction p_180463_1_) {
-        return IntStream.rangeClosed(0, 27).toArray();
+        return IntStream.range(0, getContainerSize()).toArray();
     }
 
     @Override

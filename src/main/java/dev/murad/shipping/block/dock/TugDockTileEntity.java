@@ -3,6 +3,7 @@ package dev.murad.shipping.block.dock;
 import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import dev.murad.shipping.util.InventoryUtils;
 import javafx.util.Pair;
 import net.minecraft.entity.Entity;
 import net.minecraft.inventory.IInventory;
@@ -40,7 +41,7 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
 
         // Tug needs to be loaded
         // TODO: change for liquid powered tugs
-        if(getInsertHopper().map(hopper -> mayMoveIntoInventory((IInventory) tug, hopper)).orElse(false)){
+        if(getInsertHopper().map(hopper -> InventoryUtils.mayMoveIntoInventory((IInventory) tug, hopper)).orElse(false)){
             return true;
         }
         List<Pair<AbstractBargeEntity, BargeDockTileEntity>> barges = getBargeDockPairs((AbstractTugEntity) tug);

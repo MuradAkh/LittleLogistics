@@ -1,5 +1,6 @@
 package dev.murad.shipping.setup;
 
+import dev.murad.shipping.entity.container.FishingBargeContainer;
 import dev.murad.shipping.entity.container.SteamTugContainer;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraftforge.common.extensions.IForgeContainerType;
@@ -12,6 +13,12 @@ public class ModContainerTypes {
                     () -> IForgeContainerType.create(
                             (windowId, inv, data) ->
                                     new SteamTugContainer(windowId, inv.player.level, data.readInt(), inv, inv.player)));
+
+    public static final RegistryObject<ContainerType<FishingBargeContainer>> FISHING_BARGE_CONTAINER =
+            Registration.CONTAINERS.register("fishing_barge_container",
+                    () -> IForgeContainerType.create(
+                            (windowId, inv, data) ->
+                                    new FishingBargeContainer(windowId, inv.player.level, data.readInt(), inv, inv.player)));
 
     public static void register () {}
 }

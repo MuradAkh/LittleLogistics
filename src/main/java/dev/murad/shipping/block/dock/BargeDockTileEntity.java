@@ -3,6 +3,7 @@ package dev.murad.shipping.block.dock;
 import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.barge.ChestBargeEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import dev.murad.shipping.util.InventoryUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.HopperTileEntity;
@@ -43,7 +44,7 @@ public class BargeDockTileEntity extends AbstractDockTileEntity {
 
 
         return getBlockState().getValue(BargeDockBlock.EXTRACT_MODE) ?
-                getExtractHopper().map(hopper -> mayMoveIntoInventory(hopper, (IInventory) vessel)).orElse(false) :
-                getInsertHopper().map(hopper -> mayMoveIntoInventory((IInventory) vessel, hopper)).orElse(false);
+                getExtractHopper().map(hopper -> InventoryUtils.mayMoveIntoInventory(hopper, (IInventory) vessel)).orElse(false) :
+                getInsertHopper().map(hopper -> InventoryUtils.mayMoveIntoInventory((IInventory) vessel, hopper)).orElse(false);
     }
 }

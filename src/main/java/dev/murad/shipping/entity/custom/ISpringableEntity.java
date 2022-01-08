@@ -29,7 +29,14 @@ public interface ISpringableEntity {
 
     default<U> Stream<U> applyWithDominated(Function<ISpringableEntity, U> function){
         Stream<U> ofThis = Stream.of(function.apply(this));
-        return this.getDominated().map(dom -> Stream.concat(ofThis, dom.getKey().applyWithDominated(function))).orElse(ofThis);
+        try {
+            return this.getDominated().map(dom ->
+                    Stream.concat(ofThis, dom.getKey().applyWithDominated(function))
+            ).orElse(ofThis);
+        } catch (StackOverflowError e){
+            // Train should soon auto repair
+            return Stream.of(function.apply(this));
+        }
     }
 
     default<U> Stream<U> applyWithAll(Function<ISpringableEntity, U> function){
@@ -38,6 +45,13 @@ public interface ISpringableEntity {
 
     default<U> Stream<U> applyWithDominant(Function<ISpringableEntity, U> function){
         Stream<U> ofThis = Stream.of(function.apply(this));
-        return this.getDominant().map(dom -> Stream.concat(ofThis, dom.getKey().applyWithDominant(function))).orElse(ofThis);
+        try {
+            return this.getDominant().map(dom ->
+                Stream.concat(ofThis, dom.getKey().applyWithDominant(function))
+            ).orElse(ofThis);
+        } catch (StackOverflowError e){
+            // Train should soon auto repair
+            return Stream.of(function.apply(this));
+        }
     }
 }

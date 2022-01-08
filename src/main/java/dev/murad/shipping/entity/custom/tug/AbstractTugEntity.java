@@ -143,7 +143,7 @@ public abstract class AbstractTugEntity extends WaterMobEntity implements ISprin
                 switch (slot) {
                     case 0: // route
                         return stack.getItem() == ModItems.TUG_ROUTE.get();
-                    default: // up to children
+                    default: // up to childrenge
                         return isTugSlotItemValid(slot, stack);
                 }
             }
