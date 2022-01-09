@@ -11,6 +11,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -48,6 +49,7 @@ public class TugRouteItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.appendHoverText(stack, worldIn, tooltip, flagIn);
+        tooltip.add(new TranslationTextComponent("item.shipping.tug_route.description"));
         tooltip.add(new StringTextComponent(formatRoute(getRoute(stack))));
     }
 

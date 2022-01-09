@@ -1,3 +1,29 @@
 {
-  "item.shipping.ship_lock": "Ship Lock"
+  "item.shipping.tug": "Steam Tug",
+  "item.shipping.barge": "Chest Barge",
+  "item.shipping.chunk_loader_barge": "Chunk Loader Barge",
+  "item.shipping.fishing_barge": "Auto-Fishing Barge",
+  "item.shipping.spring": "Vessel Chain",
+  "item.shipping.tug_route": "Tug Route",
+
+  "entity.shipping.tug": "Steam Tug",
+  "entity.shipping.barge": "Chest Barge",
+  "entity.shipping.chunk_loader_barge": "Chunk Loader Barge",
+  "entity.shipping.fishing_barge": "Auto-Fishing Barge",
+  "entity.shipping.spring": "Vessel Chain",
+
+  "block.shipping.tug_dock": "Tug Dock",
+  "block.shipping.barge_dock": "Barge Dock",
+
+  "screen.shipping.tug": "Steam Tug",
+  "screen.shipping.fishing_barge": "Auto-Fishing Barge",
+
+  "item.shipping.tug_route.description": "Right click to add stop, crouch right click to remove",
+  "item.shipping.spring.description": "Used to link barges/tugs",
+  "item.shipping.spring.notToSelf": "Can't link vessel to self",
+  "item.shipping.spring.noTwoTugs": "Can't link two tugs",
+  "item.shipping.spring.noLoops": "Can't link vessels in a loop",
+  "item.shipping.fishing_barge.description": "For best yield, use on long routes in deep and open water"
+
+
 }

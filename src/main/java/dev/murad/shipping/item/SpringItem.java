@@ -46,7 +46,7 @@ import java.util.List;
 
 public class SpringItem extends Item {
 
-    private TranslationTextComponent springInfo = new TranslationTextComponent("item.spring.description");
+    private TranslationTextComponent springInfo = new TranslationTextComponent("item.shipping.spring.description");
 
     public SpringItem(Properties properties) {
         super(properties);
@@ -79,14 +79,14 @@ public class SpringItem extends Item {
         if(dominant == null)
             return;
         if(dominant == target) {
-            player.displayClientMessage(new TranslationTextComponent("item.spring.notToSelf"), true);
+            player.displayClientMessage(new TranslationTextComponent("item.shipping.spring.notToSelf"), true);
         } else if(dominant instanceof ISpringableEntity) {
             Train firstTrain =  ((ISpringableEntity) dominant).getTrain();
             Train secondTrain = ((ISpringableEntity) target).getTrain();
             if (firstTrain.getTug().isPresent() && secondTrain.getTug().isPresent()) {
-                player.displayClientMessage(new TranslationTextComponent("item.spring.noTwoTugs"), true);
+                player.displayClientMessage(new TranslationTextComponent("item.shipping.spring.noTwoTugs"), true);
             } else if (secondTrain.equals(firstTrain)){
-                player.displayClientMessage(new TranslationTextComponent("item.spring.noLoops"), true);
+                player.displayClientMessage(new TranslationTextComponent("item.shipping.spring.noLoops"), true);
             } else if (firstTrain.getTug().isPresent()) {
                 SpringEntity.createSpring((Entity) firstTrain.getTail(), (Entity) secondTrain.getHead());
             } else {
