@@ -3,7 +3,6 @@ package dev.murad.shipping.entity.render;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.entity.models.ChainModel;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
@@ -14,7 +13,6 @@ public class DummyEntityRenderer extends EntityRenderer<Entity> {
     private static final ResourceLocation TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/chain.png");
 
-    private static ChainModel model = new ChainModel();
     public DummyEntityRenderer(EntityRendererManager p_i46179_1_) {
         super(p_i46179_1_);
     }
