@@ -766,7 +766,7 @@ public abstract class AbstractTugEntity extends WaterMobEntity implements ISprin
 
 
     public boolean canPlaceItem(int p_94041_1_, ItemStack p_94041_2_) {
-        return this.docked;
+        return true;
     }
 
     @Override
