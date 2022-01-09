@@ -60,7 +60,7 @@ public class InventoryUtils {
         return false;
     }
 
-    public int findSlotFotItem(IInventory target, ItemStack itemStack) {
+    public static int findSlotFotItem(IInventory target, ItemStack itemStack) {
         for (int i = 0; i < target.getContainerSize(); i++) {
             ItemStack stack = target.getItem(i);
             if(stack.isEmpty() || stack.getItem().equals(Items.AIR)){

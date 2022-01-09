@@ -3,6 +3,8 @@ package dev.murad.shipping.entity.custom;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.util.Train;
 import javafx.util.Pair;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.DamageSource;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -34,7 +36,8 @@ public interface ISpringableEntity {
                     Stream.concat(ofThis, dom.getKey().applyWithDominated(function))
             ).orElse(ofThis);
         } catch (StackOverflowError e){
-            // Train should soon auto repair
+            // In case of corrupted save
+            ((Entity) this).remove();
             return Stream.of(function.apply(this));
         }
     }
@@ -50,7 +53,8 @@ public interface ISpringableEntity {
                 Stream.concat(ofThis, dom.getKey().applyWithDominant(function))
             ).orElse(ofThis);
         } catch (StackOverflowError e){
-            // Train should soon auto repair
+            // In case of corrupted save
+            ((Entity) this).remove();
             return Stream.of(function.apply(this));
         }
     }

@@ -57,6 +57,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.IntStream;
 
 public abstract class AbstractTugEntity extends WaterMobEntity implements ISpringableEntity, IInventory, ISidedInventory {
 
@@ -744,4 +745,66 @@ public abstract class AbstractTugEntity extends WaterMobEntity implements ISprin
 
         this.calculateEntityAnimation(this, false);
     }
+
+    // Have to implement IInventory to work with hoppers
+
+
+    @Override
+    public ItemStack getItem(int p_70301_1_) {
+        return itemHandler.getStackInSlot(p_70301_1_);
+    }
+
+    @Override
+    public ItemStack removeItem(int p_70298_1_, int p_70298_2_) {
+        return null;
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int p_70304_1_) {
+        return null;
+    }
+
+
+    public boolean canPlaceItem(int p_94041_1_, ItemStack p_94041_2_) {
+        return this.docked;
+    }
+
+    @Override
+    public void setChanged() {
+        contentsChanged = true;
+    }
+
+    @Override
+    public boolean stillValid(PlayerEntity p_70300_1_) {
+        if (this.removed) {
+            return false;
+        } else {
+            return !(p_70300_1_.distanceToSqr(this) > 64.0D);
+        }
+    }
+
+    @Override
+    public void clearContent() {
+
+    }
+
+    @Override
+    public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack p_180461_2_, Direction p_180461_3_) {
+        return false;
+    }
+
+    @Override
+    public int[] getSlotsForFace(Direction p_180463_1_) {
+        return IntStream.range(1, getContainerSize()).toArray();
+    }
+
+    @Override
+    public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
+        return this.docked;
+    }
+    @Override
+    public int getContainerSize() {
+        return 1 + getNonRouteItemSlots();
+    }
+
 }

@@ -1,10 +1,11 @@
 package dev.murad.shipping.entity.custom.barge;
 
 import dev.murad.shipping.entity.container.FishingBargeContainer;
-import dev.murad.shipping.entity.container.SteamTugContainer;
 import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import dev.murad.shipping.util.InventoryUtils;
+import javafx.util.Pair;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -12,15 +13,19 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.loot.*;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.network.NetworkHooks;
@@ -30,6 +35,7 @@ import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class FishingBargeEntity extends AbstractBargeEntity implements IInventory, ISidedInventory {
@@ -37,6 +43,8 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
     protected final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
     protected boolean contentsChanged = false;
     private int ticksDeployable = 0;
+    private final Set<Pair<Integer, Integer>> overFishedCoords = new HashSet<>();
+    private final Queue<Pair<Integer, Integer>> overFishedQueue = new LinkedList<>();
 
 
     public FishingBargeEntity(EntityType<? extends BoatEntity> type, World world) {
@@ -68,32 +76,17 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
         };
     }
 
-
-
+    @Override
+    public void remove() {
+        if (!this.level.isClientSide) {
+            InventoryHelper.dropContents(this.level, this, this);
+        }
+        super.remove();
+    }
 
 
     private ItemStackHandler createHandler() {
-        return new ItemStackHandler(9) {
-            @Override
-            protected void onContentsChanged(int slot) {
-                contentsChanged = true;
-            }
-
-            @Override
-            public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-                return false;
-            }
-
-            @Override
-            public int getSlotLimit(int slot) {
-                return 64;
-            }
-
-            @Override
-            public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-                return stack;
-            }
-        };
+        return new ItemStackHandler(9);
     }
 
 
@@ -101,6 +94,9 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
     public void tick(){
         super.tick();
         tickWaterOnSidesCheck();
+        if(!this.level.isClientSide && this.getStatus() == Status.DEPLOYED){
+            tickFish();
+        }
 
     }
 
@@ -110,7 +106,76 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
         }else {
             ticksDeployable = 0;
         }
+    }
 
+    private void tickFish(){
+        double overFishPenalty = isOverFished() ? 0.1 : 1;
+        double shallowPenalty = 1;
+        double chance = 0.1 * overFishPenalty * shallowPenalty;
+
+        double r = Math.random();
+        if(r < chance){
+            LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerWorld)this.level))
+                    .withParameter(LootParameters.ORIGIN, this.position())
+                    .withParameter(LootParameters.THIS_ENTITY, this)
+                    .withParameter(LootParameters.TOOL, new ItemStack(Items.FISHING_ROD))
+                    .withRandom(this.random);
+            lootcontext$builder.withParameter(LootParameters.KILLER_ENTITY, this).withParameter(LootParameters.THIS_ENTITY, this);
+            LootTable loottable = this.level.getServer().getLootTables().get(LootTables.FISHING);
+            List<ItemStack> list = loottable.getRandomItems(lootcontext$builder.create(LootParameterSets.FISHING));
+            for (ItemStack stack : list) {
+                int slot = InventoryUtils.findSlotFotItem(this, stack);
+                if (slot != -1) {
+                    itemHandler.insertItem(slot, stack, false);
+                }
+                if(!isOverFished()) {
+                    addOverFish();
+                }
+            }
+        }
+    }
+
+    private String overFishedString(){
+        return overFishedQueue.stream().map(t -> t.getKey() + ":" + t.getValue()).reduce("", (acc, curr) -> String.join(",", acc, curr));
+    }
+
+    private void populateOverfish(String string){
+        Arrays.stream(string.split(","))
+                .filter(s -> !s.isEmpty())
+                .map(s -> s.split(":"))
+                .map(arr -> new Pair(Integer.parseInt(arr[0]), Integer.parseInt(arr[1])))
+                .forEach(overFishedQueue::add);
+        overFishedCoords.addAll(overFishedQueue);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundNBT compound) {
+        itemHandler.deserializeNBT(compound.getCompound("inv"));
+        populateOverfish(compound.getString("overfish"));
+        super.readAdditionalSaveData(compound);
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundNBT compound) {
+        compound.put("inv", itemHandler.serializeNBT());
+        compound.putString("overfish", overFishedString());
+        super.addAdditionalSaveData(compound);
+    }
+
+    private void addOverFish(){
+        int x = (int) Math.floor(this.getX());
+        int z = (int) Math.floor(this.getZ());
+        overFishedCoords.add(new Pair<>(x, z));
+        overFishedQueue.add(new Pair<>(x, z));
+        if(overFishedQueue.size() > 50){
+            overFishedCoords.remove(overFishedQueue.poll());
+        }
+    }
+
+    private boolean isOverFished(){
+        int x = (int) Math.floor(this.getX());
+        int z = (int) Math.floor(this.getZ());
+        return overFishedCoords.contains(new Pair<>(x, z));
     }
 
     @Override
@@ -160,12 +225,18 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
 
     @Override
     public ItemStack removeItem(int p_70298_1_, int p_70298_2_) {
-        return null;
+       return itemHandler.extractItem(p_70298_1_, p_70298_2_, false);
     }
 
     @Override
     public ItemStack removeItemNoUpdate(int p_70304_1_) {
-        return null;
+        ItemStack itemstack = itemHandler.getStackInSlot(p_70304_1_);
+        if (itemstack.isEmpty()) {
+            return ItemStack.EMPTY;
+        } else {
+            this.itemHandler.setStackInSlot(p_70304_1_, ItemStack.EMPTY);
+            return itemstack;
+        }
     }
 
     @Override
@@ -175,12 +246,16 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
 
     @Override
     public void setChanged() {
-
+        contentsChanged = true;
     }
 
     @Override
     public boolean stillValid(PlayerEntity p_70300_1_) {
-        return false;
+        if (this.removed) {
+            return false;
+        } else {
+            return !(p_70300_1_.distanceToSqr(this) > 64.0D);
+        }
     }
 
     public Status getStatus(){
