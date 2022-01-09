@@ -31,7 +31,6 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "chunk_loader_barge");
         builder(itemGenerated, "fishing_barge");
         builder(itemGenerated, "tug");
-        builder(itemGenerated, "cutter");
         builder(itemGenerated, "tug_route");
         builder(itemGenerated, "spring")
                 .override()

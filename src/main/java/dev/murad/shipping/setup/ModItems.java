@@ -17,11 +17,8 @@ public class ModItems {
     public static final RegistryObject<Item> TUG = Registration.ITEMS.register("tug",
             () -> new TugItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));
 
-    public static final RegistryObject<Item> SPRING_CUTTER = Registration.ITEMS.register("cutter",
-            () -> new SpringCutterItem(new Item.Properties().stacksTo(1).defaultDurability(64).tab(ItemGroup.TAB_TRANSPORTATION)));
-
     public static final RegistryObject<Item> SPRING = Registration.ITEMS.register("spring",
-            () -> new SpringItem(new Item.Properties().stacksTo(1).tab(ItemGroup.TAB_TRANSPORTATION)));
+            () -> new SpringItem(new Item.Properties().stacksTo(64).tab(ItemGroup.TAB_TRANSPORTATION)));
 
     public static final RegistryObject<Item> TUG_ROUTE = Registration.ITEMS.register("tug_route",
             () -> new TugRouteItem(new Item.Properties().stacksTo(1).tab(ItemGroup.TAB_TRANSPORTATION)));

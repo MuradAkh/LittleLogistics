@@ -93,8 +93,8 @@ public class SpringItem extends Item {
                 SpringEntity.createSpring((Entity) secondTrain.getTail(), (Entity) firstTrain.getHead());
             }
             // First entity clicked is the dominant
-//            if(!player.isCreative())
-//                stack.shrink(1);
+            if(!player.isCreative())
+                stack.shrink(1);
 
 
         }

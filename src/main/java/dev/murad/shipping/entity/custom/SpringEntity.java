@@ -26,11 +26,14 @@ SOFTWARE.
 
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
+import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.EntitySpringAPI;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
@@ -373,8 +376,8 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
         if(dominant instanceof ISpringableEntity){
             ((ISpringableEntity) dominant).removeDominated();
         }
-//        if(!level.isClientSide)
-//            InventoryHelper.dropItemStack(level, getX(), getY(), getZ(), new ItemStack(ModItems.SPRING.get()));
+        if(!level.isClientSide)
+            InventoryHelper.dropItemStack(level, getX(), getY(), getZ(), new ItemStack(ModItems.SPRING.get()));
     }
 
     public enum SpringSide {

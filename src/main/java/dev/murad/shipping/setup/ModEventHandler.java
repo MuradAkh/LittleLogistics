@@ -1,7 +1,6 @@
 package dev.murad.shipping.setup;
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.item.SpringCutterItem;
 import dev.murad.shipping.item.SpringItem;
 import dev.murad.shipping.util.EntitySpringAPI;
 import net.minecraft.entity.Entity;
@@ -35,11 +34,6 @@ public class ModEventHandler {
                     event.setCanceled(true);
                     event.setCancellationResult(ActionResultType.SUCCESS);
                 }
-            } else if(item instanceof SpringCutterItem) {
-                SpringCutterItem cutter = (SpringCutterItem) item;
-                cutter.onUsedOnEntity(event.getItemStack(), event.getPlayer(), event.getWorld(), target);
-                event.setCanceled(true);
-                event.setCancellationResult(ActionResultType.SUCCESS);
             }
         }
     }

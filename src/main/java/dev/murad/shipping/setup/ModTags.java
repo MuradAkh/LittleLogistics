@@ -10,8 +10,6 @@ import net.minecraft.util.ResourceLocation;
 
 public class ModTags {
     public static final class Blocks {
-        public static final ITag.INamedTag<Block> SHIP_LOCK = forge("chests/ship_lock");
-
         private static ITag.INamedTag<Block> forge(String path) {
             return BlockTags.bind(new ResourceLocation("forge", path).toString());
         }
@@ -22,9 +20,6 @@ public class ModTags {
     }
 
     public static final class Items {
-
-        public static final ITag.INamedTag<Item> SHIP_LOCK = forge("chests/ship_lock");
-
         private static ITag.INamedTag<Item> forge(String path) {
             return ItemTags.bind(new ResourceLocation("forge", path).toString());
         }

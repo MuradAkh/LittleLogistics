@@ -18,7 +18,6 @@ public class ModItemTagsProvider extends ItemTagsProvider {
     }
 
     protected void addTags() {
-        copy(ModTags.Blocks.SHIP_LOCK, ModTags.Items.SHIP_LOCK);
-        copy(Tags.Blocks.CHESTS, Tags.Items.CHESTS);
+
     }
 }
