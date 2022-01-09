@@ -6,6 +6,7 @@ import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.InventoryUtils;
 import javafx.util.Pair;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -22,6 +23,7 @@ import net.minecraft.item.Items;
 import net.minecraft.loot.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -43,6 +45,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
     protected final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
     protected boolean contentsChanged = false;
     private int ticksDeployable = 0;
+    private int fishCooldown = 0;
     private final Set<Pair<Integer, Integer>> overFishedCoords = new HashSet<>();
     private final Queue<Pair<Integer, Integer>> overFishedQueue = new LinkedList<>();
 
@@ -95,7 +98,12 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
         super.tick();
         tickWaterOnSidesCheck();
         if(!this.level.isClientSide && this.getStatus() == Status.DEPLOYED){
-            tickFish();
+            if(fishCooldown < 0) {
+                tickFish();
+                fishCooldown = 20;
+            }  else {
+                fishCooldown--;
+            }
         }
 
     }
@@ -108,10 +116,19 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
         }
     }
 
+    private double computeDepthPenalty(){
+        int count = 0;
+        for (BlockPos pos = this.getOnPos();  this.level.getBlockState(pos).getBlock().equals(Blocks.WATER); pos = pos.below()){
+            count ++;
+        }
+        count = Math.min(count, 20);
+        return ((double) count) / 20.0;
+    }
+
     private void tickFish(){
-        double overFishPenalty = isOverFished() ? 0.1 : 1;
-        double shallowPenalty = 1;
-        double chance = 0.1 * overFishPenalty * shallowPenalty;
+        double overFishPenalty = isOverFished() ? 0.05 : 1;
+        double shallowPenalty = computeDepthPenalty();
+        double chance = 0.5 * overFishPenalty * shallowPenalty;
 
         double r = Math.random();
         if(r < chance){
@@ -167,7 +184,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
         int z = (int) Math.floor(this.getZ());
         overFishedCoords.add(new Pair<>(x, z));
         overFishedQueue.add(new Pair<>(x, z));
-        if(overFishedQueue.size() > 50){
+        if(overFishedQueue.size() > 30){
             overFishedCoords.remove(overFishedQueue.poll());
         }
     }
