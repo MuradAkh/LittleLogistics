@@ -6,7 +6,9 @@ import javafx.util.Pair;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -29,17 +31,21 @@ public interface ISpringableEntity {
         this.getDominant().flatMap(pair -> Optional.of(pair.getKey())).ifPresent(ISpringableEntity::removeDominated);
     }
 
-    default<U> Stream<U> applyWithDominated(Function<ISpringableEntity, U> function){
-        Stream<U> ofThis = Stream.of(function.apply(this));
-        try {
-            return this.getDominated().map(dom ->
-                    Stream.concat(ofThis, dom.getKey().applyWithDominated(function))
-            ).orElse(ofThis);
-        } catch (StackOverflowError e){
-            // In case of corrupted save
-            ((Entity) this).remove();
-            return Stream.of(function.apply(this));
+    default boolean checkNoLoopsDominated(){
+        return checkNoLoopsHelper(this, (entity -> entity.getDominated().map(Pair::getKey)), new HashSet<>());
+    }
+
+    default boolean checkNoLoopsDominant(){
+        return checkNoLoopsHelper(this, (entity -> entity.getDominant().map(Pair::getKey)), new HashSet<>());
+    }
+
+    default boolean checkNoLoopsHelper(ISpringableEntity entity, Function<ISpringableEntity, Optional<ISpringableEntity>> next, Set<ISpringableEntity> set){
+        if(set.contains(entity)){
+            return true;
         }
+        set.add(entity);
+        Optional<ISpringableEntity> nextEntity = next.apply(entity);
+        return nextEntity.map(e -> this.checkNoLoopsHelper(e, next, set)).orElse(false);
     }
 
     default<U> Stream<U> applyWithAll(Function<ISpringableEntity, U> function){
@@ -48,14 +54,19 @@ public interface ISpringableEntity {
 
     default<U> Stream<U> applyWithDominant(Function<ISpringableEntity, U> function){
         Stream<U> ofThis = Stream.of(function.apply(this));
-        try {
-            return this.getDominant().map(dom ->
+
+        return checkNoLoopsDominant() ? ofThis : this.getDominant().map(dom ->
                 Stream.concat(ofThis, dom.getKey().applyWithDominant(function))
-            ).orElse(ofThis);
-        } catch (StackOverflowError e){
-            // In case of corrupted save
-            ((Entity) this).remove();
-            return Stream.of(function.apply(this));
-        }
+        ).orElse(ofThis);
+
+    }
+
+    default<U> Stream<U> applyWithDominated(Function<ISpringableEntity, U> function){
+        Stream<U> ofThis = Stream.of(function.apply(this));
+       
+        return checkNoLoopsDominated() ? ofThis : this.getDominated().map(dom ->
+                Stream.concat(ofThis, dom.getKey().applyWithDominated(function))
+        ).orElse(ofThis);
+
     }
 }

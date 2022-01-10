@@ -54,7 +54,7 @@ public class EntitySpringAPI {
     };
 
     static {
-        addGenericAnchorMapping(BoatEntity.class, DEFAULT_BOAT_ANCHOR);
+//        addGenericAnchorMapping(BoatEntity.class, DEFAULT_BOAT_ANCHOR);
     }
 
     public static boolean isValidTarget(Entity target) {
