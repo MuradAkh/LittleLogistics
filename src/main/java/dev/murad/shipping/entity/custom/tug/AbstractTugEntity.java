@@ -10,6 +10,7 @@ import dev.murad.shipping.util.Train;
 import javafx.util.Pair;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.CampfireBlock;
 import net.minecraft.block.LilyPadBlock;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MoverType;
@@ -27,6 +28,7 @@ import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.pathfinding.PathNavigator;
 import net.minecraft.potion.Effects;
 import net.minecraft.tags.FluidTags;
@@ -264,6 +266,36 @@ public abstract class AbstractTugEntity extends WaterMobEntity implements ISprin
         return true;
     }
 
+    protected void makeSmoke() {
+        World world = this.level;
+        if (world != null) {
+            BlockPos blockpos = this.getOnPos().above().above();
+            Random random = world.random;
+            if (random.nextFloat() < 0.11F) {
+                for(int i = 0; i < random.nextInt(2) + 2; ++i) {
+                    CampfireBlock.makeParticles(world, blockpos, true, false);
+                }
+            }
+
+//            int l = this.getDirection().get2DDataValue();
+
+//            for(int j = 0; j < this.items.size(); ++j) {
+//                if (!this.items.get(j).isEmpty() && random.nextFloat() < 0.2F) {
+//                    Direction direction = Direction.from2DDataValue(Math.floorMod(j + l, 4));
+//                    float f = 0.3125F;
+//                    double d0 = (double)blockpos.getX() + 0.5D - (double)((float)direction.getStepX() * 0.3125F) + (double)((float)direction.getClockWise().getStepX() * 0.3125F);
+//                    double d1 = (double)blockpos.getY() + 0.5D;
+//                    double d2 = (double)blockpos.getZ() + 0.5D - (double)((float)direction.getStepZ() * 0.3125F) + (double)((float)direction.getClockWise().getStepZ() * 0.3125F);
+//
+//                    for(int k = 0; k < 4; ++k) {
+//                        world.addParticle(ParticleTypes.SMOKE, d0, d1, d2, 0.0D, 5.0E-4D, 0.0D);
+//                    }
+//                }
+//            }
+
+        }
+    }
+
     public boolean isInvulnerableTo(DamageSource p_180431_1_) {
         return p_180431_1_.equals(DamageSource.IN_WALL) || super.isInvulnerableTo(p_180431_1_);
     }
@@ -300,6 +332,10 @@ public abstract class AbstractTugEntity extends WaterMobEntity implements ISprin
         tickRouteCheck();
         tickCheckDock();
         followPath();
+        if(this.level.isClientSide
+                && (Math.abs(this.getDeltaMovement().x) > 0.02 || Math.abs(this.getDeltaMovement().z) > 0.02) ){
+            makeSmoke();
+        }
     }
 
     private void followPath() {
