@@ -843,4 +843,13 @@ public abstract class AbstractTugEntity extends WaterMobEntity implements ISprin
         return 1 + getNonRouteItemSlots();
     }
 
+    @Override
+    public boolean canBeLeashed(PlayerEntity p_184652_1_) {
+        return true;
+    }
+
+    @Override
+    protected void handleAirSupply(int p_209207_1_) {
+            this.setAirSupply(300);
+    }
 }

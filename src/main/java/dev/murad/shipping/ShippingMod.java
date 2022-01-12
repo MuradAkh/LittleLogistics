@@ -70,7 +70,7 @@ public class ShippingMod
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.FISHING_BARGE.get(), FishingBargeRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SPRING.get(), DummyEntityRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TUG_DUMMY_HITBOX.get(), DummyEntityRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STEAM_TUG.get(), TugRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STEAM_TUG.get(), SteamTugRenderer::new);
 
         ScreenManager.register(ModContainerTypes.TUG_CONTAINER.get(), SteamTugScreen::new);
         ScreenManager.register(ModContainerTypes.FISHING_BARGE_CONTAINER.get(), FishingBargeScreen::new);
