@@ -1,11 +1,11 @@
 package dev.murad.shipping.entity.custom.barge;
 
+import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.entity.container.FishingBargeContainer;
 import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.InventoryUtils;
-import javafx.util.Pair;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.BoatEntity;
@@ -153,7 +153,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
     }
 
     private String overFishedString(){
-        return overFishedQueue.stream().map(t -> t.getKey() + ":" + t.getValue()).reduce("", (acc, curr) -> String.join(",", acc, curr));
+        return overFishedQueue.stream().map(t -> t.getFirst() + ":" + t.getSecond()).reduce("", (acc, curr) -> String.join(",", acc, curr));
     }
 
     private void populateOverfish(String string){

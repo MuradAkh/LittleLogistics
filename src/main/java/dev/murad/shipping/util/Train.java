@@ -1,9 +1,9 @@
 package dev.murad.shipping.util;
 
-import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
+import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.entity.custom.ISpringableEntity;
+import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
-import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +47,7 @@ public class Train {
     }
 
     public Optional<AbstractBargeEntity> getNextBarge(ISpringableEntity entity){
-        return entity.getDominated().map(Pair::getKey).map(e -> (AbstractBargeEntity) e);
+        return entity.getDominated().map(Pair::getFirst).map(e -> (AbstractBargeEntity) e);
     }
 
     public void setHead(ISpringableEntity head) {

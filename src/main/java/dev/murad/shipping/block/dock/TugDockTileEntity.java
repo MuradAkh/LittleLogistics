@@ -1,10 +1,10 @@
 package dev.murad.shipping.block.dock;
 
+import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.InventoryUtils;
-import javafx.util.Pair;
 import net.minecraft.entity.Entity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.CompoundNBT;
@@ -51,7 +51,7 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
 //            return true;
 //        }
 
-        if (barges.stream().map(pair -> pair.getValue().holdVessel(pair.getKey(), direction)).reduce(false, Boolean::logicalOr)){
+        if (barges.stream().map(pair -> pair.getSecond().holdVessel(pair.getFirst(), direction)).reduce(false, Boolean::logicalOr)){
             return true;
         }
 

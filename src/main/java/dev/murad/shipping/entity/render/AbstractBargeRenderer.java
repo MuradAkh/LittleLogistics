@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.models.ChainExtendedModel;
-import dev.murad.shipping.entity.models.ChestBargeModel;
 import dev.murad.shipping.entity.models.ChainModel;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -42,7 +41,7 @@ public abstract class AbstractBargeRenderer<T extends AbstractBargeEntity> exten
         IVertexBuilder ivertexbuilder = buffer.getBuffer(getModel(bargeEntity).renderType(this.getTextureLocation(bargeEntity)));
         getModel(bargeEntity).renderToBuffer(matrixStack, ivertexbuilder, p_225623_6_, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
         if(bargeEntity.getDominant().isPresent()) {
-            double dist = ((Entity)bargeEntity.getDominant().get().getKey()).distanceToSqr(bargeEntity);
+            double dist = ((Entity)bargeEntity.getDominant().get().getFirst()).distanceToSqr(bargeEntity);
             if (dist > 1.1) {
                 IVertexBuilder ivertexbuilderChain = buffer.getBuffer(chainModel.renderType(CHAIN_TEXTURE));
                 chainModel.renderToBuffer(matrixStack, ivertexbuilderChain, p_225623_6_, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);

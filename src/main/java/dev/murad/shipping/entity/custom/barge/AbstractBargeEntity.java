@@ -1,17 +1,15 @@
 package dev.murad.shipping.entity.custom.barge;
 
 
+import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.util.Train;
-import javafx.util.Pair;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.network.IPacket;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
@@ -135,8 +133,8 @@ public abstract class AbstractBargeEntity extends BoatEntity implements ISpringa
         train.setTail(this);
         dominated.ifPresent(dominated -> {
             // avoid recursion loops
-            if(!dominated.getKey().getTrain().equals(train)){
-                dominated.getKey().setTrain(train);
+            if(!dominated.getFirst().getTrain().equals(train)){
+                dominated.getFirst().setTrain(train);
             }
         });
     }
@@ -149,6 +147,6 @@ public abstract class AbstractBargeEntity extends BoatEntity implements ISpringa
 
     // hack to disable hoppers
     public boolean isDockable() {
-        return this.dominant.map(dom -> this.distanceToSqr((Entity) dom.getKey()) < 1.1).orElse(true);
+        return this.dominant.map(dom -> this.distanceToSqr((Entity) dom.getFirst()) < 1.1).orElse(true);
     }
 }

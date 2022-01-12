@@ -1,10 +1,7 @@
 package dev.murad.shipping.entity.custom;
 
-import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
+import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.util.Train;
-import javafx.util.Pair;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.DamageSource;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -25,18 +22,18 @@ public interface ISpringableEntity {
     boolean hasWaterOnSides();
 
     default void handleSpringableKill(){
-        this.getDominated().flatMap(pair -> Optional.of(pair.getKey())).ifPresent(dominated -> {
+        this.getDominated().flatMap(pair -> Optional.of(pair.getFirst())).ifPresent(dominated -> {
             dominated.removeDominant();
         });
-        this.getDominant().flatMap(pair -> Optional.of(pair.getKey())).ifPresent(ISpringableEntity::removeDominated);
+        this.getDominant().flatMap(pair -> Optional.of(pair.getFirst())).ifPresent(ISpringableEntity::removeDominated);
     }
 
     default boolean checkNoLoopsDominated(){
-        return checkNoLoopsHelper(this, (entity -> entity.getDominated().map(Pair::getKey)), new HashSet<>());
+        return checkNoLoopsHelper(this, (entity -> entity.getDominated().map(Pair::getFirst)), new HashSet<>());
     }
 
     default boolean checkNoLoopsDominant(){
-        return checkNoLoopsHelper(this, (entity -> entity.getDominant().map(Pair::getKey)), new HashSet<>());
+        return checkNoLoopsHelper(this, (entity -> entity.getDominant().map(Pair::getFirst)), new HashSet<>());
     }
 
     default boolean checkNoLoopsHelper(ISpringableEntity entity, Function<ISpringableEntity, Optional<ISpringableEntity>> next, Set<ISpringableEntity> set){
@@ -56,16 +53,16 @@ public interface ISpringableEntity {
         Stream<U> ofThis = Stream.of(function.apply(this));
 
         return checkNoLoopsDominant() ? ofThis : this.getDominant().map(dom ->
-                Stream.concat(ofThis, dom.getKey().applyWithDominant(function))
+                Stream.concat(ofThis, dom.getFirst().applyWithDominant(function))
         ).orElse(ofThis);
 
     }
 
     default<U> Stream<U> applyWithDominated(Function<ISpringableEntity, U> function){
         Stream<U> ofThis = Stream.of(function.apply(this));
-       
+
         return checkNoLoopsDominated() ? ofThis : this.getDominated().map(dom ->
-                Stream.concat(ofThis, dom.getKey().applyWithDominated(function))
+                Stream.concat(ofThis, dom.getFirst().applyWithDominated(function))
         ).orElse(ofThis);
 
     }

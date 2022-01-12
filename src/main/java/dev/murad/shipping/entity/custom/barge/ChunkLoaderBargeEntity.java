@@ -1,9 +1,9 @@
 package dev.murad.shipping.entity.custom.barge;
 
+import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
-import javafx.util.Pair;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -67,8 +67,8 @@ public class ChunkLoaderBargeEntity extends AbstractBargeEntity{
     @Override
     protected void addAdditionalSaveData(CompoundNBT p_213281_1_) {
         if(loadedChunk.isPresent()) {
-            p_213281_1_.putInt("xchunk", loadedChunk.get().getKey());
-            p_213281_1_.putInt("zchunk", loadedChunk.get().getValue());
+            p_213281_1_.putInt("xchunk", loadedChunk.get().getFirst());
+            p_213281_1_.putInt("zchunk", loadedChunk.get().getSecond());
         }
     }
 
@@ -85,14 +85,14 @@ public class ChunkLoaderBargeEntity extends AbstractBargeEntity{
         Set<Pair<Integer, Integer>> set = new HashSet<>();
         for(int i = -1; i <= 1; i++){
             for (int j = -1; j <= 1; j++){
-                set.add(new Pair<>(chunk.getKey() + i, chunk.getValue() + j));
+                set.add(new Pair<>(chunk.getFirst() + i, chunk.getSecond() + j));
             }
         }
         return set;
     }
 
     private void setChunkLoad(boolean add, Pair<Integer, Integer> chunk) {
-        ForgeChunkManager.forceChunk((ServerWorld) this.level, ShippingMod.MOD_ID, this, chunk.getKey(), chunk.getValue(), add, true);
+        ForgeChunkManager.forceChunk((ServerWorld) this.level, ShippingMod.MOD_ID, this, chunk.getFirst(), chunk.getSecond(), add, true);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package dev.murad.shipping.entity.custom.tug;
 
+import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
@@ -7,7 +8,6 @@ import dev.murad.shipping.entity.navigation.TugPathNavigator;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.Train;
-import javafx.util.Pair;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CampfireBlock;
@@ -28,12 +28,10 @@ import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.particles.ParticleTypes;
 import net.minecraft.pathfinding.PathNavigator;
 import net.minecraft.potion.Effects;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ITag;
-import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;

@@ -1,7 +1,6 @@
 package dev.murad.shipping.entity.render;
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.barge.ChestBargeEntity;
 import dev.murad.shipping.entity.models.ChestBargeModel;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
