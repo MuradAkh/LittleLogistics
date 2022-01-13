@@ -5,10 +5,7 @@ import dev.murad.shipping.entity.container.SteamTugScreen;
 
 import dev.murad.shipping.entity.render.*;
 import dev.murad.shipping.item.SpringItem;
-import dev.murad.shipping.setup.ModContainerTypes;
-import dev.murad.shipping.setup.ModEntityTypes;
-import dev.murad.shipping.setup.ModItems;
-import dev.murad.shipping.setup.Registration;
+import dev.murad.shipping.setup.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.ScreenManager;
@@ -75,13 +72,7 @@ public class ShippingMod
         ScreenManager.register(ModContainerTypes.TUG_CONTAINER.get(), SteamTugScreen::new);
         ScreenManager.register(ModContainerTypes.FISHING_BARGE_CONTAINER.get(), FishingBargeScreen::new);
 
-        event.enqueueWork(() ->
-        {
-            ItemModelsProperties.register(ModItems.SPRING.get(),
-                    new ResourceLocation(ShippingMod.MOD_ID, "springstate"), (stack, world, entity) -> {
-                        return SpringItem.getState(stack).equals(SpringItem.State.READY) ? 0 : 1;
-                    });
-        });
+        event.enqueueWork(ModItemModelProperties::register);
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event)

@@ -4,7 +4,7 @@ package dev.murad.shipping.entity.custom;
 MIT License
 
 Copyright (c) 2018 Xavier "jglrxavpok" Niochaut
-
+F
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -28,7 +28,6 @@ import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.EntitySpringAPI;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -319,37 +318,6 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
             dominatedNBT = additionalData.readNbt();
         }
     }
-
-    // Helper methods
-    public static boolean hasLinkOnSide(SpringSide side, Entity entity) {
-        return streamSpringsAttachedTo(side, entity).count() != 0;
-    }
-
-    public static Stream<SpringEntity> streamSpringsAttachedTo(SpringSide side, Entity entity) {
-        World world = entity.getCommandSenderWorld();
-        return getLoadedEntityList(world)
-                .stream()
-                .filter(e -> e instanceof SpringEntity)
-                .map(e -> (SpringEntity)e)
-                .filter(e -> {
-                    if(side == SpringSide.DOMINANT)
-                        return e.dominated == entity;
-                    else
-                        return e.dominant == entity;
-                });
-    }
-
-    private static Collection<Entity> getLoadedEntityList(World world) {
-        if(world instanceof ServerWorld) {
-            return ((ServerWorld) world).getEntities().collect(Collectors.toList());
-        } else {
-            Iterable<Entity> entities = ((ClientWorld)world).entitiesForRendering();
-            LinkedList<Entity> list = new LinkedList<>();
-            entities.forEach(list::add);
-            return list;
-        }
-    }
-
     public static void createSpring(Entity dominantEntity, Entity dominatedEntity) {
         SpringEntity link = new SpringEntity(dominantEntity, dominatedEntity);
         World world = dominantEntity.getCommandSenderWorld();
