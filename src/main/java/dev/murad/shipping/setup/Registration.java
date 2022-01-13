@@ -32,7 +32,7 @@ public class Registration  {
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
         BLOCKS.register(eventBus);
         ITEMS.register(eventBus);
-        CONTAINERS.register(eventBus);
+//        CONTAINERS.register(eventBus);
         RECIPE_SERIALIZERS.register(eventBus);
         TILE_ENTITIES.register(eventBus);
         ENTITIES.register(eventBus);
@@ -42,7 +42,7 @@ public class Registration  {
         ModBlocks.register();
         ModTileEntitiesTypes.register();
         ModRecipeSerializers.register();
-        ModContainerTypes.register();
+//        ModContainerTypes.register();
         ModEntityTypes.register();
 
     }
