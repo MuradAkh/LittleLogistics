@@ -56,7 +56,7 @@ public class SteamTugEntity extends AbstractTugEntity {
             @Nullable
             @Override
             public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
-                return new SteamTugContainer(i, level, getId(), playerInventory, playerEntity);
+                return new SteamTugContainer(i, level, dataAccess, playerInventory, playerEntity);
             }
         };
     }

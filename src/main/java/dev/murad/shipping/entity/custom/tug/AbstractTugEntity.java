@@ -32,10 +32,8 @@ import net.minecraft.pathfinding.PathNavigator;
 import net.minecraft.potion.Effects;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ITag;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
+import net.minecraft.tileentity.AbstractFurnaceTileEntity;
+import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -106,7 +104,7 @@ public abstract class AbstractTugEntity extends WaterMobEntity implements ISprin
     }
 
     // CONTAINER STUFF
-    @OnlyIn(Dist.CLIENT)
+
     public int getBurnProgress() {
         int i = burnCapacity;
         if (i == 0) {
@@ -117,10 +115,33 @@ public abstract class AbstractTugEntity extends WaterMobEntity implements ISprin
     }
 
     // CONTAINER STUFF
-    @OnlyIn(Dist.CLIENT)
     public boolean isLit() {
         return burnTime > 0;
     }
+
+    protected final IIntArray dataAccess = new IIntArray() {
+        public int get(int p_221476_1_) {
+            switch (p_221476_1_) {
+                case 0:
+                    return AbstractTugEntity.this.getId();
+                case 1:
+                    return AbstractTugEntity.this.getBurnProgress();
+                case 2:
+                    return AbstractTugEntity.this.isLit() ? 1 : -1;
+            }
+            return 0;
+        }
+
+        public void set(int p_221477_1_, int p_221477_2_) {
+
+        }
+
+        @Override
+        public int getCount() {
+            return 3;
+        }
+    };
+
 
     @Nonnull
     @Override
@@ -197,6 +218,7 @@ public abstract class AbstractTugEntity extends WaterMobEntity implements ISprin
     public void addAdditionalSaveData(CompoundNBT compound) {
         compound.put("inv", itemHandler.serializeNBT());
         compound.putInt("burn", burnTime);
+        compound.putInt("burn_capacity", burnCapacity);
         compound.putInt("next_stop", nextStop);
         super.addAdditionalSaveData(compound);
     }
@@ -307,7 +329,8 @@ public abstract class AbstractTugEntity extends WaterMobEntity implements ISprin
     public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
 
         if (!player.level.isClientSide()) {
-            NetworkHooks.openGui((ServerPlayerEntity) player, createContainerProvider(), buffer -> buffer.writeInt(this.getId()));
+            NetworkHooks.openGui((ServerPlayerEntity) player, createContainerProvider(), buffer ->
+                    buffer.writeInt(this.getId()).writeInt(getBurnProgress()).writeInt(isLit() ? 1 : -1));
         }
         return ActionResultType.PASS;
     }
@@ -327,9 +350,11 @@ public abstract class AbstractTugEntity extends WaterMobEntity implements ISprin
         this.horizontalCollision = false;
         super.tick();
         this.horizontalCollision = false;
-        tickRouteCheck();
-        tickCheckDock();
-        followPath();
+        if(!this.level.isClientSide) {
+            tickRouteCheck();
+            tickCheckDock();
+            followPath();
+        }
         if(this.level.isClientSide
                 && (Math.abs(this.getDeltaMovement().x) > 0.02 || Math.abs(this.getDeltaMovement().z) > 0.02) ){
             makeSmoke();
