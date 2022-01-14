@@ -4,12 +4,13 @@ package dev.murad.shipping.entity.custom.barge;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
+import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.util.Train;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.network.IPacket;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
@@ -21,18 +22,14 @@ import net.minecraftforge.fml.network.NetworkHooks;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public abstract class AbstractBargeEntity extends BoatEntity implements ISpringableEntity {
-    private Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
-    private Optional<Pair<ISpringableEntity, SpringEntity>> dominant = Optional.empty();
-    private Train train;
-
-    public AbstractBargeEntity(EntityType<? extends BoatEntity> type, World world) {
+public abstract class AbstractBargeEntity extends VesselEntity implements ISpringableEntity {
+    public AbstractBargeEntity(EntityType<? extends AbstractBargeEntity> type, World world) {
         super(type, world);
         this.blocksBuilding = true;
         this.train = new Train(this);
     }
 
-    public AbstractBargeEntity(EntityType<? extends BoatEntity> type, World worldIn, double x, double y, double z) {
+    public AbstractBargeEntity(EntityType<? extends AbstractBargeEntity> type, World worldIn, double x, double y, double z) {
         this(type, worldIn);
         this.setPos(x, y, z);
         this.setDeltaMovement(Vector3d.ZERO);
@@ -58,8 +55,11 @@ public abstract class AbstractBargeEntity extends BoatEntity implements ISpringa
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 
+    public abstract Item getDropItem();
+
+
     @Override
-    public ActionResultType interact(PlayerEntity player, Hand hand) {
+    public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
         if (!this.level.isClientSide) {
             doInteract(player);
             return ActionResultType.PASS;
@@ -90,16 +90,6 @@ public abstract class AbstractBargeEntity extends BoatEntity implements ISpringa
     }
 
     @Override
-    public Optional<Pair<ISpringableEntity, SpringEntity>> getDominated() {
-        return this.dominated;
-    }
-
-    @Override
-    public Optional<Pair<ISpringableEntity, SpringEntity>> getDominant() {
-        return this.dominant;
-    }
-
-    @Override
     public void setDominated(ISpringableEntity entity, SpringEntity spring) {
         this.dominated = Optional.of(new Pair<>(entity, spring));
     }
@@ -120,11 +110,6 @@ public abstract class AbstractBargeEntity extends BoatEntity implements ISpringa
     public void removeDominant() {
         this.dominant = Optional.empty();
         this.setTrain(new Train(this));
-    }
-
-    @Override
-    public Train getTrain() {
-        return train;
     }
 
     @Override

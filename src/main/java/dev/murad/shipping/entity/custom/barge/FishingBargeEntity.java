@@ -50,7 +50,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
     private final Queue<Pair<Integer, Integer>> overFishedQueue = new LinkedList<>();
 
 
-    public FishingBargeEntity(EntityType<? extends BoatEntity> type, World world) {
+    public FishingBargeEntity(EntityType<? extends FishingBargeEntity> type, World world) {
         super(type, world);
     }
     public FishingBargeEntity(World worldIn, double x, double y, double z) {

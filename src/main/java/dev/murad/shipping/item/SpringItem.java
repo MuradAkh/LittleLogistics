@@ -27,6 +27,7 @@ SOFTWARE.
 
 import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
+import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
 import dev.murad.shipping.util.Train;
 import net.minecraft.client.util.ITooltipFlag;
@@ -88,9 +89,9 @@ public class SpringItem extends Item {
             } else if (secondTrain.equals(firstTrain)){
                 player.displayClientMessage(new TranslationTextComponent("item.shipping.spring.noLoops"), true);
             } else if (firstTrain.getTug().isPresent()) {
-                SpringEntity.createSpring((Entity) firstTrain.getTail(), (Entity) secondTrain.getHead());
+                SpringEntity.createSpring((VesselEntity) firstTrain.getTail(), (VesselEntity) secondTrain.getHead());
             } else {
-                SpringEntity.createSpring((Entity) secondTrain.getTail(), (Entity) firstTrain.getHead());
+                SpringEntity.createSpring((VesselEntity) secondTrain.getTail(), (VesselEntity) firstTrain.getHead());
             }
             // First entity clicked is the dominant
             if(!player.isCreative())

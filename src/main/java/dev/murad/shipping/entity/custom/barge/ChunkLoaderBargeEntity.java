@@ -20,7 +20,7 @@ import java.util.Set;
 public class ChunkLoaderBargeEntity extends AbstractBargeEntity{
     private Optional<Pair<Integer, Integer>> loadedChunk = Optional.empty();
 
-    public ChunkLoaderBargeEntity(EntityType<? extends BoatEntity> type, World world) {
+    public ChunkLoaderBargeEntity(EntityType<? extends ChunkLoaderBargeEntity> type, World world) {
         super(type, world);
     }
 
@@ -65,7 +65,7 @@ public class ChunkLoaderBargeEntity extends AbstractBargeEntity{
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundNBT p_213281_1_) {
+    public void addAdditionalSaveData(CompoundNBT p_213281_1_) {
         if(loadedChunk.isPresent()) {
             p_213281_1_.putInt("xchunk", loadedChunk.get().getFirst());
             p_213281_1_.putInt("zchunk", loadedChunk.get().getSecond());
@@ -73,7 +73,7 @@ public class ChunkLoaderBargeEntity extends AbstractBargeEntity{
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundNBT p_70037_1_) {
+    public void readAdditionalSaveData(CompoundNBT p_70037_1_) {
         if (p_70037_1_.contains("xchunk")) {
             int x = p_70037_1_.getInt("xchunk");
             int z = p_70037_1_.getInt("zchunk");

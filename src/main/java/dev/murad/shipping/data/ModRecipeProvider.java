@@ -55,7 +55,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.REDSTONE))
                 .save(consumer);
 
-        ShapedRecipeBuilder.shaped(ModItems.TUG.get())
+        ShapedRecipeBuilder.shaped(ModItems.STEAM_TUG.get())
                 .define('_', Items.PISTON)
                 .define('#', Items.FURNACE)
                 .define('$', Items.IRON_INGOT)

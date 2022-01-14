@@ -2,6 +2,7 @@ package dev.murad.shipping.entity.custom.tug;
 
 import dev.murad.shipping.entity.container.SteamTugContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
+import dev.murad.shipping.setup.ModItems;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
@@ -11,6 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.util.Direction;
@@ -31,13 +33,6 @@ public class SteamTugEntity extends AbstractTugEntity {
 
     public SteamTugEntity(World worldIn, double x, double y, double z) {
         super(ModEntityTypes.STEAM_TUG.get(), worldIn, x, y, z);
-    }
-
-    public static AttributeModifierMap.MutableAttribute setCustomAttributes() {
-        return MobEntity.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, 1.0D)
-                .add(Attributes.MOVEMENT_SPEED, 1.6D);
-
     }
 
     @Override
@@ -90,6 +85,11 @@ public class SteamTugEntity extends AbstractTugEntity {
             }
         }
     }
+
+    public Item getDropItem() {
+        return ModItems.STEAM_TUG.get();
+    }
+
 
     // Have to implement IInventory to work with hoppers
 

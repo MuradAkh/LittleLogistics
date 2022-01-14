@@ -5,8 +5,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
-public class TugItem extends AbstractEntityAddItem {
-    public TugItem(Properties p_i48526_2_) {
+public class SteamTugItem extends AbstractEntityAddItem {
+    public SteamTugItem(Properties p_i48526_2_) {
         super(p_i48526_2_);
     }
 

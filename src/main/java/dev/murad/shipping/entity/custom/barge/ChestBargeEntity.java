@@ -28,7 +28,7 @@ import java.util.stream.IntStream;
 public class ChestBargeEntity extends AbstractBargeEntity implements IInventory, INamedContainerProvider, ISidedInventory {
     protected final NonNullList<ItemStack> itemStacks = createItemStacks();
 
-    public ChestBargeEntity(EntityType<? extends BoatEntity> type, World world) {
+    public ChestBargeEntity(EntityType<? extends ChestBargeEntity> type, World world) {
         super(type, world);
     }
 
@@ -64,11 +64,7 @@ public class ChestBargeEntity extends AbstractBargeEntity implements IInventory,
         return ModItems.CHEST_BARGE.get();
     }
 
-    @Override
-    public ItemStack getPickedResult(RayTraceResult target) {
-        return new ItemStack(ForgeRegistries.ITEMS.getValue(
-                new ResourceLocation(ShippingMod.MOD_ID, "barge")));
-    }
+
 
     protected void doInteract(PlayerEntity player) {
         player.openMenu(this);
@@ -151,13 +147,13 @@ public class ChestBargeEntity extends AbstractBargeEntity implements IInventory,
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundNBT p_213281_1_) {
+    public void addAdditionalSaveData(CompoundNBT p_213281_1_) {
         ItemStackHelper.saveAllItems(p_213281_1_, this.itemStacks);
 
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundNBT p_70037_1_) {
+    public void readAdditionalSaveData(CompoundNBT p_70037_1_) {
         ItemStackHelper.loadAllItems(p_70037_1_, this.itemStacks);
     }
 

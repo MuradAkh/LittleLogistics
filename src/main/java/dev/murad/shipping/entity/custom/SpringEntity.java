@@ -47,45 +47,43 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
 
-    private static AxisAlignedBB nullBB = new AxisAlignedBB(0,0,0,0,0,0);
     public static final DataParameter<Integer> DOMINANT_ID = EntityDataManager.defineId(SpringEntity.class, DataSerializers.INT);
     public static final DataParameter<Integer> DOMINATED_ID = EntityDataManager.defineId(SpringEntity.class, DataSerializers.INT);
 
     private @Nullable CompoundNBT dominantNBT;
     private @Nullable CompoundNBT dominatedNBT;
     @Nullable
-    private Entity dominant;
+    private VesselEntity dominant;
     @Nullable
-    private Entity dominated;
+    private VesselEntity dominated;
 
-    public Entity getDominant(){
+    public VesselEntity getDominant(){
         return dominant;
     }
 
-    public void setDominant(Entity dominant){
-        if(dominated instanceof ISpringableEntity && dominant instanceof ISpringableEntity){
-            ((ISpringableEntity) dominant).setDominated((ISpringableEntity) dominated, this);
-            ((ISpringableEntity) dominated).setDominant((ISpringableEntity) dominant, this);
+    public void setDominant(VesselEntity dominant){
+        if(dominated != null && dominant != null){
+            dominant.setDominated(dominated, this);
+            dominated.setDominant(dominant, this);
         }
         this.dominant = dominant;
     }
 
-    public void setDominated(Entity dominated){
-        if(dominated instanceof ISpringableEntity && dominant instanceof  ISpringableEntity){
-            ((ISpringableEntity) dominant).setDominated((ISpringableEntity) dominated, this);
-            ((ISpringableEntity) dominated).setDominant((ISpringableEntity) dominant, this);
+    public void setDominated(VesselEntity dominated){
+        if(dominated != null && dominant != null){
+            dominant.setDominated(dominated, this);
+            dominated.setDominant(dominant, this);
         }
         this.dominated = dominated;
     }
@@ -100,7 +98,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
         noPhysics = true;
     }
 
-    public SpringEntity(@Nonnull Entity dominant, @Nonnull Entity dominatedEntity) {
+    public SpringEntity(@Nonnull VesselEntity dominant, @Nonnull VesselEntity dominatedEntity) {
         super(ModEntityTypes.SPRING.get(), dominant.getCommandSenderWorld());
         setDominant(dominant);
         setDominated(dominatedEntity);
@@ -113,24 +111,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
         getEntityData().define(DOMINATED_ID, -1);
     }
 
-//    @Override
-//    public boolean canBePushed() {
-//        return false;
-//    }
-
-//    @Nullable
-//    @Override
-//    public AxisAlignedBB getBoundingBox() {
-//        return nullBB;
-//    }
-
-//    @Nullable
-//    @Override
-//    public AxisAlignedBB getCollisionBox(Entity entityIn) {
-//        return nullBB;
-//    }
-
-    public static Vector3d calculateAnchorPosition(Entity entity, SpringSide side) {
+    public static Vector3d calculateAnchorPosition(VesselEntity entity, SpringSide side) {
         return EntitySpringAPI.calculateAnchorPosition(entity, side);
     }
 
@@ -140,13 +121,13 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
 
         if(level.isClientSide) {
             if(DOMINANT_ID.equals(key)) {
-                Entity potential = level.getEntity(getEntityData().get(DOMINANT_ID));
+                VesselEntity potential = (VesselEntity) level.getEntity(getEntityData().get(DOMINANT_ID));
                 if(potential != null) {
                     setDominant(potential);
                 }
             }
             if(DOMINATED_ID.equals(key)) {
-                Entity potential = level.getEntity(getEntityData().get(DOMINATED_ID));
+                VesselEntity potential = (VesselEntity) level.getEntity(getEntityData().get(DOMINATED_ID));
                 if(potential != null) {
                     setDominated(potential);
                 }
@@ -173,7 +154,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
 
 
             double distSq = dominant.distanceToSqr(dominated);
-            double maxDstSq = 0.1;
+            double maxDstSq = ((ISpringableEntity) dominant).getTrain().getTug().map(tug -> tug.isDocked() ? 1 : 1.2).orElse(1.2);
             if(distSq > maxDstSq) {
                 Vector3d frontAnchor = calculateAnchorPosition(dominant, SpringSide.DOMINATED);
                 Vector3d backAnchor = calculateAnchorPosition(dominated, SpringSide.DOMINANT);
@@ -187,7 +168,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
                 dominated.yRot = (float) (alpha * dominated.yRot + targetYaw * (1f-alpha));
                 this.yRot = dominated.yRot;
                 double k = dominant instanceof AbstractTugEntity ? 0.2 : 0.13;
-                double l0 = 1.0;
+                double l0 = maxDstSq;
                 dominated.setDeltaMovement(k*(dist-l0)*dx, k*(dist-l0)*dy, k*(dist-l0)*dz);
             }
 
@@ -215,14 +196,14 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
             if(this.dominant == null) {
                 Entity potential = level.getEntity(getEntityData().get(DOMINANT_ID));
                 if (potential != null) {
-                    setDominant(potential);
+                    setDominant((VesselEntity) potential);
                 }
             }
 
             if(this.dominated == null) {
                 Entity potential_dominated = level.getEntity(getEntityData().get(DOMINATED_ID));
                 if (potential_dominated != null) {
-                    setDominated(potential_dominated);
+                    setDominated((VesselEntity) potential_dominated);
                 }
             }
         }
@@ -244,14 +225,14 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
         return closest;
     }
 
-    private Optional<Entity> tryToLoadFromNBT(CompoundNBT compound) {
+    private Optional<VesselEntity> tryToLoadFromNBT(CompoundNBT compound) {
         try {
             BlockPos.Mutable pos = new BlockPos.Mutable();
             pos.set(compound.getInt("X"), compound.getInt("Y"), compound.getInt("Z"));
-            String type = compound.getString("Type");
+            String uuid = compound.getString("UUID");
             AxisAlignedBB searchBox = new AxisAlignedBB(pos);
-            List<Entity> entities = level.getEntities(this, searchBox, e -> e.getClass().getCanonicalName().equals(type));
-            return entities.stream().findFirst();
+            List<Entity> entities = level.getEntities(this, searchBox, e -> e.getStringUUID().equals(uuid));
+            return entities.stream().findFirst().map(e -> (VesselEntity) e);
         } catch (Exception e){
             return Optional.empty();
         }
@@ -281,7 +262,8 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
         compound.putInt("X", (int)Math.floor(entity.getX()));
         compound.putInt("Y", (int)Math.floor(entity.getY()));
         compound.putInt("Z", (int)Math.floor(entity.getZ()));
-        compound.putString("Type", entity.getClass().getCanonicalName());
+
+        compound.putString("UUID", entity.getUUID().toString());
 
         globalCompound.put(side.name(), compound);
     }
@@ -311,14 +293,14 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
         if(additionalData.readBoolean()) { // has both entities
             int frontID = additionalData.readInt();
             int backID = additionalData.readInt();
-            setDominant(level.getEntity(frontID));
-            setDominated(level.getEntity(backID));
+            setDominant((VesselEntity) level.getEntity(frontID));
+            setDominated((VesselEntity) level.getEntity(backID));
 
             dominantNBT = additionalData.readNbt();
             dominatedNBT = additionalData.readNbt();
         }
     }
-    public static void createSpring(Entity dominantEntity, Entity dominatedEntity) {
+    public static void createSpring(VesselEntity dominantEntity, VesselEntity dominatedEntity) {
         SpringEntity link = new SpringEntity(dominantEntity, dominatedEntity);
         World world = dominantEntity.getCommandSenderWorld();
         world.addFreshEntity(link);
@@ -341,8 +323,8 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
 
     public void kill() {
         super.remove();
-        if(dominant instanceof ISpringableEntity){
-            ((ISpringableEntity) dominant).removeDominated();
+        if(dominant != null){
+            dominant.removeDominated();
         }
         if(!level.isClientSide)
             InventoryHelper.dropItemStack(level, getX(), getY(), getZ(), new ItemStack(ModItems.SPRING.get()));
