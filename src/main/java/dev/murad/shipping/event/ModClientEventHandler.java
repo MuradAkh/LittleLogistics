@@ -41,7 +41,7 @@ import java.util.List;
 
 @Mod.EventBusSubscriber(modid = ShippingMod.MOD_ID, value = Dist.CLIENT)
 public class ModClientEventHandler {
-    public static final ResourceLocation BEAM_LOCATION = new ResourceLocation("textures/entity/beacon_beam.png");
+    public static final ResourceLocation BEAM_LOCATION = new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/beacon_beam.png");
 
     @SubscribeEvent
     public static void onRenderWorldLast(RenderWorldLastEvent event) {
@@ -56,21 +56,19 @@ public class ModClientEventHandler {
             List<Vector2f> route = TugRouteItem.getRoute(stack);
             for (int i = 0, routeSize = route.size(); i < routeSize; i++) {
                 Vector2f v = route.get(i);
-                BeaconTileEntity beaconTile = new BeaconTileEntity() {
-                    @Override
-                    public List<BeamSegment> getBeamSections() {
-                        return ImmutableList.of(new BeamSegment(DyeColor.CYAN.getTextureDiffuseColors()));
-                    }
-                };
-                beaconTile.setLevelAndPosition(player.level, new BlockPos(v.x, 0, v.y));
                 MatrixStack matrixStack = event.getMatrixStack();
+
                 matrixStack.pushPose();
                 matrixStack.translate(v.x - d0 - 1, 1 - d1, v.y - d2);
-                setupAndRender(TileEntityRendererDispatcher.instance.getRenderer(beaconTile), beaconTile, event.getPartialTicks(), matrixStack, renderTypeBuffer);
+
+                BeaconTileEntityRenderer.renderBeaconBeam(matrixStack, renderTypeBuffer, BEAM_LOCATION, event.getPartialTicks(),
+                        1F, player.level.getGameTime(), 0, 1024,
+                        DyeColor.RED.getTextureDiffuseColors(), 0.2F, 0.25F);
                 matrixStack.popPose();
                 matrixStack.pushPose();
                 matrixStack.translate(v.x - d0 - 1, player.getY() + 2 - d1, v.y - d2);
                 matrixStack.scale(-0.025F, -0.025F, -0.025F);
+
                 matrixStack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
 
                 Matrix4f matrix4f = matrixStack.last().pose();

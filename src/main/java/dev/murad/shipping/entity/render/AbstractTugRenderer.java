@@ -11,8 +11,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
 public abstract class AbstractTugRenderer<T extends EntityModel<AbstractTugEntity>> extends MobRenderer<AbstractTugEntity, T> {
-    private static final ResourceLocation TEXTURE =
-            new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/tug.png");
+
 
     public AbstractTugRenderer(EntityRendererManager p_i46179_1_, T model) {
         super(p_i46179_1_, model,  0.7f);
@@ -30,10 +29,7 @@ public abstract class AbstractTugRenderer<T extends EntityModel<AbstractTugEntit
         super.render(boatEntity, p_225623_2_, p_225623_3_, matrixStack, buffer, p_225623_6_);
     }
 
-    @Override
-    public ResourceLocation getTextureLocation(AbstractTugEntity p_110775_1_) {
-        return TEXTURE;
-    }
+
 
 
 }
