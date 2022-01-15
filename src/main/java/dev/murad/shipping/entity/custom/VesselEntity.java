@@ -365,7 +365,7 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
                 this.setDeltaMovement(vector3d6.multiply((double) f5, (double) 0.8F, (double) f5));
                 Vector3d vector3d2 = this.getFluidFallingAdjustedMovement(d0, flag, this.getDeltaMovement());
                 this.setDeltaMovement(vector3d2);
-                if (this.horizontalCollision && this.isFree(vector3d2.x, vector3d2.y + (double) 0.6F - this.getY() + d8, vector3d2.z)) {
+                if (this.horizontalCollision) {
                     if (stuckCounter > 10) {
                         this.moveTo(((int) this.getX()) + 0.5, this.getY(), ((int) this.getZ()) + 0.5);
                         stuckCounter = 0;
@@ -373,7 +373,7 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
                         stuckCounter++;
                     }
                 } else {
-                    stuckCounter = 0;
+//                    stuckCounter = 0;
                 }
             } else if (this.isInLava() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidstate.getType())) {
                 double d7 = this.getY();
