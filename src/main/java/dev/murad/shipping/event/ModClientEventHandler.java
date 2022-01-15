@@ -7,13 +7,18 @@ import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModItems;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.debug.DebugRenderer;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.tileentity.BeaconTileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.DyeColor;
 import net.minecraft.item.ItemStack;
@@ -22,8 +27,10 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -46,19 +53,38 @@ public class ModClientEventHandler {
             double d1 = vector3d.y();
             double d2 = vector3d.z();
             IRenderTypeBuffer.Impl renderTypeBuffer = Minecraft.getInstance().renderBuffers().bufferSource();
-            for (Vector2f v : TugRouteItem.getRoute(stack)) {
-                BeaconTileEntity beaconTile = new BeaconTileEntity(){
+            List<Vector2f> route = TugRouteItem.getRoute(stack);
+            for (int i = 0, routeSize = route.size(); i < routeSize; i++) {
+                Vector2f v = route.get(i);
+                BeaconTileEntity beaconTile = new BeaconTileEntity() {
                     @Override
                     public List<BeamSegment> getBeamSections() {
                         return ImmutableList.of(new BeamSegment(DyeColor.CYAN.getTextureDiffuseColors()));
                     }
                 };
-                beaconTile.setLevelAndPosition(player.level, new BlockPos(v.x, 10, v.y));
-                MatrixStack stack1 = event.getMatrixStack();
-                stack1.pushPose();
-                stack1.translate(v.x - d0 - 1, 1 - d1, v.y - d2);
-                setupAndRender(TileEntityRendererDispatcher.instance.getRenderer(beaconTile), beaconTile, event.getPartialTicks(),stack1 , renderTypeBuffer);
-                stack1.popPose();
+                beaconTile.setLevelAndPosition(player.level, new BlockPos(v.x, 0, v.y));
+                MatrixStack matrixStack = event.getMatrixStack();
+                matrixStack.pushPose();
+                matrixStack.translate(v.x - d0 - 1, 1 - d1, v.y - d2);
+                setupAndRender(TileEntityRendererDispatcher.instance.getRenderer(beaconTile), beaconTile, event.getPartialTicks(), matrixStack, renderTypeBuffer);
+                matrixStack.popPose();
+                matrixStack.pushPose();
+                matrixStack.translate(v.x - d0 - 1, player.getY() + 2 - d1, v.y - d2);
+                matrixStack.scale(-0.025F, -0.025F, -0.025F);
+                matrixStack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
+
+                Matrix4f matrix4f = matrixStack.last().pose();
+
+                float opacity = (Minecraft.getInstance()).options.getBackgroundOpacity(0.25F);
+                FontRenderer fontRenderer = Minecraft.getInstance().font;
+//                int alpha = (int) (opacity * 255.0F) << 24;
+                String text = String.format("%s %d.", I18n.get("item.shipping.tug_route.node"), i);
+                float width = (-fontRenderer.width(text) / 2);
+
+//                fontRenderer.drawInBatch(text, width, 0.0F, 553648127, false, matrix4f, renderTypeBuffer, false, alpha, 15728880);
+                fontRenderer.drawInBatch(text, width, 0.0F, -1, true, matrix4f, renderTypeBuffer, true, 0, 15728880);
+                matrixStack.popPose();
+
             }
         }
     }

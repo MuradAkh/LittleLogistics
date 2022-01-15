@@ -19,6 +19,7 @@
   "screen.shipping.fishing_barge": "Auto-Fishing Barge",
 
   "item.shipping.tug_route.description": "Right click to add stop, crouch right click to remove",
+  "item.shipping.tug_route.node": "Node",
   "item.shipping.spring.description": "Used to link barges/tugs",
   "item.shipping.spring.notToSelf": "Can't link vessel to self",
   "item.shipping.spring.noTwoTugs": "Can't link two tugs",

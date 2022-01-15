@@ -1,5 +1,6 @@
 package dev.murad.shipping.item;
 
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Pose;
 import net.minecraft.entity.player.PlayerEntity;
@@ -107,7 +108,9 @@ public class TugRouteItem extends Item {
         AtomicInteger index = new AtomicInteger();
         return route
                 .stream()
-                .map(vector -> String.format("Stop %d. X:%d, Y:%d", index.incrementAndGet(), (int) vector.x, (int) vector.y))
+                .map(vector -> String.format("%s %d. X:%d, Y:%d",
+                        I18n.get("item.shipping.tug_route.node"),
+                        index.incrementAndGet(), (int) vector.x, (int) vector.y))
                 .reduce((acc, curr) -> acc + "\n" + curr)
                 .orElse("");
     }
