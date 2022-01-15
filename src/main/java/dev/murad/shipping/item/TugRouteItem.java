@@ -34,12 +34,11 @@ public class TugRouteItem extends Item {
         if(!player.level.isClientSide){
             int x = (int) player.getX();
             int z = (int) player.getZ();
-            if (!player.getPose().equals(Pose.CROUCHING)) {
-                player.displayClientMessage(new StringTextComponent(MessageFormat.format("Added Route Node X:{0} Z:{1}", x, z)), false);
+            if (!tryRemoveSpecific(itemstack, x, z)) {
+                player.displayClientMessage(new TranslationTextComponent("item.shipping.tug_route.added", x, z), false);
                 pushRoute(itemstack, x, z);
             } else {
-                player.displayClientMessage(new StringTextComponent("Removed last node from path"), false);
-                popRoute(itemstack);
+                player.displayClientMessage(new TranslationTextComponent("item.shipping.tug_route.removed", x, z), false);
             }
 
         }
@@ -71,6 +70,16 @@ public class TugRouteItem extends Item {
         route.remove(route.size() - 1);
         saveRoute(route, itemStack);
         return true;
+    }
+
+    public static boolean tryRemoveSpecific(ItemStack itemStack, int x, int z){
+        List<Vector2f> route = getRoute(itemStack);
+        if(route.size() == 0) {
+            return false;
+        }
+        boolean removed = route.removeIf(v -> v.x == x && v.y == z);
+        saveRoute(route, itemStack);
+        return removed;
     }
 
     public static void pushRoute(ItemStack itemStack, int x, int y){

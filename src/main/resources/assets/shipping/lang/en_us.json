@@ -18,7 +18,9 @@
   "screen.shipping.tug": "Steam Tug",
   "screen.shipping.fishing_barge": "Auto-Fishing Barge",
 
-  "item.shipping.tug_route.description": "Right click to add stop, crouch right click to remove",
+  "item.shipping.tug_route.description": "Right click to add stop, right click at the same location to remove. Nodes will always be added to the end of the route",
+  "item.shipping.tug_route.added": "Added Route Node X:%s Z:%s",
+  "item.shipping.tug_route.removed": "Removed Route Node X:%s Z:%s",
   "item.shipping.tug_route.node": "Node",
   "item.shipping.spring.description": "Used to link barges/tugs",
   "item.shipping.spring.notToSelf": "Can't link vessel to self",

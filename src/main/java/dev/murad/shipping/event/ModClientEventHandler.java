@@ -59,14 +59,14 @@ public class ModClientEventHandler {
                 MatrixStack matrixStack = event.getMatrixStack();
 
                 matrixStack.pushPose();
-                matrixStack.translate(v.x - d0 - 1, 1 - d1, v.y - d2);
+                matrixStack.translate(v.x - d0, 1 - d1, v.y - d2);
 
                 BeaconTileEntityRenderer.renderBeaconBeam(matrixStack, renderTypeBuffer, BEAM_LOCATION, event.getPartialTicks(),
                         1F, player.level.getGameTime(), 0, 1024,
                         DyeColor.RED.getTextureDiffuseColors(), 0.2F, 0.25F);
                 matrixStack.popPose();
                 matrixStack.pushPose();
-                matrixStack.translate(v.x - d0 - 1, player.getY() + 2 - d1, v.y - d2);
+                matrixStack.translate(v.x - d0, player.getY() + 2 - d1, v.y - d2);
                 matrixStack.scale(-0.025F, -0.025F, -0.025F);
 
                 matrixStack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
