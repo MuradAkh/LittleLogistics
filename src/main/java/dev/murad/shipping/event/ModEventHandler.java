@@ -1,4 +1,4 @@
-package dev.murad.shipping.setup;
+package dev.murad.shipping.event;
 
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.item.SpringItem;
