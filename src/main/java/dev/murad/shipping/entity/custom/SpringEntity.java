@@ -53,6 +53,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -175,6 +176,10 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
             if(!level.isClientSide) { // send update every tick to ensure client has infos
                 entityData.set(DOMINANT_ID, dominant.getId());
                 entityData.set(DOMINATED_ID, dominated.getId());
+            } else if (dominant == null){
+                onSyncedDataUpdated(DOMINANT_ID);
+            } else if (dominated == null) {
+                onSyncedDataUpdated(DOMINATED_ID);
             }
         } else { // front and back entities have not been loaded yet
             if(dominantNBT != null && dominatedNBT != null) {

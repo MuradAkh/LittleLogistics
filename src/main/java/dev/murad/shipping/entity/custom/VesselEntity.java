@@ -88,11 +88,6 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
     }
 
     @Override
-    public boolean canBeLeashed(PlayerEntity p_184652_1_) {
-        return true;
-    }
-
-    @Override
     protected void handleAirSupply(int p_209207_1_) {
         this.setAirSupply(300);
     }
@@ -372,7 +367,7 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
                 this.setDeltaMovement(vector3d2);
                 if (this.horizontalCollision && this.isFree(vector3d2.x, vector3d2.y + (double) 0.6F - this.getY() + d8, vector3d2.z)) {
                     if (stuckCounter > 10) {
-                        this.moveTo(Math.floor(this.getX()) + 0.5, this.getY(), Math.floor(this.getZ() + 0.5));
+                        this.moveTo(((int) this.getX()) + 0.5, this.getY(), ((int) this.getZ()) + 0.5);
                         stuckCounter = 0;
                     } else {
                         stuckCounter++;

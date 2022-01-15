@@ -460,5 +460,10 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         return docked;
     }
 
+    @Override
+    public boolean canBeLeashed(PlayerEntity p_184652_1_) {
+        return true;
+    }
+
 
 }
