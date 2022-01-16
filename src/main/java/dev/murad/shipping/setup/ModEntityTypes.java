@@ -16,13 +16,13 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<ChestBargeEntity>> CHEST_BARGE =
             Registration.ENTITIES.register("barge",
                     () -> EntityType.Builder.<ChestBargeEntity>of(ChestBargeEntity::new,
-                                    EntityClassification.MISC).sized(0.6f, 0.6f)
+                                    EntityClassification.MISC).sized(0.5f, 0.6f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "barge").toString()));
 
     public static final RegistryObject<EntityType<ChunkLoaderBargeEntity>> CHUNK_LOADER_BARGE =
             Registration.ENTITIES.register("chunk_loader_barge",
                     () -> EntityType.Builder.<ChunkLoaderBargeEntity>of(ChunkLoaderBargeEntity::new,
-                                    EntityClassification.MISC).sized(0.6f, 0.6f)
+                                    EntityClassification.MISC).sized(0.5f, 0.6f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "chunk_loader_barge").toString()));
 
     public static final RegistryObject<EntityType<FishingBargeEntity>> FISHING_BARGE =

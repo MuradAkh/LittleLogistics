@@ -10,19 +10,25 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 
 public class ChestBargeModel extends EntityModel<ChestBargeEntity> {
 	private final ModelRenderer bb_main;
+	private final ModelRenderer cube_r1;
+
 
 	public ChestBargeModel() {
 		texWidth = 128;
 		texHeight = 128;
-
 		bb_main = new ModelRenderer(this);
-		bb_main.setPos(0.0F, 24.0F, 0.0F);
-		bb_main.texOffs(0, 23).addBox(-7.0F, -25.0F, -7.0F, 14.0F, 3.0F, 14.0F, 0.0F, false);
-		bb_main.texOffs(40, 24).addBox(-8.0F, -27.0F, -8.0F, 1.0F, 3.0F, 16.0F, 0.0F, false);
-		bb_main.texOffs(38, 4).addBox(-7.0F, -27.0F, -8.0F, 14.0F, 3.0F, 1.0F, 0.0F, false);
-		bb_main.texOffs(0, 40).addBox(7.0F, -27.0F, -8.0F, 1.0F, 3.0F, 16.0F, 0.0F, false);
-		bb_main.texOffs(38, 0).addBox(-7.0F, -27.0F, 7.0F, 14.0F, 3.0F, 1.0F, 0.0F, false);
-		bb_main.texOffs(0, 0).addBox(-6.0F, -34.0F, -7.0F, 12.0F, 9.0F, 14.0F, 0.0F, false);
+		bb_main.setPos(0.0F, 23.0F, 0.0F);
+		bb_main.texOffs(0, 0).addBox(-6.0F, -27.0F, -7.0F, 12.0F, 5.0F, 14.0F, 0.0F, false);
+		bb_main.texOffs(38, 5).addBox(-8.0F, -29.0F, -7.0F, 2.0F, 4.0F, 14.0F, 0.0F, false);
+		bb_main.texOffs(28, 43).addBox(-6.0F, -29.0F, -9.0F, 12.0F, 4.0F, 2.0F, 0.0F, false);
+		bb_main.texOffs(26, 25).addBox(6.0F, -29.0F, -7.0F, 2.0F, 4.0F, 14.0F, 0.0F, false);
+		bb_main.texOffs(0, 41).addBox(-6.0F, -29.0F, 7.0F, 12.0F, 4.0F, 2.0F, 0.0F, false);
+
+		cube_r1 = new ModelRenderer(this);
+		cube_r1.setPos(0.0F, 0.0F, 0.0F);
+		bb_main.addChild(cube_r1);
+		setRotationAngle(cube_r1, 0.0F, -1.5708F, 0.0F);
+		cube_r1.texOffs(0, 19).addBox(-5.0F, -35.0F, -5.0F, 10.0F, 10.0F, 10.0F, 0.0F, false);
 	}
 
 	@Override
