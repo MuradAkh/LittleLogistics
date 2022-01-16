@@ -2,6 +2,7 @@ package dev.murad.shipping.entity.custom;
 
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.util.Train;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.LilyPadBlock;
@@ -72,12 +73,20 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
         this.status = this.getStatus();
 
         this.floatBoat();
+        this.unDrown();
 //        this.move(MoverType.SELF, this.getDeltaMovement());
 //        checkInsideBlocks();
 
         this.horizontalCollision = false;
         super.tick();
         this.horizontalCollision = false;
+    }
+
+    private void unDrown(){
+        if(level.getBlockState(getOnPos().above()).getBlock().equals(Blocks.WATER)){
+            this.setDeltaMovement(this.getDeltaMovement().add(new Vector3d(0, 0.1, 1)));
+        }
+
     }
 
     public static AttributeModifierMap.MutableAttribute setCustomAttributes() {
@@ -322,6 +331,11 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
 
     }
 
+    public boolean isInvulnerableTo(DamageSource p_180431_1_) {
+        return p_180431_1_.equals(DamageSource.IN_WALL) || super.isInvulnerableTo(p_180431_1_);
+    }
+
+
     // LivingEntity override, to avoid jumping out of water
     @Override
     public void travel(Vector3d p_213352_1_) {
@@ -367,7 +381,8 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
                 this.setDeltaMovement(vector3d2);
                 if (this.horizontalCollision) {
                     if (stuckCounter > 10) {
-                        this.moveTo(((int) this.getX()) + 0.5, this.getY(), ((int) this.getZ()) + 0.5);
+//                        this.moveTo(((int) this.getX()) + 0.5, this.getY(), ((int) this.getZ()) + 0.5);
+                        this.setDeltaMovement(this.getDeltaMovement().multiply(new Vector3d(7, 1, 7)));
                         stuckCounter = 0;
                     } else {
                         stuckCounter++;

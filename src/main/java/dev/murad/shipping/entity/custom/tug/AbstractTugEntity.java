@@ -280,9 +280,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         }
     }
 
-    public boolean isInvulnerableTo(DamageSource p_180431_1_) {
-        return p_180431_1_.equals(DamageSource.IN_WALL) || super.isInvulnerableTo(p_180431_1_);
-    }
 
     @Override
     protected PathNavigator createNavigation(World p_175447_1_) {

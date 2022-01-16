@@ -35,7 +35,10 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
 
 
     public boolean holdVessel(Entity tug, Direction direction){
-        if (!(tug instanceof AbstractTugEntity) || !getBlockState().getValue(TugDockBlock.FACING).getOpposite().equals(direction)){
+        if (!(tug instanceof AbstractTugEntity)
+                || !getBlockState().getValue(TugDockBlock.FACING).getOpposite().equals(direction)
+                || tug.getDirection().equals(getRowDirection(getBlockState().getValue(TugDockBlock.FACING)))
+        ){
             return false;
         }
 
@@ -68,7 +71,7 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
 
     private List<BargeDockTileEntity> getBargeDocks(){
         Direction facing = this.getBlockState().getValue(TugDockBlock.FACING);
-        Direction rowDirection = this.getBlockState().getValue(TugDockBlock.INVERTED) ? facing.getClockWise() : facing.getCounterClockWise();
+        Direction rowDirection = getRowDirection(facing);
         List<BargeDockTileEntity> docks = new ArrayList<>();
         for (Optional<BargeDockTileEntity> dock = getNextBargeDock(rowDirection, this.getBlockPos());
              dock.isPresent();
@@ -76,6 +79,10 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
             docks.add(dock.get());
         }
         return docks;
+    }
+
+    private Direction getRowDirection(Direction facing) {
+        return this.getBlockState().getValue(TugDockBlock.INVERTED) ? facing.getClockWise() : facing.getCounterClockWise();
     }
 
     private Optional<BargeDockTileEntity> getNextBargeDock(Direction rowDirection, BlockPos pos) {
