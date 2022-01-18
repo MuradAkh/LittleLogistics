@@ -2,7 +2,6 @@ package dev.murad.shipping.entity.custom;
 
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.util.Train;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.LilyPadBlock;
@@ -77,9 +76,8 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
 //        this.move(MoverType.SELF, this.getDeltaMovement());
 //        checkInsideBlocks();
 
-        this.horizontalCollision = false;
         super.tick();
-        this.horizontalCollision = false;
+//        this.horizontalCollision = false;
     }
 
     private void unDrown(){
@@ -381,8 +379,7 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
                 this.setDeltaMovement(vector3d2);
                 if (this.horizontalCollision) {
                     if (stuckCounter > 10) {
-//                        this.moveTo(((int) this.getX()) + 0.5, this.getY(), ((int) this.getZ()) + 0.5);
-                        this.setDeltaMovement(this.getDeltaMovement().multiply(new Vector3d(7, 1, 7)));
+                        // NO OP for now, collision detection
                         stuckCounter = 0;
                     } else {
                         stuckCounter++;

@@ -2,13 +2,16 @@ package dev.murad.shipping.entity.custom.tug;
 
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
+import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
 import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.entity.navigation.TugPathNavigator;
 import dev.murad.shipping.item.TugRouteItem;
+import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.Train;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.CampfireBlock;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MoverType;
@@ -21,6 +24,9 @@ import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.pathfinding.PathNavigator;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
@@ -49,6 +55,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     protected int burnCapacity = 0;
     protected boolean docked = false;
     private int dockCheckCooldown = 0;
+    private boolean independentMotion = false;
+    private static final DataParameter<Boolean> INDEPENDENT_MOTION = EntityDataManager.defineId(AbstractTugEntity.class, DataSerializers.BOOLEAN);
 
 
     private TugDummyHitboxEntity extraHitbox = null;
@@ -260,23 +268,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
                     CampfireBlock.makeParticles(world, blockpos, true, false);
                 }
             }
-
-//            int l = this.getDirection().get2DDataValue();
-
-//            for(int j = 0; j < this.items.size(); ++j) {
-//                if (!this.items.get(j).isEmpty() && random.nextFloat() < 0.2F) {
-//                    Direction direction = Direction.from2DDataValue(Math.floorMod(j + l, 4));
-//                    float f = 0.3125F;
-//                    double d0 = (double)blockpos.getX() + 0.5D - (double)((float)direction.getStepX() * 0.3125F) + (double)((float)direction.getClockWise().getStepX() * 0.3125F);
-//                    double d1 = (double)blockpos.getY() + 0.5D;
-//                    double d2 = (double)blockpos.getZ() + 0.5D - (double)((float)direction.getStepZ() * 0.3125F) + (double)((float)direction.getClockWise().getStepZ() * 0.3125F);
-//
-//                    for(int k = 0; k < 4; ++k) {
-//                        world.addParticle(ParticleTypes.SMOKE, d0, d1, d2, 0.0D, 5.0E-4D, 0.0D);
-//                    }
-//                }
-//            }
-
         }
     }
 
@@ -296,6 +287,17 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         return ActionResultType.PASS;
     }
 
+    @Override
+    public void onSyncedDataUpdated(DataParameter<?> key) {
+        super.onSyncedDataUpdated(key);
+
+        if(level.isClientSide) {
+            if(INDEPENDENT_MOTION.equals(key)) {
+                independentMotion = entityData.get(INDEPENDENT_MOTION);
+            }
+        }
+    }
+
     public void tick() {
         if(!level.isClientSide && extraHitbox == null){
             this.extraHitbox = new TugDummyHitboxEntity(this);
@@ -308,10 +310,21 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
             tickRouteCheck();
             tickCheckDock();
             followPath();
+            followGuideRail();
         }
         if(this.level.isClientSide
-                && (Math.abs(this.getDeltaMovement().x) > 0.02 || Math.abs(this.getDeltaMovement().z) > 0.02) ){
+                && independentMotion){
             makeSmoke();
+        }
+    }
+
+    private void followGuideRail(){
+        BlockState below = this.level.getBlockState(getOnPos().below());
+        if (below.getBlock().is(ModBlocks.GUIDE_RAIL_TUG.get())){
+            Direction arrows = TugGuideRailBlock.getArrowsDirection(below);
+            this.yRot = arrows.toYRot();
+            this.setDeltaMovement(this.getDeltaMovement().add(
+                    new Vector3d(arrows.getStepX() * 0.03,0,arrows.getStepZ() * 0.03)));
         }
     }
 
@@ -321,14 +334,27 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
             navigation.moveTo(stop.x, this.getY(), stop.y, 5);
             this.move(MoverType.SELF, this.getDeltaMovement());
             double distance = Math.abs(Math.hypot(this.getX() - stop.x, this.getZ() - stop.y));
+            independentMotion = true;
+            entityData.set(INDEPENDENT_MOTION, true);
+
             if (distance < 2.2) {
                 incrementStop();
             }
 
-        } else if (this.path.isEmpty()){
-            this.nextStop = 0;
+        } else{
+            entityData.set(INDEPENDENT_MOTION, false);
+
+            if (this.path.isEmpty()){
+                this.nextStop = 0;
+            }
         }
     }
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        entityData.define(INDEPENDENT_MOTION, false);
+    }
+
 
     public void setPath(List<Vector2f> path) {
         this.path = path;

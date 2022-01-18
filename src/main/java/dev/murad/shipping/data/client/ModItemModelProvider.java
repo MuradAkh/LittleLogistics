@@ -24,6 +24,8 @@ public class ModItemModelProvider extends ItemModelProvider {
         ModelFile itemGenerated = getExistingFile(mcLoc("item/generated"));
         withExistingParent("tug_dock", modLoc("block/tug_dock"));
         withExistingParent("barge_dock", modLoc("block/barge_dock"));
+        withExistingParent("guide_rail_corner", modLoc("block/guide_rail_corner"));
+        withExistingParent("guide_rail_tug", modLoc("block/guide_rail_tug"));
 
 
 
