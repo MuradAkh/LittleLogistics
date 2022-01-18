@@ -87,15 +87,4 @@ public class ModClientEventHandler {
         }
     }
 
-    private static <T extends TileEntity> void setupAndRender(TileEntityRenderer<T> p_228855_0_, T p_228855_1_, float p_228855_2_, MatrixStack p_228855_3_, IRenderTypeBuffer p_228855_4_) {
-        World world = p_228855_1_.getLevel();
-        int i;
-        if (world != null) {
-            i = WorldRenderer.getLightColor(world, p_228855_1_.getBlockPos());
-        } else {
-            i = 15728880;
-        }
-
-        p_228855_0_.render(p_228855_1_, p_228855_2_, p_228855_3_, p_228855_4_, i, OverlayTexture.NO_OVERLAY);
-    }
 }

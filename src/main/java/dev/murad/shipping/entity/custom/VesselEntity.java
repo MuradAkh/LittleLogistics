@@ -1,6 +1,8 @@
 package dev.murad.shipping.entity.custom;
 
 import com.mojang.datafixers.util.Pair;
+import dev.murad.shipping.block.guide_rail.GuideRailBlock;
+import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.util.Train;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -23,6 +25,7 @@ import net.minecraft.potion.Effects;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -34,6 +37,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.Optional;
 
 public abstract class VesselEntity extends WaterMobEntity implements ISpringableEntity {
@@ -77,9 +81,8 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
 //        this.move(MoverType.SELF, this.getDeltaMovement());
 //        checkInsideBlocks();
 
-        this.horizontalCollision = false;
         super.tick();
-        this.horizontalCollision = false;
+//        this.horizontalCollision = false;
     }
 
     private void unDrown(){
@@ -381,8 +384,7 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
                 this.setDeltaMovement(vector3d2);
                 if (this.horizontalCollision) {
                     if (stuckCounter > 10) {
-//                        this.moveTo(((int) this.getX()) + 0.5, this.getY(), ((int) this.getZ()) + 0.5);
-                        this.setDeltaMovement(this.getDeltaMovement().multiply(new Vector3d(7, 1, 7)));
+                        // NO OP for now, collision detection
                         stuckCounter = 0;
                     } else {
                         stuckCounter++;

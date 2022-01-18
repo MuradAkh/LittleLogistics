@@ -3,6 +3,7 @@ package dev.murad.shipping.data.client;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.dock.BargeDockBlock;
 import dev.murad.shipping.block.dock.TugDockBlock;
+import dev.murad.shipping.block.guide_rail.GuideRailBlock;
 import dev.murad.shipping.setup.ModBlocks;
 import net.minecraft.block.BlockState;
 import net.minecraft.data.DataGenerator;
@@ -30,6 +31,14 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 getBlTx("tug_dock_top" + inv));
     }
 
+    private ModelFile getGuideRailModel(BlockState state){
+        String inv = state.getValue(TugDockBlock.INVERTED) ? "_inv" : "";
+        return  models().orientable("guide_rail" + inv,
+                getBlTx("guide_rail_side"),
+                getBlTx("guide_rail_front" + inv),
+                getBlTx("guide_rail_top" + inv));
+    }
+
     private ModelFile getBargeDockModel(BlockState state){
         String inv = state.getValue(BargeDockBlock.EXTRACT_MODE) ? "_extract" : "";
         return  models().orientable("barge_dock" + inv,
@@ -50,6 +59,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
         getVariantBuilder(ModBlocks.BARGE_DOCK.get()).forAllStates(state -> ConfiguredModel.builder()
                 .modelFile(getBargeDockModel(state))
                 .rotationY((int) state.getValue(BargeDockBlock.FACING).getOpposite().toYRot())
+                .build()
+        );
+
+        getVariantBuilder(ModBlocks.GUIDE_RAIL.get()).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(getGuideRailModel(state))
+                .rotationY((int) state.getValue(GuideRailBlock.FACING).getOpposite().toYRot())
                 .build()
         );
     }
