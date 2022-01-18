@@ -2,7 +2,7 @@ package dev.murad.shipping.entity.custom.tug;
 
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
-import dev.murad.shipping.block.guide_rail.GuideRailBlock;
+import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
 import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.VesselEntity;
@@ -320,8 +320,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
 
     private void followGuideRail(){
         BlockState below = this.level.getBlockState(getOnPos().below());
-        if (below.getBlock().is(ModBlocks.GUIDE_RAIL.get())){
-            Direction arrows = GuideRailBlock.getArrowsDirection(below);
+        if (below.getBlock().is(ModBlocks.GUIDE_RAIL_TUG.get())){
+            Direction arrows = TugGuideRailBlock.getArrowsDirection(below);
             this.yRot = arrows.toYRot();
             this.setDeltaMovement(this.getDeltaMovement().add(
                     new Vector3d(arrows.getStepX() * 0.03,0,arrows.getStepZ() * 0.03)));

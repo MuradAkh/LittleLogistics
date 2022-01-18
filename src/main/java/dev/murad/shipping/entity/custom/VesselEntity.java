@@ -1,10 +1,7 @@
 package dev.murad.shipping.entity.custom;
 
 import com.mojang.datafixers.util.Pair;
-import dev.murad.shipping.block.guide_rail.GuideRailBlock;
-import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.util.Train;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.LilyPadBlock;
@@ -25,7 +22,6 @@ import net.minecraft.potion.Effects;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -37,7 +33,6 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.Optional;
 
 public abstract class VesselEntity extends WaterMobEntity implements ISpringableEntity {

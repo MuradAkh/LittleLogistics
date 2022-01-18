@@ -1,8 +1,6 @@
 package dev.murad.shipping.block.guide_rail;
 
-import dev.murad.shipping.block.dock.TugDockBlock;
 import dev.murad.shipping.entity.custom.VesselEntity;
-import dev.murad.shipping.setup.ModBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalBlock;
@@ -24,23 +22,22 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.util.logging.Level;
 
-public class GuideRailBlock extends Block {
+public class CornerGuideRailBlock extends Block {
     protected static final VoxelShape SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 15.0D, 15.0D);
 
     public static final DirectionProperty FACING = HorizontalBlock.FACING;
     public static final BooleanProperty INVERTED = BlockStateProperties.INVERTED;
 
 
-    public GuideRailBlock(Properties p_i48440_1_) {
+    public CornerGuideRailBlock(Properties p_i48440_1_) {
         super(p_i48440_1_);
     }
 
     @Override
     public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult) {
         if(player.getPose().equals(Pose.CROUCHING)){
-            world.setBlockAndUpdate(pos, state.setValue(TugDockBlock.INVERTED, !state.getValue(INVERTED)));
+            world.setBlockAndUpdate(pos, state.setValue(CornerGuideRailBlock.INVERTED, !state.getValue(INVERTED)));
             return ActionResultType.SUCCESS;
         }
 
@@ -75,13 +72,13 @@ public class GuideRailBlock extends Block {
     }
 
     public static Direction getArrowsDirection(BlockState state){
-        Direction facing = state.getValue(GuideRailBlock.FACING);
-        return state.getValue(GuideRailBlock.INVERTED) ? facing.getClockWise() : facing.getCounterClockWise();
+        Direction facing = state.getValue(CornerGuideRailBlock.FACING);
+        return state.getValue(CornerGuideRailBlock.INVERTED) ? facing.getClockWise() : facing.getCounterClockWise();
     }
 
     @Override
     public void entityInside(BlockState state, World level, BlockPos pos, Entity entity){
-        Direction facing = state.getValue(GuideRailBlock.FACING);
+        Direction facing = state.getValue(CornerGuideRailBlock.FACING);
         if(!entity.getDirection().equals(facing.getOpposite()) || !(entity instanceof VesselEntity)){
             return;
         }

@@ -3,7 +3,7 @@ package dev.murad.shipping.data.client;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.dock.BargeDockBlock;
 import dev.murad.shipping.block.dock.TugDockBlock;
-import dev.murad.shipping.block.guide_rail.GuideRailBlock;
+import dev.murad.shipping.block.guide_rail.CornerGuideRailBlock;
 import dev.murad.shipping.setup.ModBlocks;
 import net.minecraft.block.BlockState;
 import net.minecraft.data.DataGenerator;
@@ -31,12 +31,19 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 getBlTx("tug_dock_top" + inv));
     }
 
-    private ModelFile getGuideRailModel(BlockState state){
-        String inv = state.getValue(TugDockBlock.INVERTED) ? "_inv" : "";
-        return  models().orientable("guide_rail" + inv,
+    private ModelFile getCornerGuideRailModel(BlockState state){
+        String inv = state.getValue(CornerGuideRailBlock.INVERTED) ? "_inv" : "";
+        return  models().orientable("guide_rail_corner" + inv,
                 getBlTx("guide_rail_side"),
                 getBlTx("guide_rail_front" + inv),
                 getBlTx("guide_rail_top" + inv));
+    }
+
+    private ModelFile getTugGuideRailModel(BlockState state){
+        return  models().orientable("guide_rail_tug",
+                getBlTx("guide_rail_side"),
+                getBlTx("guide_rail_side"),
+                getBlTx("guide_rail_front"));
     }
 
     private ModelFile getBargeDockModel(BlockState state){
@@ -62,10 +69,20 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .build()
         );
 
-        getVariantBuilder(ModBlocks.GUIDE_RAIL.get()).forAllStates(state -> ConfiguredModel.builder()
-                .modelFile(getGuideRailModel(state))
-                .rotationY((int) state.getValue(GuideRailBlock.FACING).getOpposite().toYRot())
+        getVariantBuilder(ModBlocks.GUIDE_RAIL_CORNER.get()).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(getCornerGuideRailModel(state))
+                .rotationY((int) state.getValue(CornerGuideRailBlock.FACING).getOpposite().toYRot())
                 .build()
         );
+
+        getVariantBuilder(ModBlocks.GUIDE_RAIL_TUG.get()).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(getTugGuideRailModel(state))
+                .rotationY((int) state.getValue(CornerGuideRailBlock.FACING).getClockWise().toYRot())
+                .build()
+        );
+
+
+
+
     }
 }

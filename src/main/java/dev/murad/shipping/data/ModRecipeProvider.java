@@ -16,7 +16,7 @@ public class ModRecipeProvider extends RecipeProvider {
 
     @Override
     protected void buildShapelessRecipes(Consumer<IFinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(ModBlocks.TUG_DOCK.get())
+        ShapedRecipeBuilder.shaped(ModBlocks.TUG_DOCK.get(), 2)
                 .define('#', ModItems.SPRING.get())
                 .define('_', Tags.Items.STONE)
                 .define('$', Items.IRON_INGOT)
@@ -36,7 +36,28 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(ModItems.SPRING.get()))
                 .save(consumer);
 
-        ShapedRecipeBuilder.shaped(ModItems.SPRING.get(), 2)
+
+        ShapedRecipeBuilder.shaped(ModBlocks.GUIDE_RAIL_CORNER.get(), 3)
+                .define('#', ModItems.SPRING.get())
+                .define('_', Tags.Items.STONE)
+                .define('$', Items.POWERED_RAIL)
+                .pattern("#__")
+                .pattern("$__")
+                .pattern("#__")
+                .unlockedBy("has_item", has(Items.POWERED_RAIL))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModBlocks.GUIDE_RAIL_TUG.get(), 3)
+                .define('#', ModItems.SPRING.get())
+                .define('_', Tags.Items.STONE)
+                .define('$', Items.POWERED_RAIL)
+                .pattern("#$#")
+                .pattern("___")
+                .pattern("___")
+                .unlockedBy("has_item", has(Items.POWERED_RAIL))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModItems.SPRING.get(), 6)
                 .define('_', Tags.Items.STRING)
                 .define('$', Items.IRON_NUGGET)
                 .pattern("   ")

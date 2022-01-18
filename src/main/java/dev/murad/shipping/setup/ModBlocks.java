@@ -3,7 +3,8 @@ package dev.murad.shipping.setup;
 
 import dev.murad.shipping.block.dock.BargeDockBlock;
 import dev.murad.shipping.block.dock.TugDockBlock;
-import dev.murad.shipping.block.guide_rail.GuideRailBlock;
+import dev.murad.shipping.block.guide_rail.CornerGuideRailBlock;
+import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -29,9 +30,16 @@ public class ModBlocks {
             ),
             ItemGroup.TAB_TRANSPORTATION);
 
-    public static final RegistryObject<Block> GUIDE_RAIL = register(
-            "guide_rail",
-            () -> new GuideRailBlock(AbstractBlock.Properties.of(Material.METAL)
+    public static final RegistryObject<Block> GUIDE_RAIL_CORNER = register(
+            "guide_rail_corner",
+            () -> new CornerGuideRailBlock(AbstractBlock.Properties.of(Material.METAL)
+                    .harvestLevel(1)
+            ),
+            ItemGroup.TAB_TRANSPORTATION);
+
+    public static final RegistryObject<Block> GUIDE_RAIL_TUG = register(
+            "guide_rail_tug",
+            () -> new TugGuideRailBlock(AbstractBlock.Properties.of(Material.METAL)
                     .harvestLevel(1)
             ),
             ItemGroup.TAB_TRANSPORTATION);
