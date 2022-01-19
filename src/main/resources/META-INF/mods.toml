@@ -27,7 +27,7 @@ displayName="Little Logistics" #mandatory
 # A URL for the "homepage" for this mod, displayed in the mod UI
 displayURL="https://littlelogistics.murad.dev" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
-logoFile="./docs/modbanner.png" #optional
+# logoFile="modbanner.png" #optional
 # A text field displayed in the mod UI
 # A text field displayed in the mod UI
 authors="Murad Akhundov" #optional
