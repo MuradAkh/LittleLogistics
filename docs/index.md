@@ -2,6 +2,8 @@
 
 Little Logistics is a mod for Minecraft Forge focused on efficient, affordable, long-distance transport. This guide does not cover recepies, to check item recepies use JEI or a similar mod. 
 
+<video src="https://user-images.githubusercontent.com/31002977/150042817-908a75b5-2802-4c83-a13d-0fbecc0ec94c.mp4" data-canonical-src="https://user-images.githubusercontent.com/31002977/150042817-908a75b5-2802-4c83-a13d-0fbecc0ec94c.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2 width-fit" style="max-height:35vh;"></video><br/>
+
 ## Vessels
 
 Vessels are the core of this mod. There are two types of vessels: Barges (that can do all sorts of useful things), and Tugs (that drag the barges). If vessels get stuck, they can be moved slightly using fishing rods (just like other entities). Tugs can also be dragged with leads, right click on the hook at the back of the boat to attach. 
