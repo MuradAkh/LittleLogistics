@@ -22,6 +22,7 @@ import net.minecraft.potion.Effects;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -33,6 +34,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.Optional;
 
 public abstract class VesselEntity extends WaterMobEntity implements ISpringableEntity {
@@ -379,7 +381,17 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
                 this.setDeltaMovement(vector3d2);
                 if (this.horizontalCollision) {
                     if (stuckCounter > 10) {
-                        // NO OP for now, collision detection
+                        // destroy lilypads
+                        Direction direction = getDirection();
+                        BlockPos front = getOnPos().relative(direction).above();
+                        BlockPos left = front.relative(direction.getClockWise());
+                        BlockPos right = front.relative(direction.getCounterClockWise());
+                        for (BlockPos pos : Arrays.asList(front, left, right)){
+                            BlockState state = this.level.getBlockState(pos);
+                            if (state.is(Blocks.LILY_PAD)){
+                               this.level.destroyBlock(pos, true);
+                            }
+                        }
                         stuckCounter = 0;
                     } else {
                         stuckCounter++;

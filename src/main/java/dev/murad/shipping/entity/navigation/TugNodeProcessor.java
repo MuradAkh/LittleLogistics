@@ -21,7 +21,7 @@ public class TugNodeProcessor extends SwimNodeProcessor {
     public int getNeighbors(PathPoint[] p_222859_1_, PathPoint p_222859_2_) {
         int i = 0;
 
-        for(Direction direction : Arrays.asList(Direction.WEST, Direction.EAST, Direction.SOUTH, Direction.NORTH, Direction.DOWN)) {
+        for(Direction direction : Arrays.asList(Direction.WEST, Direction.EAST, Direction.SOUTH, Direction.NORTH)) {
             PathPoint pathpoint = this.getWaterNode(p_222859_2_.x + direction.getStepX(), p_222859_2_.y + direction.getStepY(), p_222859_2_.z + direction.getStepZ());
             if (pathpoint != null && !pathpoint.closed) {
                 p_222859_1_[i++] = pathpoint;
