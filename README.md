@@ -1,6 +1,6 @@
 # Little Logistics Mod for Minecraft Forge
 
-<video src="https://user-images.githubusercontent.com/31002977/150042817-908a75b5-2802-4c83-a13d-0fbecc0ec94c.mp4">
+<video src="https://user-images.githubusercontent.com/31002977/150042817-908a75b5-2802-4c83-a13d-0fbecc0ec94c.mp4"></video>
 
 ### Download
 
