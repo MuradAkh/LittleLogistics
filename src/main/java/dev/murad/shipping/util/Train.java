@@ -37,6 +37,12 @@ public class Train {
     }
 
     public List<AbstractBargeEntity> getBarges(){
+        if(this.head.checkNoLoopsDominated()) {
+            // just in case - to avoid crashing the world.
+            this.head.removeDominated();
+            this.head.getDominated().map(Pair::getFirst).ifPresent(ISpringableEntity::removeDominant);
+            return new ArrayList<>();
+        }
         return tug.map(tugEntity -> {
             List<AbstractBargeEntity> barges = new ArrayList<>();
             for (Optional<AbstractBargeEntity> barge = getNextBarge(tugEntity); barge.isPresent(); barge = getNextBarge(barge.get())){
