@@ -12,9 +12,9 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = 'pre-alpha-1.1.0'
+version = 'mc1.16.5-v1.0.0-alpha.1'
 group = 'dev.murad.shipping' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'shipping'
+archivesBaseName = 'littlelogistics'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
 
