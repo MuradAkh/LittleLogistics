@@ -59,21 +59,22 @@ There are two types of blocks: docks and guide rails. Docks can be used to load/
 
 ### Tug Guide rail
 
-<video src="https://user-images.githubusercontent.com/31002977/149873601-8dc6ea2b-f5d9-4cc7-992c-b40601eb093d.mp4" data-canonical-src="https://user-images.githubusercontent.com/31002977/149873601-8dc6ea2b-f5d9-4cc7-992c-b40601eb093d.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2 width-fit" style="max-height:35vh;"></video>
-
 Place under a block of water, works similar to vanilla powered rail. Can be used to force the tug to take a specific route. Does not affect barges. Shift-right-click to rotate.
+
+<video src="https://user-images.githubusercontent.com/31002977/149873601-8dc6ea2b-f5d9-4cc7-992c-b40601eb093d.mp4" data-canonical-src="https://user-images.githubusercontent.com/31002977/149873601-8dc6ea2b-f5d9-4cc7-992c-b40601eb093d.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2 width-fit" style="max-height:35vh;"></video>
 
 ### Vessel Corner Guide Rail
 
-<video src="https://user-images.githubusercontent.com/31002977/149873858-95ea9970-2b91-4cd0-a7ba-9a2d2d545292.mp4" data-canonical-src="https://user-images.githubusercontent.com/31002977/149873858-95ea9970-2b91-4cd0-a7ba-9a2d2d545292.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2 width-fit" style="max-height:35vh;"></video>
-
 Assits vessels around sharp corners, should always be used on sharp corners or near entrances to narrow waterways (such as those for docks). Affects both tugs and barges. Shift-right-click to flip direction. Must not have a full solid block directilly on top (i.e. no stone, planks etc. fence posts, signs etc OK). 
+
+<video src="https://user-images.githubusercontent.com/31002977/149873858-95ea9970-2b91-4cd0-a7ba-9a2d2d545292.mp4" data-canonical-src="https://user-images.githubusercontent.com/31002977/149873858-95ea9970-2b91-4cd0-a7ba-9a2d2d545292.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2 width-fit" style="max-height:35vh;"></video>
 
 ### Docks
 
-<video src="https://user-images.githubusercontent.com/31002977/149874251-ccc26b7d-b74c-474b-b066-e48a01872000.mp4" data-canonical-src="https://user-images.githubusercontent.com/31002977/149874251-ccc26b7d-b74c-474b-b066-e48a01872000.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2 width-fit" style="max-height:35vh;"></video>
-
 There are two dock blogs: barge and tug. The tug block must always be present for the barge docks to work. The top texture of the tug dock must be alligned with the barge docks, you can shift right-click the tug dock to flip the dock direction. The barge docks must form a straight line from the tug dock, there shouldn't be any gaps in the line. The tug dock can only insert into the tug (orange/output mode), place a hopper on top of the dock to extract. The barge docks can both insert (orange/output mode) and extract (blue/input) mode into/from the barges, shift-right click to switch the mode. Place a hopper below the waterblock next to the barge dock to extract. The dock line be next to a 1 block wide canal, wider canals can prevent the vessels from docking properly.
+
+
+<video src="https://user-images.githubusercontent.com/31002977/149874251-ccc26b7d-b74c-474b-b066-e48a01872000.mp4" data-canonical-src="https://user-images.githubusercontent.com/31002977/149874251-ccc26b7d-b74c-474b-b066-e48a01872000.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2 width-fit" style="max-height:35vh;"></video>
 
 ## License
 
