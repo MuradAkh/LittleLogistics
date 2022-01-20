@@ -12,6 +12,7 @@ import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.inventory.InventoryHelper;
@@ -129,7 +130,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
         double overFishPenalty = isOverFished() ? 0.05 : 1;
         double shallowPenalty = computeDepthPenalty();
         double chance = 0.5 * overFishPenalty * shallowPenalty;
-
+        double treasure = chance * (shallowPenalty / 2) * 0.1;
         double r = Math.random();
         if(r < chance){
             LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerWorld)this.level))
@@ -137,8 +138,9 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
                     .withParameter(LootParameters.THIS_ENTITY, this)
                     .withParameter(LootParameters.TOOL, new ItemStack(Items.FISHING_ROD))
                     .withRandom(this.random);
+
             lootcontext$builder.withParameter(LootParameters.KILLER_ENTITY, this).withParameter(LootParameters.THIS_ENTITY, this);
-            LootTable loottable = this.level.getServer().getLootTables().get(LootTables.FISHING);
+            LootTable loottable = this.level.getServer().getLootTables().get(r < treasure ? LootTables.FISHING_TREASURE : LootTables.FISHING_FISH);
             List<ItemStack> list = loottable.getRandomItems(lootcontext$builder.create(LootParameterSets.FISHING));
             for (ItemStack stack : list) {
                 int slot = InventoryUtils.findSlotFotItem(this, stack);
