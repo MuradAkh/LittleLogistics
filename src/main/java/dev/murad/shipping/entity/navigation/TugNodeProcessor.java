@@ -1,6 +1,10 @@
 package dev.murad.shipping.entity.navigation;
 
+import dev.murad.shipping.block.dock.AbstractDockBlock;
+import dev.murad.shipping.setup.ModBlocks;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.PathPoint;
@@ -24,6 +28,19 @@ public class TugNodeProcessor extends SwimNodeProcessor {
         for(Direction direction : Arrays.asList(Direction.WEST, Direction.EAST, Direction.SOUTH, Direction.NORTH)) {
             PathPoint pathpoint = this.getWaterNode(p_222859_2_.x + direction.getStepX(), p_222859_2_.y + direction.getStepY(), p_222859_2_.z + direction.getStepZ());
             if (pathpoint != null && !pathpoint.closed) {
+                BlockPos pos = pathpoint.asBlockPos();
+                int penalty = 0;
+                for (BlockPos surr : Arrays.asList(pos.east(), pos.west(), pos.south(), pos.north(), pos.north().west(), pos.north().east(), pos.south().east(), pos.south().west())){
+                    Block block = level.getBlockState(surr).getBlock();
+                    if(!block.is(Blocks.WATER)){
+                        penalty += 1;
+                        if(block instanceof AbstractDockBlock || block.is(ModBlocks.GUIDE_RAIL_CORNER.get())){
+                            penalty = 0;
+                            break;
+                        }
+                    }
+                }
+                pathpoint.costMalus += Math.min(penalty, 3);
                 p_222859_1_[i++] = pathpoint;
             }
         }

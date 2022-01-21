@@ -84,7 +84,9 @@ public class SpringItem extends Item {
         } else if(dominant instanceof ISpringableEntity) {
             Train firstTrain =  ((ISpringableEntity) dominant).getTrain();
             Train secondTrain = ((ISpringableEntity) target).getTrain();
-            if (firstTrain.getTug().isPresent() && secondTrain.getTug().isPresent()) {
+            if (dominant.distanceTo(target) > 15){
+                player.displayClientMessage(new TranslationTextComponent("item.shipping.spring.tooFar"), true);
+            } else if (firstTrain.getTug().isPresent() && secondTrain.getTug().isPresent()) {
                 player.displayClientMessage(new TranslationTextComponent("item.shipping.spring.noTwoTugs"), true);
             } else if (secondTrain.equals(firstTrain)){
                 player.displayClientMessage(new TranslationTextComponent("item.shipping.spring.noLoops"), true);

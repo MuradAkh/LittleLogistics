@@ -11,7 +11,7 @@ import net.minecraftforge.fml.common.Mod;
 public class ModEventBusEvents {
     @SubscribeEvent
     public static void addEntityAttributes(EntityAttributeCreationEvent event) {
-        event.put(ModEntityTypes.STEAM_TUG.get(), VesselEntity.setCustomAttributes().build());
+        event.put(ModEntityTypes.STEAM_TUG.get(), SteamTugEntity.setCustomAttributes().build());
         event.put(ModEntityTypes.FISHING_BARGE.get(), VesselEntity.setCustomAttributes().build());
         event.put(ModEntityTypes.CHUNK_LOADER_BARGE.get(), VesselEntity.setCustomAttributes().build());
         event.put(ModEntityTypes.CHEST_BARGE.get(), VesselEntity.setCustomAttributes().build());

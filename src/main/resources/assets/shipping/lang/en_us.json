@@ -27,6 +27,7 @@
   "item.shipping.spring.description": "Used to link barges/tugs",
   "item.shipping.spring.notToSelf": "Can't link vessel to self",
   "item.shipping.spring.noTwoTugs": "Can't link two tugs",
+  "item.shipping.spring.tooFar": "Vessels too far to link",
   "item.shipping.spring.noLoops": "Can't link vessels in a loop",
   "item.shipping.fishing_barge.description": "For best yield, use on long routes in deep and open water"
 }

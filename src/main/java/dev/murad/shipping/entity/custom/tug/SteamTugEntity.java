@@ -4,9 +4,6 @@ import dev.murad.shipping.entity.container.SteamTugContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap;
-import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -15,7 +12,6 @@ import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.FurnaceTileEntity;
-import net.minecraft.util.Direction;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -25,6 +21,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class SteamTugEntity extends AbstractTugEntity {
+    private static final int FURNACE_FUEL_MULTIPLIER= 4;
+
     public SteamTugEntity(EntityType<? extends WaterMobEntity> type, World world) {
         super(type, world);
     }
@@ -74,7 +72,7 @@ public class SteamTugEntity extends AbstractTugEntity {
         } else {
             ItemStack stack = itemHandler.getStackInSlot(1);
             if (!stack.isEmpty()) {
-                burnCapacity = ForgeHooks.getBurnTime(stack, null) - 1;
+                burnCapacity = (ForgeHooks.getBurnTime(stack, null) * FURNACE_FUEL_MULTIPLIER) - 1;
                 burnTime = burnCapacity - 1;
                 stack.shrink(1);
                 return true;

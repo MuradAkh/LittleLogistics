@@ -130,7 +130,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
         double overFishPenalty = isOverFished() ? 0.05 : 1;
         double shallowPenalty = computeDepthPenalty();
         double chance = 0.5 * overFishPenalty * shallowPenalty;
-        double treasure = chance * (shallowPenalty / 2) * 0.1;
+        double treasure_chance = shallowPenalty > 0.4 ? chance * (shallowPenalty / 2) * 0.02 : 0;
         double r = Math.random();
         if(r < chance){
             LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerWorld)this.level))
@@ -140,7 +140,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
                     .withRandom(this.random);
 
             lootcontext$builder.withParameter(LootParameters.KILLER_ENTITY, this).withParameter(LootParameters.THIS_ENTITY, this);
-            LootTable loottable = this.level.getServer().getLootTables().get(r < treasure ? LootTables.FISHING_TREASURE : LootTables.FISHING_FISH);
+            LootTable loottable = this.level.getServer().getLootTables().get(r < treasure_chance ? LootTables.FISHING_TREASURE : LootTables.FISHING_FISH);
             List<ItemStack> list = loottable.getRandomItems(lootcontext$builder.create(LootParameterSets.FISHING));
             for (ItemStack stack : list) {
                 int slot = InventoryUtils.findSlotFotItem(this, stack);

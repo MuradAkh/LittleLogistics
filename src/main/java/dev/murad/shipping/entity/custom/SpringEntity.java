@@ -146,6 +146,12 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
         super.baseTick();
 
         if(dominant != null && dominated != null) {
+            if(dominated.distanceTo(dominant) > 20){
+                dominant.removeDominated();
+                dominated.removeDominant();
+                kill();
+                return;
+            }
             if( ! dominant.isAlive() || ! dominated.isAlive()) {
                 kill();
                 return;

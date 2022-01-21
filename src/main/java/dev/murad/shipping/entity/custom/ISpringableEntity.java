@@ -2,6 +2,7 @@ package dev.murad.shipping.entity.custom;
 
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.util.Train;
+import net.minecraft.entity.Entity;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -64,6 +65,22 @@ public interface ISpringableEntity {
         return checkNoLoopsDominated() ? ofThis : this.getDominated().map(dom ->
                 Stream.concat(ofThis, dom.getFirst().applyWithDominated(function))
         ).orElse(ofThis);
+
+    }
+
+    default void tickSpringAliveCheck(){
+        this.getDominant().map(Pair::getSecond).map(Entity::isAlive).ifPresent(alive -> {
+            if(!alive){
+                this.removeDominant();
+            }
+        });
+
+        this.getDominated().map(Pair::getSecond).map(Entity::isAlive).ifPresent(alive -> {
+            if(!alive){
+                this.removeDominant();
+            }
+        });
+
 
     }
 }

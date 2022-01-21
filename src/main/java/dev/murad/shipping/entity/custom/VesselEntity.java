@@ -70,6 +70,7 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
 
     @Override
     public void tick() {
+        tickSpringAliveCheck();
         this.oldStatus = this.status;
         this.status = this.getStatus();
 

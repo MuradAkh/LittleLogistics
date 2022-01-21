@@ -14,7 +14,10 @@ import dev.murad.shipping.util.Train;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CampfireBlock;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.MoverType;
+import net.minecraft.entity.ai.attributes.AttributeModifierMap;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -210,6 +213,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     }
 
     protected abstract boolean tickFuel();
+
+    public static AttributeModifierMap.MutableAttribute setCustomAttributes() {
+        return VesselEntity.createMobAttributes()
+                .add(Attributes.FOLLOW_RANGE, 200);
+
+    }
 
 
     // MOB STUFF

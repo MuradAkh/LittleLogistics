@@ -10,6 +10,7 @@ import net.minecraft.world.World;
 public class TugPathNavigator extends SwimmerPathNavigator {
     public TugPathNavigator(MobEntity p_i45873_1_, World p_i45873_2_) {
         super(p_i45873_1_, p_i45873_2_);
+        setMaxVisitedNodesMultiplier(5);
     }
 
     @Override
