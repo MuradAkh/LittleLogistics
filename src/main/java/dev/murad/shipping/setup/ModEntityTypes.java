@@ -5,6 +5,7 @@ import dev.murad.shipping.entity.custom.barge.ChestBargeEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.barge.ChunkLoaderBargeEntity;
 import dev.murad.shipping.entity.custom.barge.FishingBargeEntity;
+import dev.murad.shipping.entity.custom.barge.FluidTankBargeEntity;
 import dev.murad.shipping.entity.custom.tug.SteamTugEntity;
 import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
 import net.minecraft.entity.EntityClassification;
@@ -30,6 +31,12 @@ public class ModEntityTypes {
                     () -> EntityType.Builder.<FishingBargeEntity>of(FishingBargeEntity::new,
                                     EntityClassification.MISC).sized(0.6f, 0.6f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "fishing_barge").toString()));
+
+    public static final RegistryObject<EntityType<FluidTankBargeEntity>> FLUID_TANK_BARGE =
+            Registration.ENTITIES.register("fluid_barge",
+                    () -> EntityType.Builder.<FluidTankBargeEntity>of(FluidTankBargeEntity::new,
+                                    EntityClassification.MISC).sized(0.6f, 0.6f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "fluid_barge").toString()));
 
     public static final RegistryObject<EntityType<SteamTugEntity>> STEAM_TUG =
             Registration.ENTITIES.register("tug",
