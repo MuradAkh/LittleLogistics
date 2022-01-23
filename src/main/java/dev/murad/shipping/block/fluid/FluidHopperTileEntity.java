@@ -2,14 +2,18 @@ package dev.murad.shipping.block.fluid;
 
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -21,9 +25,13 @@ import net.minecraftforge.fluids.capability.templates.FluidTank;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Optional;
 
-public class FluidHopperTileEntity extends TileEntity {
+public class FluidHopperTileEntity extends TileEntity implements ITickableTileEntity {
     public static final int CAPACITY = FluidAttributes.BUCKET_VOLUME * 5;
+    private int cooldownTime = 0;
+
     public FluidHopperTileEntity(TileEntityType<?> p_i48289_1_) {
         super(p_i48289_1_);
     }
@@ -89,5 +97,52 @@ public class FluidHopperTileEntity extends TileEntity {
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet) {
         this.load(null,packet.getTag());
+    }
+
+    @Override
+    public void tick() {
+        if (this.level != null && !this.level.isClientSide) {
+            --this.cooldownTime;
+            if (this.cooldownTime <= 0) {
+                this.cooldownTime = 10;
+                this.tryExportFluid();
+                this.tryImportFluid();
+            }
+        }
+    }
+
+    private Optional<IFluidHandler> getEntityFluidHandler(BlockPos pos){
+        List<Entity> fluidEntities = this.level.getEntities((Entity) null,
+                new AxisAlignedBB(
+                        pos.getX() - 0.5D,
+                        pos.getY() - 0.5D,
+                        pos.getZ() - 0.5D,
+                        pos.getX() + 0.5D,
+                        pos.getY() + 0.5D,
+                        pos.getZ() + 0.5D),
+                (entity -> entity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).isPresent())
+        );
+        return fluidEntities.isEmpty() ? Optional.empty() : fluidEntities.get(0).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).resolve();
+    }
+
+    private Optional<IFluidHandler> getExternalFluidHandler(BlockPos pos){
+        return Optional.ofNullable(this.level.getBlockEntity(pos))
+                .map(tile -> tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY))
+                .flatMap(LazyOptional::resolve)
+                .map(Optional::of).orElseGet(() -> getEntityFluidHandler(pos));
+
+    }
+
+    private void tryImportFluid() {
+        getExternalFluidHandler(this.getBlockPos().above()).ifPresent(iFluidHandler -> {
+           FluidUtil.tryFluidTransfer(this.tank, iFluidHandler, 500, true);
+        });
+    }
+
+    private void tryExportFluid() {
+        getExternalFluidHandler(this.getBlockPos().relative(this.getBlockState().getValue(FluidHopperBlock.FACING)))
+                .ifPresent(iFluidHandler -> {
+            FluidUtil.tryFluidTransfer(iFluidHandler, this.tank, 500, true);
+        });
     }
 }
