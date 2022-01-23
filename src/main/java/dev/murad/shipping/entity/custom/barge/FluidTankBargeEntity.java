@@ -68,7 +68,7 @@ public class FluidTankBargeEntity extends AbstractBargeEntity{
     @Override
     protected void doInteract(PlayerEntity player) {
         FluidUtil.interactWithFluidHandler(player, Hand.MAIN_HAND, tank);
-        player.displayClientMessage(new StringTextComponent("Volume: " + tank.getFluidAmount() + "/" + tank.getCapacity()), false);
+        player.displayClientMessage(new StringTextComponent(tank.getFluidAmount() + "/" + tank.getCapacity() + " ml"), false);
         sendInfoToClient();
     }
 
