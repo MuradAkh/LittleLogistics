@@ -35,7 +35,12 @@ import javax.annotation.Nullable;
 
 public class FluidTankBargeEntity extends AbstractBargeEntity{
     public static int CAPACITY = FluidAttributes.BUCKET_VOLUME * 10;
-    protected FluidTank tank = new FluidTank(CAPACITY);
+    protected FluidTank tank = new FluidTank(CAPACITY){
+        @Override
+        protected void onContentsChanged(){
+            sendInfoToClient();
+        }
+    };
     private static final DataParameter<Integer> VOLUME = EntityDataManager.defineId(AbstractTugEntity.class, DataSerializers.INT);
     private static final DataParameter<String> FLUID_TYPE = EntityDataManager.defineId(AbstractTugEntity.class, DataSerializers.STRING);
     private Fluid clientCurrFluid = Fluids.EMPTY;
@@ -69,7 +74,6 @@ public class FluidTankBargeEntity extends AbstractBargeEntity{
     protected void doInteract(PlayerEntity player) {
         FluidUtil.interactWithFluidHandler(player, Hand.MAIN_HAND, tank);
         player.displayClientMessage(new StringTextComponent(tank.getFluidAmount() + "/" + tank.getCapacity() + " ml"), false);
-        sendInfoToClient();
     }
 
     public FluidStack getFluidStack(){
