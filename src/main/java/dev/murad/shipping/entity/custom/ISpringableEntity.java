@@ -77,7 +77,7 @@ public interface ISpringableEntity {
 
         this.getDominated().map(Pair::getSecond).map(Entity::isAlive).ifPresent(alive -> {
             if(!alive){
-                this.removeDominant();
+                this.removeDominated();
             }
         });
 
