@@ -1,6 +1,7 @@
 package dev.murad.shipping.entity.custom.barge;
 
 import com.mojang.datafixers.util.Pair;
+import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.entity.container.FishingBargeContainer;
 import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
@@ -130,7 +131,8 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
         double overFishPenalty = isOverFished() ? 0.05 : 1;
         double shallowPenalty = computeDepthPenalty();
         double chance = 0.5 * overFishPenalty * shallowPenalty;
-        double treasure_chance = shallowPenalty > 0.4 ? chance * (shallowPenalty / 2) * 0.013 : 0;
+        double treasure_chance = shallowPenalty > 0.4 ? chance * (shallowPenalty / 2)
+                * ShippingConfig.fishing_treasure_chance_modifier.get() : 0;
         double r = Math.random();
         if(r < chance){
             LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerWorld)this.level))

@@ -1,5 +1,6 @@
 package dev.murad.shipping.entity.custom.tug;
 
+import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.entity.container.SteamTugContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
@@ -21,7 +22,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class SteamTugEntity extends AbstractTugEntity {
-    private static final int FURNACE_FUEL_MULTIPLIER= 4;
+    private static final int FURNACE_FUEL_MULTIPLIER= ShippingConfig.steam_tug_fuel_multiplier.get();
 
     public SteamTugEntity(EntityType<? extends WaterMobEntity> type, World world) {
         super(type, world);
