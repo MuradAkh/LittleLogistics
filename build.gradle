@@ -12,7 +12,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = 'mc1.16.5-v1.0.0-alpha.4'
+version = 'mc1.16.5-v1.1.0-alpha.1'
 group = 'dev.murad.shipping' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'littlelogistics'
 
@@ -146,6 +146,9 @@ dependencies {
     // at runtime, use the full JEI jar
     runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
 
+    compileOnly fg.deobf("vazkii.patchouli:Patchouli:1.16.4-53.2:api")
+    runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:1.16.4-53.2")
+
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
@@ -192,5 +195,16 @@ repositories {
         // location of a maven mirror for JEI files, as a fallback
         name = "ModMaven"
         url = "https://modmaven.dev"
+    }
+    maven { url 'https://maven.blamejared.com' }
+
+}
+
+minecraft {
+    runs {
+        client {
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+        }
     }
 }
