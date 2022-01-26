@@ -1,0 +1,5 @@
+{
+  "name": "Vessels",
+  "description": "There are two types of vessels: Barges (that can do all sorts of useful things), and Tugs (that drag the barges). If vessels get stuck, they can be moved slightly using fishing rods (just like other entities). Tugs can also be dragged with leads, right click on the hook at the back of the boat to attach.",
+  "icon": "shipping:tug"
+}
