@@ -7,6 +7,7 @@ import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.models.ChainExtendedModel;
 import dev.murad.shipping.entity.models.ChainModel;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.culling.ClippingHelper;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.model.EntityModel;
@@ -22,7 +23,6 @@ public abstract class AbstractBargeRenderer<T extends AbstractBargeEntity> exten
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/chain.png");
 
     private static ChainModel chainModel = new ChainModel();
-    private static ChainExtendedModel chainExtendedModel = new ChainExtendedModel();
 
 
     public AbstractBargeRenderer(EntityRendererManager p_i46179_1_) {
@@ -41,21 +41,37 @@ public abstract class AbstractBargeRenderer<T extends AbstractBargeEntity> exten
         IVertexBuilder ivertexbuilder = buffer.getBuffer(getModel(bargeEntity).renderType(this.getTextureLocation(bargeEntity)));
         getModel(bargeEntity).renderToBuffer(matrixStack, ivertexbuilder, p_225623_6_, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
         if(bargeEntity.getDominant().isPresent()) {
-            double dist = ((Entity)bargeEntity.getDominant().get().getFirst()).distanceToSqr(bargeEntity);
-            if (dist > 1.1) {
-                IVertexBuilder ivertexbuilderChain = buffer.getBuffer(chainModel.renderType(CHAIN_TEXTURE));
+            double dist = ((Entity)bargeEntity.getDominant().get().getFirst()).distanceTo(bargeEntity);
+            IVertexBuilder ivertexbuilderChain = buffer.getBuffer(chainModel.renderType(CHAIN_TEXTURE));
+            int segments = (int) Math.ceil(dist * 4);
+            matrixStack.pushPose();
+            for (int i = 0; i < segments; i++) {
+                matrixStack.pushPose();
+                matrixStack.translate(i / 4.0, 0, 0);
                 chainModel.renderToBuffer(matrixStack, ivertexbuilderChain, p_225623_6_, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+                matrixStack.popPose();
             }
-            if (dist > 3.7){
-                IVertexBuilder ivertexbuilderChainE = buffer.getBuffer(chainExtendedModel.renderType(CHAIN_TEXTURE));
-                chainExtendedModel.renderToBuffer(matrixStack, ivertexbuilderChainE, p_225623_6_, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-            }
+            matrixStack.popPose();
 
         }
 
         matrixStack.popPose();
         super.render(bargeEntity, p_225623_2_, p_225623_3_, matrixStack, buffer, p_225623_6_);
     }
+
+    @Override
+    public boolean shouldRender(T p_225626_1_, ClippingHelper p_225626_2_, double p_225626_3_, double p_225626_5_, double p_225626_7_) {
+        if(p_225626_1_.getDominant().isPresent()){
+            if(((Entity) p_225626_1_.getDominant().get().getFirst()).shouldRender(p_225626_3_, p_225626_5_, p_225626_7_)){
+                return true;
+            }
+            if(p_225626_1_.getDominant().get().getSecond().shouldRender(p_225626_3_, p_225626_5_, p_225626_7_)){
+                return true;
+            }
+        }
+        return super.shouldRender(p_225626_1_, p_225626_2_, p_225626_3_, p_225626_5_, p_225626_7_);
+    }
+
 
     abstract EntityModel getModel(T entity);
 

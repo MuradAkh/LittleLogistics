@@ -15,11 +15,11 @@ public class ChainModel extends EntityModel<AbstractBargeEntity> {
 	private final ModelRenderer bone2;
 
 	public ChainModel() {
-		texWidth = 64;
-		texHeight = 64;
+		texWidth = 16;
+		texHeight = 16;
 
 		bb_main = new ModelRenderer(this);
-		bb_main.setPos(0.0F, 24.0F, 0.0F);
+		bb_main.setPos(-13.0F, 24.0F, 0.0F);
 
 
 		cube_r1 = new ModelRenderer(this);
@@ -29,17 +29,12 @@ public class ChainModel extends EntityModel<AbstractBargeEntity> {
 
 
 		bone2 = new ModelRenderer(this);
-		bone2.setPos(0.0F, 0.0F, 0.0F);
+		bone2.setPos(-1.0F, 0.0F, 1.0F);
 		cube_r1.addChild(bone2);
-		bone2.texOffs(3, 7).addBox(0.0F, -25.0F, -22.0F, 1.0F, 1.0F, 1.0F, 0.0F, false);
-		bone2.texOffs(6, 6).addBox(0.0F, -25.0F, -18.0F, 1.0F, 1.0F, 1.0F, 0.0F, false);
-		bone2.texOffs(6, 4).addBox(-1.0F, -25.0F, -20.0F, 1.0F, 1.0F, 1.0F, 0.0F, false);
-		bone2.texOffs(6, 2).addBox(0.0F, -25.0F, -14.0F, 1.0F, 1.0F, 1.0F, 0.0F, false);
-		bone2.texOffs(6, 0).addBox(-1.0F, -25.0F, -16.0F, 1.0F, 1.0F, 1.0F, 0.0F, false);
-		bone2.texOffs(0, 6).addBox(0.0F, -25.0F, -10.0F, 1.0F, 1.0F, 1.0F, 0.0F, false);
-		bone2.texOffs(3, 5).addBox(-1.0F, -25.0F, -12.0F, 1.0F, 1.0F, 1.0F, 0.0F, false);
-		bone2.texOffs(0, 15).addBox(-1.0F, -26.0F, -22.0F, 2.0F, 1.0F, 14.0F, 0.0F, false);
-		bone2.texOffs(0, 0).addBox(-1.0F, -24.0F, -22.0F, 2.0F, 1.0F, 14.0F, 0.0F, false);
+		bone2.texOffs(0, 2).addBox(1.0F, -25.0F, -11.0F, 1.0F, 1.0F, 1.0F, 0.0F, false);
+		bone2.texOffs(0, 0).addBox(0.0F, -25.0F, -13.0F, 1.0F, 1.0F, 1.0F, 0.0F, false);
+		bone2.texOffs(3, 8).addBox(0.0F, -26.0F, -13.0F, 2.0F, 1.0F, 4.0F, 0.0F, false);
+		bone2.texOffs(4, 4).addBox(0.0F, -24.0F, -13.0F, 2.0F, 1.0F, 4.0F, 0.0F, false);
 	}
 
 	@Override
