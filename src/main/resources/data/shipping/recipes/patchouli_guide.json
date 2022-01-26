@@ -1,0 +1,16 @@
+{
+  "conditions": [{
+    "type": "forge:mod_loaded",
+    "modid": "patchouli"
+  }],
+  "result": {
+    "item": "patchouli:guide_book",
+    "nbt": "{\"patchouli:book\":\"shipping:guide\"}"
+  },
+  "ingredients": [
+    { "item": "minecraft:chest" },
+    { "item": "minecraft:compass" },
+    { "item": "minecraft:book" }
+  ],
+  "type": "minecraft:crafting_shapeless"
+}

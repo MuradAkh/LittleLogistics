@@ -1,0 +1,19 @@
+{
+  "name": "Chest Barge",
+  "icon": "shipping:barge",
+  "category": "shipping:vessels",
+  "pages": [
+    {
+      "type": "patchouli:entity",
+      "entity": "shipping:barge",
+      "scale": 0.6,
+      "offset": 0.5,
+      "text": "A simple barge that holds items, similar to chest minecart."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "shipping:barge",
+      "text": "The barge must be docked and part of a tug-train to interface with hoppers."
+    }
+  ]
+}

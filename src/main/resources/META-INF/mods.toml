@@ -71,3 +71,10 @@ For logo help: https://github.com/tenmyouji
     versionRange="[1.16.5,1.17)"
     ordering="NONE"
     side="BOTH"
+
+[[dependencies.shipping]]
+    modId="patchouli"
+    mandatory=false
+    versionRange="[1.16.4,)"
+    ordering="NONE"
+    side="BOTH"
