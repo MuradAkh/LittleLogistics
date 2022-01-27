@@ -31,16 +31,20 @@ public class TugNodeProcessor extends SwimNodeProcessor {
                 BlockPos pos = pathpoint.asBlockPos();
                 int penalty = 0;
                 for (BlockPos surr : Arrays.asList(pos.east(), pos.west(), pos.south(), pos.north(), pos.north().west(), pos.north().east(), pos.south().east(), pos.south().west())){
-                    Block block = level.getBlockState(surr).getBlock();
-                    if(!block.is(Blocks.WATER)){
-                        penalty += 1;
-                        if(block instanceof AbstractDockBlock || block.is(ModBlocks.GUIDE_RAIL_CORNER.get())){
-                            penalty = 0;
-                            break;
-                        }
+                    if(!level.getBlockState(surr).is(Blocks.WATER)){
+                        penalty++;
+                    }
+                    if(
+                            level.getBlockState(surr).is(ModBlocks.GUIDE_RAIL_CORNER.get()) ||
+                            level.getBlockState(surr).is(ModBlocks.BARGE_DOCK.get()) ||
+                            level.getBlockState(surr).is(ModBlocks.TUG_DOCK.get())
+
+                    ){
+                        penalty = 0;
+                        break;
                     }
                 }
-                pathpoint.costMalus += Math.min(penalty, 3);
+                pathpoint.costMalus += Math.min(penalty, 5);
                 p_222859_1_[i++] = pathpoint;
             }
         }

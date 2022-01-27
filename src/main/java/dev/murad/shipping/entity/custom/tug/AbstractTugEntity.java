@@ -86,6 +86,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     }
 
     // CONTAINER STUFF
+    @Override
+    public void dropLeash(boolean p_110160_1_, boolean p_110160_2_) {
+        navigation.recomputePath();
+        super.dropLeash(p_110160_1_, p_110160_2_);
+    }
 
     public int getBurnProgress() {
         int i = burnCapacity;
