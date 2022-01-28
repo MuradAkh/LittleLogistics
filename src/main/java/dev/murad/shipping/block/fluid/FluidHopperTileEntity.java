@@ -1,5 +1,7 @@
 package dev.murad.shipping.block.fluid;
 
+import dev.murad.shipping.block.IVesselLoader;
+import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -9,7 +11,6 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -28,13 +29,9 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class FluidHopperTileEntity extends TileEntity implements ITickableTileEntity {
+public class FluidHopperTileEntity extends TileEntity implements ITickableTileEntity, IVesselLoader {
     public static final int CAPACITY = FluidAttributes.BUCKET_VOLUME * 5;
     private int cooldownTime = 0;
-
-    public FluidHopperTileEntity(TileEntityType<?> p_i48289_1_) {
-        super(p_i48289_1_);
-    }
 
     public FluidHopperTileEntity() {
         super(ModTileEntitiesTypes.FLUID_HOPPER.get());
@@ -50,6 +47,17 @@ public class FluidHopperTileEntity extends TileEntity implements ITickableTileEn
     };
 
     private final LazyOptional<IFluidHandler> holder = LazyOptional.of(() -> tank);
+
+    private static boolean entityPredicate(Entity entity, BlockPos pos) {
+        return entity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).resolve().map(cap -> {
+            if (entity instanceof VesselEntity){
+                VesselEntity vessel = (VesselEntity) entity;
+                return vessel.allowDockInterface() && vessel.getBlockPos().equals(pos);
+            } else {
+                return true;
+            }
+        }).orElse(false);
+    }
 
     public boolean use(PlayerEntity player, Hand hand){
         boolean result = FluidUtil.interactWithFluidHandler(player, hand, tank);
@@ -120,9 +128,17 @@ public class FluidHopperTileEntity extends TileEntity implements ITickableTileEn
                         pos.getX() + 0.5D,
                         pos.getY() + 0.5D,
                         pos.getZ() + 0.5D),
-                (entity -> entity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).isPresent())
+                (e -> FluidHopperTileEntity.entityPredicate(e, pos))
         );
-        return fluidEntities.isEmpty() ? Optional.empty() : fluidEntities.get(0).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).resolve();
+
+        if(fluidEntities.isEmpty()){
+            return Optional.empty();
+        } else {
+            Entity entity = fluidEntities.get(0);
+
+
+            return entity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).resolve();
+        }
     }
 
     private Optional<IFluidHandler> getExternalFluidHandler(BlockPos pos){
@@ -140,9 +156,23 @@ public class FluidHopperTileEntity extends TileEntity implements ITickableTileEn
     }
 
     private void tryExportFluid() {
-        getExternalFluidHandler(this.getBlockPos().relative(this.getBlockState().getValue(FluidHopperBlock.FACING)))
+        getExternalFluidHandler(this.getBlockPos().relative(this.getBlockState().getValue(FluidHopperBlock.FACING)).below())
                 .ifPresent(iFluidHandler -> {
             FluidUtil.tryFluidTransfer(iFluidHandler, this.tank, 500, true);
         });
+    }
+
+    @Override
+    public boolean holdVessel(VesselEntity vessel, Mode mode) {
+        return vessel.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).map(iFluidHandler -> {
+            switch (mode) {
+                case IMPORT:
+                    return !FluidUtil.tryFluidTransfer(this.tank, iFluidHandler, 1, false).isEmpty();
+                case EXPORT:
+                    return !FluidUtil.tryFluidTransfer(iFluidHandler, tank, 1, false).isEmpty();
+                default:
+                    return false;
+            }
+        }).orElse(false);
     }
 }
