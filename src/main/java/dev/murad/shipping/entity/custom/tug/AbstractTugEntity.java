@@ -1,6 +1,7 @@
 package dev.murad.shipping.entity.custom.tug;
 
 import com.mojang.datafixers.util.Pair;
+import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
 import dev.murad.shipping.entity.custom.ISpringableEntity;
@@ -30,6 +31,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.particles.BasicParticleType;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.pathfinding.PathNavigator;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
@@ -46,6 +49,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 public abstract class AbstractTugEntity extends VesselEntity implements ISpringableEntity, IInventory, ISidedInventory {
@@ -277,13 +281,23 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         if (world != null) {
             BlockPos blockpos = this.getOnPos().above().above();
             Random random = world.random;
-            if (random.nextFloat() < 0.11F) {
+            if (random.nextFloat() < ShippingConfig.tug_smoke_modifier.get()) {
                 for(int i = 0; i < random.nextInt(2) + 2; ++i) {
-                    CampfireBlock.makeParticles(world, blockpos, true, false);
+                    makeParticles(world, blockpos, true, false);
                 }
             }
         }
     }
+
+    public static void makeParticles(World p_220098_0_, BlockPos p_220098_1_, boolean p_220098_2_, boolean p_220098_3_) {
+        Random random = p_220098_0_.getRandom();
+        Supplier<Boolean> h = () -> random.nextDouble() < 0.5;
+        BasicParticleType basicparticletype = p_220098_2_ ? ParticleTypes.CAMPFIRE_SIGNAL_SMOKE : ParticleTypes.CAMPFIRE_COSY_SMOKE;
+        double xdrift = (h.get() ? 1 : -1) * random.nextDouble() * 2;
+        double zdrift = (h.get() ? 1 : -1) * random.nextDouble() * 2;
+        p_220098_0_.addAlwaysVisibleParticle(basicparticletype, true, (double)p_220098_1_.getX() + 0.5D + random.nextDouble() / 3.0D * (double)(random.nextBoolean() ? 1 : -1), (double)p_220098_1_.getY() + random.nextDouble() + random.nextDouble(), (double)p_220098_1_.getZ() + 0.5D + random.nextDouble() / 3.0D * (double)(random.nextBoolean() ? 1 : -1), 0.007D * xdrift, 0.05D, 0.007D * zdrift);
+    }
+
 
 
     @Override
