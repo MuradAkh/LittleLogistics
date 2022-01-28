@@ -1,5 +1,6 @@
 package dev.murad.shipping.block.guide_rail;
 
+import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -84,6 +85,7 @@ public class CornerGuideRailBlock extends Block {
         }
 
         Direction arrows = getArrowsDirection(state);
+        ((VesselEntity) entity).setLastCornerGuideRail(new Pair<>(pos, state));
         entity.setDeltaMovement(entity.getDeltaMovement().add(
                 new Vector3d(
                         (facing.getOpposite().getStepX() + arrows.getStepX()) * 0.1,

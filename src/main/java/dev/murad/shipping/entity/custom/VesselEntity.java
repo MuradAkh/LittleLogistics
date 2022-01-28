@@ -51,6 +51,7 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
     private BoatEntity.Status status;
     private BoatEntity.Status oldStatus;
     private double lastYd;
+    private Optional<Pair<BlockPos, BlockState>> lastCornerGuideRail = Optional.empty();
 
     protected Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
     protected Optional<Pair<ISpringableEntity, SpringEntity>> dominant = Optional.empty();
@@ -489,4 +490,11 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
         this.calculateEntityAnimation(this, false);
     }
 
+    public Optional<Pair<BlockPos, BlockState>> getLastCornerGuideRail() {
+        return lastCornerGuideRail;
+    }
+
+    public void setLastCornerGuideRail(Pair<BlockPos, BlockState> lastCornerGuideRail) {
+        this.lastCornerGuideRail = Optional.of(lastCornerGuideRail);
+    }
 }

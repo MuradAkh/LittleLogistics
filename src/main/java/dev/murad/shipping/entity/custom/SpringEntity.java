@@ -24,7 +24,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
+import dev.murad.shipping.block.guide_rail.CornerGuideRailBlock;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
+import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.EntitySpringAPI;
@@ -175,6 +177,13 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
                 double k = dominant instanceof AbstractTugEntity ? 0.2 : 0.13;
                 double l0 = maxDstSq;
                 dominated.setDeltaMovement(k*(dist-l0)*dx, k*(dist-l0)*dy, k*(dist-l0)*dz);
+                if(!this.level.isClientSide) {
+                    dominated.getLastCornerGuideRail().ifPresent(pair -> {
+                        if (dominated.isColliding(pair.getFirst(), pair.getSecond())) {
+                            ModBlocks.GUIDE_RAIL_CORNER.get().entityInside(pair.getSecond(), this.level, pair.getFirst(), dominated);
+                        }
+                    });
+                }
             }
 
             if(!level.isClientSide) { // send update every tick to ensure client has infos
