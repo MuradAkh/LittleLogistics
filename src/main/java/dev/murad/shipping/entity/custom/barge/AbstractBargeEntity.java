@@ -140,4 +140,8 @@ public abstract class AbstractBargeEntity extends VesselEntity implements ISprin
     public boolean isDockable() {
         return this.dominant.map(dom -> this.distanceToSqr((Entity) dom.getFirst()) < 1.1).orElse(true);
     }
+
+    public boolean allowDockInterface(){
+        return isDockable();
+    }
 }

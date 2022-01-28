@@ -66,6 +66,10 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     private boolean independentMotion = false;
     private static final DataParameter<Boolean> INDEPENDENT_MOTION = EntityDataManager.defineId(AbstractTugEntity.class, DataSerializers.BOOLEAN);
 
+    public boolean allowDockInterface(){
+        return isDocked();
+    }
+
     private TugDummyHitboxEntity extraHitbox = null;
 
     private List<Vector2f> path;
