@@ -1,11 +1,12 @@
 package dev.murad.shipping.block.dock;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
+import dev.murad.shipping.block.IVesselLoader;
+import dev.murad.shipping.entity.custom.VesselEntity;
 import net.minecraft.tileentity.HopperTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.Optional;
 
@@ -15,14 +16,24 @@ public abstract class AbstractDockTileEntity extends TileEntity {
         super(p_i48289_1_);
     }
 
-    public abstract boolean holdVessel(Entity vessel, Direction direction);
+    public abstract boolean holdVessel(VesselEntity vessel, Direction direction);
 
-    public Optional<HopperTileEntity> getInsertHopper(){
-        TileEntity mayBeHopper = this.level.getBlockEntity(this.getBlockPos().above());
+    public Optional<HopperTileEntity> getHopper(){
+        TileEntity mayBeHopper = this.level.getBlockEntity(this.getTargetBlockPos());
         if (mayBeHopper instanceof HopperTileEntity) {
             return Optional.of((HopperTileEntity) mayBeHopper);
         }
         else return Optional.empty();
     }
+
+    public Optional<IVesselLoader> getVesselLoader(){
+        TileEntity mayBeHopper = this.level.getBlockEntity(this.getTargetBlockPos());
+        if (mayBeHopper instanceof IVesselLoader) {
+            return Optional.of((IVesselLoader) mayBeHopper);
+        }
+        else return Optional.empty();
+    }
+
+    protected abstract BlockPos getTargetBlockPos();
 
 }

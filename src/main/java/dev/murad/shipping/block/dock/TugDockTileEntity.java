@@ -1,6 +1,8 @@
 package dev.murad.shipping.block.dock;
 
 import com.mojang.datafixers.util.Pair;
+import dev.murad.shipping.block.IVesselLoader;
+import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
@@ -8,6 +10,7 @@ import dev.murad.shipping.util.InventoryUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.HopperTileEntity;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
@@ -19,7 +22,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class TugDockTileEntity extends AbstractDockTileEntity implements ITickableTileEntity {
+public class TugDockTileEntity extends AbstractDockTileEntity {
 
     public TugDockTileEntity(TileEntityType<?> tileEntityTypeIn) {
         super(tileEntityTypeIn);
@@ -28,13 +31,15 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
         super(ModTileEntitiesTypes.TUG_DOCK.get());
     }
 
-    private boolean checkTugFull(AbstractTugEntity tug){
-        return tug.getItem(1).getCount() == tug.getItem(1).getMaxStackSize();
+    private boolean handleItemHopper(VesselEntity tugEntity, HopperTileEntity hopper){
+        if(!(tugEntity instanceof IInventory)){
+            return false;
+        }
+        return InventoryUtils.mayMoveIntoInventory((IInventory) tugEntity, hopper);
     }
 
 
-
-    public boolean holdVessel(Entity tug, Direction direction){
+    public boolean holdVessel(VesselEntity tug, Direction direction){
         if (!(tug instanceof AbstractTugEntity)
                 || !getBlockState().getValue(TugDockBlock.FACING).getOpposite().equals(direction)
                 || tug.getDirection().equals(getRowDirection(getBlockState().getValue(TugDockBlock.FACING)))
@@ -42,23 +47,26 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
             return false;
         }
 
-        // Tug needs to be loaded
-        // TODO: change for liquid powered tugs
-        if(getInsertHopper().map(hopper -> InventoryUtils.mayMoveIntoInventory((IInventory) tug, hopper)).orElse(false)){
+
+        if(getHopper().map(hopper -> InventoryUtils.mayMoveIntoInventory((IInventory) tug, hopper))
+                .orElse(getVesselLoader().map(l -> l.holdVessel(tug, IVesselLoader.Mode.EXPORT)).orElse(false))){
             return true;
         }
+
+
         List<Pair<AbstractBargeEntity, BargeDockTileEntity>> barges = getBargeDockPairs((AbstractTugEntity) tug);
 
-        // Barges with corresponding docks for docking aren't dockable yet
-//        if(!barges.stream().map(pair -> pair.getKey().isDockable()).reduce(true, Boolean::logicalAnd)){
-//            return true;
-//        }
 
         if (barges.stream().map(pair -> pair.getSecond().holdVessel(pair.getFirst(), direction)).reduce(false, Boolean::logicalOr)){
             return true;
         }
 
         return false;
+    }
+
+    @Override
+    protected BlockPos getTargetBlockPos() {
+        return this.getBlockPos().above();
     }
 
     private List<Pair<AbstractBargeEntity, BargeDockTileEntity>> getBargeDockPairs(AbstractTugEntity tug){
@@ -90,12 +98,6 @@ public class TugDockTileEntity extends AbstractDockTileEntity implements ITickab
         return Optional.ofNullable(this.level.getBlockEntity(next))
                 .filter(e -> e instanceof BargeDockTileEntity)
                 .map(e -> (BargeDockTileEntity) e);
-    }
-
-
-    @Override
-    public void tick() {
-
     }
 
     @Override
