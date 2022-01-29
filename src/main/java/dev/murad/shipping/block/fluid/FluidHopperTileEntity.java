@@ -52,7 +52,7 @@ public class FluidHopperTileEntity extends TileEntity implements ITickableTileEn
         return entity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).resolve().map(cap -> {
             if (entity instanceof VesselEntity){
                 VesselEntity vessel = (VesselEntity) entity;
-                return vessel.allowDockInterface() && vessel.getBlockPos().equals(pos);
+                return vessel.allowDockInterface() && (vessel.getBlockPos().getX() == pos.getX() && vessel.getBlockPos().getZ() == pos.getZ());
             } else {
                 return true;
             }
@@ -156,7 +156,7 @@ public class FluidHopperTileEntity extends TileEntity implements ITickableTileEn
     }
 
     private void tryExportFluid() {
-        getExternalFluidHandler(this.getBlockPos().relative(this.getBlockState().getValue(FluidHopperBlock.FACING)).below())
+        getExternalFluidHandler(this.getBlockPos().relative(this.getBlockState().getValue(FluidHopperBlock.FACING)))
                 .ifPresent(iFluidHandler -> {
             FluidUtil.tryFluidTransfer(iFluidHandler, this.tank, 500, true);
         });
