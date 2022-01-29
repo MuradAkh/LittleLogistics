@@ -14,6 +14,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 
 public class TugNodeProcessor extends SwimNodeProcessor {
@@ -28,28 +29,52 @@ public class TugNodeProcessor extends SwimNodeProcessor {
         for(Direction direction : Arrays.asList(Direction.WEST, Direction.EAST, Direction.SOUTH, Direction.NORTH)) {
             PathPoint pathpoint = this.getWaterNode(p_222859_2_.x + direction.getStepX(), p_222859_2_.y + direction.getStepY(), p_222859_2_.z + direction.getStepZ());
             if (pathpoint != null && !pathpoint.closed) {
-                BlockPos pos = pathpoint.asBlockPos();
-                int penalty = 0;
-                for (BlockPos surr : Arrays.asList(pos.east(), pos.west(), pos.south(), pos.north(), pos.north().west(), pos.north().east(), pos.south().east(), pos.south().west())){
-                    if(!level.getBlockState(surr).is(Blocks.WATER)){
-                        penalty++;
-                    }
-                    if(
-                            level.getBlockState(surr).is(ModBlocks.GUIDE_RAIL_CORNER.get()) ||
-                            level.getBlockState(surr).is(ModBlocks.BARGE_DOCK.get()) ||
-                            level.getBlockState(surr).is(ModBlocks.TUG_DOCK.get())
-
-                    ){
-                        penalty = 0;
-                        break;
-                    }
-                }
-                pathpoint.costMalus += Math.min(penalty, 5);
                 p_222859_1_[i++] = pathpoint;
             }
         }
 
         return i;
+    }
+
+    @Override
+    protected PathPoint getNode(int p_176159_1_, int p_176159_2_, int p_176159_3_) {
+        PathPoint pathpoint = super.getNode(p_176159_1_, p_176159_2_, p_176159_3_);
+        if (pathpoint != null) {
+            BlockPos pos = pathpoint.asBlockPos();
+            float penalty = 0;
+            for (BlockPos surr : Arrays.asList(
+                    pos.east(),
+                    pos.west(),
+                    pos.south(),
+                    pos.north(),
+                    pos.north().west(),
+                    pos.north().west().north().west(),
+                    pos.north().east(),
+                    pos.north().east().north().east(),
+                    pos.south().east(),
+                    pos.south().west(),
+                    pos.south().west().south().west(),
+                    pos.south().east().south().east()
+            )
+            ){
+                if(!level.getBlockState(surr).is(Blocks.WATER)){
+                    penalty = 5f;
+                }
+                if(
+                        level.getBlockState(surr).is(ModBlocks.GUIDE_RAIL_CORNER.get()) ||
+                                level.getBlockState(surr).is(ModBlocks.BARGE_DOCK.get()) ||
+                                level.getBlockState(surr).is(ModBlocks.TUG_DOCK.get())
+
+                ){
+                    penalty = 0;
+                    break;
+                }
+            }
+            pathpoint.costMalus += penalty;
+        }
+
+
+        return pathpoint;
     }
 
     private PathPoint getWaterNode(int p_186328_1_, int p_186328_2_, int p_186328_3_) {
