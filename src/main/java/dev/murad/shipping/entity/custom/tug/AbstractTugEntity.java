@@ -13,9 +13,9 @@ import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.Train;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.CampfireBlock;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -142,6 +142,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         }
 
         return super.getCapability(cap, side);
+    }
+
+    @Override
+    public boolean isPushedByFluid() {
+        return true;
     }
 
     private ItemStackHandler createHandler() {
@@ -347,12 +352,17 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     }
 
     private void followGuideRail(){
-        BlockState below = this.level.getBlockState(getOnPos().below());
-        if (below.getBlock().is(ModBlocks.GUIDE_RAIL_TUG.get())){
-            Direction arrows = TugGuideRailBlock.getArrowsDirection(below);
-            this.yRot = arrows.toYRot();
-            this.setDeltaMovement(this.getDeltaMovement().add(
-                    new Vector3d(arrows.getStepX() * 0.03,0,arrows.getStepZ() * 0.03)));
+        List<BlockState> belowList = Arrays.asList(this.level.getBlockState(getOnPos().below()),
+                this.level.getBlockState(getOnPos().below().below()));
+        BlockState water = this.level.getBlockState(getOnPos());
+        for (BlockState below : belowList) {
+            if (below.getBlock().is(ModBlocks.GUIDE_RAIL_TUG.get()) && water.is(Blocks.WATER)) {
+                Direction arrows = TugGuideRailBlock.getArrowsDirection(below);
+                this.yRot = arrows.toYRot();
+                double modifier = 0.03;
+                this.setDeltaMovement(this.getDeltaMovement().add(
+                        new Vector3d(arrows.getStepX() * modifier, 0, arrows.getStepZ() * modifier)));
+            }
         }
     }
 

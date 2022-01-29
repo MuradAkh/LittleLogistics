@@ -14,6 +14,7 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class TugGuideRailBlock extends Block {
     public static final DirectionProperty FACING = HorizontalBlock.FACING;
