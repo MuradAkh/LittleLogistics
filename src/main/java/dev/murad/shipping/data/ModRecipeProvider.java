@@ -26,7 +26,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(ModItems.SPRING.get()))
                 .save(consumer);
 
-        ShapedRecipeBuilder.shaped(ModBlocks.BARGE_DOCK.get())
+        ShapedRecipeBuilder.shaped(ModBlocks.BARGE_DOCK.get(), 2)
                 .define('#', ModItems.SPRING.get())
                 .define('_', Tags.Items.STONE)
                 .define('$', Items.IRON_INGOT)
@@ -47,7 +47,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.POWERED_RAIL))
                 .save(consumer);
 
-        ShapedRecipeBuilder.shaped(ModBlocks.GUIDE_RAIL_TUG.get(), 3)
+        ShapedRecipeBuilder.shaped(ModBlocks.GUIDE_RAIL_TUG.get(), 8)
                 .define('#', ModItems.SPRING.get())
                 .define('_', Tags.Items.STONE)
                 .define('$', Items.POWERED_RAIL)
