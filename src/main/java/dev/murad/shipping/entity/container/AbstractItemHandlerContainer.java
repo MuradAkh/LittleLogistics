@@ -22,11 +22,6 @@ public abstract class AbstractItemHandlerContainer extends Container {
         this.playerInventory = new InvWrapper(playerInventory);
     }
 
-    @Override
-    public boolean stillValid(PlayerEntity p_75145_1_) {
-        return true;
-    }
-
     private int addSlotRange(IItemHandler handler, int index, int x, int y, int amount, int dx) {
         for (int i = 0; i < amount; i++) {
             addSlot(new SlotItemHandler(handler, index, x, y));

@@ -39,6 +39,10 @@ public class SteamTugContainer extends AbstractItemHandlerContainer {
         return data.get(2) > 0;
     }
 
+    @Override
+    public boolean stillValid(PlayerEntity p_75145_1_) {
+        return tugEntity.stillValid(p_75145_1_);
+    }
 
     @Override
     protected int getSlotNum() {

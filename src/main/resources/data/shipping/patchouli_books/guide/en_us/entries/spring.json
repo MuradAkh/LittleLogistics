@@ -5,7 +5,7 @@
   "pages": [
     {
       "type": "patchouli:crafting",
-      "recipe": "shipping:tug_route",
+      "recipe": "shipping:spring",
       "text": "Used to link vessels together. Right click vessels in order to create a “vessel train”. A train can only have one tugboat and cannot have loops. Will break if vessels are more than 20 blocks apart."
     }
   ]

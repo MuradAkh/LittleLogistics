@@ -30,4 +30,9 @@ public class FishingBargeContainer extends AbstractItemHandlerContainer {
     protected int getSlotNum() {
         return 9;
     }
+
+    @Override
+    public boolean stillValid(PlayerEntity p_75145_1_) {
+        return fishingBargeEntity.stillValid(p_75145_1_);
+    }
 }

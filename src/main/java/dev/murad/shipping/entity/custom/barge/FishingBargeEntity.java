@@ -130,7 +130,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
     private void tickFish(){
         double overFishPenalty = isOverFished() ? 0.05 : 1;
         double shallowPenalty = computeDepthPenalty();
-        double chance = 0.5 * overFishPenalty * shallowPenalty;
+        double chance = 0.25 * overFishPenalty * shallowPenalty;
         double treasure_chance = shallowPenalty > 0.4 ? chance * (shallowPenalty / 2)
                 * ShippingConfig.fishing_treasure_chance_modifier.get() : 0;
         double r = Math.random();
