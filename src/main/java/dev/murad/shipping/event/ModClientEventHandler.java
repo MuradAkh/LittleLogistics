@@ -3,6 +3,7 @@ package dev.murad.shipping.event;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
+import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModItems;
@@ -45,6 +46,9 @@ public class ModClientEventHandler {
 
     @SubscribeEvent
     public static void onRenderWorldLast(RenderWorldLastEvent event) {
+        if(ShippingConfig.disable_tug_route_beacons.get()){
+            return;
+        }
         PlayerEntity player = Minecraft.getInstance().player;
         ItemStack stack = player.getItemInHand(Hand.MAIN_HAND);
         if (stack.getItem().equals(ModItems.TUG_ROUTE.get())){
