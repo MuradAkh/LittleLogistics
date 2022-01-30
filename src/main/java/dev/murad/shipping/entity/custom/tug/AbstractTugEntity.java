@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
+import dev.murad.shipping.data.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.VesselEntity;
@@ -58,8 +59,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     protected final ItemStackHandler itemHandler = createHandler();
     protected final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
     protected boolean contentsChanged = false;
-    protected int burnTime = 0;
-    protected int burnCapacity = 0;
     protected boolean docked = false;
     private int dockCheckCooldown = 0;
     private boolean independentMotion = false;
@@ -99,43 +98,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         super.dropLeash(p_110160_1_, p_110160_2_);
     }
 
-    public int getBurnProgress() {
-        int i = burnCapacity;
-        if (i == 0) {
-            i = 200;
-        }
 
-        return burnTime * 13 / i;
-    }
-
-    // CONTAINER STUFF
-    public boolean isLit() {
-        return burnTime > 0;
-    }
-
-    protected final IIntArray dataAccess = new IIntArray() {
-        public int get(int p_221476_1_) {
-            switch (p_221476_1_) {
-                case 0:
-                    return AbstractTugEntity.this.getId();
-                case 1:
-                    return AbstractTugEntity.this.getBurnProgress();
-                case 2:
-                    return AbstractTugEntity.this.isLit() ? 1 : -1;
-            }
-            return 0;
-        }
-
-        public void set(int p_221477_1_, int p_221477_2_) {
-
-        }
-
-        @Override
-        public int getCount() {
-            return 3;
-        }
-    };
-
+    public abstract DataAccessor getDataAccessor();
 
     @Nonnull
     @Override
@@ -206,8 +170,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     @Override
     public void readAdditionalSaveData(CompoundNBT compound) {
         itemHandler.deserializeNBT(compound.getCompound("inv"));
-        burnTime = compound.contains("burn") ? compound.getInt("burn") : 0;
-        burnCapacity = compound.contains("burn_capacity") ? compound.getInt("burn_capacity") : 0;
         nextStop = compound.contains("next_stop") ? compound.getInt("next_stop") : 0;
         contentsChanged = true;
         super.readAdditionalSaveData(compound);
@@ -216,8 +178,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     @Override
     public void addAdditionalSaveData(CompoundNBT compound) {
         compound.put("inv", itemHandler.serializeNBT());
-        compound.putInt("burn", burnTime);
-        compound.putInt("burn_capacity", burnCapacity);
         compound.putInt("next_stop", nextStop);
         super.addAdditionalSaveData(compound);
     }
@@ -271,7 +231,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
                 .reduce(false, (acc, curr) -> acc || curr);
 
         if(this.docked) {
-            dockCheckCooldown = 20;
+            dockCheckCooldown = 20; // todo: magic number
             this.setDeltaMovement(Vector3d.ZERO);
             this.moveTo(x + 0.5 ,getY(),z + 0.5);
         } else {
@@ -315,12 +275,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
 
     @Override
     public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
-
         if (!player.level.isClientSide()) {
-            NetworkHooks.openGui((ServerPlayerEntity) player, createContainerProvider(), buffer ->
-                    buffer.writeInt(this.getId()).writeInt(getBurnProgress()).writeInt(isLit() ? 1 : -1));
+            NetworkHooks.openGui((ServerPlayerEntity) player, createContainerProvider(), getDataAccessor()::write);
         }
-        return ActionResultType.PASS;
+        // don't open GUI *and* use item in hand
+        return ActionResultType.CONSUME;
     }
 
     @Override

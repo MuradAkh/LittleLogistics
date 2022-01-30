@@ -20,6 +20,9 @@ public class ModItems {
     public static final RegistryObject<Item> STEAM_TUG = Registration.ITEMS.register("tug",
             () -> new SteamTugItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));
 
+    public static final RegistryObject<Item> ENERGY_TUG = Registration.ITEMS.register("energy_tug",
+            () -> new EnergyTugItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));
+
     public static final RegistryObject<Item> SPRING = Registration.ITEMS.register("spring",
             () -> new SpringItem(new Item.Properties().stacksTo(64).tab(ItemGroup.TAB_TRANSPORTATION)));
 

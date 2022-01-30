@@ -62,9 +62,9 @@ public abstract class AbstractBargeEntity extends VesselEntity implements ISprin
     public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
         if (!this.level.isClientSide) {
             doInteract(player);
-            return ActionResultType.PASS;
         }
-        return ActionResultType.SUCCESS;
+        // don't interact *and* use current item
+        return ActionResultType.CONSUME;
     }
 
     abstract protected void doInteract(PlayerEntity player);
