@@ -48,7 +48,7 @@ public class TugDockTileEntity extends AbstractDockTileEntity {
         }
 
 
-        if(getHopper().map(hopper -> InventoryUtils.mayMoveIntoInventory((IInventory) tug, hopper))
+        if(getHopper().map(hopper -> handleItemHopper(tug, hopper))
                 .orElse(getVesselLoader().map(l -> l.holdVessel(tug, IVesselLoader.Mode.EXPORT)).orElse(false))){
             return true;
         }
