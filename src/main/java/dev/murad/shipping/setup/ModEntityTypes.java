@@ -6,6 +6,7 @@ import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.barge.ChunkLoaderBargeEntity;
 import dev.murad.shipping.entity.custom.barge.FishingBargeEntity;
 import dev.murad.shipping.entity.custom.barge.FluidTankBargeEntity;
+import dev.murad.shipping.entity.custom.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.custom.tug.SteamTugEntity;
 import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
 import net.minecraft.entity.EntityClassification;
@@ -43,6 +44,12 @@ public class ModEntityTypes {
                     () -> EntityType.Builder.<SteamTugEntity>of(SteamTugEntity::new,
                                     EntityClassification.MISC).sized(0.7f, 0.6f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "tug").toString()));
+
+    public static final RegistryObject<EntityType<EnergyTugEntity>> ENERGY_TUG =
+            Registration.ENTITIES.register("energy_tug",
+                    () -> EntityType.Builder.<EnergyTugEntity>of(EnergyTugEntity::new,
+                                    EntityClassification.MISC).sized(0.7f, 0.6f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "energy_tug").toString()));
 
     public static final RegistryObject<EntityType<TugDummyHitboxEntity>> TUG_DUMMY_HITBOX =
             Registration.ENTITIES.register("tug_dummy_hitbox",

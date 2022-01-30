@@ -11,8 +11,11 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+/**
+ * Forge-wide event bus
+ */
 @Mod.EventBusSubscriber(modid = ShippingMod.MOD_ID)
-public class ModEventHandler {
+public class ForgeEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void entityInteract(PlayerInteractEvent.EntityInteract event) {
