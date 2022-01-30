@@ -3,6 +3,7 @@ package dev.murad.shipping.data.client;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.dock.BargeDockBlock;
 import dev.murad.shipping.block.dock.TugDockBlock;
+import dev.murad.shipping.block.energy.VesselChargerBlock;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
 import dev.murad.shipping.block.guide_rail.CornerGuideRailBlock;
 import dev.murad.shipping.setup.ModBlocks;
@@ -90,9 +91,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .build()
         );
 
-
-
-
-
+        getVariantBuilder(ModBlocks.VESSEL_CHARGER.get()).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(models()
+                        .withExistingParent("vessel_charger", modLoc("fluid_hopper_parent_model"))
+                )
+                .rotationY((int) state.getValue(VesselChargerBlock.FACING).getClockWise().toYRot())
+                .build()
+        );
     }
 }
