@@ -3,6 +3,7 @@
   "item.shipping.barge": "Chest Barge",
   "item.shipping.chunk_loader_barge": "Chunk Loader Barge",
   "item.shipping.fishing_barge": "Auto-Fishing Barge",
+  "item.shipping.fluid_barge": "Fluid Tank Barge",
   "item.shipping.spring": "Vessel Chain",
   "item.shipping.tug_route": "Tug Route",
 
@@ -10,12 +11,15 @@
   "entity.shipping.barge": "Chest Barge",
   "entity.shipping.chunk_loader_barge": "Chunk Loader Barge",
   "entity.shipping.fishing_barge": "Auto-Fishing Barge",
+  "entity.shipping.fluid_barge": "Fluid Tank Barge",
   "entity.shipping.spring": "Vessel Chain",
 
   "block.shipping.tug_dock": "Tug Dock",
   "block.shipping.barge_dock": "Barge Dock",
   "block.shipping.guide_rail_tug": "Tug Guide Rail",
   "block.shipping.guide_rail_corner": "Vessel Corner Guide Rail",
+  "block.shipping.vessel_charger": "Vessel Charger",
+  "block.shipping.fluid_hopper": "Fluid Hopper",
 
   "screen.shipping.tug": "Steam Tug",
   "screen.shipping.fishing_barge": "Auto-Fishing Barge",
