@@ -1,9 +1,11 @@
 package dev.murad.shipping.block.energy;
 
 import dev.murad.shipping.block.IVesselLoader;
+import dev.murad.shipping.capability.ReadWriteEnergyStorage;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -21,13 +23,13 @@ import javax.annotation.Nullable;
 public class VesselChargerTileEntity extends TileEntity implements ITickableTileEntity, IVesselLoader {
     private static final int MAX_RECEIVE = 100;
     private static final int MAX_EXTRACT = 100;
-    private final EnergyStorage internalBattery = new EnergyStorage(10000, MAX_RECEIVE, MAX_EXTRACT);
-
+    private static final int MAX_CAPACITY = 10000;
+    private final ReadWriteEnergyStorage internalBattery = new ReadWriteEnergyStorage("Internal", MAX_RECEIVE, MAX_EXTRACT);
     private final LazyOptional<IEnergyStorage> holder = LazyOptional.of(() -> internalBattery);
-    private int cooldownTime = 0;
 
     public VesselChargerTileEntity() {
         super(ModTileEntitiesTypes.VESSEL_CHARGER.get());
+        internalBattery.setEnergy(0, MAX_CAPACITY);
     }
 
     @Override
@@ -41,11 +43,7 @@ public class VesselChargerTileEntity extends TileEntity implements ITickableTile
     @Override
     public void tick() {
         if (this.level != null && !this.level.isClientSide) {
-            --this.cooldownTime;
-            if (this.cooldownTime <= 0) {
-                this.cooldownTime = 10;
-                this.tryChargeEntity();
-            }
+            this.tryChargeEntity();
         }
     }
 
@@ -71,8 +69,6 @@ public class VesselChargerTileEntity extends TileEntity implements ITickableTile
     }
 
     public void use(PlayerEntity player, Hand hand) {
-        internalBattery.receiveEnergy(100, false);
-        player.displayClientMessage(new StringTextComponent(internalBattery.getEnergyStored() + "/" + internalBattery.getMaxEnergyStored() + "RF"), false);
-
+        player.displayClientMessage(new StringTextComponent(internalBattery.getEnergyStored() + "/" + internalBattery.getMaxEnergyStored() + "FE"), false);
     }
 }

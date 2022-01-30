@@ -1,5 +1,6 @@
 {
   "item.shipping.tug": "Steam Tug",
+  "item.shipping.energy_tug": "Energy Tug",
   "item.shipping.barge": "Chest Barge",
   "item.shipping.chunk_loader_barge": "Chunk Loader Barge",
   "item.shipping.fishing_barge": "Auto-Fishing Barge",
@@ -8,6 +9,7 @@
   "item.shipping.tug_route": "Tug Route",
 
   "entity.shipping.tug": "Steam Tug",
+  "entity.shipping.energy_tug": "Energy Tug",
   "entity.shipping.barge": "Chest Barge",
   "entity.shipping.chunk_loader_barge": "Chunk Loader Barge",
   "entity.shipping.fishing_barge": "Auto-Fishing Barge",
@@ -22,6 +24,8 @@
   "block.shipping.fluid_hopper": "Fluid Hopper",
 
   "screen.shipping.tug": "Steam Tug",
+  "screen.shipping.energy_tug": "Energy Tug",
+  "screen.shipping.energy_tug.energy": "%s/%s FE",
   "screen.shipping.fishing_barge": "Auto-Fishing Barge",
 
   "item.shipping.tug_route.description": "Right click to add stop, right click at the same location to remove. Nodes will always be added to the end of the route",
