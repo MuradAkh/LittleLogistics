@@ -57,6 +57,25 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.POWERED_RAIL))
                 .save(consumer);
 
+        ShapedRecipeBuilder.shaped(ModBlocks.FLUID_HOPPER.get(), 1)
+                .define('_', Items.GLASS)
+                .define('$', Items.HOPPER)
+                .pattern("   ")
+                .pattern("_$_")
+                .pattern(" _ ")
+                .unlockedBy("has_item", has(Items.HOPPER))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModBlocks.VESSEL_CHARGER.get(), 1)
+                .define('_', Items.REDSTONE_BLOCK)
+                .define('$', Items.IRON_INGOT)
+                .define('.', Items.GOLD_INGOT)
+                .pattern(" . ")
+                .pattern(" $ ")
+                .pattern("_$_")
+                .unlockedBy("has_item", has(Items.REDSTONE))
+                .save(consumer);
+
         ShapedRecipeBuilder.shaped(ModItems.SPRING.get(), 6)
                 .define('_', Tags.Items.STRING)
                 .define('$', Items.IRON_NUGGET)
@@ -103,6 +122,15 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("###")
                 .pattern("$$$")
                 .unlockedBy("has_item", has(Items.FISHING_ROD))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModItems.FLUID_BARGE.get())
+                .define('#', Items.GLASS)
+                .define('$', Items.IRON_INGOT)
+                .pattern("# #")
+                .pattern(" # ")
+                .pattern("$$$")
+                .unlockedBy("has_item", has(Items.GLASS))
                 .save(consumer);
 
         ShapedRecipeBuilder.shaped(ModItems.CHUNK_LOADER_BARGE.get())
