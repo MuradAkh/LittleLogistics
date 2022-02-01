@@ -26,6 +26,7 @@ public class VesselChargerTileEntity extends TileEntity implements ITickableTile
     private static final int MAX_CAPACITY = 10000;
     private final ReadWriteEnergyStorage internalBattery = new ReadWriteEnergyStorage("Internal", MAX_RECEIVE, MAX_EXTRACT);
     private final LazyOptional<IEnergyStorage> holder = LazyOptional.of(() -> internalBattery);
+    private int cooldownTime = 0;
 
     public VesselChargerTileEntity() {
         super(ModTileEntitiesTypes.VESSEL_CHARGER.get());
@@ -40,20 +41,25 @@ public class VesselChargerTileEntity extends TileEntity implements ITickableTile
         return super.getCapability(capability, facing);
     }
 
+
     @Override
     public void tick() {
         if (this.level != null && !this.level.isClientSide) {
-            this.tryChargeEntity();
+            --this.cooldownTime;
+            if (this.cooldownTime <= 0) {
+                this.cooldownTime = tryChargeEntity() ? 0 : 10;
+            }
         }
     }
 
-    private void tryChargeEntity() {
-        IVesselLoader.getEntityCapability(getBlockPos().relative(getBlockState().getValue(VesselChargerBlock.FACING)),
-                CapabilityEnergy.ENERGY, level).ifPresent(iEnergyStorage -> {
+
+    private boolean tryChargeEntity() {
+        return IVesselLoader.getEntityCapability(getBlockPos().relative(getBlockState().getValue(VesselChargerBlock.FACING)),
+                CapabilityEnergy.ENERGY, level).map(iEnergyStorage -> {
                     int vesselCap = iEnergyStorage.receiveEnergy(MAX_EXTRACT, true);
                     int toTransfer = internalBattery.extractEnergy(vesselCap, false);
-                    iEnergyStorage.receiveEnergy(toTransfer, false);
-        });
+                    return iEnergyStorage.receiveEnergy(toTransfer, false) > 0;
+        }).orElse(false);
     }
 
     @Override
