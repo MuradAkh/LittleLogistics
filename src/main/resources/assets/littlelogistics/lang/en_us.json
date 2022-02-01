@@ -38,5 +38,9 @@
   "item.littlelogistics.spring.noTwoTugs": "Can't link two tugs",
   "item.littlelogistics.spring.tooFar": "Vessels too far to link",
   "item.littlelogistics.spring.noLoops": "Can't link vessels in a loop",
-  "item.littlelogistics.fishing_barge.description": "For best yield, use on long routes in deep and open water"
+  "item.littlelogistics.fishing_barge.description": "For best yield, use on long routes in deep and open water",
+
+  "block.littlelogistics.vessel_charger.capacity": "%s/%s FE",
+  "block.littlelogistics.fluid_hopper.capacity": "%s %s/%s mB",
+  "block.littlelogistics.fluid_hopper.capacity_empty": "Empty 0/%s mB"
 }

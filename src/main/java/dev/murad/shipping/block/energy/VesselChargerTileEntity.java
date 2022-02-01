@@ -11,6 +11,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -75,6 +76,7 @@ public class VesselChargerTileEntity extends TileEntity implements ITickableTile
     }
 
     public void use(PlayerEntity player, Hand hand) {
-        player.displayClientMessage(new StringTextComponent(internalBattery.getEnergyStored() + "/" + internalBattery.getMaxEnergyStored() + "FE"), false);
+        player.displayClientMessage(new TranslationTextComponent("block.littlelogistics.vessel_charger.capacity",
+                internalBattery.getEnergyStored(), internalBattery.getMaxEnergyStored()), false);
     }
 }
