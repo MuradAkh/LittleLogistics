@@ -98,9 +98,8 @@ public class FluidHopperTileEntity extends TileEntity implements ITickableTileEn
         if (this.level != null && !this.level.isClientSide) {
             --this.cooldownTime;
             if (this.cooldownTime <= 0) {
-                this.cooldownTime = 10;
-                this.tryExportFluid();
-                this.tryImportFluid();
+                // do not short-circuit
+                this.cooldownTime = Boolean.logicalOr(this.tryExportFluid(), tryImportFluid()) ? 0 : 10;
             }
         }
     }
@@ -113,17 +112,17 @@ public class FluidHopperTileEntity extends TileEntity implements ITickableTileEn
 
     }
 
-    private void tryImportFluid() {
-        getExternalFluidHandler(this.getBlockPos().above()).ifPresent(iFluidHandler -> {
-           FluidUtil.tryFluidTransfer(this.tank, iFluidHandler, 500, true);
-        });
+    private boolean tryImportFluid() {
+        return getExternalFluidHandler(this.getBlockPos().above()).map(iFluidHandler ->
+           !FluidUtil.tryFluidTransfer(this.tank, iFluidHandler, 50, true).isEmpty()
+        ).orElse(false);
     }
 
-    private void tryExportFluid() {
-        getExternalFluidHandler(this.getBlockPos().relative(this.getBlockState().getValue(FluidHopperBlock.FACING)))
-                .ifPresent(iFluidHandler -> {
-            FluidUtil.tryFluidTransfer(iFluidHandler, this.tank, 500, true);
-        });
+    private boolean tryExportFluid() {
+        return getExternalFluidHandler(this.getBlockPos().relative(this.getBlockState().getValue(FluidHopperBlock.FACING)))
+                .map(iFluidHandler ->
+            !FluidUtil.tryFluidTransfer(iFluidHandler, this.tank, 50, true).isEmpty()
+        ).orElse(false);
     }
 
     @Override
