@@ -16,13 +16,50 @@ import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.IBooleanFunction;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.stream.Stream;
 
 public class VesselChargerBlock extends Block {
     public static final DirectionProperty FACING = HorizontalBlock.FACING;
+    private static final VoxelShape SHAPE_N = Stream.of(
+            Block.box(3, 2, 3, 13, 13, 13),
+            Block.box(0, 0, 0, 16, 2, 16),
+            Block.box(2, 13, 2, 14, 15, 14),
+            Block.box(7, 4, 0, 9, 6, 3),
+            Block.box(7, 4, 0, 9, 6, 3),
+            Block.box(6, 15, 6, 10, 16, 10)
+    ).reduce((v1, v2) -> VoxelShapes.join(v1, v2, IBooleanFunction.OR)).get();;
+    private static final VoxelShape SHAPE_W = Stream.of(
+            Block.box(3, 2, 3, 13, 13, 13),
+            Block.box(0, 0, 0, 16, 2, 16),
+            Block.box(2, 13, 2, 14, 15, 14),
+            Block.box(0, 4, 7, 3, 6, 9),
+            Block.box(0, 4, 7, 3, 6, 9),
+            Block.box(6, 15, 6, 10, 16, 10)
+    ).reduce((v1, v2) -> VoxelShapes.join(v1, v2, IBooleanFunction.OR)).get();;
+    private static final VoxelShape SHAPE_E = Stream.of(
+            Block.box(3, 2, 3, 13, 13, 13),
+            Block.box(0, 0, 0, 16, 2, 16),
+            Block.box(2, 13, 2, 14, 15, 14),
+            Block.box(13, 4, 7, 16, 6, 9),
+            Block.box(13, 4, 7, 16, 6, 9),
+            Block.box(6, 15, 6, 10, 16, 10)
+    ).reduce((v1, v2) -> VoxelShapes.join(v1, v2, IBooleanFunction.OR)).get();;
+    private static final VoxelShape SHAPE_S = Stream.of(
+            Block.box(3, 2, 3, 13, 13, 13),
+            Block.box(0, 0, 0, 16, 2, 16),
+            Block.box(2, 13, 2, 14, 15, 14),
+            Block.box(7, 4, 13, 9, 6, 16),
+            Block.box(7, 4, 13, 9, 6, 16),
+            Block.box(6, 15, 6, 10, 16, 10)
+    ).reduce((v1, v2) -> VoxelShapes.join(v1, v2, IBooleanFunction.OR)).get();;
 
     public VesselChargerBlock(Properties p_i48440_1_) {
         super(p_i48440_1_);
@@ -66,6 +103,21 @@ public class VesselChargerBlock extends Block {
     @Override
     protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(FACING);
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState p_220053_1_, IBlockReader p_220053_2_, BlockPos p_220053_3_, ISelectionContext p_220053_4_) {
+        switch (p_220053_1_.getValue(FACING)){
+            case SOUTH:
+                return SHAPE_S;
+            case WEST:
+                return SHAPE_W;
+            case EAST:
+                return SHAPE_E;
+            case NORTH:
+            default:
+                return SHAPE_N;
+        }
     }
 
     @Nullable

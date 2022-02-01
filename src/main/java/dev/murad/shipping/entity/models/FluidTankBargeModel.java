@@ -16,28 +16,29 @@ public class FluidTankBargeModel extends EntityModel<FluidTankBargeEntity> {
 	public FluidTankBargeModel() {
 		texWidth = 128;
 		texHeight = 128;
+
 		bb_main = new ModelRenderer(this);
 		bb_main.setPos(0.0F, 23.0F, 0.0F);
 		bb_main.texOffs(0, 0).addBox(-6.0F, -27.0F, -7.0F, 12.0F, 5.0F, 14.0F, 0.0F, false);
-		bb_main.texOffs(0, 32).addBox(-8.0F, -29.0F, -7.0F, 2.0F, 4.0F, 14.0F, 0.0F, false);
-		bb_main.texOffs(38, 0).addBox(-6.0F, -29.0F, -9.0F, 12.0F, 4.0F, 2.0F, 0.0F, false);
-		bb_main.texOffs(30, 19).addBox(6.0F, -29.0F, -7.0F, 2.0F, 4.0F, 14.0F, 0.0F, false);
-		bb_main.texOffs(18, 37).addBox(-6.0F, -29.0F, 7.0F, 12.0F, 4.0F, 2.0F, 0.0F, false);
-		bb_main.texOffs(48, 37).addBox(1.0F, -35.0F, 5.0F, 3.0F, 8.0F, 1.0F, 0.0F, false);
-		bb_main.texOffs(48, 19).addBox(-4.0F, -35.0F, 5.0F, 3.0F, 8.0F, 1.0F, 0.0F, false);
-		bb_main.texOffs(40, 43).addBox(-4.0F, -35.0F, -6.0F, 3.0F, 8.0F, 1.0F, 0.0F, false);
-		bb_main.texOffs(32, 43).addBox(1.0F, -35.0F, -6.0F, 3.0F, 8.0F, 1.0F, 0.0F, false);
-		bb_main.texOffs(32, 19).addBox(4.0F, -35.0F, -6.0F, 1.0F, 8.0F, 4.0F, 0.0F, false);
-		bb_main.texOffs(0, 19).addBox(-5.0F, -35.0F, -6.0F, 1.0F, 8.0F, 4.0F, 0.0F, false);
-		bb_main.texOffs(38, 6).addBox(-2.0F, -37.0F, -2.0F, 4.0F, 1.0F, 4.0F, 0.0F, false);
-		bb_main.texOffs(0, 19).addBox(-5.0F, -36.0F, -6.0F, 10.0F, 1.0F, 12.0F, 0.0F, false);
-		bb_main.texOffs(0, 0).addBox(-5.0F, -35.0F, 2.0F, 1.0F, 8.0F, 4.0F, 0.0F, false);
-		bb_main.texOffs(0, 32).addBox(4.0F, -35.0F, 2.0F, 1.0F, 8.0F, 4.0F, 0.0F, false);
-		bb_main.texOffs(11, 22).addBox(4.0F, -30.0F, -2.0F, 1.0F, 3.0F, 4.0F, 0.0F, false);
-		bb_main.texOffs(13, 22).addBox(-5.0F, -30.0F, -2.0F, 1.0F, 3.0F, 4.0F, 0.0F, false);
-		bb_main.texOffs(11, 22).addBox(-1.0F, -30.0F, 5.0F, 2.0F, 3.0F, 1.0F, 0.0F, false);
-		bb_main.texOffs(11, 22).addBox(-1.0F, -30.0F, -6.0F, 2.0F, 3.0F, 1.0F, 0.0F, false);
-
+		bb_main.texOffs(38, 5).addBox(-8.0F, -29.0F, -7.0F, 2.0F, 4.0F, 14.0F, 0.0F, false);
+		bb_main.texOffs(28, 43).addBox(-6.0F, -29.0F, -9.0F, 12.0F, 4.0F, 2.0F, 0.0F, false);
+		bb_main.texOffs(26, 25).addBox(6.0F, -29.0F, -7.0F, 2.0F, 4.0F, 14.0F, 0.0F, false);
+		bb_main.texOffs(0, 41).addBox(-6.0F, -29.0F, 7.0F, 12.0F, 4.0F, 2.0F, 0.0F, false);
+		bb_main.texOffs(16, 49).addBox(-6.0F, -28.0F, -5.0F, 12.0F, 1.0F, 12.0F, 0.0F, false);
+		bb_main.texOffs(0, 0).addBox(-6.0F, -38.0F, -6.0F, 4.0F, 10.0F, 2.0F, 0.0F, false);
+		bb_main.texOffs(0, 0).addBox(2.0F, -38.0F, -6.0F, 4.0F, 10.0F, 2.0F, 0.0F, false);
+		bb_main.texOffs(38, 0).addBox(-2.0F, -38.0F, -4.0F, 4.0F, 10.0F, 0.0F, 0.0F, false);
+		bb_main.texOffs(38, 0).addBox(-2.0F, -38.0F, 5.0F, 4.0F, 10.0F, 0.0F, 0.0F, false);
+		bb_main.texOffs(0, 0).addBox(2.0F, -38.0F, 4.0F, 4.0F, 10.0F, 2.0F, 0.0F, false);
+		bb_main.texOffs(0, 0).addBox(4.0F, -38.0F, 2.0F, 2.0F, 10.0F, 2.0F, 0.0F, false);
+		bb_main.texOffs(38, -4).addBox(5.0F, -38.0F, -2.0F, 0.0F, 10.0F, 4.0F, 0.0F, false);
+		bb_main.texOffs(38, -4).addBox(-5.0F, -38.0F, -2.0F, 0.0F, 10.0F, 4.0F, 0.0F, false);
+		bb_main.texOffs(0, 0).addBox(4.0F, -38.0F, -4.0F, 2.0F, 10.0F, 2.0F, 0.0F, false);
+		bb_main.texOffs(0, 0).addBox(-6.0F, -38.0F, -4.0F, 2.0F, 10.0F, 2.0F, 0.0F, false);
+		bb_main.texOffs(0, 0).addBox(-6.0F, -38.0F, 2.0F, 2.0F, 10.0F, 2.0F, 0.0F, false);
+		bb_main.texOffs(0, 0).addBox(-6.0F, -38.0F, 4.0F, 4.0F, 10.0F, 2.0F, 0.0F, false);
+		bb_main.texOffs(16, 49).addBox(-6.0F, -39.0F, -6.0F, 12.0F, 1.0F, 12.0F, 0.0F, false);
+		bb_main.texOffs(72, 0).addBox(-4.0F, -40.0F, -4.0F, 8.0F, 1.0F, 8.0F, 0.0F, false);
 	}
 
 	@Override

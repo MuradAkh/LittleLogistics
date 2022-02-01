@@ -27,7 +27,7 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class FluidHopperTileEntity extends TileEntity implements ITickableTileEntity, IVesselLoader {
-    public static final int CAPACITY = FluidAttributes.BUCKET_VOLUME * 5;
+    public static final int CAPACITY = FluidAttributes.BUCKET_VOLUME * 10;
     private int cooldownTime = 0;
 
     public FluidHopperTileEntity() {
