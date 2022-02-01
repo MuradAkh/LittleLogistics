@@ -213,6 +213,16 @@ publishing {
         maven {
             url "file:///${project.projectDir}/mcmodsrepo"
         }
+
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/MuradAkh/LittleLogistics")
+
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
     }
 }
 
