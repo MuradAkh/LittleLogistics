@@ -70,7 +70,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
         return new INamedContainerProvider() {
             @Override
             public ITextComponent getDisplayName() {
-                return new TranslationTextComponent("screen.shipping.fishing_barge");
+                return new TranslationTextComponent("screen.littlelogistics.fishing_barge");
             }
 
             @Nullable
