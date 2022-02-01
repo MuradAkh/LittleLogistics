@@ -102,7 +102,17 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern(" $ ")
                 .pattern("_#_")
                 .pattern("$$$")
-                .unlockedBy("has_item", has(Items.FURNACE))
+                .unlockedBy("has_item", has(Items.PISTON))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModItems.ENERGY_TUG.get())
+                .define('_', Items.PISTON)
+                .define('#', ModBlocks.VESSEL_CHARGER.get())
+                .define('$', Items.IRON_INGOT)
+                .pattern(" $ ")
+                .pattern("_#_")
+                .pattern("$$$")
+                .unlockedBy("has_item", has(Items.PISTON))
                 .save(consumer);
 
         ShapedRecipeBuilder.shaped(ModItems.CHEST_BARGE.get())
