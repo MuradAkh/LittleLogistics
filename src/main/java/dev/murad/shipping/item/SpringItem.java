@@ -47,7 +47,7 @@ import java.util.List;
 
 public class SpringItem extends Item {
 
-    private TranslationTextComponent springInfo = new TranslationTextComponent("item.shipping.spring.description");
+    private TranslationTextComponent springInfo = new TranslationTextComponent("item.littlelogistics.spring.description");
 
     public SpringItem(Properties properties) {
         super(properties);
@@ -80,16 +80,16 @@ public class SpringItem extends Item {
         if(dominant == null)
             return;
         if(dominant == target) {
-            player.displayClientMessage(new TranslationTextComponent("item.shipping.spring.notToSelf"), true);
+            player.displayClientMessage(new TranslationTextComponent("item.littlelogistics.spring.notToSelf"), true);
         } else if(dominant instanceof ISpringableEntity) {
             Train firstTrain =  ((ISpringableEntity) dominant).getTrain();
             Train secondTrain = ((ISpringableEntity) target).getTrain();
             if (dominant.distanceTo(target) > 15){
-                player.displayClientMessage(new TranslationTextComponent("item.shipping.spring.tooFar"), true);
+                player.displayClientMessage(new TranslationTextComponent("item.littlelogistics.spring.tooFar"), true);
             } else if (firstTrain.getTug().isPresent() && secondTrain.getTug().isPresent()) {
-                player.displayClientMessage(new TranslationTextComponent("item.shipping.spring.noTwoTugs"), true);
+                player.displayClientMessage(new TranslationTextComponent("item.littlelogistics.spring.noTwoTugs"), true);
             } else if (secondTrain.equals(firstTrain)){
-                player.displayClientMessage(new TranslationTextComponent("item.shipping.spring.noLoops"), true);
+                player.displayClientMessage(new TranslationTextComponent("item.littlelogistics.spring.noLoops"), true);
             } else if (firstTrain.getTug().isPresent()) {
                 SpringEntity.createSpring((VesselEntity) firstTrain.getTail(), (VesselEntity) secondTrain.getHead());
             } else {

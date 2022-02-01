@@ -1,11 +1,11 @@
 {
   "name": "Tug Route",
-  "icon": "shipping:tug_route",
-  "category": "shipping:items",
+  "icon": "littlelogistics:tug_route",
+  "category": "littlelogistics:items",
   "pages": [
     {
       "type": "patchouli:crafting",
-      "recipe": "shipping:tug_route",
+      "recipe": "littlelogistics:tug_route",
       "text": "This item stores a route for the tug. When the item is placed in the tug’s route slot, the tug will follow the route in order from node 0."
     },
     {

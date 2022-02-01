@@ -1,7 +1,7 @@
 {
   "name": "Docks",
-  "icon": "shipping:tug_dock",
-  "category": "shipping:blocks",
+  "icon": "littlelogistics:tug_dock",
+  "category": "littlelogistics:blocks",
   "pages": [
     {
       "type": "patchouli:text",
@@ -10,13 +10,13 @@
     {
       "type": "patchouli:crafting",
       "title": "Tug Dock",
-      "recipe": "shipping:tug_dock",
+      "recipe": "littlelogistics:tug_dock",
       "text": "The tug dock can only insert into the tug (orange/output mode), place a hopper on top of the dock to extract. Shift right-click the tug dock to flip the dock direction See the next page for barge dock >>>"
     },
     {
       "type": "patchouli:crafting",
       "title": "Barge Dock",
-      "recipe": "shipping:barge_dock",
+      "recipe": "littlelogistics:barge_dock",
       "text": "The barge docks can both insert (orange/output mode) and extract (blue/input) mode into/from the barges, shift-right click to switch the mode. Place a hopper below the waterblock next to the barge dock to extract"
     }
   ]

@@ -1,0 +1,33 @@
+{
+  "item.littlelogistics.tug": "Steam Tug",
+  "item.littlelogistics.barge": "Chest Barge",
+  "item.littlelogistics.chunk_loader_barge": "Chunk Loader Barge",
+  "item.littlelogistics.fishing_barge": "Auto-Fishing Barge",
+  "item.littlelogistics.spring": "Vessel Chain",
+  "item.littlelogistics.tug_route": "Tug Route",
+
+  "entity.littlelogistics.tug": "Steam Tug",
+  "entity.littlelogistics.barge": "Chest Barge",
+  "entity.littlelogistics.chunk_loader_barge": "Chunk Loader Barge",
+  "entity.littlelogistics.fishing_barge": "Auto-Fishing Barge",
+  "entity.littlelogistics.spring": "Vessel Chain",
+
+  "block.littlelogistics.tug_dock": "Tug Dock",
+  "block.littlelogistics.barge_dock": "Barge Dock",
+  "block.littlelogistics.guide_rail_tug": "Tug Guide Rail",
+  "block.littlelogistics.guide_rail_corner": "Vessel Corner Guide Rail",
+
+  "screen.littlelogistics.tug": "Steam Tug",
+  "screen.littlelogistics.fishing_barge": "Auto-Fishing Barge",
+
+  "item.littlelogistics.tug_route.description": "Right click to add stop, right click at the same location to remove. Nodes will always be added to the end of the route",
+  "item.littlelogistics.tug_route.added": "Added Route Node X:%s Z:%s",
+  "item.littlelogistics.tug_route.removed": "Removed Route Node X:%s Z:%s",
+  "item.littlelogistics.tug_route.node": "Node",
+  "item.littlelogistics.spring.description": "Used to link barges/tugs",
+  "item.littlelogistics.spring.notToSelf": "Can't link vessel to self",
+  "item.littlelogistics.spring.noTwoTugs": "Can't link two tugs",
+  "item.littlelogistics.spring.tooFar": "Vessels too far to link",
+  "item.littlelogistics.spring.noLoops": "Can't link vessels in a loop",
+  "item.littlelogistics.fishing_barge.description": "For best yield, use on long routes in deep and open water"
+}
