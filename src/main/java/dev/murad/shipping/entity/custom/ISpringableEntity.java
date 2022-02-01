@@ -23,10 +23,8 @@ public interface ISpringableEntity {
     boolean hasWaterOnSides();
 
     default void handleSpringableKill(){
-        this.getDominated().flatMap(pair -> Optional.of(pair.getFirst())).ifPresent(dominated -> {
-            dominated.removeDominant();
-        });
-        this.getDominant().flatMap(pair -> Optional.of(pair.getFirst())).ifPresent(ISpringableEntity::removeDominated);
+        this.getDominated().map(Pair::getFirst).ifPresent(ISpringableEntity::removeDominant);
+        this.getDominant().map(Pair::getFirst).ifPresent(ISpringableEntity::removeDominated);
     }
 
     default boolean checkNoLoopsDominated(){

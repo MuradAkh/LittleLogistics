@@ -102,12 +102,18 @@ public abstract class AbstractBargeEntity extends VesselEntity implements ISprin
 
     @Override
     public void removeDominated() {
+        if(!this.isAlive()){
+            return;
+        }
         this.dominated = Optional.empty();
         this.train.setTail(this);
     }
 
     @Override
     public void removeDominant() {
+        if(!this.isAlive()){
+            return;
+        }
         this.dominant = Optional.empty();
         this.setTrain(new Train(this));
     }
