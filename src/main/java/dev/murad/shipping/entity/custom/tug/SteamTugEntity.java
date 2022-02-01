@@ -51,7 +51,7 @@ public class SteamTugEntity extends AbstractTugEntity {
         return new INamedContainerProvider() {
             @Override
             public ITextComponent getDisplayName() {
-                return new TranslationTextComponent("screen.shipping.tug");
+                return new TranslationTextComponent("screen.littlelogistics.tug");
             }
 
             @Nullable
