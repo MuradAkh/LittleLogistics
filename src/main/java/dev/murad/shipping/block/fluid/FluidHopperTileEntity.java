@@ -5,6 +5,8 @@ import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
@@ -14,9 +16,11 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidAttributes;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -45,9 +49,18 @@ public class FluidHopperTileEntity extends TileEntity implements ITickableTileEn
 
     private final LazyOptional<IFluidHandler> holder = LazyOptional.of(() -> tank);
 
+    private TranslationTextComponent getFluidDisplay() {
+        Fluid fluid = tank.getFluid().getFluid();
+        return fluid.equals(Fluids.EMPTY) ?
+                new TranslationTextComponent("block.littlelogistics.fluid_hopper.capacity_empty", tank.getCapacity()) :
+                new TranslationTextComponent("block.littlelogistics.fluid_hopper.capacity", tank.getFluid().getDisplayName().getString(),
+                        tank.getFluidAmount(), tank.getCapacity());
+
+    }
+
     public boolean use(PlayerEntity player, Hand hand){
         boolean result = FluidUtil.interactWithFluidHandler(player, hand, tank);
-        player.displayClientMessage(new StringTextComponent(tank.getFluidAmount() + "/" + tank.getCapacity() + "ml"), false);
+        player.displayClientMessage(getFluidDisplay(), false);
         return result;
     }
 
