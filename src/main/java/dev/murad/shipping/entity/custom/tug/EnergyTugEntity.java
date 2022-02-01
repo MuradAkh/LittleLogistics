@@ -139,11 +139,8 @@ public class EnergyTugEntity extends AbstractTugEntity {
             IEnergyStorage capability = getEnergyCapabilityInSlot(1);
             if (capability != null) {
                 // simulate first
-                System.out.println("Has capability");
                 int toExtract = capability.extractEnergy(MAX_TRANSFER, true);
-                System.out.println(toExtract);
                 toExtract = internalBattery.receiveEnergy(toExtract, false);
-                System.out.println(toExtract);
                 capability.extractEnergy(toExtract, false);
             }
         }
