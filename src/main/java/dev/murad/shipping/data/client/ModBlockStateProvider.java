@@ -93,9 +93,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
         getVariantBuilder(ModBlocks.VESSEL_CHARGER.get()).forAllStates(state -> ConfiguredModel.builder()
                 .modelFile(models()
-                        .withExistingParent("vessel_charger", modLoc("fluid_hopper_parent_model"))
+                        .withExistingParent("vessel_charger", modLoc("vessel_charger_parent_model"))
                 )
-                .rotationY((int) state.getValue(VesselChargerBlock.FACING).getClockWise().toYRot())
+                .rotationY((int) state.getValue(VesselChargerBlock.FACING).getOpposite().toYRot())
                 .build()
         );
     }

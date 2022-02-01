@@ -30,7 +30,7 @@ public class FluidHopperTileEntityRenderer extends TileEntityRenderer<FluidHoppe
             default:
                 matrixStack.mulPose(Vector3f.YP.rotationDegrees(direction.toYRot()));
         }
-        matrixStack.scale(1.7f, 0.65f, 1.2f);
+        matrixStack.scale(1.45f, 1f, 1.2f);
         matrixStack.translate(-0.25f, 0, -0.15f);
 
         FluidRenderUtil.renderCubeUsingQuads(FluidHopperTileEntity.CAPACITY,

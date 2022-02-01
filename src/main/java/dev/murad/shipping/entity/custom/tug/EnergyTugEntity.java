@@ -83,6 +83,18 @@ public class EnergyTugEntity extends AbstractTugEntity {
         };
     }
 
+    @Override
+    protected void makeSmoke(){
+
+    }
+
+
+    // Energy tug can be loaded at all times since there is no concern
+    // with mix-ups like with fluids and items
+    @Override
+    public boolean allowDockInterface(){
+        return true;
+    }
 
     @Override
     public EnergyTugDataAccessor getDataAccessor() {
@@ -141,8 +153,7 @@ public class EnergyTugEntity extends AbstractTugEntity {
 
     @Override
     protected boolean tickFuel() {
-        // todo: tick energy (mark dirty!)
-        return internalBattery.extractEnergy(10, false) > 0;
+        return internalBattery.extractEnergy(1, false) > 0;
     }
 
     @Override
