@@ -30,7 +30,7 @@ public class EnergyTugScreen extends ContainerScreen<EnergyTugContainer> {
 
         if (inBounds(mouseX - leftPos, mouseY - topPos, 56, 17, 68, 67)) {
             this.renderTooltip(matrixStack,
-                    new TranslationTextComponent("screen.shipping.energy_tug.energy",
+                    new TranslationTextComponent("screen.littlelogistics.energy_tug.energy",
                             getMenu().getEnergy(),
                             getMenu().getCapacity()),
                     mouseX, mouseY);
