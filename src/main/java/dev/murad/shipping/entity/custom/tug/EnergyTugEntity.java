@@ -72,7 +72,7 @@ public class EnergyTugEntity extends AbstractTugEntity {
         return new INamedContainerProvider() {
             @Override
             public ITextComponent getDisplayName() {
-                return new TranslationTextComponent("screen.shipping.energy_tug");
+                return new TranslationTextComponent("screen.littlelogistics.energy_tug");
             }
 
             @Nullable
