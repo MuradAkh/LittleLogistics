@@ -2,8 +2,8 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [64, 64],
 	"textures": {
-		"0": "shipping:block/fluid_hopper",
-		"particle": "shipping:block/fluid_hopper"
+		"0": "littlelogistics:block/fluid_hopper",
+		"particle": "littlelogistics:block/fluid_hopper"
 	},
 	"elements": [
 		{
