@@ -16,6 +16,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -67,10 +68,18 @@ public class FluidTankBargeEntity extends AbstractBargeEntity{
         entityData.define(VOLUME, 0);
     }
 
+    private TranslationTextComponent getFluidDisplay() {
+        Fluid fluid = tank.getFluid().getFluid();
+        return fluid.equals(Fluids.EMPTY) ?
+                new TranslationTextComponent("entity.littlelogistics.fluid_barge.capacity_empty", tank.getCapacity()) :
+                new TranslationTextComponent("entity.littlelogistics.fluid_barge.capacity", tank.getFluid().getDisplayName().getString(),
+                        tank.getFluidAmount(), tank.getCapacity());
+    }
+
     @Override
     protected void doInteract(PlayerEntity player) {
         FluidUtil.interactWithFluidHandler(player, Hand.MAIN_HAND, tank);
-        player.displayClientMessage(new StringTextComponent(tank.getFluidAmount() + "/" + tank.getCapacity() + " ml"), false);
+        player.displayClientMessage(getFluidDisplay(), false);
     }
 
     public FluidStack getFluidStack(){

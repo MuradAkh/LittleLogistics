@@ -55,7 +55,6 @@ public class FluidHopperTileEntity extends TileEntity implements ITickableTileEn
                 new TranslationTextComponent("block.littlelogistics.fluid_hopper.capacity_empty", tank.getCapacity()) :
                 new TranslationTextComponent("block.littlelogistics.fluid_hopper.capacity", tank.getFluid().getDisplayName().getString(),
                         tank.getFluidAmount(), tank.getCapacity());
-
     }
 
     public boolean use(PlayerEntity player, Hand hand){
