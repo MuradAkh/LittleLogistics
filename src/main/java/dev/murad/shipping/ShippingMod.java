@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @Mod(ShippingMod.MOD_ID)
 public class ShippingMod
 {
-    public static final String MOD_ID = "shipping";
+    public static final String MOD_ID = "littlelogistics";
     // Directly reference a log4j logger.
     private static final Logger LOGGER = LogManager.getLogger();
 

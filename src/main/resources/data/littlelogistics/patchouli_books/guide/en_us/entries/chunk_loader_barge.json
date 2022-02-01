@@ -1,18 +1,18 @@
 {
   "name": "Chunk Loader Barge",
-  "icon": "shipping:chunk_loader_barge",
-  "category": "shipping:vessels",
+  "icon": "littlelogistics:chunk_loader_barge",
+  "category": "littlelogistics:vessels",
   "pages": [
     {
       "type": "patchouli:entity",
-      "entity": "shipping:chunk_loader_barge",
+      "entity": "littlelogistics:chunk_loader_barge",
       "scale": 0.6,
       "offset": 0.5,
       "text": "This barge keeps 3x3 area of chunks, centered on the entity, loaded."
     },
     {
       "type": "patchouli:crafting",
-      "recipe": "shipping:chunk_loader_barge",
+      "recipe": "littlelogistics:chunk_loader_barge",
       "text": "Recommended for long-distance routes."
     }
   ]

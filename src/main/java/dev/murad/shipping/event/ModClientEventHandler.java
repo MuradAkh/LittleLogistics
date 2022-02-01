@@ -80,7 +80,7 @@ public class ModClientEventHandler {
                 float opacity = (Minecraft.getInstance()).options.getBackgroundOpacity(0.25F);
                 FontRenderer fontRenderer = Minecraft.getInstance().font;
 //                int alpha = (int) (opacity * 255.0F) << 24;
-                String text = String.format("%s %d.", I18n.get("item.shipping.tug_route.node"), i);
+                String text = String.format("%s %d.", I18n.get("item.littlelogistics.tug_route.node"), i);
                 float width = (-fontRenderer.width(text) / 2);
 
 //                fontRenderer.drawInBatch(text, width, 0.0F, 553648127, false, matrix4f, renderTypeBuffer, false, alpha, 15728880);

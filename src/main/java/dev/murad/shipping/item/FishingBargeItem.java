@@ -26,6 +26,6 @@ public class FishingBargeItem extends AbstractEntityAddItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.appendHoverText(stack, worldIn, tooltip, flagIn);
-        tooltip.add(new TranslationTextComponent("item.shipping.fishing_barge.description")   );
+        tooltip.add(new TranslationTextComponent("item.littlelogistics.fishing_barge.description")   );
     }
 }

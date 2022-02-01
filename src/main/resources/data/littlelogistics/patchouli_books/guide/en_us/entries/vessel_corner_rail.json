@@ -1,11 +1,11 @@
 {
   "name": "Vessel Corner Guide Rail",
-  "icon": "shipping:guide_rail_corner",
-  "category": "shipping:blocks",
+  "icon": "littlelogistics:guide_rail_corner",
+  "category": "littlelogistics:blocks",
   "pages": [
     {
       "type": "patchouli:crafting",
-      "recipe": "shipping:guide_rail_corner",
+      "recipe": "littlelogistics:guide_rail_corner",
       "text": "Assists vessels around sharp corners, should always be used on sharp corners or near entrances to narrow waterways (such as those for docks). Affects both tugs and barges. Shift-right-click to flip direction."
     },
     {

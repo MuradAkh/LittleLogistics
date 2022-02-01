@@ -6,51 +6,33 @@
 # The name of the mod loader type to load - for regular FML @Mod mods it should be javafml
 modLoader="javafml" #mandatory
 # A version range to match for said mod loader - for regular FML @Mod it will be the forge version
-loaderVersion="[36,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+loaderVersion="${forge_version_range}" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
 # The license for you mod. This is mandatory metadata and allows for easier comprehension of your redistributive properties.
 # Review your options at https://choosealicense.com/. All rights reserved is the default copyright stance, and is thus the default here.
-license="GPLv3"
+license="${mod_license}"
 # A URL to refer people to when problems occur with this mod
 issueTrackerURL="https://github.com/MuradAkh/LittleLogistics/issues" #optional
 # A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory
 # The modid of the mod
-modId="shipping" #mandatory
+modId="${mod_id}" #mandatory
 # The version number of the mod - there's a few well known ${} variables useable here or just hardcode it
-# ${file.jarVersion} will substitute the value of the Implementation-Version as read from the mod's JAR file metadata
+# ${mod_version} will substitute the value of the Implementation-Version as read from the mod's JAR file metadata
 # see the associated build.gradle script for how to populate this completely automatically during a build
-version="${file.jarVersion}" #mandatory
+version="${mod_version}" #mandatory
  # A display name for the mod
-displayName="Little Logistics" #mandatory
+displayName="${mod_title}" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification https://mcforge.readthedocs.io/en/latest/gettingstarted/autoupdate/
 #updateJSONURL="https://change.me.example.invalid/updates.json" #optional
 # A URL for the "homepage" for this mod, displayed in the mod UI
-displayURL="https://littlelogistics.murad.dev" #optional
+displayURL="${mod_url}" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
-# logoFile="modbanner.png" #optional
+logoFile="${mod_icon_path}" #optional
 # A text field displayed in the mod UI
 # A text field displayed in the mod UI
-authors="Murad Akhundov" #optional
+authors="${mod_author}" #optional
 # The description text for the mod (multi line!) (#mandatory)
-description='''
-Adds water logistics: Tugs and Barges!
-See the homepage for usage instructions.
-
-Modpack use:
-
-You include this mod in your modpack and distribute it without restrictions.
-You may distribute a modified version of this mod in accordance with the GPLv3.
-
-License:
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with this program. If not, see https://www.gnu.org/licenses/.
-
-Acknowledgements:
-For Entity Spring: https://github.com/jglrxavpok
-For logo help: https://github.com/tenmyouji
-
-'''
+description='''${mod_description}'''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
 [[dependencies.shipping]] #optional
     # the modid of the dependency
@@ -58,23 +40,23 @@ For logo help: https://github.com/tenmyouji
     # Does this dependency have to exist - if not, ordering below must be specified
     mandatory=true #mandatory
     # The version range of the dependency
-    versionRange="[36,)" #mandatory
+    versionRange="${forge_version_range}" #mandatory
     # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
     ordering="NONE"
-    # Side this dependency is appli ed on - BOTH, CLIENT or SERVER
+    # Side this dependency is applied on - BOTH, CLIENT or SERVER
     side="BOTH"
 # Here's another dependency
 [[dependencies.shipping]]
     modId="minecraft"
     mandatory=true
 # This version range declares a minimum of the current minecraft version up to but not including the next major version
-    versionRange="[1.16.5,1.17)"
+    versionRange="${mc_version_range}"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.shipping]]
     modId="patchouli"
     mandatory=false
-    versionRange="[1.16.4,)"
+    versionRange="${patchouli_version_range}"
     ordering="NONE"
     side="BOTH"

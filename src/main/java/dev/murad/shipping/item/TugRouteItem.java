@@ -35,10 +35,10 @@ public class TugRouteItem extends Item {
             int x = (int) player.getX();
             int z = (int) player.getZ();
             if (!tryRemoveSpecific(itemstack, x, z)) {
-                player.displayClientMessage(new TranslationTextComponent("item.shipping.tug_route.added", x, z), false);
+                player.displayClientMessage(new TranslationTextComponent("item.littlelogistics.tug_route.added", x, z), false);
                 pushRoute(itemstack, x, z);
             } else {
-                player.displayClientMessage(new TranslationTextComponent("item.shipping.tug_route.removed", x, z), false);
+                player.displayClientMessage(new TranslationTextComponent("item.littlelogistics.tug_route.removed", x, z), false);
             }
 
         }
@@ -49,7 +49,7 @@ public class TugRouteItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.appendHoverText(stack, worldIn, tooltip, flagIn);
-        tooltip.add(new TranslationTextComponent("item.shipping.tug_route.description"));
+        tooltip.add(new TranslationTextComponent("item.littlelogistics.tug_route.description"));
         tooltip.add(new StringTextComponent(formatRoute(getRoute(stack))));
     }
 
@@ -118,7 +118,7 @@ public class TugRouteItem extends Item {
         return route
                 .stream()
                 .map(vector -> String.format("%s %d. X:%d, Y:%d",
-                        I18n.get("item.shipping.tug_route.node"),
+                        I18n.get("item.littlelogistics.tug_route.node"),
                         index.incrementAndGet(), (int) vector.x, (int) vector.y))
                 .reduce((acc, curr) -> acc + "\n" + curr)
                 .orElse("");
