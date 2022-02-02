@@ -62,9 +62,9 @@ public abstract class AbstractBargeEntity extends VesselEntity implements ISprin
     public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
         if (!this.level.isClientSide) {
             doInteract(player);
-            return ActionResultType.PASS;
         }
-        return ActionResultType.SUCCESS;
+        // don't interact *and* use current item
+        return ActionResultType.CONSUME;
     }
 
     abstract protected void doInteract(PlayerEntity player);
@@ -139,5 +139,9 @@ public abstract class AbstractBargeEntity extends VesselEntity implements ISprin
     // hack to disable hoppers
     public boolean isDockable() {
         return this.dominant.map(dom -> this.distanceToSqr((Entity) dom.getFirst()) < 1.1).orElse(true);
+    }
+
+    public boolean allowDockInterface(){
+        return isDockable();
     }
 }

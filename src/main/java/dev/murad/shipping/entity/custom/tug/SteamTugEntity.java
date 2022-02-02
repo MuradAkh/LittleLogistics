@@ -1,6 +1,7 @@
 package dev.murad.shipping.entity.custom.tug;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.entity.accessor.SteamTugDataAccessor;
 import dev.murad.shipping.entity.container.SteamTugContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
@@ -12,6 +13,7 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -24,11 +26,12 @@ import javax.annotation.Nullable;
 public class SteamTugEntity extends AbstractTugEntity {
     private static final int FURNACE_FUEL_MULTIPLIER= ShippingConfig.steam_tug_fuel_multiplier.get();
 
+    protected int burnTime = 0;
+    protected int burnCapacity = 0;
+
     public SteamTugEntity(EntityType<? extends WaterMobEntity> type, World world) {
         super(type, world);
     }
-
-
 
     public SteamTugEntity(World worldIn, double x, double y, double z) {
         super(ModEntityTypes.STEAM_TUG.get(), worldIn, x, y, z);
@@ -44,15 +47,37 @@ public class SteamTugEntity extends AbstractTugEntity {
         return new INamedContainerProvider() {
             @Override
             public ITextComponent getDisplayName() {
-                return new TranslationTextComponent("screen.shipping.tug");
+                return new TranslationTextComponent("screen.littlelogistics.tug");
             }
 
             @Nullable
             @Override
             public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
-                return new SteamTugContainer(i, level, dataAccess, playerInventory, playerEntity);
+                return new SteamTugContainer(i, level, getDataAccessor(), playerInventory, playerEntity);
             }
         };
+    }
+
+    public int getBurnProgress() {
+        int i = burnCapacity;
+        if (i == 0) {
+            i = 200;
+        }
+
+        return burnTime * 13 / i;
+    }
+
+    // CONTAINER STUFF
+    public boolean isLit() {
+        return burnTime > 0;
+    }
+
+    @Override
+    public SteamTugDataAccessor getDataAccessor() {
+        return new SteamTugDataAccessor.Builder(this.getId())
+                .withBurnProgress(this::getBurnProgress)
+                .withLit(this::isLit)
+                .build();
     }
 
     @Override
@@ -90,10 +115,21 @@ public class SteamTugEntity extends AbstractTugEntity {
     }
 
 
+    @Override
+    public void readAdditionalSaveData(CompoundNBT compound) {
+        burnTime = compound.contains("burn") ? compound.getInt("burn") : 0;
+        burnCapacity = compound.contains("burn_capacity") ? compound.getInt("burn_capacity") : 0;
+        super.readAdditionalSaveData(compound);
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundNBT compound) {
+        compound.putInt("burn", burnTime);
+        compound.putInt("burn_capacity", burnCapacity);
+        super.addAdditionalSaveData(compound);
+    }
+
     // Have to implement IInventory to work with hoppers
-
-
-
     @Override
     public boolean isEmpty() {
         return itemHandler.getStackInSlot(1).isEmpty();

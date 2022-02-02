@@ -1,5 +1,8 @@
 package dev.murad.shipping;
 
+import dev.murad.shipping.block.fluid.render.FluidHopperTileEntityRenderer;
+import dev.murad.shipping.entity.container.EnergyTugContainer;
+import dev.murad.shipping.entity.container.EnergyTugScreen;
 import dev.murad.shipping.entity.container.FishingBargeScreen;
 import dev.murad.shipping.entity.container.SteamTugScreen;
 
@@ -16,6 +19,7 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -68,11 +72,16 @@ public class ShippingMod
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CHEST_BARGE.get(), ChestBargeRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CHUNK_LOADER_BARGE.get(), ChunkLoaderBargeRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.FISHING_BARGE.get(), FishingBargeRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.FLUID_TANK_BARGE.get(), FluidTankBargeRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SPRING.get(), DummyEntityRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TUG_DUMMY_HITBOX.get(), DummyEntityRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STEAM_TUG.get(), SteamTugRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ENERGY_TUG.get(), EnergyTugRenderer::new);
+
+        ClientRegistry.bindTileEntityRenderer(ModTileEntitiesTypes.FLUID_HOPPER.get(), FluidHopperTileEntityRenderer::new);
 
         ScreenManager.register(ModContainerTypes.TUG_CONTAINER.get(), SteamTugScreen::new);
+        ScreenManager.register(ModContainerTypes.ENERGY_TUG_CONTAINER.get(), EnergyTugScreen::new);
         ScreenManager.register(ModContainerTypes.FISHING_BARGE_CONTAINER.get(), FishingBargeScreen::new);
 
         event.enqueueWork(ModItemModelProperties::register);

@@ -5,6 +5,8 @@ import dev.murad.shipping.entity.custom.barge.ChestBargeEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.barge.ChunkLoaderBargeEntity;
 import dev.murad.shipping.entity.custom.barge.FishingBargeEntity;
+import dev.murad.shipping.entity.custom.barge.FluidTankBargeEntity;
+import dev.murad.shipping.entity.custom.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.custom.tug.SteamTugEntity;
 import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
 import net.minecraft.entity.EntityClassification;
@@ -31,11 +33,23 @@ public class ModEntityTypes {
                                     EntityClassification.MISC).sized(0.6f, 0.6f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "fishing_barge").toString()));
 
+    public static final RegistryObject<EntityType<FluidTankBargeEntity>> FLUID_TANK_BARGE =
+            Registration.ENTITIES.register("fluid_barge",
+                    () -> EntityType.Builder.<FluidTankBargeEntity>of(FluidTankBargeEntity::new,
+                                    EntityClassification.MISC).sized(0.6f, 0.6f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "fluid_barge").toString()));
+
     public static final RegistryObject<EntityType<SteamTugEntity>> STEAM_TUG =
             Registration.ENTITIES.register("tug",
                     () -> EntityType.Builder.<SteamTugEntity>of(SteamTugEntity::new,
                                     EntityClassification.MISC).sized(0.7f, 0.6f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "tug").toString()));
+
+    public static final RegistryObject<EntityType<EnergyTugEntity>> ENERGY_TUG =
+            Registration.ENTITIES.register("energy_tug",
+                    () -> EntityType.Builder.<EnergyTugEntity>of(EnergyTugEntity::new,
+                                    EntityClassification.MISC).sized(0.7f, 0.6f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "energy_tug").toString()));
 
     public static final RegistryObject<EntityType<TugDummyHitboxEntity>> TUG_DUMMY_HITBOX =
             Registration.ENTITIES.register("tug_dummy_hitbox",

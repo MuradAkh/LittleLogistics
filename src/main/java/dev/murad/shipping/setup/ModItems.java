@@ -14,8 +14,14 @@ public class ModItems {
     public static final RegistryObject<Item> FISHING_BARGE = Registration.ITEMS.register("fishing_barge",
             () -> new FishingBargeItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));
 
+    public static final RegistryObject<Item> FLUID_BARGE = Registration.ITEMS.register("fluid_barge",
+            () -> new FluidTankBargeItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));
+
     public static final RegistryObject<Item> STEAM_TUG = Registration.ITEMS.register("tug",
             () -> new SteamTugItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));
+
+    public static final RegistryObject<Item> ENERGY_TUG = Registration.ITEMS.register("energy_tug",
+            () -> new EnergyTugItem(new Item.Properties().tab(ItemGroup.TAB_TRANSPORTATION)));
 
     public static final RegistryObject<Item> SPRING = Registration.ITEMS.register("spring",
             () -> new SpringItem(new Item.Properties().stacksTo(64).tab(ItemGroup.TAB_TRANSPORTATION)));

@@ -54,6 +54,10 @@ minecraft {
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
+            // for patchouli
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
             mods {
                 "${project.mod_id}" {
                     source sourceSets.main
@@ -148,6 +152,10 @@ dependencies {
 
     compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")
     runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
+
+    runtimeOnly fg.deobf("com.teamcofh:cofh_core:1.16.5-1.4.2.9")
+    runtimeOnly fg.deobf("com.teamcofh:thermal_foundation:1.16.5-1.4.3.10")
+    runtimeOnly fg.deobf("com.teamcofh:thermal_expansion:1.16.5-1.4.2.4")
 
 }
 
