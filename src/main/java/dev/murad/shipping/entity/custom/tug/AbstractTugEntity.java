@@ -28,6 +28,7 @@ import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -83,7 +84,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     public AbstractTugEntity(EntityType type, World worldIn, double x, double y, double z) {
         this(type, worldIn);
         this.setPos(x, y, z);
-        this.setDeltaMovement(Vector3d.ZERO);
         this.xo = x;
         this.yo = y;
         this.zo = z;
@@ -164,6 +164,10 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         return 0;
     }
 
+    public TugDummyHitboxEntity getDummyHitbox(){
+        return extraHitbox;
+    }
+
     protected abstract INamedContainerProvider createContainerProvider();
 
     @Override
@@ -171,6 +175,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         itemHandler.deserializeNBT(compound.getCompound("inv"));
         nextStop = compound.contains("next_stop") ? compound.getInt("next_stop") : 0;
         contentsChanged = true;
+        extraHitbox = null;
         super.readAdditionalSaveData(compound);
     }
 
@@ -293,9 +298,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     }
 
     public void tick() {
-        if(!level.isClientSide && extraHitbox == null){
-            this.extraHitbox = new TugDummyHitboxEntity(this);
-            level.addFreshEntity(this.extraHitbox);
+        if(!level.isClientSide){
+            if (extraHitbox == null || extraHitbox.isAlive()){
+                this.extraHitbox = new TugDummyHitboxEntity(this);
+                level.addFreshEntity(this.extraHitbox);
+            }
+            extraHitbox.updatePosition();
         }
 
         super.tick();
