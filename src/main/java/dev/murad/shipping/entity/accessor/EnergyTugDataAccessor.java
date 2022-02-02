@@ -1,7 +1,6 @@
-package dev.murad.shipping.data.accessor;
+package dev.murad.shipping.entity.accessor;
 
 import net.minecraft.util.IIntArray;
-import net.minecraft.util.IntArray;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.IntSupplier;

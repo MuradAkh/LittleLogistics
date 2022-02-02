@@ -1,6 +1,6 @@
 package dev.murad.shipping.entity.container;
 
-import dev.murad.shipping.data.accessor.DataAccessor;
+import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
