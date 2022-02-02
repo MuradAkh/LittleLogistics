@@ -1,5 +1,7 @@
 package dev.murad.shipping.entity.custom.tug;
 
+import dev.murad.shipping.entity.custom.SpringEntity;
+import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -7,6 +9,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
@@ -17,6 +22,8 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpawnData {
     private AbstractTugEntity tugEntity;
+    public static final DataParameter<Integer> TUG_ID = EntityDataManager.defineId(TugDummyHitboxEntity.class, DataSerializers.INT);
+
 
     public TugDummyHitboxEntity(EntityType<TugDummyHitboxEntity> p_i48580_1_, World p_i48580_2_) {
         super(p_i48580_1_, p_i48580_2_);
@@ -36,22 +43,30 @@ public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpa
         return tugEntity;
     }
 
-    private void updatePosition(){
-        if (tugEntity == null || !tugEntity.isAlive()){
-            this.remove();
-            return;
+    @Override
+    public void tick(){
+        if(this.level.isClientSide && tugEntity == null){
+            setTug();
         }
+        if(tugEntity == null || !tugEntity.isAlive()){
+            this.kill();
+        }else{
+            TugDummyHitboxEntity p = tugEntity.getDummyHitbox();
+            if(p != null && !p.equals(this)){
+                this.kill();
+            }else{
+                if(!this.level.isClientSide){
+                    entityData.set(TUG_ID, tugEntity.getId());
+                }
+            }
+        }
+    }
 
+    public void updatePosition(){
         double x = tugEntity.getX() + tugEntity.getDirection().getStepX() * 0.7;
         double z = tugEntity.getZ() + tugEntity.getDirection().getStepZ() * 0.7;
         double y = tugEntity.getY();
-        this.setPos(x, y, z);
-    }
-
-    @Override
-    public void baseTick() {
-        super.baseTick();
-        updatePosition();
+        this.moveTo(x, y, z);
     }
 
     public boolean isPickable() {
@@ -60,38 +75,44 @@ public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpa
 
     @Override
     public ActionResultType interact(PlayerEntity p_184230_1_, Hand p_184230_2_) {
-        System.out.println(1);
         return tugEntity.mobInteract(p_184230_1_, p_184230_2_);
     }
 
     @Override
     public boolean hurt(DamageSource p_70097_1_, float p_70097_2_) {
-        System.out.println(1);
         return tugEntity.hurt(p_70097_1_, p_70097_2_);
     }
 
     @Override
     protected void defineSynchedData() {
+        entityData.define(TUG_ID, -1);
+    }
 
+    @Override
+    public void onSyncedDataUpdated(DataParameter<?> key) {
+        super.onSyncedDataUpdated(key);
 
+        if(level.isClientSide) {
+            if(TUG_ID.equals(key)) {
+                setTug();
+            }
+        }
+    }
+
+    private void setTug() {
+        Entity potential = level.getEntity(getEntityData().get(TUG_ID));
+        if(potential instanceof AbstractTugEntity){
+            tugEntity = (AbstractTugEntity) potential;
+        }
     }
 
     @Override
     public void readAdditionalSaveData(CompoundNBT nbt) {
-//        tugEntity = nbt.contains("parent") ? (TugEntity) this.level.getEntity(nbt.getInt("parent")) : null;
-//        if (tugEntity != null && tugEntity.extraHitbox == null) {
-//            tugEntity.extraHitbox = this;
-//        } else if (tugEntity != null && !tugEntity.extraHitbox.equals(this)){
-//            this.remove();
-//        }
         this.remove();
     }
 
     @Override
     public void addAdditionalSaveData(CompoundNBT nbt) {
-        if (tugEntity != null) {
-            nbt.putInt("parent", tugEntity.getId());
-        }
     }
 
     @Override
