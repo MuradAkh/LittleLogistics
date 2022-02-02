@@ -1,9 +1,8 @@
 package dev.murad.shipping.setup;
 
-import dev.murad.shipping.data.accessor.EnergyTugDataAccessor;
-import dev.murad.shipping.data.accessor.SteamTugDataAccessor;
+import dev.murad.shipping.entity.accessor.EnergyTugDataAccessor;
+import dev.murad.shipping.entity.accessor.SteamTugDataAccessor;
 import dev.murad.shipping.entity.container.EnergyTugContainer;
-import dev.murad.shipping.entity.container.EnergyTugScreen;
 import dev.murad.shipping.entity.container.FishingBargeContainer;
 import dev.murad.shipping.entity.container.SteamTugContainer;
 import net.minecraft.inventory.container.ContainerType;

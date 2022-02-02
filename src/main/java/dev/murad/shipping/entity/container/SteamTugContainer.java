@@ -1,6 +1,6 @@
 package dev.murad.shipping.entity.container;
 
-import dev.murad.shipping.data.accessor.SteamTugDataAccessor;
+import dev.murad.shipping.entity.accessor.SteamTugDataAccessor;
 import dev.murad.shipping.event.ModClientEventHandler;
 import dev.murad.shipping.setup.ModContainerTypes;
 import net.minecraft.entity.player.PlayerEntity;

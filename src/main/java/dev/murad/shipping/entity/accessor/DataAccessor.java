@@ -1,4 +1,4 @@
-package dev.murad.shipping.data.accessor;
+package dev.murad.shipping.entity.accessor;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.IIntArray;
