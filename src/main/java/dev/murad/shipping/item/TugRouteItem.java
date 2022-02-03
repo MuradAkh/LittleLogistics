@@ -32,8 +32,8 @@ public class TugRouteItem extends Item {
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
         if(!player.level.isClientSide){
-            int x = (int) player.getX();
-            int z = (int) player.getZ();
+            int x = (int) Math.floor(player.getX());
+            int z = (int) Math.floor(player.getZ());
             if (!tryRemoveSpecific(itemstack, x, z)) {
                 player.displayClientMessage(new TranslationTextComponent("item.littlelogistics.tug_route.added", x, z), false);
                 pushRoute(itemstack, x, z);
@@ -119,7 +119,7 @@ public class TugRouteItem extends Item {
                 .stream()
                 .map(vector -> String.format("%s %d. X:%d, Y:%d",
                         I18n.get("item.littlelogistics.tug_route.node"),
-                        index.incrementAndGet(), (int) vector.x, (int) vector.y))
+                        index.getAndIncrement(), (int) Math.floor(vector.x), (int) Math.floor(vector.y)))
                 .reduce((acc, curr) -> acc + "\n" + curr)
                 .orElse("");
     }

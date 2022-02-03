@@ -6,13 +6,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.pathfinding.PathNodeType;
-import net.minecraft.pathfinding.PathPoint;
-import net.minecraft.pathfinding.PathType;
-import net.minecraft.pathfinding.SwimNodeProcessor;
+import net.minecraft.pathfinding.*;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -37,6 +35,11 @@ public class TugNodeProcessor extends SwimNodeProcessor {
     }
 
     @Override
+    public FlaggedPathPoint getGoal(double p_224768_1_, double p_224768_3_, double p_224768_5_) {
+        return new FlaggedPathPoint(super.getNode(MathHelper.floor(p_224768_1_), MathHelper.floor(p_224768_3_), MathHelper.floor(p_224768_5_)));
+    }
+
+    @Override
     protected PathPoint getNode(int p_176159_1_, int p_176159_2_, int p_176159_3_) {
         PathPoint pathpoint = super.getNode(p_176159_1_, p_176159_2_, p_176159_3_);
         if (pathpoint != null) {
@@ -48,15 +51,16 @@ public class TugNodeProcessor extends SwimNodeProcessor {
                     pos.south(),
                     pos.north(),
                     pos.north().west(),
-                    pos.north().west().north().west(),
                     pos.north().east(),
-                    pos.north().east().north().east(),
                     pos.south().east(),
                     pos.south().west(),
+                    pos.north().west().north().west(),
+                    pos.north().east().north().east(),
                     pos.south().west().south().west(),
                     pos.south().east().south().east()
             )
             ){
+                // if the point's neighbour has land, penalty is 5 unless there is a dock
                 if(!level.getBlockState(surr).is(Blocks.WATER)){
                     penalty = 5f;
                 }

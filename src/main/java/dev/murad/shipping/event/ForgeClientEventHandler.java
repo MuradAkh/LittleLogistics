@@ -53,7 +53,7 @@ public class ForgeClientEventHandler {
                 MatrixStack matrixStack = event.getMatrixStack();
 
                 matrixStack.pushPose();
-                matrixStack.translate(v.x - d0 - (v.x < 0 ? 1 : 0), 1 - d1, v.y - d2 - (v.y < 0 ? 1 : 0));
+                matrixStack.translate(v.x - d0, 1 - d1, v.y - d2);
 
                 BeaconTileEntityRenderer.renderBeaconBeam(matrixStack, renderTypeBuffer, BEAM_LOCATION, event.getPartialTicks(),
                         1F, player.level.getGameTime(), 0, 1024,
@@ -70,8 +70,8 @@ public class ForgeClientEventHandler {
                 float opacity = (Minecraft.getInstance()).options.getBackgroundOpacity(0.25F);
                 FontRenderer fontRenderer = Minecraft.getInstance().font;
 //                int alpha = (int) (opacity * 255.0F) << 24;
-                String text = String.format("%s %d.", I18n.get("item.littlelogistics.tug_route.node"), i);
-                float width = (-fontRenderer.width(text) / 2);
+                String text = String.format("%s %d", I18n.get("item.littlelogistics.tug_route.node"), i);
+                float width = (-fontRenderer.width(text) / (float) 2);
 
 //                fontRenderer.drawInBatch(text, width, 0.0F, 553648127, false, matrix4f, renderTypeBuffer, false, alpha, 15728880);
                 fontRenderer.drawInBatch(text, width, 0.0F, -1, true, matrix4f, renderTypeBuffer, true, 0, 15728880);

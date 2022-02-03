@@ -48,14 +48,14 @@ public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpa
         if(this.level.isClientSide && tugEntity == null){
             setTug();
         }
-        if(tugEntity == null || !tugEntity.isAlive()){
-            this.kill();
-        }else{
-            TugDummyHitboxEntity p = tugEntity.getDummyHitbox();
-            if(p != null && !p.equals(this)){
+        if(!this.level.isClientSide) {
+            if (tugEntity == null || !tugEntity.isAlive()) {
                 this.kill();
-            }else{
-                if(!this.level.isClientSide){
+            } else {
+                TugDummyHitboxEntity p = tugEntity.getDummyHitbox();
+                if (p != null && !p.equals(this)) {
+                    this.kill();
+                } else {
                     entityData.set(TUG_ID, tugEntity.getId());
                 }
             }
