@@ -310,6 +310,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
 
         public void tick() {
             if(!AbstractTugEntity.this.level.isClientSide) {
+                tickRouteCheck();
                 tickCheckDock();
                 followPath();
                 followGuideRail();
@@ -323,7 +324,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
 
     public void tick() {
         if(!level.isClientSide){
-            if (extraHitbox == null || extraHitbox.isAlive()){
+            if (extraHitbox == null || !extraHitbox.isAlive()){
                 this.extraHitbox = new TugDummyHitboxEntity(this);
                 level.addFreshEntity(this.extraHitbox);
             }
@@ -332,9 +333,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
 
         super.tick();
 
-        if(!this.level.isClientSide) {
-            tickRouteCheck();
-        }
     }
 
     private void followGuideRail(){
@@ -361,13 +359,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     private void followPath() {
         if (!this.path.isEmpty() && !this.docked && tickFuel()) {
             Vector2f stop = path.get(nextStop);
-            navigation.moveTo(stop.x + 1, this.getY(), stop.y + 1, 10);
-//            this.move(MoverType.SELF, this.getDeltaMovement());
+            navigation.moveTo(stop.x, this.getY(), stop.y, 10);
             double distance = Math.abs(Math.hypot(this.getX() - (stop.x + 0.5), this.getZ() - (stop.y + 0.5)));
             independentMotion = true;
             entityData.set(INDEPENDENT_MOTION, true);
 
-            if (distance < 1.5) {
+            if (distance < 0.6) {
                 incrementStop();
             }
 
