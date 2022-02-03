@@ -335,6 +335,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         }
     }
 
+    // todo: someone said you could prevent mobs from getting stuck on blocks by override this
+//    @Override
+//    protected void customServerAiStep() {
+//        super.customServerAiStep();
+//    }
+
     private void followPath() {
         if (!this.path.isEmpty() && !this.docked && tickFuel()) {
             Vector2f stop = path.get(nextStop);

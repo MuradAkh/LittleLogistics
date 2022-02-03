@@ -1,9 +1,7 @@
 package dev.murad.shipping.entity.navigation;
 
 import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.passive.DolphinEntity;
 import net.minecraft.pathfinding.PathFinder;
-import net.minecraft.pathfinding.SwimNodeProcessor;
 import net.minecraft.pathfinding.SwimmerPathNavigator;
 import net.minecraft.world.World;
 

@@ -48,15 +48,16 @@ public class TugNodeProcessor extends SwimNodeProcessor {
                     pos.south(),
                     pos.north(),
                     pos.north().west(),
-                    pos.north().west().north().west(),
                     pos.north().east(),
-                    pos.north().east().north().east(),
                     pos.south().east(),
                     pos.south().west(),
+                    pos.north().west().north().west(),
+                    pos.north().east().north().east(),
                     pos.south().west().south().west(),
                     pos.south().east().south().east()
             )
             ){
+                // if the point's neighbour has land, penalty is 5 unless there is a dock
                 if(!level.getBlockState(surr).is(Blocks.WATER)){
                     penalty = 5f;
                 }
