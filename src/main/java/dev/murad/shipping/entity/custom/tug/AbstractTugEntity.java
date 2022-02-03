@@ -19,6 +19,9 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.controller.MovementController;
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.passive.DolphinEntity;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -37,6 +40,7 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.pathfinding.PathNavigator;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -87,7 +91,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         this.xo = x;
         this.yo = y;
         this.zo = z;
-
     }
 
     // CONTAINER STUFF
@@ -196,9 +199,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     protected abstract boolean tickFuel();
 
     public static AttributeModifierMap.MutableAttribute setCustomAttributes() {
-        return VesselEntity.createMobAttributes()
+        return VesselEntity.setCustomAttributes()
                 .add(Attributes.FOLLOW_RANGE, 200);
-
     }
 
 
@@ -270,8 +272,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         p_220098_0_.addAlwaysVisibleParticle(basicparticletype, true, (double)p_220098_1_.getX() + 0.5D + random.nextDouble() / 3.0D * (double)(random.nextBoolean() ? 1 : -1), (double)p_220098_1_.getY() + random.nextDouble() + random.nextDouble(), (double)p_220098_1_.getZ() + 0.5D + random.nextDouble() / 3.0D * (double)(random.nextBoolean() ? 1 : -1), 0.007D * xdrift, 0.05D, 0.007D * zdrift);
     }
 
-
-
     @Override
     protected PathNavigator createNavigation(World p_175447_1_) {
         return new TugPathNavigator(this, p_175447_1_);
@@ -297,6 +297,30 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         }
     }
 
+
+    protected void registerGoals() {
+        this.goalSelector.addGoal(0, new MovementGoal());
+    }
+
+    class MovementGoal extends Goal {
+        @Override
+        public boolean canUse() {
+            return AbstractTugEntity.this.path != null;
+        }
+
+        public void tick() {
+            if(!AbstractTugEntity.this.level.isClientSide) {
+                tickCheckDock();
+                followPath();
+                followGuideRail();
+            }
+            if(AbstractTugEntity.this.level.isClientSide
+                    && independentMotion){
+                makeSmoke();
+            }
+        }
+    }
+
     public void tick() {
         if(!level.isClientSide){
             if (extraHitbox == null || extraHitbox.isAlive()){
@@ -310,13 +334,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
 
         if(!this.level.isClientSide) {
             tickRouteCheck();
-            tickCheckDock();
-            followPath();
-            followGuideRail();
-        }
-        if(this.level.isClientSide
-                && independentMotion){
-            makeSmoke();
         }
     }
 
@@ -336,21 +353,21 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     }
 
     // todo: someone said you could prevent mobs from getting stuck on blocks by override this
-//    @Override
-//    protected void customServerAiStep() {
-//        super.customServerAiStep();
-//    }
+    @Override
+    protected void customServerAiStep() {
+        super.customServerAiStep();
+    }
 
     private void followPath() {
         if (!this.path.isEmpty() && !this.docked && tickFuel()) {
             Vector2f stop = path.get(nextStop);
-            navigation.moveTo(stop.x, this.getY(), stop.y, 5);
-            this.move(MoverType.SELF, this.getDeltaMovement());
-            double distance = Math.abs(Math.hypot(this.getX() - stop.x, this.getZ() - stop.y));
+            navigation.moveTo(stop.x + 1, this.getY(), stop.y + 1, 10);
+//            this.move(MoverType.SELF, this.getDeltaMovement());
+            double distance = Math.abs(Math.hypot(this.getX() - (stop.x + 0.5), this.getZ() - (stop.y + 0.5)));
             independentMotion = true;
             entityData.set(INDEPENDENT_MOTION, true);
 
-            if (distance < 2.2) {
+            if (distance < 1.5) {
                 incrementStop();
             }
 

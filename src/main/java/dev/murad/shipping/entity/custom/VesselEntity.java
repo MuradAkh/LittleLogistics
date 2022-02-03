@@ -32,6 +32,7 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeMod;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -102,8 +103,8 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
     public static AttributeModifierMap.MutableAttribute setCustomAttributes() {
         return MobEntity.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 1.0D)
-                .add(Attributes.MOVEMENT_SPEED,  (double)1.2F);
-
+                .add(Attributes.MOVEMENT_SPEED,  2.4D)
+                .add(ForgeMod.SWIM_SPEED.get(), 2.4D);
     }
 
     @Override
