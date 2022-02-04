@@ -34,9 +34,15 @@ public class TugNodeProcessor extends SwimNodeProcessor {
         return i;
     }
 
+    private PathPoint getNodeSimple(int p_176159_1_, int p_176159_2_, int p_176159_3_) {
+        return this.nodes.computeIfAbsent(PathPoint.createHash(p_176159_1_, p_176159_2_, p_176159_3_), (p_215743_3_) -> {
+            return new PathPoint(p_176159_1_, p_176159_2_, p_176159_3_);
+        });
+    }
+
     @Override
     public FlaggedPathPoint getGoal(double p_224768_1_, double p_224768_3_, double p_224768_5_) {
-        return new FlaggedPathPoint(super.getNode(MathHelper.floor(p_224768_1_), MathHelper.floor(p_224768_3_), MathHelper.floor(p_224768_5_)));
+        return new FlaggedPathPoint(getNodeSimple(MathHelper.floor(p_224768_1_), MathHelper.floor(p_224768_3_), MathHelper.floor(p_224768_5_)));
     }
 
     @Override
