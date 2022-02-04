@@ -47,6 +47,11 @@ public class TugDockTileEntity extends AbstractDockTileEntity {
             return false;
         }
 
+        // force tug to be docked when powered
+        // todo: add UI for inverted mode toggle?
+        if (getBlockState().getValue(TugDockBlock.POWERED)) {
+            return true;
+        }
 
         if(getHopper().map(hopper -> handleItemHopper(tug, hopper))
                 .orElse(getVesselLoader().map(l -> l.holdVessel(tug, IVesselLoader.Mode.EXPORT)).orElse(false))){
