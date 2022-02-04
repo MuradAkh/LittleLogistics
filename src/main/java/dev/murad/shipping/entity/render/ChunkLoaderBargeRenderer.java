@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.util.ResourceLocation;
 
-public class ChunkLoaderBargeRenderer extends AbstractBargeRenderer<ChunkLoaderBargeEntity> {
+public class ChunkLoaderBargeRenderer extends VesselRenderer<ChunkLoaderBargeEntity> {
     private static final ResourceLocation BARGE_TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/chunk_loader_barge.png");
 

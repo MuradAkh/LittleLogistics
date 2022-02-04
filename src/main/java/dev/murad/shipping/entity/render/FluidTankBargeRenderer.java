@@ -10,11 +10,10 @@ import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.fluids.FluidStack;
 
-public class FluidTankBargeRenderer extends AbstractBargeRenderer<FluidTankBargeEntity> {
+public class FluidTankBargeRenderer extends VesselRenderer<FluidTankBargeEntity> {
     private static final ResourceLocation BARGE_TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/fluid_barge.png");
 
@@ -36,9 +35,9 @@ public class FluidTankBargeRenderer extends AbstractBargeRenderer<FluidTankBarge
     }
 
     @Override
-    public void render(FluidTankBargeEntity bargeEntity, float p_225623_2_, float p_225623_3_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int p_225623_6_) {
-        super.render(bargeEntity, p_225623_2_, p_225623_3_, matrixStack, buffer, p_225623_6_);
-        renderFluid(bargeEntity, p_225623_2_, p_225623_3_, matrixStack, buffer, 0, p_225623_6_);
+    public void render(FluidTankBargeEntity vesselEntity, float p_225623_2_, float p_225623_3_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int p_225623_6_) {
+        super.render(vesselEntity, p_225623_2_, p_225623_3_, matrixStack, buffer, p_225623_6_);
+        renderFluid(vesselEntity, p_225623_2_, p_225623_3_, matrixStack, buffer, 0, p_225623_6_);
 
     }
 
