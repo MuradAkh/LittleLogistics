@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.util.ResourceLocation;
 
-public class ChestBargeRenderer extends AbstractBargeRenderer<ChestBargeEntity> {
+public class ChestBargeRenderer extends VesselRenderer<ChestBargeEntity> {
     private static final ResourceLocation BARGE_TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/barge.png");
 

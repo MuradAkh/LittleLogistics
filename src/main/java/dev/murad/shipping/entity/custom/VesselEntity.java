@@ -86,11 +86,8 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
 
         this.floatBoat();
         this.unDrown();
-//        this.move(MoverType.SELF, this.getDeltaMovement());
-//        checkInsideBlocks();
 
         super.tick();
-//        this.horizontalCollision = false;
     }
 
     private void unDrown(){
