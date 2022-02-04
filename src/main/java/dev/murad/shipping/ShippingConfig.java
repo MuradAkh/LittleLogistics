@@ -27,6 +27,9 @@ public class ShippingConfig {
         public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
         public static final ForgeConfigSpec SPEC;
         public static final ForgeConfigSpec.ConfigValue<Double> FISHING_TREASURE_CHANCE_MODIFIER;
+
+        public static final ForgeConfigSpec.ConfigValue<Double> TUG_BASE_SPEED;
+
         public static final ForgeConfigSpec.ConfigValue<Integer> STEAM_TUG_FUEL_MULTIPLIER;
 
         public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_CAPACITY;
@@ -35,6 +38,7 @@ public class ShippingConfig {
 
         public static final ForgeConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_CAPACITY;
         public static final ForgeConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_MAX_TRANSFER;
+
 
 
         static {
@@ -48,6 +52,10 @@ public class ShippingConfig {
             }
             {
                 BUILDER.push("tug");
+                TUG_BASE_SPEED =
+                        BUILDER.comment("Base speed of the tugs. Default 2.4.")
+                                .defineInRange("tugBaseSpeed", 2.4, 0.1, 10);
+
                 STEAM_TUG_FUEL_MULTIPLIER =
                         BUILDER.comment("Increases the burn duration of Steam tug fuel by N times when compared to furnace, must be an integer >= 1. Default 4.")
                                 .defineInRange("steamTugFuelMultiplier", 4, 1, Integer.MAX_VALUE);
