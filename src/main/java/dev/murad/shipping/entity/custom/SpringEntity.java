@@ -172,7 +172,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
                 final double alpha = 0.5;
 
                 float targetYaw = computeTargetYaw(dominated.yRot, frontAnchor, backAnchor);
-                dominated.yRot = (float) (alpha * dominated.yRot + targetYaw * (1f-alpha));
+                dominated.yRot = (float) ((alpha * dominated.yRot + targetYaw * (1f-alpha)) % 360);
                 this.yRot = dominated.yRot;
                 double k = dominant instanceof AbstractTugEntity ? 0.2 : 0.13;
                 double l0 = maxDstSq;
