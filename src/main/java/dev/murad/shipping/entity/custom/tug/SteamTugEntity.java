@@ -24,7 +24,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class SteamTugEntity extends AbstractTugEntity {
-    private static final int FURNACE_FUEL_MULTIPLIER= ShippingConfig.steam_tug_fuel_multiplier.get();
+    private static final int FURNACE_FUEL_MULTIPLIER= ShippingConfig.Server.STEAM_TUG_FUEL_MULTIPLIER.get();
 
     protected int burnTime = 0;
     protected int burnCapacity = 0;

@@ -132,7 +132,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
         double shallowPenalty = computeDepthPenalty();
         double chance = 0.25 * overFishPenalty * shallowPenalty;
         double treasure_chance = shallowPenalty > 0.4 ? chance * (shallowPenalty / 2)
-                * ShippingConfig.fishing_treasure_chance_modifier.get() : 0;
+                * ShippingConfig.Server.FISHING_TREASURE_CHANCE_MODIFIER.get() : 0;
         double r = Math.random();
         if(r < chance){
             LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerWorld)this.level))

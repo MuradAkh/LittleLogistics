@@ -255,7 +255,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         if (world != null) {
             BlockPos blockpos = this.getOnPos().above().above();
             Random random = world.random;
-            if (random.nextFloat() < ShippingConfig.tug_smoke_modifier.get()) {
+            if (random.nextFloat() < ShippingConfig.Client.TUG_SMOKE_MODIFIER.get()) {
                 for(int i = 0; i < random.nextInt(2) + 2; ++i) {
                     makeParticles(world, blockpos, true, false);
                 }
