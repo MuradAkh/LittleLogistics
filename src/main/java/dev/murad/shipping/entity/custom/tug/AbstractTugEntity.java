@@ -315,10 +315,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
                 followPath();
                 followGuideRail();
             }
-            if(AbstractTugEntity.this.level.isClientSide
-                    && independentMotion){
-                makeSmoke();
-            }
+
         }
     }
 
@@ -329,6 +326,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
                 level.addFreshEntity(this.extraHitbox);
             }
             extraHitbox.updatePosition();
+        }
+
+        if(this.level.isClientSide
+                && independentMotion){
+            makeSmoke();
         }
 
         super.tick();
