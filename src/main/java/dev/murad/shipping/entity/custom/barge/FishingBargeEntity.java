@@ -262,7 +262,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
 
     @Override
     public void setItem(int p_70299_1_, ItemStack p_70299_2_) {
-
+        itemHandler.setStackInSlot(p_70299_1_, p_70299_2_);
     }
 
     @Override
