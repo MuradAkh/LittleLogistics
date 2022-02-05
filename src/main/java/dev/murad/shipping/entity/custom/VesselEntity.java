@@ -9,6 +9,7 @@ import net.minecraft.block.LilyPadBlock;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.MoverType;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
@@ -44,6 +45,7 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
     protected VesselEntity(EntityType<? extends WaterMobEntity> type, World world) {
         super(type, world);
         stuckCounter = 0;
+        resetSpeedAttributes();
         setSpeedAttributes(ShippingConfig.Server.TUG_BASE_SPEED.get());
     }
 
@@ -108,14 +110,25 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundNBT tags) {
-        super.readAdditionalSaveData(tags);
-        setSpeedAttributes(ShippingConfig.Server.TUG_BASE_SPEED.get());
+    public void readAdditionalSaveData(CompoundNBT nbt) {
+        super.readAdditionalSaveData(nbt);
+        // override speed attributes on load from previous versions
+        resetSpeedAttributes();
     }
 
-    protected void setSpeedAttributes(double speed) {
-        this.getAttribute(ForgeMod.SWIM_SPEED.get()).setBaseValue(speed);
-        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(speed);
+    // reset speed to 1
+    private void resetSpeedAttributes() {
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(1.0);
+        this.getAttribute(ForgeMod.SWIM_SPEED.get()).setBaseValue(1.0);
+    }
+
+    private void setSpeedAttributes(double speed) {
+        this.getAttribute(Attributes.MOVEMENT_SPEED)
+                .addTransientModifier(
+                        new AttributeModifier("movementspeed_mult", speed, AttributeModifier.Operation.MULTIPLY_BASE));
+        this.getAttribute(ForgeMod.SWIM_SPEED.get())
+                .addTransientModifier(
+                        new AttributeModifier("swimspeed_mult", speed, AttributeModifier.Operation.MULTIPLY_BASE));
     }
 
     @Override
