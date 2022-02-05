@@ -103,7 +103,10 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            
+
+
+            forceExit = false
+
             args '--mod', "${project.mod_id}", '--all',
                     '--existing', file('src/main/resources').toString(),
                     '--existing', file('src/generated/resources').toString(),
