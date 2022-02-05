@@ -44,6 +44,7 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
     protected VesselEntity(EntityType<? extends WaterMobEntity> type, World world) {
         super(type, world);
         stuckCounter = 0;
+        setSpeedAttributes(ShippingConfig.Server.TUG_BASE_SPEED.get());
     }
 
     // MOB STUFF
@@ -102,8 +103,8 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
     public static AttributeModifierMap.MutableAttribute setCustomAttributes() {
         return MobEntity.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 1.0D)
-                .add(Attributes.MOVEMENT_SPEED, ShippingConfig.Server.TUG_BASE_SPEED.get())
-                .add(ForgeMod.SWIM_SPEED.get(), ShippingConfig.Server.TUG_BASE_SPEED.get());
+                .add(Attributes.MOVEMENT_SPEED, 1.0D)
+                .add(ForgeMod.SWIM_SPEED.get(), 1.0D);
     }
 
     @Override
@@ -112,7 +113,7 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
         setSpeedAttributes(ShippingConfig.Server.TUG_BASE_SPEED.get());
     }
 
-    public void setSpeedAttributes(double speed) {
+    protected void setSpeedAttributes(double speed) {
         this.getAttribute(ForgeMod.SWIM_SPEED.get()).setBaseValue(speed);
         this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(speed);
     }
