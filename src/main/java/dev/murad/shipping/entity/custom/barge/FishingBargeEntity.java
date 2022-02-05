@@ -25,6 +25,7 @@ import net.minecraft.item.Items;
 import net.minecraft.loot.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -50,6 +51,9 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
     private int fishCooldown = 0;
     private final Set<Pair<Integer, Integer>> overFishedCoords = new HashSet<>();
     private final Queue<Pair<Integer, Integer>> overFishedQueue = new LinkedList<>();
+
+    private static final ResourceLocation fishingLootTable =
+            new ResourceLocation(ShippingConfig.Server.FISHING_LOOT_TABLE.get());
 
 
     public FishingBargeEntity(EntityType<? extends FishingBargeEntity> type, World world) {
@@ -132,7 +136,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
         double shallowPenalty = computeDepthPenalty();
         double chance = 0.25 * overFishPenalty * shallowPenalty;
         double treasure_chance = shallowPenalty > 0.4 ? chance * (shallowPenalty / 2)
-                * ShippingConfig.fishing_treasure_chance_modifier.get() : 0;
+                * ShippingConfig.Server.FISHING_TREASURE_CHANCE_MODIFIER.get() : 0;
         double r = Math.random();
         if(r < chance){
             LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerWorld)this.level))
@@ -142,7 +146,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
                     .withRandom(this.random);
 
             lootcontext$builder.withParameter(LootParameters.KILLER_ENTITY, this).withParameter(LootParameters.THIS_ENTITY, this);
-            LootTable loottable = this.level.getServer().getLootTables().get(r < treasure_chance ? LootTables.FISHING_TREASURE : LootTables.FISHING_FISH);
+            LootTable loottable = this.level.getServer().getLootTables().get(r < treasure_chance ? LootTables.FISHING_TREASURE : fishingLootTable);
             List<ItemStack> list = loottable.getRandomItems(lootcontext$builder.create(LootParameterSets.FISHING));
             for (ItemStack stack : list) {
                 int slot = InventoryUtils.findSlotFotItem(this, stack);

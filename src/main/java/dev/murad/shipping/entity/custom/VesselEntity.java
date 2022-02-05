@@ -1,6 +1,7 @@
 package dev.murad.shipping.entity.custom;
 
 import com.mojang.datafixers.util.Pair;
+import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.util.Train;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -18,6 +19,7 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.Effects;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ITag;
@@ -39,8 +41,8 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public abstract class VesselEntity extends WaterMobEntity implements ISpringableEntity {
-    protected VesselEntity(EntityType<? extends WaterMobEntity> p_i48576_1_, World p_i48576_2_) {
-        super(p_i48576_1_, p_i48576_2_);
+    protected VesselEntity(EntityType<? extends WaterMobEntity> type, World world) {
+        super(type, world);
         stuckCounter = 0;
     }
 
@@ -100,8 +102,19 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
     public static AttributeModifierMap.MutableAttribute setCustomAttributes() {
         return MobEntity.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 1.0D)
-                .add(Attributes.MOVEMENT_SPEED,  2.4D)
-                .add(ForgeMod.SWIM_SPEED.get(), 2.4D);
+                .add(Attributes.MOVEMENT_SPEED, ShippingConfig.Server.TUG_BASE_SPEED.get())
+                .add(ForgeMod.SWIM_SPEED.get(), ShippingConfig.Server.TUG_BASE_SPEED.get());
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundNBT tags) {
+        super.readAdditionalSaveData(tags);
+        setSpeedAttributes(ShippingConfig.Server.TUG_BASE_SPEED.get());
+    }
+
+    public void setSpeedAttributes(double speed) {
+        this.getAttribute(ForgeMod.SWIM_SPEED.get()).setBaseValue(speed);
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(speed);
     }
 
     @Override

@@ -8,36 +8,35 @@ import net.minecraftforge.energy.IEnergyStorage;
  * Re-implementation of EnergyStorage so we can read and write it from/to NBT data
  */
 public class ReadWriteEnergyStorage implements IEnergyStorage {
-    public static final String ENERGY_FORMAT = "%s_energy";
-    public static final String CAPACITY_FORMAT = "%s_capacity";
+    public static final String ENERGY_TAG = "energy";
 
-    private final String energyTag, capacityTag;
-    private final int maxReceive, maxExtract;
+    private final int maxCapacity, maxReceive, maxExtract;
     private EnergyStorage proxyStorage;
 
-    public ReadWriteEnergyStorage(String ident, int maxReceive, int maxExtract)
+    public ReadWriteEnergyStorage(int maxCapacity, int maxReceive, int maxExtract)
     {
-        this.energyTag = String.format(ENERGY_FORMAT, ident);
-        this.capacityTag = String.format(CAPACITY_FORMAT, ident);
+        this.maxCapacity = maxCapacity;
         this.maxReceive = maxReceive;
         this.maxExtract = maxExtract;
         proxyStorage = null;
     }
 
+    private int clampInclusive(int n, int lo, int hi) {
+        return Math.max(lo, Math.min(n, hi));
+    }
+
     // when a TileEntity/Item/Entity is created, call this to set it up
-    public void setEnergy(int energy, int capacity) {
-        proxyStorage = new EnergyStorage(capacity, maxReceive, maxExtract, energy);
+    public void setEnergy(int energy) {
+        proxyStorage = new EnergyStorage(maxCapacity, maxReceive, maxExtract, clampInclusive(energy, 0, maxCapacity));
     }
 
     public void readAdditionalSaveData(CompoundNBT compound) {
-        int energy = compound.contains(energyTag) ? compound.getInt(energyTag) : 0;
-        int capacity = compound.contains(capacityTag) ? compound.getInt(capacityTag) : 0;
-        proxyStorage = new EnergyStorage(capacity, maxReceive, maxExtract, energy);
+        int energy = compound.contains(ENERGY_TAG) ? compound.getInt(ENERGY_TAG) : 0;
+        proxyStorage = new EnergyStorage(maxCapacity, maxReceive, maxExtract, clampInclusive(energy, 0, maxCapacity));
     }
 
     public void addAdditionalSaveData(CompoundNBT compound) {
-        compound.putInt(energyTag, proxyStorage.getEnergyStored());
-        compound.putInt(capacityTag, proxyStorage.getMaxEnergyStored());
+        compound.putInt(ENERGY_TAG, proxyStorage.getEnergyStored());
     }
 
     @Override

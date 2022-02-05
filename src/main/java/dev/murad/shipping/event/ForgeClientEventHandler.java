@@ -36,7 +36,7 @@ public class ForgeClientEventHandler {
 
     @SubscribeEvent
     public static void onRenderWorldLast(RenderWorldLastEvent event) {
-        if(ShippingConfig.disable_tug_route_beacons.get()){
+        if(ShippingConfig.Client.DISABLE_TUG_ROUTE_BEACONS.get()){
             return;
         }
         PlayerEntity player = Minecraft.getInstance().player;
