@@ -1,11 +1,8 @@
 package dev.murad.shipping.setup;
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.custom.barge.ChestBargeEntity;
+import dev.murad.shipping.entity.custom.barge.*;
 import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.entity.custom.barge.ChunkLoaderBargeEntity;
-import dev.murad.shipping.entity.custom.barge.FishingBargeEntity;
-import dev.murad.shipping.entity.custom.barge.FluidTankBargeEntity;
 import dev.murad.shipping.entity.custom.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.custom.tug.SteamTugEntity;
 import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
@@ -38,6 +35,12 @@ public class ModEntityTypes {
                     () -> EntityType.Builder.<FluidTankBargeEntity>of(FluidTankBargeEntity::new,
                                     EntityClassification.MISC).sized(0.6f, 0.6f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "fluid_barge").toString()));
+
+    public static final RegistryObject<EntityType<SeaterBargeEntity>> SEATER_BARGE =
+            Registration.ENTITIES.register("seater_barge",
+                    () -> EntityType.Builder.<SeaterBargeEntity>of(SeaterBargeEntity::new,
+                                    EntityClassification.MISC).sized(0.6f, 0.6f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "seater_barge").toString()));
 
     public static final RegistryObject<EntityType<SteamTugEntity>> STEAM_TUG =
             Registration.ENTITIES.register("tug",

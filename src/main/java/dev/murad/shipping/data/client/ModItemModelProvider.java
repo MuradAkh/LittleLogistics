@@ -34,6 +34,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "chunk_loader_barge");
         builder(itemGenerated, "fishing_barge");
         builder(itemGenerated, "fluid_barge");
+        builder(itemGenerated, "seater_barge");
         builder(itemGenerated, "tug");
         builder(itemGenerated, "energy_tug");
         builder(itemGenerated, "vessel_charger");

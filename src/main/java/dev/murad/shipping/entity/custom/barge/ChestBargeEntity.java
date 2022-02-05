@@ -36,10 +36,6 @@ public class ChestBargeEntity extends AbstractBargeEntity implements IInventory,
         super(ModEntityTypes.CHEST_BARGE.get(), worldIn, x, y, z);
     }
 
-    ChestBargeEntity(EntityType<? extends ChestBargeEntity> type, World worldIn, double x, double y, double z) {
-        super(type, worldIn, x, y, z);
-    }
-
     protected NonNullList<ItemStack> createItemStacks(){
         return NonNullList.withSize(36, ItemStack.EMPTY);
     }
