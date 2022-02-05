@@ -33,17 +33,17 @@ public class EnergyTugEntity extends AbstractTugEntity {
     private static final int MAX_TRANSFER = ShippingConfig.Server.ENERGY_TUG_BASE_MAX_CHARGE_RATE.get();
     private static final int ENERGY_USAGE = ShippingConfig.Server.ENERGY_TUG_BASE_ENERGY_USAGE.get();
 
-    private final ReadWriteEnergyStorage internalBattery = new ReadWriteEnergyStorage("Internal", MAX_TRANSFER, Integer.MAX_VALUE);
+    private final ReadWriteEnergyStorage internalBattery = new ReadWriteEnergyStorage(MAX_ENERGY, MAX_TRANSFER, Integer.MAX_VALUE);
     private final LazyOptional<IEnergyStorage> holder = LazyOptional.of(() -> internalBattery);
 
     public EnergyTugEntity(EntityType<? extends WaterMobEntity> type, World world) {
         super(type, world);
-        internalBattery.setEnergy(0, MAX_ENERGY);
+        internalBattery.setEnergy(0);
     }
 
     public EnergyTugEntity(World worldIn, double x, double y, double z) {
         super(ModEntityTypes.ENERGY_TUG.get(), worldIn, x, y, z);
-        internalBattery.setEnergy(0, MAX_ENERGY);
+        internalBattery.setEnergy(0);
     }
 
     // todo: Store contents?
@@ -107,13 +107,15 @@ public class EnergyTugEntity extends AbstractTugEntity {
 
     @Override
     public void readAdditionalSaveData(CompoundNBT compound) {
-        internalBattery.readAdditionalSaveData(compound);
+        internalBattery.readAdditionalSaveData(compound.getCompound("energy_storage"));
         super.readAdditionalSaveData(compound);
     }
 
     @Override
     public void addAdditionalSaveData(CompoundNBT compound) {
-        internalBattery.addAdditionalSaveData(compound);
+        CompoundNBT energyNBT = new CompoundNBT();
+        internalBattery.addAdditionalSaveData(energyNBT);
+        compound.put("energy_storage", energyNBT);
         super.addAdditionalSaveData(compound);
     }
 

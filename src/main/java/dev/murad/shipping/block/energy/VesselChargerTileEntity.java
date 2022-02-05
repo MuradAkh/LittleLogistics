@@ -5,6 +5,7 @@ import dev.murad.shipping.block.IVesselLoader;
 import dev.murad.shipping.capability.ReadWriteEnergyStorage;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
@@ -25,13 +26,13 @@ import javax.annotation.Nullable;
 public class VesselChargerTileEntity extends TileEntity implements ITickableTileEntity, IVesselLoader {
     private static final int MAX_TRANSFER = ShippingConfig.Server.VESSEL_CHARGER_BASE_MAX_TRANSFER.get();
     private static final int MAX_CAPACITY = ShippingConfig.Server.VESSEL_CHARGER_BASE_CAPACITY.get();
-    private final ReadWriteEnergyStorage internalBattery = new ReadWriteEnergyStorage("Internal", MAX_TRANSFER, MAX_TRANSFER);
+    private final ReadWriteEnergyStorage internalBattery = new ReadWriteEnergyStorage(MAX_CAPACITY, MAX_TRANSFER, MAX_TRANSFER);
     private final LazyOptional<IEnergyStorage> holder = LazyOptional.of(() -> internalBattery);
     private int cooldownTime = 0;
 
     public VesselChargerTileEntity() {
         super(ModTileEntitiesTypes.VESSEL_CHARGER.get());
-        internalBattery.setEnergy(0, MAX_CAPACITY);
+        internalBattery.setEnergy(0);
     }
 
     @Override
@@ -61,6 +62,21 @@ public class VesselChargerTileEntity extends TileEntity implements ITickableTile
                     int toTransfer = internalBattery.extractEnergy(vesselCap, false);
                     return iEnergyStorage.receiveEnergy(toTransfer, false) > 0;
         }).orElse(false);
+    }
+
+    @Override
+    public void load(BlockState state, CompoundNBT compound) {
+        super.load(state, compound);
+        internalBattery.readAdditionalSaveData(compound.getCompound("energy_storage"));
+    }
+
+    @Override
+    public CompoundNBT save(CompoundNBT compound) {
+        CompoundNBT energyNBT = new CompoundNBT();
+        internalBattery.addAdditionalSaveData(energyNBT);
+        CompoundNBT sup = super.save(compound);
+        sup.put("energy_storage", energyNBT);
+        return sup;
     }
 
     @Override
