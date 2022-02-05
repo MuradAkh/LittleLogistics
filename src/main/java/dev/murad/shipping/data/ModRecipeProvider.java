@@ -4,7 +4,11 @@ import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
 import net.minecraft.data.*;
 import net.minecraft.item.Items;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.Tags;
+import net.minecraftforge.common.data.ForgeRecipeProvider;
+import net.minecraftforge.registries.GameData;
 
 import java.util.function.Consumer;
 
@@ -123,6 +127,16 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("#_#")
                 .pattern("$$$")
                 .unlockedBy("has_item", has(Items.CHEST))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModItems.SEATER_BARGE.get())
+                .define('_', ItemTags.createOptional(new ResourceLocation("minecraft", "wooden_stairs")))
+                .define('#', ItemTags.createOptional(new ResourceLocation("minecraft", "signs")))
+                .define('$', Items.IRON_INGOT)
+                .pattern("   ")
+                .pattern("#_#")
+                .pattern("$$$")
+                .unlockedBy("has_item", has(Items.IRON_INGOT))
                 .save(consumer);
 
         ShapedRecipeBuilder.shaped(ModItems.FISHING_BARGE.get())
