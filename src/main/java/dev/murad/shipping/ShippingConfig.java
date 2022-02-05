@@ -1,5 +1,6 @@
 package dev.murad.shipping;
 
+import com.sun.org.apache.xalan.internal.xsltc.compiler.util.BooleanType;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 public class ShippingConfig {
@@ -27,6 +28,7 @@ public class ShippingConfig {
         public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
         public static final ForgeConfigSpec SPEC;
         public static final ForgeConfigSpec.ConfigValue<Double> FISHING_TREASURE_CHANCE_MODIFIER;
+        public static final ForgeConfigSpec.ConfigValue<String> FISHING_LOOT_TABLE;
 
         public static final ForgeConfigSpec.ConfigValue<Double> TUG_BASE_SPEED;
 
@@ -46,8 +48,13 @@ public class ShippingConfig {
             {
                 BUILDER.push("barge");
                 FISHING_TREASURE_CHANCE_MODIFIER =
-                        BUILDER.comment("Modify the chance of using the treasure loot table with the auto fishing barge, other factors such as depth and overfishing still play a role.")
+                        BUILDER.comment("Modify the chance of using the treasure loot table with the auto fishing barge, other factors such as depth and overfishing still play a role. " +
+                                        "Default 0.02.")
                                 .define("fishingTreasureChance", 0.02);
+                FISHING_LOOT_TABLE =
+                        BUILDER.comment("Loot table to use when fishing barge catches a fish. Change to 'minecraft:gameplay/fishing' if some modded fish aren't being caught. Defaults to 'minecraft:gameplay/fishing/fish'.")
+                                .define("fishingLootTable", "minecraft:gameplay/fishing/fish");
+
                 BUILDER.pop();
             }
             {
