@@ -39,11 +39,6 @@ public abstract class AbstractBargeEntity extends VesselEntity implements ISprin
     }
 
     @Override
-    protected void addPassenger(Entity passenger){
-
-    }
-
-    @Override
     protected boolean canAddPassenger(Entity passenger) {
         return false;
     }

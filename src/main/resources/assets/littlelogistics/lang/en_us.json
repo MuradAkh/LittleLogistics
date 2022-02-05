@@ -2,6 +2,7 @@
   "item.littlelogistics.tug": "Steam Tug",
   "item.littlelogistics.barge": "Chest Barge",
   "item.littlelogistics.chunk_loader_barge": "Chunk Loader Barge",
+  "item.littlelogistics.seater_barge": "Seater Barge",
   "item.littlelogistics.fishing_barge": "Auto-Fishing Barge",
   "item.littlelogistics.spring": "Vessel Chain",
   "item.littlelogistics.tug_route": "Tug Route",
@@ -16,6 +17,7 @@
   "entity.littlelogistics.spring": "Vessel Chain",
   "entity.littlelogistics.energy_tug": "Energy Tug",
   "entity.littlelogistics.fluid_barge": "Fluid Tank Barge",
+  "entity.littlelogistics.seater_barge": "Seater Barge",
 
   "block.littlelogistics.tug_dock": "Tug Dock",
   "block.littlelogistics.barge_dock": "Barge Dock",
