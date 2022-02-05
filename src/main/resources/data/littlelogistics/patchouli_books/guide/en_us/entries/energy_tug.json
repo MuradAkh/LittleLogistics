@@ -12,7 +12,7 @@
     },
     {
       "type": "patchouli:crafting",
-      "recipe": "littlelogistics:tug",
+      "recipe": "littlelogistics:energy_tug",
       "text": "The tug has an extra slot for a capacitor, this is useful if the tug ran out of energy mid-way and needs to be recharged."
     }
   ]

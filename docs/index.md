@@ -22,7 +22,7 @@ A basic tugboat that can operate on any furnace fuel. Fuel can be loaded with ho
 
 ### Energy Tug
 
-_COMING SOON_
+A tugboat powered by Forge Energy, can be charged when docked with a Vessel Charger. The tug has an extra slot for a capacitor, this is useful if the tug ran out of energy mid-way and needs to be recharged.
 
 ### Chest Barge
 
@@ -30,6 +30,9 @@ A simple barge that holds items, very similar to vanilla minecart. Must be docke
 
 <img src="https://user-images.githubusercontent.com/31002977/150036819-99629a2b-d3db-4058-aa16-4bd7bed7b1ac.png" style="max-height:35vh;">
 
+### Seater Barge
+
+A simple barge that seats one player.
 
 ### Auto-Fishing Barge
 
@@ -43,9 +46,9 @@ This barge keeps 3x3 area of chunks, centered on the entity, loaded. Recommended
 
 <img src="https://user-images.githubusercontent.com/31002977/150036818-47fc4cfd-8dc0-470f-9f26-d4b16a3e0f6c.png" style="max-height:35vh;">
 
-### Fluid Storage Barge
+### Fluid Tank Barge
 
-_COMING SOON_
+Use this barge to transport fluids, can be loaded and unloaded with a Fluid Hoppers.
 
 ## Items
 
@@ -83,6 +86,14 @@ There are two dock blogs: barge and tug. The tug block must always be present fo
 
 
 <video src="https://user-images.githubusercontent.com/31002977/149874251-ccc26b7d-b74c-474b-b066-e48a01872000.mp4" data-canonical-src="https://user-images.githubusercontent.com/31002977/149874251-ccc26b7d-b74c-474b-b066-e48a01872000.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2 width-fit" style="max-height:35vh;"></video><br/>
+
+### Vessel Charger
+
+A charger for Energy Tug, connect to any forge energy cable to add power to the charger. Place on top of a dock to charge the vessel when docking.
+
+### Fluid Hopper
+
+A hopper but for fluids, can import from the top and export from the sides. Can be loaded by right-clicking with buckets. Can be used to load/unload vessels using Docks.
 
 ## License
 
