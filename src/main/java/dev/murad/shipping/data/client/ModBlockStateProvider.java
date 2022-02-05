@@ -27,9 +27,10 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
     private ModelFile getTugDockModel(BlockState state){
         String inv = state.getValue(TugDockBlock.INVERTED) ? "_inv" : "";
-        return  models().orientable("tug_dock" + inv,
+        String powered = state.getValue(TugDockBlock.POWERED) ? "_powered" : "";
+        return  models().orientable("tug_dock" + inv + powered,
                 getBlTx("tug_dock"),
-                getBlTx("tug_dock_front"),
+                getBlTx("tug_dock_front" + powered),
                 getBlTx("tug_dock_top" + inv));
     }
 
