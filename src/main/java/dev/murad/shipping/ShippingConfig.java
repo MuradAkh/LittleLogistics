@@ -61,7 +61,7 @@ public class ShippingConfig {
                 BUILDER.push("tug");
                 TUG_BASE_SPEED =
                         BUILDER.comment("Base speed of the tugs. Default 2.4.")
-                                .defineInRange("tugBaseSpeed", 2.4, 0.1, 10);
+                                .defineInRange("tugBaseSpeed", 1.8, 0.1, 10);
 
                 STEAM_TUG_FUEL_MULTIPLIER =
                         BUILDER.comment("Increases the burn duration of Steam tug fuel by N times when compared to furnace, must be an integer >= 1. Default 4.")

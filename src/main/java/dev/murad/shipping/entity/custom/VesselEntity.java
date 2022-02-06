@@ -105,8 +105,8 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
     public static AttributeModifierMap.MutableAttribute setCustomAttributes() {
         return MobEntity.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 1.0D)
-                .add(Attributes.MOVEMENT_SPEED, 1.0D)
-                .add(ForgeMod.SWIM_SPEED.get(), 1.0D);
+                .add(Attributes.MOVEMENT_SPEED, 0.0D)
+                .add(ForgeMod.SWIM_SPEED.get(), 0.0D);
     }
 
     @Override
@@ -118,17 +118,17 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
 
     // reset speed to 1
     private void resetSpeedAttributes() {
-        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(1.0);
-        this.getAttribute(ForgeMod.SWIM_SPEED.get()).setBaseValue(1.0);
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0);
+        this.getAttribute(ForgeMod.SWIM_SPEED.get()).setBaseValue(0);
     }
 
     private void setSpeedAttributes(double speed) {
         this.getAttribute(Attributes.MOVEMENT_SPEED)
                 .addTransientModifier(
-                        new AttributeModifier("movementspeed_mult", speed, AttributeModifier.Operation.MULTIPLY_BASE));
+                        new AttributeModifier("movementspeed_mult", speed, AttributeModifier.Operation.ADDITION));
         this.getAttribute(ForgeMod.SWIM_SPEED.get())
                 .addTransientModifier(
-                        new AttributeModifier("swimspeed_mult", speed, AttributeModifier.Operation.MULTIPLY_BASE));
+                        new AttributeModifier("swimspeed_mult", speed, AttributeModifier.Operation.ADDITION));
     }
 
     @Override
