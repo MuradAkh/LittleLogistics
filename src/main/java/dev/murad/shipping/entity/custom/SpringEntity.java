@@ -248,7 +248,14 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
             BlockPos.Mutable pos = new BlockPos.Mutable();
             pos.set(compound.getInt("X"), compound.getInt("Y"), compound.getInt("Z"));
             String uuid = compound.getString("UUID");
-            AxisAlignedBB searchBox = new AxisAlignedBB(pos);
+            AxisAlignedBB searchBox = new AxisAlignedBB(
+                    pos.getX() - 2,
+                    pos.getY() - 2,
+                    pos.getZ() - 2,
+                    pos.getX() + 2,
+                    pos.getY() + 2,
+                    pos.getZ() + 2
+            );
             List<Entity> entities = level.getEntities(this, searchBox, e -> e.getStringUUID().equals(uuid));
             return entities.stream().findFirst().map(e -> (VesselEntity) e);
         } catch (Exception e){
