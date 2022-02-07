@@ -17,7 +17,7 @@ public class ShippingConfig {
                     BUILDER.comment("Modify the rate of smoke produced by a tug. Min 0, Max 1, Default 0.4")
                             .defineInRange("tugSmoke", 0.4, 0, 1);
             DISABLE_TUG_ROUTE_BEACONS =
-                    BUILDER.comment("Disable indicator beacons for tug route item, for use with shaders. Default false.")
+                    BUILDER.comment("Disable indicator beacons for tug route item. Default false.")
                             .define("disableTugRouteBeacons", false);
             BUILDER.pop();
             SPEC = BUILDER.build();
