@@ -29,8 +29,8 @@ public class SeaterBargeEntity extends AbstractBargeEntity{
     }
 
     @Override
-    protected boolean canAddPassenger(Entity passenger) {
-        return true;
+    protected boolean canAddPassenger(Entity p_184219_1_) {
+        return this.getPassengers().size() < 1;
     }
 
     private void clampRotation(Entity p_184454_1_) {

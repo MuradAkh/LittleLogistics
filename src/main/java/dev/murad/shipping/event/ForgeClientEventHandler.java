@@ -8,6 +8,7 @@ import dev.murad.shipping.setup.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.tileentity.BeaconTileEntityRenderer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
@@ -46,7 +47,7 @@ public class ForgeClientEventHandler {
             double d0 = vector3d.x();
             double d1 = vector3d.y();
             double d2 = vector3d.z();
-            IRenderTypeBuffer.Impl renderTypeBuffer = Minecraft.getInstance().renderBuffers().bufferSource();
+            IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
             List<Vector2f> route = TugRouteItem.getRoute(stack);
             for (int i = 0, routeSize = route.size(); i < routeSize; i++) {
                 Vector2f v = route.get(i);
@@ -67,18 +68,16 @@ public class ForgeClientEventHandler {
 
                 Matrix4f matrix4f = matrixStack.last().pose();
 
-                float opacity = (Minecraft.getInstance()).options.getBackgroundOpacity(0.25F);
                 FontRenderer fontRenderer = Minecraft.getInstance().font;
-//                int alpha = (int) (opacity * 255.0F) << 24;
                 String text = String.format("%s %d", I18n.get("item.littlelogistics.tug_route.node"), i);
                 float width = (-fontRenderer.width(text) / (float) 2);
-
-//                fontRenderer.drawInBatch(text, width, 0.0F, 553648127, false, matrix4f, renderTypeBuffer, false, alpha, 15728880);
                 fontRenderer.drawInBatch(text, width, 0.0F, -1, true, matrix4f, renderTypeBuffer, true, 0, 15728880);
                 matrixStack.popPose();
 
             }
+            renderTypeBuffer.endBatch();
         }
+
     }
 
 }
