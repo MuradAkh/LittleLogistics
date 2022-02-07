@@ -1,5 +1,6 @@
 package dev.murad.shipping.setup;
 import dev.murad.shipping.item.*;
+import dev.murad.shipping.item.creative.CreativeCapacitor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraftforge.fml.RegistryObject;
@@ -31,6 +32,9 @@ public class ModItems {
 
     public static final RegistryObject<Item> TUG_ROUTE = Registration.ITEMS.register("tug_route",
             () -> new TugRouteItem(new Item.Properties().stacksTo(1).tab(ItemGroup.TAB_TRANSPORTATION)));
+
+    public static final RegistryObject<Item> CREATIVE_CAPACITOR = Registration.ITEMS.register("creative_capacitor",
+            () -> new CreativeCapacitor(new Item.Properties().stacksTo(1).tab(ItemGroup.TAB_TRANSPORTATION)));
 
     public static void register () {
 

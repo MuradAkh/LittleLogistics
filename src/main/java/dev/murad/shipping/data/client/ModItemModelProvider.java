@@ -44,6 +44,8 @@ public class ModItemModelProvider extends ItemModelProvider {
                 .override()
                 .model(builder(itemGenerated, "spring_dominant_selected"))
                 .predicate(new ResourceLocation(ShippingMod.MOD_ID, "springstate"), 1f).end();
+
+        builder(itemGenerated, "creative_capacitor");
     }
 
 
