@@ -31,22 +31,22 @@
   "screen.littlelogistics.energy_tug": "Remorqueur Électrique",
   "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
 
-  "item.littlelogistics.tug_route.description": "Right click to add stop, right click at the same location to remove. Nodes will always be added to the end of the route",
-  "item.littlelogistics.tug_route.added": "Added Route Node X:%s Z:%s",
-  "item.littlelogistics.tug_route.removed": "Removed Route Node X:%s Z:%s",
-  "item.littlelogistics.tug_route.node": "Node",
-  "item.littlelogistics.spring.description": "Used to link barges/tugs",
-  "item.littlelogistics.spring.notToSelf": "Can't link vessel to self",
-  "item.littlelogistics.spring.noTwoTugs": "Can't link two tugs",
-  "item.littlelogistics.spring.tooFar": "Vessels too far to link",
-  "item.littlelogistics.spring.noLoops": "Can't link vessels in a loop",
-  "item.littlelogistics.fishing_barge.description": "For best yield, use on long routes in deep and open water",
+  "item.littlelogistics.tug_route.description": "Right click to add mark, right click on a mark to remove that mark. Marks are always added to the end of the guide.",
+  "item.littlelogistics.tug_route.added": "Marque de guidage ajoutée á X:%s Z:%s",
+  "item.littlelogistics.tug_route.removed": "Marque de guidage supprimée à X:%s Z:%s",
+  "item.littlelogistics.tug_route.node": "Marque",
+  "item.littlelogistics.spring.description": "Utilisé pour connecter des barges et des remorqueurs",
+  "item.littlelogistics.spring.notToSelf": "Impossible de connecter un bateau à lui-même",
+  "item.littlelogistics.spring.noTwoTugs": "Impossible de connecter deux remorqueurs",
+  "item.littlelogistics.spring.tooFar": "Les bateaux sont trop loin pour la connexion",
+  "item.littlelogistics.spring.noLoops": "Impossible de connecter des bateaux en cercle",
+  "item.littlelogistics.fishing_barge.description": "Pour de meilleurs résultats, utilisez-le lors de longs voyages en eau profonde et libre.",
 
-  "item.littlelogistics.creative_capacitor": "Creative Capacitor",
+  "item.littlelogistics.creative_capacitor": "Condensateur Créatif",
 
   "block.littlelogistics.vessel_charger.capacity": "%s/%s FE",
   "block.littlelogistics.fluid_hopper.capacity": "%s %s/%s mB",
-  "block.littlelogistics.fluid_hopper.capacity_empty": "Empty 0/%s mB",
+  "block.littlelogistics.fluid_hopper.capacity_empty": "Vide 0/%s mB",
   "entity.littlelogistics.fluid_barge.capacity": "%s %s/%s mB",
-  "entity.littlelogistics.fluid_barge.capacity_empty": "Empty 0/%s mB"
+  "entity.littlelogistics.fluid_barge.capacity_empty": "Vide 0/%s mB"
 }
