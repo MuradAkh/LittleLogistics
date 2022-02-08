@@ -43,6 +43,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -66,6 +67,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     protected boolean docked = false;
     private int dockCheckCooldown = 0;
     private boolean independentMotion = false;
+    private int pathfindCooldown = 0;
     private static final DataParameter<Boolean> INDEPENDENT_MOTION = EntityDataManager.defineId(AbstractTugEntity.class, DataSerializers.BOOLEAN);
 
     public boolean allowDockInterface(){
@@ -361,7 +363,10 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     private void followPath() {
         if (!this.path.isEmpty() && !this.docked && tickFuel()) {
             Vector2f stop = path.get(nextStop);
-            navigation.moveTo(stop.x, this.getY(), stop.y, 10);
+            if (navigation.getPath() == null || navigation.getPath().isDone()
+            ) {
+                navigation.moveTo(stop.x, this.getY(), stop.y, 10);
+            }
             double distance = Math.abs(Math.hypot(this.getX() - (stop.x + 0.5), this.getZ() - (stop.y + 0.5)));
             independentMotion = true;
             entityData.set(INDEPENDENT_MOTION, true);

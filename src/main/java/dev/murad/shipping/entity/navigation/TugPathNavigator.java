@@ -1,5 +1,6 @@
 package dev.murad.shipping.entity.navigation;
 
+import dev.murad.shipping.ShippingConfig;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.pathfinding.PathFinder;
 import net.minecraft.pathfinding.SwimmerPathNavigator;
@@ -8,7 +9,7 @@ import net.minecraft.world.World;
 public class TugPathNavigator extends SwimmerPathNavigator {
     public TugPathNavigator(MobEntity p_i45873_1_, World p_i45873_2_) {
         super(p_i45873_1_, p_i45873_2_);
-        setMaxVisitedNodesMultiplier(5);
+        setMaxVisitedNodesMultiplier(ShippingConfig.Server.TUG_PATHFINDING_MULTIPLIER.get());
     }
 
     @Override
