@@ -14,6 +14,8 @@ import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.Train;
+import dev.murad.shipping.util.TugRoute;
+import dev.murad.shipping.util.TugRouteNode;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
@@ -79,7 +81,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
 
     private TugDummyHitboxEntity extraHitbox = null;
 
-    private List<Vector2f> path;
+    private TugRoute path;
     private int nextStop;
 
 
@@ -87,7 +89,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         super(type, world);
         this.blocksBuilding = true;
         this.train = new Train(this);
-        this.path = new ArrayList<>();
+        this.path = new TugRoute();
     }
 
     public AbstractTugEntity(EntityType type, World worldIn, double x, double y, double z) {
@@ -365,12 +367,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
 
     private void followPath() {
         if (!this.path.isEmpty() && !this.docked && tickFuel()) {
-            Vector2f stop = path.get(nextStop);
+            TugRouteNode stop = path.get(nextStop);
             if (navigation.getPath() == null || navigation.getPath().isDone()
             ) {
-                navigation.moveTo(stop.x, this.getY(), stop.y, 0.3);
+                navigation.moveTo(stop.getX(), this.getY(), stop.getZ(), 0.3);
             }
-            double distance = Math.abs(Math.hypot(this.getX() - (stop.x + 0.5), this.getZ() - (stop.y + 0.5)));
+            double distance = Math.abs(Math.hypot(this.getX() - (stop.getX() + 0.5), this.getZ() - (stop.getZ() + 0.5)));
             independentMotion = true;
             entityData.set(INDEPENDENT_MOTION, true);
 
@@ -394,7 +396,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     }
 
 
-    public void setPath(List<Vector2f> path) {
+    public void setPath(TugRoute path) {
         this.path = path;
     }
 

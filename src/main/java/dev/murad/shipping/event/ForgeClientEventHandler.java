@@ -5,6 +5,7 @@ import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModItems;
+import dev.murad.shipping.util.TugRouteNode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -48,20 +49,20 @@ public class ForgeClientEventHandler {
             double d1 = vector3d.y();
             double d2 = vector3d.z();
             IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-            List<Vector2f> route = TugRouteItem.getRoute(stack);
+            List<TugRouteNode> route = TugRouteItem.getRoute(stack);
             for (int i = 0, routeSize = route.size(); i < routeSize; i++) {
-                Vector2f v = route.get(i);
+                TugRouteNode node = route.get(i);
                 MatrixStack matrixStack = event.getMatrixStack();
 
                 matrixStack.pushPose();
-                matrixStack.translate(v.x - d0, 1 - d1, v.y - d2);
+                matrixStack.translate(node.getX() - d0, 1 - d1, node.getZ() - d2);
 
                 BeaconTileEntityRenderer.renderBeaconBeam(matrixStack, renderTypeBuffer, BEAM_LOCATION, event.getPartialTicks(),
                         1F, player.level.getGameTime(), 0, 1024,
                         DyeColor.RED.getTextureDiffuseColors(), 0.2F, 0.25F);
                 matrixStack.popPose();
                 matrixStack.pushPose();
-                matrixStack.translate(v.x - d0 , player.getY() + 2 - d1, v.y - d2 );
+                matrixStack.translate(node.getX() - d0 , player.getY() + 2 - d1, node.getZ() - d2 );
                 matrixStack.scale(-0.025F, -0.025F, -0.025F);
 
                 matrixStack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
@@ -69,7 +70,7 @@ public class ForgeClientEventHandler {
                 Matrix4f matrix4f = matrixStack.last().pose();
 
                 FontRenderer fontRenderer = Minecraft.getInstance().font;
-                String text = String.format("%s %d", I18n.get("item.littlelogistics.tug_route.node"), i);
+                String text = node.getDisplayName(i);
                 float width = (-fontRenderer.width(text) / (float) 2);
                 fontRenderer.drawInBatch(text, width, 0.0F, -1, true, matrix4f, renderTypeBuffer, true, 0, 15728880);
                 matrixStack.popPose();
