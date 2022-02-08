@@ -32,9 +32,9 @@
   "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
 
   "item.littlelogistics.tug_route.description": "Clic droit pour ajouter une balise, clic droit sur une balise existante pour la supprimer. Les nouvelles balises sont ajoutés à la fin du guide.",
-  "item.littlelogistics.tug_route.added": "Marque de guidage ajoutée á X:%s Z:%s",
-  "item.littlelogistics.tug_route.removed": "Marque de guidage supprimée à X:%s Z:%s",
-  "item.littlelogistics.tug_route.node": "Marque",
+  "item.littlelogistics.tug_route.added": "Balise de guidage ajoutée á X:%s Z:%s",
+  "item.littlelogistics.tug_route.removed": "Balise de guidage supprimée à X:%s Z:%s",
+  "item.littlelogistics.tug_route.node": "Balise",
   "item.littlelogistics.spring.description": "Utilisé pour connecter des barges et des remorqueurs",
   "item.littlelogistics.spring.notToSelf": "Impossible de connecter un bateau à lui-même",
   "item.littlelogistics.spring.noTwoTugs": "Impossible de connecter deux remorqueurs",
