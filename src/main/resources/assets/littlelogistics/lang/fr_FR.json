@@ -31,7 +31,7 @@
   "screen.littlelogistics.energy_tug": "Remorqueur Électrique",
   "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
 
-  "item.littlelogistics.tug_route.description": "Right click to add mark, right click on a mark to remove that mark. Marks are always added to the end of the guide.",
+  "item.littlelogistics.tug_route.description": "Clic droit pour ajouter une balise, clic droit sur une balise existante pour la supprimer. Les nouvelles balises sont ajoutés à la fin du guide.",
   "item.littlelogistics.tug_route.added": "Marque de guidage ajoutée á X:%s Z:%s",
   "item.littlelogistics.tug_route.removed": "Marque de guidage supprimée à X:%s Z:%s",
   "item.littlelogistics.tug_route.node": "Marque",
