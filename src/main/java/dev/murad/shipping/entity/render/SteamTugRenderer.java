@@ -30,7 +30,7 @@ public class SteamTugRenderer extends VesselRenderer<SteamTugEntity> {
 
     @Override
     protected double getModelYoffset() {
-        return 1.55D;
+        return 1.45D;
     }
 
     @Override

@@ -34,7 +34,7 @@ public class EnergyTugRenderer extends VesselRenderer<EnergyTugEntity> {
 
     @Override
     protected double getModelYoffset() {
-        return 1.65D;
+        return 1.55D;
     }
 
     @Override
