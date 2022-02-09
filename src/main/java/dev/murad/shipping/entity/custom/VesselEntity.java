@@ -86,18 +86,21 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
         if(this.isAlive()) {
             tickSpringAliveCheck();
         }
-        this.oldStatus = this.status;
-        this.status = this.getStatus();
 
-        this.floatBoat();
-        this.unDrown();
+        if(!this.level.isClientSide) {
+            this.oldStatus = this.status;
+            this.status = this.getStatus();
+
+            this.floatBoat();
+            this.unDrown();
+        }
 
         super.tick();
     }
 
     private void unDrown(){
         if(level.getBlockState(getOnPos().above()).getBlock().equals(Blocks.WATER)){
-            this.setDeltaMovement(this.getDeltaMovement().add(new Vector3d(0, 0.1, 1)));
+            this.setDeltaMovement(this.getDeltaMovement().add(new Vector3d(0, 0.1, 0)));
         }
 
     }
