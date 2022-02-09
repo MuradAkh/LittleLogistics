@@ -36,7 +36,7 @@
   "item.littlelogistics.tug_route.removed": "Balise de guidage supprimée à X:%s Z:%s",
   "item.littlelogistics.tug_route.node": "Balise",
   "item.littlelogistics.spring.description": "Utilisé pour connecter des barges et des remorqueurs",
-  "item.littlelogistics.spring.notToSelf": "Impossible de connecter un bateau à lui-même",
+  "item.littlelogistics.spring.notToSelf": "Impossible de connecter un bateau à elle-même",
   "item.littlelogistics.spring.noTwoTugs": "Impossible de connecter deux remorqueurs",
   "item.littlelogistics.spring.tooFar": "Les bateaux sont trop loin pour la connexion",
   "item.littlelogistics.spring.noLoops": "Impossible de connecter des bateaux en cercle",
