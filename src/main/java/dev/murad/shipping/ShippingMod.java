@@ -8,6 +8,7 @@ import dev.murad.shipping.entity.container.SteamTugScreen;
 
 import dev.murad.shipping.entity.render.*;
 import dev.murad.shipping.item.SpringItem;
+import dev.murad.shipping.item.container.TugRouteScreen;
 import dev.murad.shipping.setup.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -86,6 +87,8 @@ public class ShippingMod
         ScreenManager.register(ModContainerTypes.TUG_CONTAINER.get(), SteamTugScreen::new);
         ScreenManager.register(ModContainerTypes.ENERGY_TUG_CONTAINER.get(), EnergyTugScreen::new);
         ScreenManager.register(ModContainerTypes.FISHING_BARGE_CONTAINER.get(), FishingBargeScreen::new);
+
+        ScreenManager.register(ModContainerTypes.TUG_ROUTE_CONTAINER.get(), TugRouteScreen::new);
 
         event.enqueueWork(ModItemModelProperties::register);
     }

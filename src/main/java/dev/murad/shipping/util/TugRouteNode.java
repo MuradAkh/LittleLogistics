@@ -13,7 +13,7 @@ public class TugRouteNode {
     private static final String Z_TAG = "z";
     private static final String COORDS_TAG = "coordinates";
 
-    private final String name;
+    private String name;
     private final double x, z;
 
     public TugRouteNode(String name, double x, double z) {
@@ -30,8 +30,16 @@ public class TugRouteNode {
         if (!this.hasCustomName()) {
             return I18n.get("item.littlelogistics.tug_route.node", index);
         } else {
-            return this.getName();
+            return I18n.get("item.littlelogistics.tug_route.node_named", index, getName());
         }
+    }
+
+    public String getDisplayCoords() {
+        return this.x + ", " + this.z;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Nullable
