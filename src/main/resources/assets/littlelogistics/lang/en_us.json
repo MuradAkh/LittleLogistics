@@ -30,7 +30,13 @@
   "screen.littlelogistics.fishing_barge": "Auto-Fishing Barge",
   "screen.littlelogistics.energy_tug": "Energy Tug",
   "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
+
   "screen.littlelogistics.tug_route": "Tug Route Configurator",
+  "screen.littlelogistics.tug_route.rename_button": "Rename node",
+  "screen.littlelogistics.tug_route.up_button": "Move node up",
+  "screen.littlelogistics.tug_route.down_button": "Move node down",
+  "screen.littlelogistics.tug_route.delete_button": "Remove node",
+
   "screen.littlelogistics.tug_route.rename": "Renaming %s",
   "screen.littlelogistics.tug_route.confirm": "Save",
 

@@ -127,12 +127,12 @@ public class TugRouteClientHandler {
 
         @Override
         public int getRowWidth() {
-            return 128;
+            return screen.getXSize() - 40;
         }
 
         @Override
         protected int getScrollbarPosition() {
-            return this.width / 2 + 70;
+            return (this.width + getRowWidth()) / 2 + 5;
         }
 
         public class Entry extends ExtendedList.AbstractListEntry<Entry> {
@@ -148,7 +148,7 @@ public class TugRouteClientHandler {
                 String s = node.getDisplayName(index) + ": " + node.getDisplayCoords();
 
                 screen.getMinecraft().getTextureManager().bind(TugRouteScreen.GUI);
-                blit(matrixStack, rowLeft, rowTop, hovered ? 128 : 0, 236, width, height);
+                blit(matrixStack, rowLeft, rowTop, 0, hovered ? 216 : 236, width - 3, height);
                 screen.getFont().draw(matrixStack, s, rowLeft + 3, (float) (rowTop + 3), 16777215);
             }
 

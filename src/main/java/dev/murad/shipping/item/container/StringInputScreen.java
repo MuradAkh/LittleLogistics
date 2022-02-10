@@ -41,14 +41,14 @@ public class StringInputScreen extends Screen {
 
         LOGGER.info("Initializing StringInputScreen");
 
-        int w = 155, h = 64;
+        int w = 156, h = 65;
         int left = (this.width - w) / 2;
         int top = (this.height - h) / 2;
 
         // x, y, width, height
         this.textFieldWidget = new TextFieldWidget(this.font, left + 10, top + 10, 135, 20, new StringTextComponent(text));
         this.textFieldWidget.setValue(text);
-        this.textFieldWidget.setMaxLength(10);
+        this.textFieldWidget.setMaxLength(20);
         this.textFieldWidget.setResponder((s) -> text = s);
         this.addWidget(textFieldWidget);
 
@@ -72,7 +72,7 @@ public class StringInputScreen extends Screen {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bind(GUI);
 
-        int w = 155, h = 64;
+        int w = 156, h = 65;
         int i = (this.width - w) / 2;
         int j = (this.height - h) / 2;
         this.blit(p_230446_1_, i, j, 0, 0, w, h);
