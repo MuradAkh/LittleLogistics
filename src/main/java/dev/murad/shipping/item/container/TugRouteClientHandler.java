@@ -149,7 +149,7 @@ public class TugRouteClientHandler {
 
                 screen.getMinecraft().getTextureManager().bind(TugRouteScreen.GUI);
                 blit(matrixStack, rowLeft, rowTop, 0, hovered ? 216 : 236, width - 3, height);
-                screen.getFont().draw(matrixStack, s, rowLeft + 3, (float) (rowTop + 3), 16777215);
+                screen.getFont().draw(matrixStack, s, rowLeft + 3, (float) (rowTop + 4), 16777215);
             }
 
             public void setIndex(int index) {
