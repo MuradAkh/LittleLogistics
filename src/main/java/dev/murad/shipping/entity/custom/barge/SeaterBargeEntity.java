@@ -51,7 +51,7 @@ public class SeaterBargeEntity extends AbstractBargeEntity{
             float f = -0.1F;
             float f1 = (float)((this.removed ? (double)0.01F : this.getPassengersRidingOffset()) + p_184232_1_.getMyRidingOffset());
             Vector3d vector3d = (new Vector3d((double)f, 0.0D, 0.0D)).yRot(-this.yRot * ((float)Math.PI / 180F) - ((float)Math.PI / 2F));
-            p_184232_1_.setPos(this.getX() + vector3d.x, this.getY() + (double)f1, this.getZ() + vector3d.z);
+            p_184232_1_.setPos(this.getX() + vector3d.x, this.getY() - 0.5 + (double)f1, this.getZ() + vector3d.z);
             if (p_184232_1_ instanceof AnimalEntity && this.getPassengers().size() > 1) {
                 int j = p_184232_1_.getId() % 2 == 0 ? 90 : 270;
                 p_184232_1_.setYBodyRot(((AnimalEntity)p_184232_1_).yBodyRot + (float)j);
