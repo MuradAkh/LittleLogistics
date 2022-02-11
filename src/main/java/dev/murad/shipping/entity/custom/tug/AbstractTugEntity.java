@@ -2,6 +2,7 @@ package dev.murad.shipping.entity.custom.tug;
 
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
 import dev.murad.shipping.entity.accessor.DataAccessor;
@@ -56,6 +57,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.stream.IntStream;
 
 public abstract class AbstractTugEntity extends VesselEntity implements ISpringableEntity, IInventory, ISidedInventory {
@@ -365,7 +368,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
             Vector2f stop = path.get(nextStop);
             if (navigation.getPath() == null || navigation.getPath().isDone()
             ) {
-                navigation.moveTo(stop.x, this.getY(), stop.y, 10);
+                navigation.moveTo(stop.x, this.getY(), stop.y, 0.3);
             }
             double distance = Math.abs(Math.hypot(this.getX() - (stop.x + 0.5), this.getZ() - (stop.y + 0.5)));
             independentMotion = true;
@@ -377,6 +380,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
 
         } else{
             entityData.set(INDEPENDENT_MOTION, false);
+            this.navigation.stop();
 
             if (this.path.isEmpty()){
                 this.nextStop = 0;
