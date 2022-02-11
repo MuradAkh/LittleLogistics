@@ -66,7 +66,7 @@ public class ShippingConfig {
 
                 TUG_PATHFINDING_MULTIPLIER =
                         BUILDER.comment("Multiplier for tug pathfinding search space, high values may impact performance. Default 1.")
-                                .defineInRange("tugBaseSpeed", 1, 1, 10);
+                                .defineInRange("tugPathfindMult", 1, 1, 10);
 
                 STEAM_TUG_FUEL_MULTIPLIER =
                         BUILDER.comment("Increases the burn duration of Steam tug fuel by N times when compared to furnace, must be an integer >= 1. Default 4.")
