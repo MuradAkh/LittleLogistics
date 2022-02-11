@@ -72,9 +72,9 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
 
     public boolean hasWaterOnSides(){
         return this.level.getBlockState(this.getOnPos().relative(this.getDirection().getClockWise())).getBlock().equals(Blocks.WATER) &&
-                this.level.getBlockState(this.getOnPos().relative(this.getDirection().getClockWise())).getBlock().equals(Blocks.WATER) &&
+                this.level.getBlockState(this.getOnPos().relative(this.getDirection().getCounterClockWise())).getBlock().equals(Blocks.WATER) &&
                 this.level.getBlockState(this.getOnPos().above().relative(this.getDirection().getClockWise())).getBlock().equals(Blocks.AIR) &&
-                this.level.getBlockState(this.getOnPos().above().relative(this.getDirection().getClockWise())).getBlock().equals(Blocks.AIR);
+                this.level.getBlockState(this.getOnPos().above().relative(this.getDirection().getCounterClockWise())).getBlock().equals(Blocks.AIR);
     }
 
     public BlockPos getBlockPos(){
@@ -86,18 +86,21 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
         if(this.isAlive()) {
             tickSpringAliveCheck();
         }
-        this.oldStatus = this.status;
-        this.status = this.getStatus();
 
-        this.floatBoat();
-        this.unDrown();
+        if(!this.level.isClientSide) {
+            this.oldStatus = this.status;
+            this.status = this.getStatus();
+
+            this.floatBoat();
+            this.unDrown();
+        }
 
         super.tick();
     }
 
     private void unDrown(){
         if(level.getBlockState(getOnPos().above()).getBlock().equals(Blocks.WATER)){
-            this.setDeltaMovement(this.getDeltaMovement().add(new Vector3d(0, 0.1, 1)));
+            this.setDeltaMovement(this.getDeltaMovement().add(new Vector3d(0, 0.1, 0)));
         }
 
     }
@@ -199,7 +202,7 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
             this.setDeltaMovement(vector3d.x * (double) this.invFriction, vector3d.y + d1, vector3d.z * (double) this.invFriction);
             if (d2 > 0.0D) {
                 Vector3d vector3d1 = this.getDeltaMovement();
-                this.setDeltaMovement(vector3d1.x, (vector3d1.y + d2 * 0.06153846016296973D) * 0.75D, vector3d1.z);
+                this.setDeltaMovement(vector3d1.x, (vector3d1.y + d2 * 0.10153846016296973D) * 0.75D, vector3d1.z);
             }
         }
 

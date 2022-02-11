@@ -34,6 +34,7 @@ public class ShippingConfig {
 
         public static final ForgeConfigSpec.ConfigValue<Integer> STEAM_TUG_FUEL_MULTIPLIER;
 
+        public static final ForgeConfigSpec.ConfigValue<Integer> TUG_PATHFINDING_MULTIPLIER;
         public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_CAPACITY;
         public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_ENERGY_USAGE;
         public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_MAX_CHARGE_RATE;
@@ -62,6 +63,10 @@ public class ShippingConfig {
                 TUG_BASE_SPEED =
                         BUILDER.comment("Base speed of the tugs. Default 2.4.")
                                 .defineInRange("tugBaseSpeed", 2.4, 0.1, 10);
+
+                TUG_PATHFINDING_MULTIPLIER =
+                        BUILDER.comment("Multiplier for tug pathfinding search space, high values may impact performance. Default 1.")
+                                .defineInRange("tugPathfindMult", 1, 1, 10);
 
                 STEAM_TUG_FUEL_MULTIPLIER =
                         BUILDER.comment("Increases the burn duration of Steam tug fuel by N times when compared to furnace, must be an integer >= 1. Default 4.")
