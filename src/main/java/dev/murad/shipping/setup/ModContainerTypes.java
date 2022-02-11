@@ -2,9 +2,11 @@ package dev.murad.shipping.setup;
 
 import dev.murad.shipping.entity.accessor.EnergyTugDataAccessor;
 import dev.murad.shipping.entity.accessor.SteamTugDataAccessor;
+import dev.murad.shipping.entity.accessor.TugRouteScreenDataAccessor;
 import dev.murad.shipping.entity.container.EnergyTugContainer;
 import dev.murad.shipping.entity.container.FishingBargeContainer;
 import dev.murad.shipping.entity.container.SteamTugContainer;
+import dev.murad.shipping.item.container.TugRouteContainer;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.IntArray;
@@ -39,6 +41,12 @@ public class ModContainerTypes {
                     () -> IForgeContainerType.create(
                             (windowId, inv, data) ->
                                     new FishingBargeContainer(windowId, inv.player.level, data.readInt(), inv, inv.player)));
+
+    public static final RegistryObject<ContainerType<TugRouteContainer>> TUG_ROUTE_CONTAINER =
+            Registration.CONTAINERS.register("tug_route_container",
+                    () -> IForgeContainerType.create(
+                            (windowId, inv, data) ->
+                                    new TugRouteContainer(windowId, inv.player.level, new TugRouteScreenDataAccessor(makeIntArray(data)), inv, inv.player)));
 
 
 

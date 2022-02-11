@@ -1,6 +1,7 @@
 package dev.murad.shipping.setup;
 
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.network.TugRoutePacketHandler;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.inventory.container.Container;
@@ -44,6 +45,6 @@ public class Registration  {
         ModRecipeSerializers.register();
         ModContainerTypes.register();
         ModEntityTypes.register();
-
+        TugRoutePacketHandler.register();
     }
 }
