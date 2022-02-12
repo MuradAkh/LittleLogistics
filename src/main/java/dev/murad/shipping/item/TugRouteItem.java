@@ -33,8 +33,8 @@ public class TugRouteItem extends Item {
     private static final Logger LOGGER = LogManager.getLogger(TugRouteItem.class);
 
     private static final String ROUTE_NBT = "route";
-    public TugRouteItem(Properties p_i48487_1_) {
-        super(p_i48487_1_);
+    public TugRouteItem(Properties properties) {
+        super(properties);
     }
 
     protected INamedContainerProvider createContainerProvider(Hand hand) {
