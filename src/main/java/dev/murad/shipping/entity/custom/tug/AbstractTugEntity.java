@@ -366,11 +366,17 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     }
 
     private void followPath() {
+        pathfindCooldown--;
         if (!this.path.isEmpty() && !this.docked && tickFuel()) {
             TugRouteNode stop = path.get(nextStop);
             if (navigation.getPath() == null || navigation.getPath().isDone()
             ) {
-                navigation.moveTo(stop.getX(), this.getY(), stop.getZ(), 0.3);
+                if(pathfindCooldown < 0){
+                    navigation.moveTo(stop.getX(), this.getY(), stop.getZ(), 0.3);
+                    pathfindCooldown = 20;
+                } else {
+                    return;
+                }
             }
             double distance = Math.abs(Math.hypot(this.getX() - (stop.getX() + 0.5), this.getZ() - (stop.getZ() + 0.5)));
             independentMotion = true;

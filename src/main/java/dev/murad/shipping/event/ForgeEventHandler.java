@@ -1,10 +1,12 @@
 package dev.murad.shipping.event;
 
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.item.SpringItem;
 import dev.murad.shipping.util.EntitySpringAPI;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ShearsItem;
 import net.minecraft.util.ActionResultType;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -34,6 +36,14 @@ public class ForgeEventHandler {
                 SpringItem springItem = (SpringItem) item;
                 if(EntitySpringAPI.isValidTarget(target)) {
                     springItem.onUsedOnEntity(event.getItemStack(), event.getPlayer(), event.getWorld(), target);
+                    event.setCanceled(true);
+                    event.setCancellationResult(ActionResultType.SUCCESS);
+                }
+            }
+
+            if(item instanceof ShearsItem) {
+                if(target instanceof ISpringableEntity) {
+                    ((ISpringableEntity) target).getDominant().ifPresent(pair -> pair.getSecond().kill());
                     event.setCanceled(true);
                     event.setCancellationResult(ActionResultType.SUCCESS);
                 }
