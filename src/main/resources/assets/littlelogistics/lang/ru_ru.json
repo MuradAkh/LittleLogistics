@@ -1,0 +1,64 @@
+{
+  "item.littlelogistics.tug": "Паровой Буксир",
+  "item.littlelogistics.barge": "Баржа с Сундуком",
+  "item.littlelogistics.chunk_loader_barge": "Баржа с Загрузчиком Чанков",
+  "item.littlelogistics.seater_barge": "Пассажирская Баржа",
+  "item.littlelogistics.fishing_barge": "Рыбачая Баржа",
+  "item.littlelogistics.spring": "Цепь для судна",
+  "item.littlelogistics.tug_route": "Курс Буксира",
+  "item.littlelogistics.energy_tug": "Электрический Буксир",
+  "item.littlelogistics.fluid_barge": "Баржа с Цистерной",
+
+
+  "entity.littlelogistics.tug": "Паровой Буксир",
+  "entity.littlelogistics.barge": "Баржа с Сундуком",
+  "entity.littlelogistics.chunk_loader_barge": "Баржа с Загрузчиком Чанков",
+  "entity.littlelogistics.fishing_barge": "Рыбачая Баржа",
+  "entity.littlelogistics.spring": "Цепь для судна",
+  "entity.littlelogistics.energy_tug": "Energy Tug",
+  "entity.littlelogistics.fluid_barge": "Электрический  Буксир",
+  "entity.littlelogistics.seater_barge": "Баржа с Цистерной",
+
+  "block.littlelogistics.tug_dock": "Tug Dock",
+  "block.littlelogistics.barge_dock": "Barge Dock",
+  "block.littlelogistics.guide_rail_tug": "Tug Guide Rail",
+  "block.littlelogistics.guide_rail_corner": "Vessel Corner Guide Rail",
+  "block.littlelogistics.vessel_charger": "Vessel Charger",
+  "block.littlelogistics.fluid_hopper": "Fluid Hopper",
+
+  "screen.littlelogistics.tug": "Паровой Буксир",
+  "screen.littlelogistics.fishing_barge": "Рыбачая Баржа",
+  "screen.littlelogistics.energy_tug": "Электрический Буксир",
+  "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
+
+  "screen.littlelogistics.tug_route": "Tug Route Configurator",
+  "screen.littlelogistics.tug_route.rename_button": "Rename node",
+  "screen.littlelogistics.tug_route.up_button": "Move node up",
+  "screen.littlelogistics.tug_route.down_button": "Move node down",
+  "screen.littlelogistics.tug_route.delete_button": "Remove node",
+
+  "screen.littlelogistics.tug_route.rename": "Renaming %s",
+  "screen.littlelogistics.tug_route.confirm": "Save",
+
+  "item.littlelogistics.tug_route.description": "Right click to add node at the end of the route, right click at the same location to remove. Shift right click to bring up menu.",
+  "item.littlelogistics.tug_route.num_nodes": "Route Nodes: %s",
+  "item.littlelogistics.tug_route.added": "Added Route Node X:%s Z:%s",
+  "item.littlelogistics.tug_route.removed": "Removed Route Node X:%s Z:%s",
+  "item.littlelogistics.tug_route.node": "%s. Node",
+  "item.littlelogistics.tug_route.node_named": "%s. %s",
+  "item.littlelogistics.tug_route.node_line": "Node %s: %s, %s",
+  "item.littlelogistics.spring.description": "Used to link barges/tugs",
+  "item.littlelogistics.spring.notToSelf": "Can't link vessel to self",
+  "item.littlelogistics.spring.noTwoTugs": "Can't link two tugs",
+  "item.littlelogistics.spring.tooFar": "Vessels too far to link",
+  "item.littlelogistics.spring.noLoops": "Can't link vessels in a loop",
+  "item.littlelogistics.fishing_barge.description": "For best yield, use on long routes in deep and open water",
+
+  "item.littlelogistics.creative_capacitor": "Creative Capacitor",
+
+  "block.littlelogistics.vessel_charger.capacity": "%s/%s FE",
+  "block.littlelogistics.fluid_hopper.capacity": "%s %s/%s mB",
+  "block.littlelogistics.fluid_hopper.capacity_empty": "Пусто 0/%s mB",
+  "entity.littlelogistics.fluid_barge.capacity": "%s %s/%s mB",
+  "entity.littlelogistics.fluid_barge.capacity_empty": "Пусто 0/%s mB"
+}
