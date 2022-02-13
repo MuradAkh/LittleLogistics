@@ -38,7 +38,11 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "tug");
         builder(itemGenerated, "energy_tug");
         builder(itemGenerated, "book");
-        builder(itemGenerated, "tug_route");
+        builder(itemGenerated, "tug_route")
+                .override()
+                .model(builder(itemGenerated, "tug_route_empty"))
+                .predicate(new ResourceLocation(ShippingMod.MOD_ID, "routestate"), 1f).end();
+
         builder(itemGenerated, "spring")
                 .override()
                 .model(builder(itemGenerated, "spring_dominant_selected"))
