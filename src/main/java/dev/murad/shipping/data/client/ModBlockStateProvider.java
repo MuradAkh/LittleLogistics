@@ -3,12 +3,14 @@ package dev.murad.shipping.data.client;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.dock.BargeDockBlock;
 import dev.murad.shipping.block.dock.TugDockBlock;
+import dev.murad.shipping.block.vessel_detector.VesselDetectorBlock;
 import dev.murad.shipping.block.energy.VesselChargerBlock;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
 import dev.murad.shipping.block.guide_rail.CornerGuideRailBlock;
 import dev.murad.shipping.setup.ModBlocks;
 import net.minecraft.block.BlockState;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
@@ -49,12 +51,30 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 getBlTx("guide_rail_front"));
     }
 
+    private ModelFile getVesselDetectorModel(BlockState state){
+        return  models().orientable("vessel_detector",
+                getBlTx("guide_rail_side"),
+                getBlTx("vessel_detector"),
+                getBlTx("guide_rail_side"));
+    }
+
     private ModelFile getBargeDockModel(BlockState state){
         String inv = state.getValue(BargeDockBlock.EXTRACT_MODE) ? "_extract" : "";
         return  models().orientable("barge_dock" + inv,
                 getBlTx("barge_dock"),
                 getBlTx("barge_dock_front" + inv),
                 getBlTx("barge_dock_top"));
+    }
+
+    private int xRotFromDir(Direction direction){
+        switch (direction) {
+            case DOWN:
+                return 270;
+            case UP:
+                return 90;
+            default:
+                return 0;
+        }
     }
 
 
@@ -75,6 +95,13 @@ public class ModBlockStateProvider extends BlockStateProvider {
         getVariantBuilder(ModBlocks.GUIDE_RAIL_CORNER.get()).forAllStates(state -> ConfiguredModel.builder()
                 .modelFile(getCornerGuideRailModel(state))
                 .rotationY((int) state.getValue(CornerGuideRailBlock.FACING).getOpposite().toYRot())
+                .build()
+        );
+
+        getVariantBuilder(ModBlocks.VESSEL_DETECTOR.get()).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(getVesselDetectorModel(state))
+                .rotationY((int) state.getValue(VesselDetectorBlock.FACING).getOpposite().toYRot())
+                .rotationX(xRotFromDir(state.getValue(VesselDetectorBlock.FACING).getOpposite()))
                 .build()
         );
 
