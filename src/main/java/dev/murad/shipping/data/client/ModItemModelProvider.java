@@ -28,8 +28,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         withExistingParent("guide_rail_tug", modLoc("block/guide_rail_tug"));
         withExistingParent("fluid_hopper", modLoc("block/fluid_hopper"));
         withExistingParent("vessel_detector", modLoc("block/vessel_detector"));
-
-
+        withExistingParent("vessel_charger", modLoc("block/vessel_charger"));
 
         builder(itemGenerated, "barge");
         builder(itemGenerated, "chunk_loader_barge");
@@ -38,7 +37,6 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "seater_barge");
         builder(itemGenerated, "tug");
         builder(itemGenerated, "energy_tug");
-        builder(itemGenerated, "vessel_charger");
         builder(itemGenerated, "book");
         builder(itemGenerated, "tug_route");
         builder(itemGenerated, "spring")
