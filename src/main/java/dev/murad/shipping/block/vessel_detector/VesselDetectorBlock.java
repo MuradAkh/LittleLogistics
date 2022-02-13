@@ -4,21 +4,25 @@ import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalBlock;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.Rotation;
+import net.minecraft.util.*;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 
 public class VesselDetectorBlock extends Block {
+
+
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
 
@@ -75,5 +79,20 @@ public class VesselDetectorBlock extends Block {
                 .setValue(FACING, context.getNearestLookingDirection().getOpposite())
                 .setValue(POWERED, false);
 
+    }
+
+    private void showParticles(BlockPos pos, BlockState state, World level) {
+        AxisAlignedBB bb = VesselDetectorTileEntity.getSearchBox(pos, state.getValue(FACING), level);
+        level.addParticle();
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public ActionResultType use(BlockState state, World level, BlockPos pos, PlayerEntity entity, Hand hand, BlockRayTraceResult hit) {
+        if (!level.isClientSide()) {
+            showParticles(pos, state, entity.level);
+        }
+
+        return ActionResultType.CONSUME;
     }
 }
