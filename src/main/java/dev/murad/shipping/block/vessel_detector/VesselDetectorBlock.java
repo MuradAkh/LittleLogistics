@@ -1,11 +1,13 @@
 package dev.murad.shipping.block.vessel_detector;
 
+import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import dev.murad.shipping.util.MathUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.particles.RedstoneParticleData;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
@@ -15,13 +17,14 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class VesselDetectorBlock extends Block {
-
 
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
@@ -81,18 +84,27 @@ public class VesselDetectorBlock extends Block {
 
     }
 
+    // client only
     private void showParticles(BlockPos pos, BlockState state, World level) {
         AxisAlignedBB bb = VesselDetectorTileEntity.getSearchBox(pos, state.getValue(FACING), level);
-        level.addParticle();
+        List<Pair<Vector3d, Vector3d>> edges = MathUtil.getEdges(bb);
+
+        for (Pair<Vector3d, Vector3d> edge : edges) {
+            Vector3d from = edge.getFirst(), to = edge.getSecond();
+            for (int i = 0; i < 10; i++) {
+                Vector3d pPos = MathUtil.lerp(from, to, (float) i / 10);
+                level.addParticle(RedstoneParticleData.REDSTONE, pPos.x, pPos.y, pPos.z, 0, 0, 0);
+            }
+        }
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public ActionResultType use(BlockState state, World level, BlockPos pos, PlayerEntity entity, Hand hand, BlockRayTraceResult hit) {
-        if (!level.isClientSide()) {
+        if (level.isClientSide()) {
             showParticles(pos, state, entity.level);
         }
 
-        return ActionResultType.CONSUME;
+        return ActionResultType.SUCCESS;
     }
 }

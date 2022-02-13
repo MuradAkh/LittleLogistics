@@ -10,9 +10,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 
 public class VesselDetectorTileEntity extends TileEntity implements ITickableTileEntity {
+    private static final int MAX_RANGE = 3;
     private int cooldown = 0;
 
     public VesselDetectorTileEntity() {
@@ -23,10 +25,9 @@ public class VesselDetectorTileEntity extends TileEntity implements ITickableTil
         return state.is(Blocks.WATER) || state.is(Blocks.AIR);
     }
 
-    private static int getSearchLimit(BlockPos initialPos, Direction direction, World level){
+    private static int getSearchLimit(BlockPos pos, Direction direction, World level){
         int i = 0;
-        BlockPos pos = initialPos.relative(direction);
-        for (; i < 4 && isValidBlock(level.getBlockState(pos)); i++) {
+        for (; i < MAX_RANGE && isValidBlock(level.getBlockState(pos)); i++) {
             pos = pos.relative(direction);
         }
         return i;
@@ -40,15 +41,19 @@ public class VesselDetectorTileEntity extends TileEntity implements ITickableTil
         level.setBlockAndUpdate(getBlockPos(), getBlockState().setValue(VesselDetectorBlock.POWERED, found));
     }
 
-    public static AxisAlignedBB getSearchBox(BlockPos initialPos, Direction direction, World level) {
-        int searchLimit = getSearchLimit(initialPos, direction, level);
-        return new AxisAlignedBB(
-                initialPos.getX() - 0.5D,
-                initialPos.getY() - 0.5D,
-                initialPos.getZ() - 0.5D,
-                initialPos.getX() + direction.getStepX() * searchLimit + 0.5D,
-                initialPos.getY() + direction.getStepY() * searchLimit + 0.5D,
-                initialPos.getZ() + direction.getStepZ() * searchLimit + 0.5D);
+    public static AxisAlignedBB getSearchBox(BlockPos pos, Direction direction, World level) {
+        int searchLimit = getSearchLimit(pos.relative(direction), direction, level);
+
+        Direction.AxisDirection posNeg = direction.getAxisDirection();
+        BlockPos start = posNeg == Direction.AxisDirection.POSITIVE ? pos.relative(direction) : pos;
+
+        int offX = direction.getStepX() == 0 ? 1 : direction.getStepX() * searchLimit;
+        int offY = direction.getStepY() == 0 ? 1 : direction.getStepY() * searchLimit;
+        int offZ = direction.getStepZ() == 0 ? 1 : direction.getStepZ() * searchLimit;
+
+        BlockPos end = start.offset(offX, offY, offZ);
+
+        return new AxisAlignedBB(start, end);
     }
 
     @Override
