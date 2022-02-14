@@ -44,12 +44,12 @@ public interface IVesselLoader {
 
     static AxisAlignedBB getSearchBox(BlockPos pos) {
         return new AxisAlignedBB(
-                pos.getX() - 0.5D,
-                pos.getY() - 0.5D,
-                pos.getZ() - 0.5D,
-                pos.getX() + 0.5D,
-                pos.getY() + 0.5D,
-                pos.getZ() + 0.5D);
+                pos.getX() ,
+                pos.getY(),
+                pos.getZ(),
+                pos.getX() + 1D,
+                pos.getY() + 1D,
+                pos.getZ() + 1D);
     }
 
     boolean holdVessel(VesselEntity vessel, Mode mode);
