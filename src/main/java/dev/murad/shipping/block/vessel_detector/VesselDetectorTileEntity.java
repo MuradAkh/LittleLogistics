@@ -47,7 +47,6 @@ public class VesselDetectorTileEntity extends TileEntity implements ITickableTil
             // update back neighbour
             BlockPos neighbour = getBlockPos().relative(direction.getOpposite());
             Block block = getBlockState().getBlock();
-            System.out.println("CHANGED!" + neighbour);
             this.level.neighborChanged(neighbour, block, getBlockPos());
             this.level.updateNeighborsAtExceptFromFacing(neighbour, block, direction);
         }
