@@ -18,6 +18,14 @@ public class TugNodeProcessor extends SwimNodeProcessor {
         super(false);
     }
 
+    private boolean isOppositeGuideRail(PathPoint pathPoint, Direction direction){
+        BlockState state = this.level.getBlockState(pathPoint.asBlockPos().below());
+        if (state.is(ModBlocks.GUIDE_RAIL_TUG.get())){
+            return TugGuideRailBlock.getArrowsDirection(state).getOpposite().equals(direction);
+        }
+        return false;
+    }
+
     @Override
     public int getNeighbors(PathPoint[] p_222859_1_, PathPoint p_222859_2_) {
         int i = 0;

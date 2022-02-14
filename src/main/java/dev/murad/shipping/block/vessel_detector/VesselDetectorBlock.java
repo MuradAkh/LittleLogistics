@@ -29,6 +29,8 @@ public class VesselDetectorBlock extends Block {
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
 
+    private static final RedstoneParticleData PARTICLE = new RedstoneParticleData(0.9f, 0.65f, 0.2f, 1.0f);
+
     @Nullable
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
@@ -92,7 +94,7 @@ public class VesselDetectorBlock extends Block {
             Vector3d from = edge.getFirst(), to = edge.getSecond();
             for (int i = 0; i < 10; i++) {
                 Vector3d pPos = MathUtil.lerp(from, to, (float) i / 10);
-                level.addParticle(RedstoneParticleData.REDSTONE, pPos.x, pPos.y, pPos.z, 0, 0, 0);
+                level.addParticle(PARTICLE, pPos.x, pPos.y, pPos.z, 0, 0, 0);
             }
         }
     }
