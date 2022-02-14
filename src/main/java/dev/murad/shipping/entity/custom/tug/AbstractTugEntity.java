@@ -13,6 +13,7 @@ import dev.murad.shipping.entity.navigation.TugPathNavigator;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
+import dev.murad.shipping.setup.ModSounds;
 import dev.murad.shipping.util.Train;
 import dev.murad.shipping.util.TugRoute;
 import dev.murad.shipping.util.TugRouteNode;
@@ -210,6 +211,13 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
                 .add(Attributes.FOLLOW_RANGE, 200);
     }
 
+    protected void onDock() {
+        this.playSound(ModSounds.TUG_DOCKING.get(), 0.6f, 1.0f);
+    }
+
+    protected void onUndock() {
+        this.playSound(ModSounds.TUG_UNDOCKING.get(), 0.6f, 1.5f);
+    }
 
     // MOB STUFF
 
@@ -233,7 +241,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         }
 
         // Check docks
-        this.docked = this.getSideDirections()
+        boolean shouldDock = this.getSideDirections()
                 .stream()
                 .map((curr) ->
                     Optional.ofNullable(level.getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
@@ -243,6 +251,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
                             .orElse(false))
                 .reduce(false, (acc, curr) -> acc || curr);
 
+         boolean changedDock = !this.docked && shouldDock;
+         boolean changedUndock = this.docked && !shouldDock;
+
+        this.docked = shouldDock;
+
         if(this.docked) {
             dockCheckCooldown = 20; // todo: magic number
             this.setDeltaMovement(Vector3d.ZERO);
@@ -250,6 +263,9 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         } else {
             dockCheckCooldown = 0;
         }
+
+        if (changedDock) onDock();
+        if (changedUndock) onUndock();
     }
 
     @Override
