@@ -61,5 +61,9 @@
   "block.littlelogistics.fluid_hopper.capacity": "%s %s/%s mB",
   "block.littlelogistics.fluid_hopper.capacity_empty": "Empty 0/%s mB",
   "entity.littlelogistics.fluid_barge.capacity": "%s %s/%s mB",
-  "entity.littlelogistics.fluid_barge.capacity_empty": "Empty 0/%s mB"
+  "entity.littlelogistics.fluid_barge.capacity_empty": "Empty 0/%s mB",
+
+  "subtitle.littlelogistics.steam_tug_whistle": "Steam tug whistles",
+  "subtitle.littlelogistics.tug_docking": "Tug boat docks",
+  "subtitle.littlelogistics.tug_undocking": "Tug boat undocks"
 }
