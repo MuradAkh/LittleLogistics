@@ -87,7 +87,6 @@ public class VesselDetectorBlock extends Block {
         return this.defaultBlockState()
                 .setValue(FACING, context.getNearestLookingDirection().getOpposite())
                 .setValue(POWERED, false);
-
     }
 
     // client only

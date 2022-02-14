@@ -2,6 +2,7 @@ package dev.murad.shipping.block.vessel_detector;
 
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -37,8 +38,19 @@ public class VesselDetectorTileEntity extends TileEntity implements ITickableTil
         Direction direction = this.getBlockState().getValue(VesselDetectorBlock.FACING);
         boolean found = !this.level.getEntities((Entity) null, getSearchBox(this.getBlockPos(), direction, this.level),
                 (e) -> e instanceof VesselEntity).isEmpty();
+        boolean previousPowered = this.getBlockState().getValue(VesselDetectorBlock.POWERED);
+
         this.getBlockState().setValue(VesselDetectorBlock.POWERED, found);
         level.setBlockAndUpdate(getBlockPos(), getBlockState().setValue(VesselDetectorBlock.POWERED, found));
+
+        if (found != previousPowered) {
+            // update back neighbour
+            BlockPos neighbour = getBlockPos().relative(direction.getOpposite());
+            Block block = getBlockState().getBlock();
+            System.out.println("CHANGED!" + neighbour);
+            this.level.neighborChanged(neighbour, block, getBlockPos());
+            this.level.updateNeighborsAtExceptFromFacing(neighbour, block, direction);
+        }
     }
 
     public static AxisAlignedBB getSearchBox(BlockPos pos, Direction direction, World level) {
