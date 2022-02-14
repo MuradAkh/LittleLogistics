@@ -55,7 +55,7 @@ public abstract class VesselRenderer<T extends VesselEntity> extends EntityRende
     }
 
     protected double getModelYoffset() {
-        return 0.375D;
+        return 0.275D;
     }
 
     protected float getModelYrot() {

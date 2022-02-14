@@ -1,5 +1,6 @@
 package dev.murad.shipping.data;
 
+import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
 import net.minecraft.data.*;
@@ -37,6 +38,16 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("___")
                 .pattern("_#_")
                 .pattern("$$$")
+                .unlockedBy("has_item", has(ModItems.SPRING.get()))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModBlocks.VESSEL_DETECTOR.get(), 2)
+                .define('#', ModItems.SPRING.get())
+                .define('_', Tags.Items.STONE)
+                .define('$', Items.REDSTONE_TORCH)
+                .pattern("_#_")
+                .pattern("_$_")
+                .pattern("___")
                 .unlockedBy("has_item", has(ModItems.SPRING.get()))
                 .save(consumer);
 
@@ -98,6 +109,11 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern(" # ")
                 .unlockedBy("has_item", has(Items.REDSTONE))
                 .save(consumer);
+
+        ShapelessRecipeBuilder.shapeless(ModItems.TUG_ROUTE.get())
+                .unlockedBy("has_item", has(Items.REDSTONE))
+                .requires(ModItems.TUG_ROUTE.get())
+                .save(consumer,new ResourceLocation(ShippingMod.MOD_ID, "route_reset"));
 
         ShapedRecipeBuilder.shaped(ModItems.STEAM_TUG.get())
                 .define('_', Items.PISTON)

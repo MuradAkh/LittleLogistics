@@ -2,12 +2,8 @@ package dev.murad.shipping.data.client;
 
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.item.SpringItem;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ItemModelBuilder;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
@@ -27,8 +23,8 @@ public class ModItemModelProvider extends ItemModelProvider {
         withExistingParent("guide_rail_corner", modLoc("block/guide_rail_corner"));
         withExistingParent("guide_rail_tug", modLoc("block/guide_rail_tug"));
         withExistingParent("fluid_hopper", modLoc("block/fluid_hopper"));
-
-
+        withExistingParent("vessel_detector", modLoc("block/vessel_detector"));
+        withExistingParent("vessel_charger", modLoc("block/vessel_charger"));
 
         builder(itemGenerated, "barge");
         builder(itemGenerated, "chunk_loader_barge");
@@ -37,9 +33,12 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "seater_barge");
         builder(itemGenerated, "tug");
         builder(itemGenerated, "energy_tug");
-        builder(itemGenerated, "vessel_charger");
         builder(itemGenerated, "book");
-        builder(itemGenerated, "tug_route");
+        builder(itemGenerated, "tug_route")
+                .override()
+                .model(builder(itemGenerated, "tug_route_empty"))
+                .predicate(new ResourceLocation(ShippingMod.MOD_ID, "routestate"), 1f).end();
+
         builder(itemGenerated, "spring")
                 .override()
                 .model(builder(itemGenerated, "spring_dominant_selected"))

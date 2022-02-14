@@ -4,6 +4,13 @@ Little Logistics is a mod for Minecraft Forge focused on efficient, affordable, 
 
 <video src="https://user-images.githubusercontent.com/31002977/150042817-908a75b5-2802-4c83-a13d-0fbecc0ec94c.mp4" data-canonical-src="https://user-images.githubusercontent.com/31002977/150042817-908a75b5-2802-4c83-a13d-0fbecc0ec94c.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2 width-fit" style="max-height:35vh;"></video><br/>
 
+## Video Guide
+
+Check out the Bit-By-Bit Mischief of Mice!
+<iframe width="560" height="315" src="https://www.youtube.com/embed/4hI99VUqczw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+<br/>
+
 ## In Game Guide
 
 Install [Patchouli](https://www.curseforge.com/minecraft/mc-mods/patchouli) to get access to the in-game version of this guide. Can be crafted using a book, a chest, and a compass (shapeless).

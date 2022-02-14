@@ -146,67 +146,97 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
     public void baseTick() {
         setDeltaMovement(0, 0, 0);
         super.baseTick();
+        if (tryLoadAndCalculate()) return;
+        syncClient();
+    }
 
-        if(dominant != null && dominated != null) {
-            if(dominated.distanceTo(dominant) > 20 && !this.level.isClientSide){
-                dominated.removeDominant();
-                kill();
-                return;
-            }
-            if( ! dominant.isAlive() || ! dominated.isAlive()) {
-                kill();
-                return;
-            }
-            setPos((dominant.getX() + dominated.getX())/2, (dominant.getY() + dominated.getY())/2, (dominant.getZ() + dominated.getZ())/2);
-
-
-            double distSq = dominant.distanceToSqr(dominated);
-            double maxDstSq = ((ISpringableEntity) dominant).getTrain().getTug().map(tug -> tug.isDocked() ? 1 : 1.2).orElse(1.2);
-            if(distSq > maxDstSq) {
-                Vector3d frontAnchor = calculateAnchorPosition(dominant, SpringSide.DOMINATED);
-                Vector3d backAnchor = calculateAnchorPosition(dominated, SpringSide.DOMINANT);
-                double dist = Math.sqrt(distSq);
-                double dx = (frontAnchor.x - backAnchor.x) / dist;
-                double dy = (frontAnchor.y - backAnchor.y) / dist;
-                double dz = (frontAnchor.z - backAnchor.z) / dist;
-                final double alpha = 0.5;
-
-                float targetYaw = computeTargetYaw(dominated.yRot, frontAnchor, backAnchor);
-                dominated.yRot = (float) ((alpha * dominated.yRot + targetYaw * (1f-alpha)) % 360);
-                this.yRot = dominated.yRot;
-                double k = dominant instanceof AbstractTugEntity ? 0.2 : 0.13;
-                double l0 = maxDstSq;
-                dominated.setDeltaMovement(k*(dist-l0)*dx, k*(dist-l0)*dy, k*(dist-l0)*dz);
-                if(!this.level.isClientSide) {
-                    dominated.getLastCornerGuideRail().ifPresent(pair -> {
-                        if (dominated.isColliding(pair.getFirst(), pair.getSecond())) {
-                            ModBlocks.GUIDE_RAIL_CORNER.get().entityInside(pair.getSecond(), this.level, pair.getFirst(), dominated);
-                        }
-                    });
-                }
-            }
-
-            if(!level.isClientSide) { // send update every tick to ensure client has infos
+    private void syncClient() {
+        if(dominant != null && dominated != null) { // send update every tick to ensure client has infos
+            if (!this.level.isClientSide) {
                 entityData.set(DOMINANT_ID, dominant.getId());
                 entityData.set(DOMINATED_ID, dominated.getId());
-            } else if (dominant == null){
+            }
+        } else {
+            if (dominant == null){
                 onSyncedDataUpdated(DOMINANT_ID);
-            } else if (dominated == null) {
+            }
+
+            if (dominated == null) {
                 onSyncedDataUpdated(DOMINATED_ID);
             }
-        } else { // front and back entities have not been loaded yet
-            if(dominantNBT != null && dominatedNBT != null) {
-                tryToLoadFromNBT(dominantNBT).ifPresent(e -> {
-                    setDominant(e);
-                    entityData.set(DOMINANT_ID, e.getId());
-                });
-                tryToLoadFromNBT(dominatedNBT).ifPresent(e -> {
-                    setDominated(e);
-                    entityData.set(DOMINATED_ID, e.getId());
-                });
-            }
-            updateClient();
         }
+
+        if(this.level.isClientSide) {
+            if (dominant!= null && ! dominant.isAlive()){
+                onSyncedDataUpdated(DOMINANT_ID);
+
+            }
+
+            if (dominated!= null && ! dominated.isAlive()){
+                onSyncedDataUpdated(DOMINATED_ID);
+
+            }
+
+        }
+
+
+    }
+
+    private boolean tryLoadAndCalculate() {
+        if(!this.level.isClientSide) {
+            if (dominant != null && dominated != null) {
+                if (dominated.distanceTo(dominant) > 20) {
+                    dominated.removeDominant();
+                    kill();
+                    return true;
+                }
+                if (!dominant.isAlive() || !dominated.isAlive()) {
+                    kill();
+                    return true;
+                }
+                setPos((dominant.getX() + dominated.getX()) / 2, (dominant.getY() + dominated.getY()) / 2, (dominant.getZ() + dominated.getZ()) / 2);
+
+
+                double distSq = dominant.distanceToSqr(dominated);
+                double maxDstSq = ((ISpringableEntity) dominant).getTrain().getTug().map(tug -> tug.isDocked() ? 1 : 1.2).orElse(1.2);
+                if (distSq > maxDstSq) {
+                    Vector3d frontAnchor = calculateAnchorPosition(dominant, SpringSide.DOMINATED);
+                    Vector3d backAnchor = calculateAnchorPosition(dominated, SpringSide.DOMINANT);
+                    double dist = Math.sqrt(distSq);
+                    double dx = (frontAnchor.x - backAnchor.x) / dist;
+                    double dy = (frontAnchor.y - backAnchor.y) / dist;
+                    double dz = (frontAnchor.z - backAnchor.z) / dist;
+                    final double alpha = 0.5;
+
+                    float targetYaw = computeTargetYaw(dominated.yRot, frontAnchor, backAnchor);
+                    dominated.yRot = (float) ((alpha * dominated.yRot + targetYaw * (1f - alpha)) % 360);
+                    this.yRot = dominated.yRot;
+                    double k = dominant instanceof AbstractTugEntity ? 0.2 : 0.13;
+                    double l0 = maxDstSq;
+                    dominated.setDeltaMovement(k * (dist - l0) * dx, k * (dist - l0) * dy, k * (dist - l0) * dz);
+                    if (!this.level.isClientSide) {
+                        dominated.getLastCornerGuideRail().ifPresent(pair -> {
+                            if (dominated.isColliding(pair.getFirst(), pair.getSecond())) {
+                                ModBlocks.GUIDE_RAIL_CORNER.get().entityInside(pair.getSecond(), this.level, pair.getFirst(), dominated);
+                            }
+                        });
+                    }
+                }
+            } else { // front and back entities have not been loaded yet
+                if (dominantNBT != null && dominatedNBT != null) {
+                    tryToLoadFromNBT(dominantNBT).ifPresent(e -> {
+                        setDominant(e);
+                        entityData.set(DOMINANT_ID, e.getId());
+                    });
+                    tryToLoadFromNBT(dominatedNBT).ifPresent(e -> {
+                        setDominated(e);
+                        entityData.set(DOMINATED_ID, e.getId());
+                    });
+                }
+                updateClient();
+            }
+        }
+        return false;
     }
 
     private void updateClient(){

@@ -2,6 +2,7 @@ package dev.murad.shipping.entity.custom.tug;
 
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
 import dev.murad.shipping.entity.accessor.DataAccessor;
@@ -12,7 +13,10 @@ import dev.murad.shipping.entity.navigation.TugPathNavigator;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
+import dev.murad.shipping.setup.ModSounds;
 import dev.murad.shipping.util.Train;
+import dev.murad.shipping.util.TugRoute;
+import dev.murad.shipping.util.TugRouteNode;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
@@ -43,6 +47,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -55,6 +60,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.stream.IntStream;
 
 public abstract class AbstractTugEntity extends VesselEntity implements ISpringableEntity, IInventory, ISidedInventory {
@@ -66,6 +73,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     protected boolean docked = false;
     private int dockCheckCooldown = 0;
     private boolean independentMotion = false;
+    private int pathfindCooldown = 0;
     private static final DataParameter<Boolean> INDEPENDENT_MOTION = EntityDataManager.defineId(AbstractTugEntity.class, DataSerializers.BOOLEAN);
 
     public boolean allowDockInterface(){
@@ -74,7 +82,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
 
     private TugDummyHitboxEntity extraHitbox = null;
 
-    private List<Vector2f> path;
+    private TugRoute path;
     private int nextStop;
 
 
@@ -82,7 +90,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         super(type, world);
         this.blocksBuilding = true;
         this.train = new Train(this);
-        this.path = new ArrayList<>();
+        this.path = new TugRoute();
     }
 
     public AbstractTugEntity(EntityType type, World worldIn, double x, double y, double z) {
@@ -203,6 +211,13 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
                 .add(Attributes.FOLLOW_RANGE, 200);
     }
 
+    protected void onDock() {
+        this.playSound(ModSounds.TUG_DOCKING.get(), 0.6f, 1.0f);
+    }
+
+    protected void onUndock() {
+        this.playSound(ModSounds.TUG_UNDOCKING.get(), 0.6f, 1.5f);
+    }
 
     // MOB STUFF
 
@@ -226,7 +241,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         }
 
         // Check docks
-        this.docked = this.getSideDirections()
+        boolean shouldDock = this.getSideDirections()
                 .stream()
                 .map((curr) ->
                     Optional.ofNullable(level.getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
@@ -236,6 +251,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
                             .orElse(false))
                 .reduce(false, (acc, curr) -> acc || curr);
 
+         boolean changedDock = !this.docked && shouldDock;
+         boolean changedUndock = this.docked && !shouldDock;
+
+        this.docked = shouldDock;
+
         if(this.docked) {
             dockCheckCooldown = 20; // todo: magic number
             this.setDeltaMovement(Vector3d.ZERO);
@@ -243,6 +263,9 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         } else {
             dockCheckCooldown = 0;
         }
+
+        if (changedDock) onDock();
+        if (changedUndock) onUndock();
     }
 
     @Override
@@ -359,10 +382,19 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     }
 
     private void followPath() {
+        pathfindCooldown--;
         if (!this.path.isEmpty() && !this.docked && tickFuel()) {
-            Vector2f stop = path.get(nextStop);
-            navigation.moveTo(stop.x, this.getY(), stop.y, 10);
-            double distance = Math.abs(Math.hypot(this.getX() - (stop.x + 0.5), this.getZ() - (stop.y + 0.5)));
+            TugRouteNode stop = path.get(nextStop);
+            if (navigation.getPath() == null || navigation.getPath().isDone()
+            ) {
+                if(pathfindCooldown < 0){
+                    navigation.moveTo(stop.getX(), this.getY(), stop.getZ(), 0.3);
+                    pathfindCooldown = 20;
+                } else {
+                    return;
+                }
+            }
+            double distance = Math.abs(Math.hypot(this.getX() - (stop.getX() + 0.5), this.getZ() - (stop.getZ() + 0.5)));
             independentMotion = true;
             entityData.set(INDEPENDENT_MOTION, true);
 
@@ -372,6 +404,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
 
         } else{
             entityData.set(INDEPENDENT_MOTION, false);
+            this.navigation.stop();
 
             if (this.path.isEmpty()){
                 this.nextStop = 0;
@@ -385,7 +418,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     }
 
 
-    public void setPath(List<Vector2f> path) {
+    public void setPath(TugRoute path) {
         this.path = path;
     }
 

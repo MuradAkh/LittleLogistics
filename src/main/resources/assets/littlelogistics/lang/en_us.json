@@ -25,16 +25,29 @@
   "block.littlelogistics.guide_rail_corner": "Vessel Corner Guide Rail",
   "block.littlelogistics.vessel_charger": "Vessel Charger",
   "block.littlelogistics.fluid_hopper": "Fluid Hopper",
+  "block.littlelogistics.vessel_detector": "Vessel Detector",
 
   "screen.littlelogistics.tug": "Steam Tug",
   "screen.littlelogistics.fishing_barge": "Auto-Fishing Barge",
   "screen.littlelogistics.energy_tug": "Energy Tug",
   "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
 
-  "item.littlelogistics.tug_route.description": "Right click to add stop, right click at the same location to remove. Nodes will always be added to the end of the route",
+  "screen.littlelogistics.tug_route": "Tug Route Configurator",
+  "screen.littlelogistics.tug_route.rename_button": "Rename node",
+  "screen.littlelogistics.tug_route.up_button": "Move node up",
+  "screen.littlelogistics.tug_route.down_button": "Move node down",
+  "screen.littlelogistics.tug_route.delete_button": "Remove node",
+
+  "screen.littlelogistics.tug_route.rename": "Renaming %s",
+  "screen.littlelogistics.tug_route.confirm": "Save",
+
+  "item.littlelogistics.tug_route.description": "Right click to add node at the end of the route, right click at the same location to remove. Shift right click to bring up menu.",
+  "item.littlelogistics.tug_route.num_nodes": "Route Nodes: %s",
   "item.littlelogistics.tug_route.added": "Added Route Node X:%s Z:%s",
   "item.littlelogistics.tug_route.removed": "Removed Route Node X:%s Z:%s",
-  "item.littlelogistics.tug_route.node": "Node",
+  "item.littlelogistics.tug_route.node": "%s. Node",
+  "item.littlelogistics.tug_route.node_named": "%s. %s",
+  "item.littlelogistics.tug_route.node_line": "Node %s: %s, %s",
   "item.littlelogistics.spring.description": "Used to link barges/tugs",
   "item.littlelogistics.spring.notToSelf": "Can't link vessel to self",
   "item.littlelogistics.spring.noTwoTugs": "Can't link two tugs",
@@ -48,5 +61,9 @@
   "block.littlelogistics.fluid_hopper.capacity": "%s %s/%s mB",
   "block.littlelogistics.fluid_hopper.capacity_empty": "Empty 0/%s mB",
   "entity.littlelogistics.fluid_barge.capacity": "%s %s/%s mB",
-  "entity.littlelogistics.fluid_barge.capacity_empty": "Empty 0/%s mB"
+  "entity.littlelogistics.fluid_barge.capacity_empty": "Empty 0/%s mB",
+
+  "subtitle.littlelogistics.steam_tug_whistle": "Steam tug whistles",
+  "subtitle.littlelogistics.tug_docking": "Tug boat docks",
+  "subtitle.littlelogistics.tug_undocking": "Tug boat undocks"
 }
