@@ -43,15 +43,14 @@ public class VesselDetectorBlock extends Block {
 
     @Override
     public int getSignal(BlockState state, IBlockReader reader, BlockPos blockPos, Direction direction) {
-        return state.getValue(POWERED) ? 15 : 0;
+        return state.getValue(POWERED) && direction == state.getValue(FACING) ? 15 : 0;
     }
 
 
     @Override
     public int getDirectSignal(BlockState state, IBlockReader reader, BlockPos blockPos, Direction direction) {
-        return state.getValue(POWERED) ? 15 : 0;
+        return state.getValue(POWERED) && direction == state.getValue(FACING) ? 15 : 0;
     }
-
 
     public VesselDetectorBlock(Properties p_i48440_1_) {
         super(p_i48440_1_);

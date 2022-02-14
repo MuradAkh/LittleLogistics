@@ -52,10 +52,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private ModelFile getVesselDetectorModel(BlockState state){
-        return  models().orientable("vessel_detector",
-                getBlTx("guide_rail_side"),
-                getBlTx("vessel_detector"),
-                getBlTx("guide_rail_side"));
+        String powered = state.getValue(VesselDetectorBlock.POWERED) ? "_powered" : "";
+
+        return models().withExistingParent("vessel_detector" + powered, modLoc("orientable_with_back"))
+                .texture("side", getBlTx("vessel_detector_side"))
+                .texture("front", getBlTx("vessel_detector_front"))
+                .texture("back", getBlTx("vessel_detector_back" + powered));
     }
 
     private ModelFile getBargeDockModel(BlockState state){
