@@ -2,12 +2,8 @@ package dev.murad.shipping.data.client;
 
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.item.SpringItem;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ItemModelBuilder;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
@@ -27,9 +23,8 @@ public class ModItemModelProvider extends ItemModelProvider {
         withExistingParent("guide_rail_corner", modLoc("block/guide_rail_corner"));
         withExistingParent("guide_rail_tug", modLoc("block/guide_rail_tug"));
         withExistingParent("fluid_hopper", modLoc("block/fluid_hopper"));
+        withExistingParent("vessel_detector", modLoc("block/vessel_detector"));
         withExistingParent("vessel_charger", modLoc("block/vessel_charger"));
-
-
 
         builder(itemGenerated, "barge");
         builder(itemGenerated, "chunk_loader_barge");

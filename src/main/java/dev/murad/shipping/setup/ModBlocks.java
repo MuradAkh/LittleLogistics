@@ -3,6 +3,7 @@ package dev.murad.shipping.setup;
 
 import dev.murad.shipping.block.dock.BargeDockBlock;
 import dev.murad.shipping.block.dock.TugDockBlock;
+import dev.murad.shipping.block.vessel_detector.VesselDetectorBlock;
 import dev.murad.shipping.block.energy.VesselChargerBlock;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
 import dev.murad.shipping.block.guide_rail.CornerGuideRailBlock;
@@ -35,6 +36,13 @@ public class ModBlocks {
     public static final RegistryObject<Block> GUIDE_RAIL_CORNER = register(
             "guide_rail_corner",
             () -> new CornerGuideRailBlock(AbstractBlock.Properties.of(Material.METAL)
+                    .harvestLevel(1)
+            ),
+            ItemGroup.TAB_TRANSPORTATION);
+
+    public static final RegistryObject<Block> VESSEL_DETECTOR = register(
+            "vessel_detector",
+            () -> new VesselDetectorBlock(AbstractBlock.Properties.of(Material.METAL)
                     .harvestLevel(1)
             ),
             ItemGroup.TAB_TRANSPORTATION);
