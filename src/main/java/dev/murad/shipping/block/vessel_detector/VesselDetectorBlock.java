@@ -44,6 +44,11 @@ public class VesselDetectorBlock extends Block {
     }
 
     @Override
+    public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, @Nullable Direction side) {
+        return state.getValue(FACING) == side;
+    }
+
+    @Override
     public int getSignal(BlockState state, IBlockReader reader, BlockPos blockPos, Direction direction) {
         return state.getValue(POWERED) && direction == state.getValue(FACING) ? 15 : 0;
     }
