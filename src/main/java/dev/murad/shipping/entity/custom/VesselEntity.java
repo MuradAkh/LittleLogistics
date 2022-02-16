@@ -36,7 +36,11 @@ import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.CapabilityItemHandler;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Optional;
@@ -375,6 +379,17 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
     @Override
     public void checkInsideBlocks(){
         super.checkInsideBlocks();
+    }
+
+    // Get rid of default armour/hands slots itemhandler from mobs
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return LazyOptional.empty();
+        }
+
+        return super.getCapability(cap, side);
     }
 
     // LivingEntity override, to avoid jumping out of water
