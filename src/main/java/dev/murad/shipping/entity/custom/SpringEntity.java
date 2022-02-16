@@ -216,7 +216,9 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
                     dominated.setDeltaMovement(k * (dist - l0) * dx, k * (dist - l0) * dy, k * (dist - l0) * dz);
                     if (!this.level.isClientSide) {
                         dominated.getLastCornerGuideRail().ifPresent(pair -> {
-                            if (dominated.isColliding(pair.getFirst(), pair.getSecond())) {
+                            if (level.getBlockCollisions(dominated, dominated.getBoundingBox(),
+                                            (b, pos) -> pos.equals(pair.getFirst()))
+                                    .anyMatch(voxelShape -> !voxelShape.isEmpty())) {
                                 ModBlocks.GUIDE_RAIL_CORNER.get().entityInside(pair.getSecond(), this.level, pair.getFirst(), dominated);
                             }
                         });
