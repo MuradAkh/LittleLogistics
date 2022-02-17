@@ -25,16 +25,16 @@ SOFTWARE.
 
 
 import dev.murad.shipping.entity.custom.ISpringableEntity;
-import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
+import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.entity.item.*;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -44,13 +44,13 @@ public class EntitySpringAPI {
 
     private static final BiFunction<Entity, SpringEntity.SpringSide, Vec3> DEFAULT_ANCHOR_LOCATION = (e, sideArg) -> e.position();
     private static final List<Predicate<Entity>> predicates = new ArrayList<>();
-    private static final Map<Class<? extends Entity>, BiFunction<Entity, SpringEntity.SpringSide, Vector3d>> mapping = new HashMap<>();
-    public static final BiFunction<Entity, SpringEntity.SpringSide, Vector3d> DEFAULT_BOAT_ANCHOR = (entity, side) -> {
+    private static final Map<Class<? extends Entity>, BiFunction<Entity, SpringEntity.SpringSide, Vec3>> mapping = new HashMap<>();
+    public static final BiFunction<Entity, SpringEntity.SpringSide, Vec3> DEFAULT_BOAT_ANCHOR = (entity, side) -> {
         float distanceFromCenter = 0.0625f * 17f * (side == SpringEntity.SpringSide.DOMINANT ? 1f : -1f);
-        double anchorX = entity.getX() + MathHelper.cos((float) ((entity.yRot + 90f) * Math.PI / 180f)) * distanceFromCenter;
+        double anchorX = entity.getX() + Math.cos((float) ((entity.getYRot() + 90f) * Math.PI / 180f)) * distanceFromCenter;
         double anchorY = entity.getY();
-        double anchorZ = entity.getZ() + MathHelper.sin((float)((entity.yRot + 90f) * Math.PI / 180f)) * distanceFromCenter;
-        return new Vector3d(anchorX, anchorY, anchorZ);
+        double anchorZ = entity.getZ() + Math.sin((float)((entity.getYRot() + 90f) * Math.PI / 180f)) * distanceFromCenter;
+        return new Vec3(anchorX, anchorY, anchorZ);
     };
 
     static {
@@ -61,16 +61,16 @@ public class EntitySpringAPI {
         return target instanceof ISpringableEntity || target instanceof TugDummyHitboxEntity;
     }
 
-    public static void addGenericAnchorMapping(Class<? extends Entity> entity, BiFunction<Entity, SpringEntity.SpringSide, Vector3d> function) {
+    public static void addGenericAnchorMapping(Class<? extends Entity> entity, BiFunction<Entity, SpringEntity.SpringSide, Vec3> function) {
         mapping.put(entity, function);
     }
 
-    public static <T extends Entity> void addAnchorMapping(Class<? extends T> entity, BiFunction<T, SpringEntity.SpringSide, Vector3d> function) {
+    public static <T extends Entity> void addAnchorMapping(Class<? extends T> entity, BiFunction<T, SpringEntity.SpringSide, Vec3> function) {
         mapping.put(entity, (e, side) -> function.apply((T) e, side));
     }
 
-    public static Vector3d calculateAnchorPosition(Entity entity, SpringEntity.SpringSide side) {
-        BiFunction<Entity, SpringEntity.SpringSide, Vector3d> function = mapping.getOrDefault(entity.getClass(), DEFAULT_ANCHOR_LOCATION);
+    public static Vec3 calculateAnchorPosition(Entity entity, SpringEntity.SpringSide side) {
+        BiFunction<Entity, SpringEntity.SpringSide, Vec3> function = mapping.getOrDefault(entity.getClass(), DEFAULT_ANCHOR_LOCATION);
         return function.apply(entity, side);
     }
 }

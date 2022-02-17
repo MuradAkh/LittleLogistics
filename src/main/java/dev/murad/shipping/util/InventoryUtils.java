@@ -1,11 +1,11 @@
 package dev.murad.shipping.util;
 
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
-import net.minecraft.entity.Entity;
 import net.minecraft.world.Container;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.items.CapabilityItemHandler;
 
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class InventoryUtils {
         return false;
     }
 
-    public static int findSlotFotItem(IInventory target, ItemStack itemStack) {
+    public static int findSlotFotItem(Container target, ItemStack itemStack) {
         for (int i = 0; i < target.getContainerSize(); i++) {
             ItemStack stack = target.getItem(i);
             if(stack.isEmpty() || stack.getItem().equals(Items.AIR)){

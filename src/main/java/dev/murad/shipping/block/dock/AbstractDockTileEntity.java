@@ -2,6 +2,7 @@ package dev.murad.shipping.block.dock;
 
 import dev.murad.shipping.block.IVesselLoader;
 import dev.murad.shipping.entity.custom.VesselEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -20,7 +21,7 @@ public abstract class AbstractDockTileEntity extends BlockEntity {
 
     public Optional<HopperBlockEntity> getHopper(){
         BlockEntity mayBeHopper = this.level.getBlockEntity(this.getTargetBlockPos());
-        if (mayBeHopper instanceof HopperTileEntity) {
+        if (mayBeHopper instanceof HopperBlockEntity) {
             return Optional.of((HopperTileEntity) mayBeHopper);
         }
         else return Optional.empty();
