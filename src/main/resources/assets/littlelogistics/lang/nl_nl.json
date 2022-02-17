@@ -25,6 +25,7 @@
   "block.littlelogistics.guide_rail_corner": "Vaartuig Hoek Geleiderail",
   "block.littlelogistics.vessel_charger": "Vaartuig Oplader",
   "block.littlelogistics.fluid_hopper": "Vloeistof Trechter",
+  "block.littlelogistics.vessel_detector": "Vaartuig Detector",
 
   "screen.littlelogistics.tug": "Stoom Sleepboot",
   "screen.littlelogistics.fishing_barge": "Auto-Vis Sleepaak",
@@ -60,5 +61,9 @@
   "block.littlelogistics.fluid_hopper.capacity": "%s %s/%s mB",
   "block.littlelogistics.fluid_hopper.capacity_empty": "Empty 0/%s mB",
   "entity.littlelogistics.fluid_barge.capacity": "%s %s/%s mB",
-  "entity.littlelogistics.fluid_barge.capacity_empty": "Empty 0/%s mB"
+  "entity.littlelogistics.fluid_barge.capacity_empty": "Empty 0/%s mB",
+
+  "subtitle.littlelogistics.steam_tug_whistle": "Stoom Sleeboot fluit",
+  "subtitle.littlelogistics.tug_docking": "Sleepboot meert aan",
+  "subtitle.littlelogistics.tug_undocking":  "Sleepboot meert af"
 }
