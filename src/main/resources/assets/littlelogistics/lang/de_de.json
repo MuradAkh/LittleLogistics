@@ -1,0 +1,69 @@
+{
+  "item.littlelogistics.tug": "Dampfschlepper",
+  "item.littlelogistics.barge": "Schute",
+  "item.littlelogistics.chunk_loader_barge": "Chunkloader Barge",
+  "item.littlelogistics.seater_barge": "Sitz Barge",
+  "item.littlelogistics.fishing_barge": "Fischer Barge",
+  "item.littlelogistics.spring": "Schiffskette",
+  "item.littlelogistics.tug_route": "Schlepproute",
+  "item.littlelogistics.energy_tug": "Elektrischer Schlepper",
+  "item.littlelogistics.fluid_barge": "Tanker Barge",
+
+
+  "entity.littlelogistics.tug": "Dampfschlepper",
+  "entity.littlelogistics.barge": "Schute",
+  "entity.littlelogistics.chunk_loader_barge": "Chunkloader Barge",
+  "entity.littlelogistics.fishing_barge": "Fischer Barge",
+  "entity.littlelogistics.spring": "Schiffskette",
+  "entity.littlelogistics.energy_tug": "Elektrischerschlepper",
+  "entity.littlelogistics.fluid_barge": "Tanker Barge",
+  "entity.littlelogistics.seater_barge": "Sitz Barge",
+
+  "block.littlelogistics.tug_dock": "Schlepperdock",
+  "block.littlelogistics.barge_dock": "Bargendock",
+  "block.littlelogistics.guide_rail_tug": "Schlepperleitschiene",
+  "block.littlelogistics.guide_rail_corner": "Schiffseckleitschiene",
+  "block.littlelogistics.vessel_charger": "Schiffsstromlader",
+  "block.littlelogistics.fluid_hopper": "Flüssigkeitstrichter",
+  "block.littlelogistics.vessel_detector": "Schiffsdetektor",
+
+  "screen.littlelogistics.tug": "Dampfschlepper",
+  "screen.littlelogistics.fishing_barge": "Fischer Barge",
+  "screen.littlelogistics.energy_tug": "Elektrischer Schlepper",
+  "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
+
+  "screen.littlelogistics.tug_route": "Schlepproutenkonfigurator",
+  "screen.littlelogistics.tug_route.rename_button": "Knotenpunkt umbenennen",
+  "screen.littlelogistics.tug_route.up_button": "Knotenpunkt nach oben bewegen",
+  "screen.littlelogistics.tug_route.down_button": "Knotenpunkt nach unten bewegen"
+  "screen.littlelogistics.tug_route.delete_button": "Knotenpunkt entfernen",
+
+  "screen.littlelogistics.tug_route.rename": "Benenne %s um",
+  "screen.littlelogistics.tug_route.confirm": "Speichern",
+
+  "item.littlelogistics.tug_route.description": "Rechtsklick fügt Knotenpunkt an das Ende der Route hinzu, Rechtsklick an derselben Position entfernt Knotenpunkt. Shift Rechtsklick öffnet das Menü.",
+  "item.littlelogistics.tug_route.num_nodes": "Routenpunkt: %s",
+  "item.littlelogistics.tug_route.added": "Hinzugefügt Knotenpunkt X:%s Z:%s",
+  "item.littlelogistics.tug_route.removed": "Entfernt Knotenpunkt X:%s Z:%s",
+  "item.littlelogistics.tug_route.node": "%s. Knotenpunkt",
+  "item.littlelogistics.tug_route.node_named": "%s. %s",
+  "item.littlelogistics.tug_route.node_line": "Knotenpunkt %s: %s, %s",
+  "item.littlelogistics.spring.description": "Zum Verlinken von Schleppern/Bargen",
+  "item.littlelogistics.spring.notToSelf": "Kann nicht Schiff mit sich selbst verbinden",
+  "item.littlelogistics.spring.noTwoTugs": "Kann keine zwei Schlepper verbinden",
+  "item.littlelogistics.spring.tooFar": "Schiffe zu weit entfernt",
+  "item.littlelogistics.spring.noLoops": "Kann nicht Schiffe im Kreis verlinken",
+  "item.littlelogistics.fishing_barge.description": "Für starke Fänge finden sich auf langen Routen in tiefen und offenen Gewässern",
+
+  "item.littlelogistics.creative_capacitor": "Kreativkondensator",
+
+  "block.littlelogistics.vessel_charger.capacity": "%s/%s FE",
+  "block.littlelogistics.fluid_hopper.capacity": "%s %s/%s mB",
+  "block.littlelogistics.fluid_hopper.capacity_empty": "Leer 0/%s mB",
+  "entity.littlelogistics.fluid_barge.capacity": "%s %s/%s mB",
+  "entity.littlelogistics.fluid_barge.capacity_empty": "Leer 0/%s mB",
+
+  "subtitle.littlelogistics.steam_tug_whistle": "Dampfschlepper pfeift",
+  "subtitle.littlelogistics.tug_docking": "Schlepper dockt an",
+  "subtitle.littlelogistics.tug_undocking": "Schlepper dockt ab"
+}
