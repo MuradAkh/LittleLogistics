@@ -2,6 +2,7 @@ package dev.murad.shipping.setup;
 
 import dev.murad.shipping.block.dock.BargeDockTileEntity;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
+import dev.murad.shipping.block.vessel_detector.VesselDetectorTileEntity;
 import dev.murad.shipping.block.energy.VesselChargerTileEntity;
 import dev.murad.shipping.block.fluid.FluidHopperTileEntity;
 import net.minecraft.block.Block;
@@ -22,6 +23,12 @@ public class ModTileEntitiesTypes {
             "barge_dock",
             BargeDockTileEntity::new,
             ModBlocks.BARGE_DOCK
+    );
+
+    public static final RegistryObject<TileEntityType<VesselDetectorTileEntity>> VESSEL_DETECTOR = register(
+            "vessel_detector",
+            VesselDetectorTileEntity::new,
+            ModBlocks.VESSEL_DETECTOR
     );
 
     public static final RegistryObject<TileEntityType<FluidHopperTileEntity>> FLUID_HOPPER = register(

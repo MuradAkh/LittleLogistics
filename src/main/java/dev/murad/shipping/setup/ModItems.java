@@ -31,7 +31,7 @@ public class ModItems {
             () -> new SpringItem(new Item.Properties().stacksTo(64).tab(ItemGroup.TAB_TRANSPORTATION)));
 
     public static final RegistryObject<Item> TUG_ROUTE = Registration.ITEMS.register("tug_route",
-            () -> new TugRouteItem(new Item.Properties().stacksTo(1).tab(ItemGroup.TAB_TRANSPORTATION)));
+            () -> new TugRouteItem(new Item.Properties().stacksTo(16).tab(ItemGroup.TAB_TRANSPORTATION)));
 
     public static final RegistryObject<Item> CREATIVE_CAPACITOR = Registration.ITEMS.register("creative_capacitor",
             () -> new CreativeCapacitor(new Item.Properties().stacksTo(1).tab(ItemGroup.TAB_TRANSPORTATION)));

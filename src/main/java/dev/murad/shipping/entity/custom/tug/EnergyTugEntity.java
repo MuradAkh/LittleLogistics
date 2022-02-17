@@ -88,7 +88,6 @@ public class EnergyTugEntity extends AbstractTugEntity {
 
     }
 
-
     // Energy tug can be loaded at all times since there is no concern
     // with mix-ups like with fluids and items
     @Override

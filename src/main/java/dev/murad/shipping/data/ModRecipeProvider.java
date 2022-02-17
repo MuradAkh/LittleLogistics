@@ -41,6 +41,16 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(ModItems.SPRING.get()))
                 .save(consumer);
 
+        ShapedRecipeBuilder.shaped(ModBlocks.VESSEL_DETECTOR.get(), 2)
+                .define('#', ModItems.SPRING.get())
+                .define('_', Tags.Items.STONE)
+                .define('$', Items.REDSTONE_TORCH)
+                .pattern("_#_")
+                .pattern("_$_")
+                .pattern("___")
+                .unlockedBy("has_item", has(ModItems.SPRING.get()))
+                .save(consumer);
+
 
         ShapedRecipeBuilder.shaped(ModBlocks.GUIDE_RAIL_CORNER.get(), 3)
                 .define('#', ModItems.SPRING.get())

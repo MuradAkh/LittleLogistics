@@ -1,8 +1,7 @@
 package dev.murad.shipping.entity.navigation;
 
-import dev.murad.shipping.block.dock.AbstractDockBlock;
+import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
 import dev.murad.shipping.setup.ModBlocks;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.fluid.FluidState;
@@ -12,12 +11,19 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 
 public class TugNodeProcessor extends SwimNodeProcessor {
     public TugNodeProcessor() {
         super(false);
+    }
+
+    private boolean isOppositeGuideRail(PathPoint pathPoint, Direction direction){
+        BlockState state = this.level.getBlockState(pathPoint.asBlockPos().below());
+        if (state.is(ModBlocks.GUIDE_RAIL_TUG.get())){
+            return TugGuideRailBlock.getArrowsDirection(state).getOpposite().equals(direction);
+        }
+        return false;
     }
 
     @Override
@@ -26,7 +32,7 @@ public class TugNodeProcessor extends SwimNodeProcessor {
 
         for(Direction direction : Arrays.asList(Direction.WEST, Direction.EAST, Direction.SOUTH, Direction.NORTH)) {
             PathPoint pathpoint = this.getWaterNode(p_222859_2_.x + direction.getStepX(), p_222859_2_.y + direction.getStepY(), p_222859_2_.z + direction.getStepZ());
-            if (pathpoint != null && !pathpoint.closed) {
+            if (pathpoint != null && !pathpoint.closed && !isOppositeGuideRail(pathpoint, direction)) {
                 p_222859_1_[i++] = pathpoint;
             }
         }

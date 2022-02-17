@@ -1,0 +1,23 @@
+{
+    "steam_tug_whistle": {
+        "subtitle": "subtitle.littlelogistics.steam_tug_whistle",
+        "sounds": [
+            "littlelogistics:steam_tug/tug_whistle1",
+            "littlelogistics:steam_tug/tug_whistle2",
+            "littlelogistics:steam_tug/tug_whistle3",
+            "littlelogistics:steam_tug/tug_whistle4"
+        ]
+    },
+    "tug_docking": {
+        "subtitle": "subtitle.littlelogistics.tug_docking",
+        "sounds": [
+            "littlelogistics:dock/docking"
+        ]
+    },
+    "tug_undocking": {
+        "subtitle": "subtitle.littlelogistics.tug_undocking",
+        "sounds": [
+            "littlelogistics:dock/docking"
+        ]
+    }
+}

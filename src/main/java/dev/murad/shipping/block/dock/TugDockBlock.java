@@ -57,7 +57,7 @@ public class TugDockBlock extends AbstractDockBlock {
     public BlockState getStateForPlacement(BlockItemUseContext context){
         return super.getStateForPlacement(context)
                 .setValue(INVERTED, false)
-                .setValue(POWERED, false);
+                .setValue(POWERED, context.getLevel().hasNeighborSignal(context.getClickedPos()));
     }
 
     @Override

@@ -5,6 +5,7 @@ import dev.murad.shipping.entity.accessor.SteamTugDataAccessor;
 import dev.murad.shipping.entity.container.SteamTugContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import dev.murad.shipping.setup.ModSounds;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -127,6 +128,12 @@ public class SteamTugEntity extends AbstractTugEntity {
         compound.putInt("burn", burnTime);
         compound.putInt("burn_capacity", burnCapacity);
         super.addAdditionalSaveData(compound);
+    }
+
+    @Override
+    protected void onUndock() {
+        super.onUndock();
+        this.playSound(ModSounds.STEAM_TUG_WHISTLE.get(), 1, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
     }
 
     // Have to implement IInventory to work with hoppers

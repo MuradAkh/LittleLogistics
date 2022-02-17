@@ -214,13 +214,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
                     double k = dominant instanceof AbstractTugEntity ? 0.2 : 0.13;
                     double l0 = maxDstSq;
                     dominated.setDeltaMovement(k * (dist - l0) * dx, k * (dist - l0) * dy, k * (dist - l0) * dz);
-                    if (!this.level.isClientSide) {
-                        dominated.getLastCornerGuideRail().ifPresent(pair -> {
-                            if (dominated.isColliding(pair.getFirst(), pair.getSecond())) {
-                                ModBlocks.GUIDE_RAIL_CORNER.get().entityInside(pair.getSecond(), this.level, pair.getFirst(), dominated);
-                            }
-                        });
-                    }
+                    dominated.checkInsideBlocks();
                 }
             } else { // front and back entities have not been loaded yet
                 if (dominantNBT != null && dominatedNBT != null) {
