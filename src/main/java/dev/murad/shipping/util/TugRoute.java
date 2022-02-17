@@ -62,14 +62,14 @@ public class TugRoute extends ArrayList<TugRouteNode> {
         return tag;
     }
 
-    public static TugRoute fromNBT(CompoundNBT tag) {
+    public static TugRoute fromNBT(CompoundTag tag) {
         String name = null;
         if (tag.contains(NAME_TAG)) {
             name = tag.getString(NAME_TAG);
         }
 
         // 10 == magic number of Compound Tag
-        ListNBT nodesNBT = tag.getList(NODES_TAG, 10);
+        ListTag nodesNBT = tag.getList(NODES_TAG, 10);
         ArrayList<TugRouteNode> nodes = new ArrayList<>();
         for (int i = 0; i < nodesNBT.size(); i++) {
             nodes.add(TugRouteNode.fromNBT(nodesNBT.getCompound(i)));

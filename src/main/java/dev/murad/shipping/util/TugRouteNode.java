@@ -1,8 +1,8 @@
 package dev.murad.shipping.util;
 
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.vector.Vector2f;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.phys.Vec2;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -72,14 +72,14 @@ public class TugRouteNode {
         return Objects.hash(name, x, z);
     }
 
-    public CompoundNBT toNBT() {
-        CompoundNBT tag = new CompoundNBT();
+    public CompoundTag toNBT() {
+        CompoundTag tag = new CompoundTag();
         if (this.hasCustomName()) {
             //noinspection ConstantConditions
             tag.putString(NAME_TAG, this.getName());
         }
 
-        CompoundNBT coords = new CompoundNBT();
+        CompoundTag coords = new CompoundTag();
         coords.putDouble(X_TAG, x);
         coords.putDouble(Z_TAG, z);
 
@@ -87,20 +87,20 @@ public class TugRouteNode {
         return tag;
     }
 
-    public static TugRouteNode fromNBT(CompoundNBT tag) {
+    public static TugRouteNode fromNBT(CompoundTag tag) {
         String name = null;
         if (tag.contains(NAME_TAG)) {
             name = tag.getString(NAME_TAG);
         }
 
-        CompoundNBT coords = tag.getCompound(COORDS_TAG);
+        CompoundTag coords = tag.getCompound(COORDS_TAG);
         double x = coords.getDouble(X_TAG);
         double z = coords.getDouble(Z_TAG);
 
         return new TugRouteNode(name, x, z);
     }
 
-    public static TugRouteNode fromVector2f(Vector2f node) {
+    public static TugRouteNode fromVector2f(Vec2 node) {
         double x = node.x, z = node.y;
         return new TugRouteNode(null, x, z);
     }

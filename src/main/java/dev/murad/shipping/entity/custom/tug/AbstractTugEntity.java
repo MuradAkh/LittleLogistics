@@ -19,6 +19,7 @@ import dev.murad.shipping.util.TugRoute;
 import dev.murad.shipping.util.TugRouteNode;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.core.Direction;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
@@ -34,7 +35,7 @@ import net.minecraft.world.WorldlyContainer;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.datasync.DataSerializers;
@@ -49,6 +50,14 @@ import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.network.NetworkHooks;
@@ -86,14 +95,14 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     private int nextStop;
 
 
-    public AbstractTugEntity(EntityType<? extends WaterMobEntity> type, World world) {
+    public AbstractTugEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
         this.blocksBuilding = true;
         this.train = new Train(this);
         this.path = new TugRoute();
     }
 
-    public AbstractTugEntity(EntityType type, World worldIn, double x, double y, double z) {
+    public AbstractTugEntity(EntityType type, Level worldIn, double x, double y, double z) {
         this(type, worldIn);
         this.setPos(x, y, z);
         this.xo = x;
@@ -182,7 +191,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     protected abstract INamedContainerProvider createContainerProvider();
 
     @Override
-    public void readAdditionalSaveData(CompoundNBT compound) {
+    public void readAdditionalSaveData(CompoundTag compound) {
         itemHandler.deserializeNBT(compound.getCompound("inv"));
         nextStop = compound.contains("next_stop") ? compound.getInt("next_stop") : 0;
         contentsChanged = true;
@@ -191,7 +200,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundNBT compound) {
+    public void addAdditionalSaveData(CompoundTag compound) {
         compound.put("inv", itemHandler.serializeNBT());
         compound.putInt("next_stop", nextStop);
         super.addAdditionalSaveData(compound);
@@ -206,7 +215,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
 
     protected abstract boolean tickFuel();
 
-    public static AttributeModifierMap.MutableAttribute setCustomAttributes() {
+    public static AttributeSupplier.Builder setCustomAttributes() {
         return VesselEntity.setCustomAttributes()
                 .add(Attributes.FOLLOW_RANGE, 200);
     }
@@ -365,12 +374,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
                 this.level.getBlockState(getOnPos().below().below()));
         BlockState water = this.level.getBlockState(getOnPos());
         for (BlockState below : belowList) {
-            if (below.getBlock().is(ModBlocks.GUIDE_RAIL_TUG.get()) && water.is(Blocks.WATER)) {
+            if (below.is(ModBlocks.GUIDE_RAIL_TUG.get()) && water.is(Blocks.WATER)) {
                 Direction arrows = TugGuideRailBlock.getArrowsDirection(below);
-                this.yRot = arrows.toYRot();
+                this.setYRot(arrows.toYRot());
                 double modifier = 0.03;
                 this.setDeltaMovement(this.getDeltaMovement().add(
-                        new Vector3d(arrows.getStepX() * modifier, 0, arrows.getStepZ() * modifier)));
+                        new Vec3(arrows.getStepX() * modifier, 0, arrows.getStepZ() * modifier)));
             }
         }
     }

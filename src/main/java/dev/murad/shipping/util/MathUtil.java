@@ -1,6 +1,7 @@
 package dev.murad.shipping.util;
 
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -49,6 +50,6 @@ public class MathUtil {
     }
 
     public static Vec3 lerp(Vec3 from, Vec3 to, double ratio) {
-        return new Vec3(MathHelper.lerp(ratio, from.x, to.x), MathHelper.lerp(ratio, from.y, to.y), MathHelper.lerp(ratio, from.z, to.z));
+        return new Vec3(Mth.lerp(ratio, from.x, to.x), Mth.lerp(ratio, from.y, to.y), Mth.lerp(ratio, from.z, to.z));
     }
 }

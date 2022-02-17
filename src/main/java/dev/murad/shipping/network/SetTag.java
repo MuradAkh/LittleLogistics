@@ -14,7 +14,7 @@ public class SetTag {
         this.tag = buffer.readNbt();
     }
 
-    public SetTag(int checksum, boolean isOffHand, CompoundNBT tag) {
+    public SetTag(int checksum, boolean isOffHand, CompoundTag tag) {
         this.routeChecksum = checksum;
         this.isOffhand = isOffHand;
         this.tag = tag;

@@ -4,6 +4,7 @@ import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.item.SpringItem;
 import dev.murad.shipping.item.TugRouteItem;
 import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ResourceLocation;
 
 public class ModItemModelProperties {

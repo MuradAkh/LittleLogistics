@@ -2,13 +2,13 @@ package dev.murad.shipping.setup;
 
 import dev.murad.shipping.block.dock.BargeDockTileEntity;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
-import dev.murad.shipping.block.vessel_detector.VesselDetectorTileEntity;
 import dev.murad.shipping.block.energy.VesselChargerTileEntity;
 import dev.murad.shipping.block.fluid.FluidHopperTileEntity;
+import dev.murad.shipping.block.vessel_detector.VesselDetectorTileEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.function.Supplier;
 

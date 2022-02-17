@@ -7,13 +7,13 @@ import dev.murad.shipping.entity.container.EnergyTugContainer;
 import dev.murad.shipping.entity.container.FishingBargeContainer;
 import dev.murad.shipping.entity.container.SteamTugContainer;
 import dev.murad.shipping.item.container.TugRouteContainer;
-import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SimpleContainerData;
-import net.minecraftforge.common.extensions.IForgeContainerType;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.common.extensions.IForgeMenuType;
+import net.minecraftforge.registries.RegistryObject;
 
-public class ModContainerTypes {
+public class ModMenuTypes {
 
     private static SimpleContainerData makeIntArray(FriendlyByteBuf buffer) {
         int size = (buffer.readableBytes() + 1) / 4;
@@ -24,27 +24,27 @@ public class ModContainerTypes {
         return arr;
     }
 
-    public static final RegistryObject<ContainerType<SteamTugContainer>> TUG_CONTAINER =
+    public static final RegistryObject<MenuType<SteamTugContainer>> TUG_CONTAINER =
             Registration.CONTAINERS.register("tug_container",
-                    () -> IForgeContainerType.create(
+                    () -> IForgeMenuType.create(
                             (windowId, inv, data) ->
                                     new SteamTugContainer(windowId, inv.player.level, new SteamTugDataAccessor(makeIntArray(data)), inv, inv.player)));
 
-    public static final RegistryObject<ContainerType<EnergyTugContainer>> ENERGY_TUG_CONTAINER =
+    public static final RegistryObject<MenuType<EnergyTugContainer>> ENERGY_TUG_CONTAINER =
             Registration.CONTAINERS.register("energy_tug_container",
-                    () -> IForgeContainerType.create(
+                    () -> IForgeMenuType.create(
                             (windowId, inv, data) ->
                                     new EnergyTugContainer(windowId, inv.player.level, new EnergyTugDataAccessor(makeIntArray(data)), inv, inv.player)));
 
-    public static final RegistryObject<ContainerType<FishingBargeContainer>> FISHING_BARGE_CONTAINER =
+    public static final RegistryObject<MenuType<FishingBargeContainer>> FISHING_BARGE_CONTAINER =
             Registration.CONTAINERS.register("fishing_barge_container",
-                    () -> IForgeContainerType.create(
+                    () -> IForgeMenuType.create(
                             (windowId, inv, data) ->
                                     new FishingBargeContainer(windowId, inv.player.level, data.readInt(), inv, inv.player)));
 
-    public static final RegistryObject<ContainerType<TugRouteContainer>> TUG_ROUTE_CONTAINER =
+    public static final RegistryObject<MenuType<TugRouteContainer>> TUG_ROUTE_CONTAINER =
             Registration.CONTAINERS.register("tug_route_container",
-                    () -> IForgeContainerType.create(
+                    () -> IForgeMenuType.create(
                             (windowId, inv, data) ->
                                     new TugRouteContainer(windowId, inv.player.level, new TugRouteScreenDataAccessor(makeIntArray(data)), inv, inv.player)));
 

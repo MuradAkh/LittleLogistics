@@ -3,7 +3,7 @@ package dev.murad.shipping.setup;
 import dev.murad.shipping.ShippingMod;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.registries.RegistryObject;
 
 public class ModSounds {
 

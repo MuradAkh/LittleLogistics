@@ -6,18 +6,18 @@ import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.util.Train;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.network.IPacket;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -29,10 +29,10 @@ public abstract class AbstractBargeEntity extends VesselEntity implements ISprin
         this.train = new Train(this);
     }
 
-    public AbstractBargeEntity(EntityType<? extends AbstractBargeEntity> type, World worldIn, double x, double y, double z) {
+    public AbstractBargeEntity(EntityType<? extends AbstractBargeEntity> type, Level worldIn, double x, double y, double z) {
         this(type, worldIn);
         this.setPos(x, y, z);
-        this.setDeltaMovement(Vector3d.ZERO);
+        this.setDeltaMovement(Vec3.ZERO);
         this.xo = x;
         this.yo = y;
         this.zo = z;
@@ -46,7 +46,7 @@ public abstract class AbstractBargeEntity extends VesselEntity implements ISprin
 
     @Nonnull
     @Override
-    public IPacket<?> getAddEntityPacket() {
+    public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 
@@ -54,23 +54,23 @@ public abstract class AbstractBargeEntity extends VesselEntity implements ISprin
 
 
     @Override
-    public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (!this.level.isClientSide) {
             doInteract(player);
         }
         // don't interact *and* use current item
-        return ActionResultType.CONSUME;
+        return InteractionResult.CONSUME;
     }
 
-    abstract protected void doInteract(PlayerEntity player);
+    abstract protected void doInteract(Player player);
 
     @Override
     public boolean hurt(DamageSource p_70097_1_, float p_70097_2_) {
         if (this.isInvulnerableTo(p_70097_1_)) {
             return false;
-        } else if (!this.level.isClientSide && !this.removed) {
+        } else if (!this.level.isClientSide && !this.dead) {
             this.spawnAtLocation(this.getDropItem());
-            this.remove();
+            this.kill();
             return true;
         } else {
             return true;
@@ -126,9 +126,9 @@ public abstract class AbstractBargeEntity extends VesselEntity implements ISprin
     }
 
     @Override
-    public void remove(){
+    public void kill(){
         handleSpringableKill();
-        super.remove();
+        super.kill();
     }
 
     // hack to disable hoppers
