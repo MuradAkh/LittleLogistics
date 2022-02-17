@@ -35,7 +35,7 @@
   "screen.littlelogistics.tug_route": "Schlepproutenkonfigurator",
   "screen.littlelogistics.tug_route.rename_button": "Knotenpunkt umbenennen",
   "screen.littlelogistics.tug_route.up_button": "Knotenpunkt nach oben bewegen",
-  "screen.littlelogistics.tug_route.down_button": "Knotenpunkt nach unten bewegen
+  "screen.littlelogistics.tug_route.down_button": "Knotenpunkt nach unten bewegen"
   "screen.littlelogistics.tug_route.delete_button": "Knotenpunkt entfernen",
 
   "screen.littlelogistics.tug_route.rename": "Benenne %s um",
