@@ -1,26 +1,26 @@
 package dev.murad.shipping.entity.container;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.murad.shipping.ShippingMod;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
 
 public class SteamTugScreen extends AbstractTugScreen<SteamTugContainer> {
     private static final ResourceLocation GUI = new ResourceLocation(ShippingMod.MOD_ID, "textures/container/steam_tug.png");
 
-    public SteamTugScreen(SteamTugContainer menu, PlayerInventory inventory, ITextComponent label) {
+    public SteamTugScreen(SteamTugContainer menu, Inventory inventory, Component label) {
         super(menu, inventory, label);
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         super.render(matrixStack, mouseX, mouseY, partialTicks);
     }
 
     @Override
-    protected void renderBg(MatrixStack matrixStack, float partialTicks, int x, int y) {
+    protected void renderBg(PoseStack matrixStack, float partialTicks, int x, int y) {
         RenderSystem.color4f(1f, 1f, 1f, 1f);
         this.minecraft.getTextureManager().bind(GUI);
         int i = this.getGuiLeft();

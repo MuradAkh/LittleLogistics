@@ -6,14 +6,14 @@ package dev.murad.shipping.entity.models;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.world.entity.Entity;
 
 public class SeaterBargeModel extends EntityModel<Entity> {
-	private final ModelRenderer bb_main;
-	private final ModelRenderer cube_r1;
-	private final ModelRenderer bb_main2;
+	private final ModelPart bb_main;
+	private final ModelPart cube_r1;
+	private final ModelPart bb_main2;
 
 	public SeaterBargeModel() {
 		texWidth = 128;

@@ -8,12 +8,12 @@ import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.InventoryUtils;
 import net.minecraft.entity.Entity;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.world.Container;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.HopperTileEntity;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.core.Direction;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
@@ -24,18 +24,18 @@ import java.util.stream.IntStream;
 
 public class TugDockTileEntity extends AbstractDockTileEntity {
 
-    public TugDockTileEntity(TileEntityType<?> tileEntityTypeIn) {
+    public TugDockTileEntity(BlockEntityType<?> tileEntityTypeIn) {
         super(tileEntityTypeIn);
     }
     public TugDockTileEntity() {
         super(ModTileEntitiesTypes.TUG_DOCK.get());
     }
 
-    private boolean handleItemHopper(VesselEntity tugEntity, HopperTileEntity hopper){
-        if(!(tugEntity instanceof IInventory)){
+    private boolean handleItemHopper(VesselEntity tugEntity, HopperBlockEntity hopper){
+        if(!(tugEntity instanceof Container)){
             return false;
         }
-        return InventoryUtils.mayMoveIntoInventory((IInventory) tugEntity, hopper);
+        return InventoryUtils.mayMoveIntoInventory((Container) tugEntity, hopper);
     }
 
 

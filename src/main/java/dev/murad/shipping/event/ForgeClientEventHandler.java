@@ -12,12 +12,12 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.tileentity.BeaconTileEntityRenderer;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.DyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
@@ -41,7 +41,7 @@ public class ForgeClientEventHandler {
         if(ShippingConfig.Client.DISABLE_TUG_ROUTE_BEACONS.get()){
             return;
         }
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         ItemStack stack = player.getItemInHand(Hand.MAIN_HAND);
         if (stack.getItem().equals(ModItems.TUG_ROUTE.get())){
             Vector3d vector3d = Minecraft.getInstance().getEntityRenderDispatcher().camera.getPosition();

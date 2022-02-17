@@ -5,18 +5,18 @@ package dev.murad.shipping.entity.models;// Made with Blockbench 4.1.1
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.world.entity.Entity;
 
 public class FishingBargeTransitionModel extends EntityModel<Entity> {
-	private final ModelRenderer bb_main;
-	private final ModelRenderer bone;
-	private final ModelRenderer bone2;
-	private final ModelRenderer cube_r1;
-	private final ModelRenderer bone3;
-	private final ModelRenderer bone4;
-	private final ModelRenderer cube_r2;
+	private final ModelPart bb_main;
+	private final ModelPart bone;
+	private final ModelPart bone2;
+	private final ModelPart cube_r1;
+	private final ModelPart bone3;
+	private final ModelPart bone4;
+	private final ModelPart cube_r2;
 
 	public FishingBargeTransitionModel() {
 		texWidth = 128;

@@ -4,12 +4,12 @@ import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
-import net.minecraft.entity.EntityType;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.world.ForgeChunkManager;
 
@@ -20,11 +20,11 @@ import java.util.Set;
 public class ChunkLoaderBargeEntity extends AbstractBargeEntity{
     private Optional<Pair<Integer, Integer>> loadedChunk = Optional.empty();
 
-    public ChunkLoaderBargeEntity(EntityType<? extends ChunkLoaderBargeEntity> type, World world) {
+    public ChunkLoaderBargeEntity(EntityType<? extends ChunkLoaderBargeEntity> type, Level world) {
         super(type, world);
     }
 
-    public ChunkLoaderBargeEntity(World worldIn, double x, double y, double z) {
+    public ChunkLoaderBargeEntity(Level worldIn, double x, double y, double z) {
         super(ModEntityTypes.CHUNK_LOADER_BARGE.get(), worldIn, x, y, z);
     }
 

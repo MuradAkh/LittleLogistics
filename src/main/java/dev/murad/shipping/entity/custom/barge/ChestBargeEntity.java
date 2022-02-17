@@ -3,36 +3,38 @@ package dev.murad.shipping.entity.custom.barge;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
-import net.minecraft.entity.EntityType;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.ISidedInventory;
+import net.minecraft.world.Container;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.ChestContainer;
 import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.*;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.stream.IntStream;
 
-public class ChestBargeEntity extends AbstractBargeEntity implements IInventory, INamedContainerProvider, ISidedInventory {
+import net.minecraft.core.NonNullList;
+
+public class ChestBargeEntity extends AbstractBargeEntity implements Container, MenuProvider, WorldlyContainer {
     protected final NonNullList<ItemStack> itemStacks = createItemStacks();
 
-    public ChestBargeEntity(EntityType<? extends ChestBargeEntity> type, World world) {
+    public ChestBargeEntity(EntityType<? extends ChestBargeEntity> type, Level world) {
         super(type, world);
     }
 
-    public ChestBargeEntity(World worldIn, double x, double y, double z) {
+    public ChestBargeEntity(Level worldIn, double x, double y, double z) {
         super(ModEntityTypes.CHEST_BARGE.get(), worldIn, x, y, z);
     }
 

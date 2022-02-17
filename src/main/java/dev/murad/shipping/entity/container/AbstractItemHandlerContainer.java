@@ -1,9 +1,9 @@
 package dev.murad.shipping.entity.container;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
@@ -12,11 +12,11 @@ import net.minecraftforge.items.wrapper.InvWrapper;
 
 import javax.annotation.Nullable;
 
-public abstract class AbstractItemHandlerContainer extends Container {
-    private final PlayerEntity playerEntity;
+public abstract class AbstractItemHandlerContainer extends AbstractContainerMenu {
+    private final Player playerEntity;
     private final IItemHandler playerInventory;
 
-    protected AbstractItemHandlerContainer(@Nullable ContainerType<?> p_i50105_1_, int p_i50105_2_, PlayerInventory playerInventory, PlayerEntity player) {
+    protected AbstractItemHandlerContainer(@Nullable MenuType<?> p_i50105_1_, int p_i50105_2_, Inventory playerInventory, Player player) {
         super(p_i50105_1_, p_i50105_2_);
         playerEntity = player;
         this.playerInventory = new InvWrapper(playerInventory);

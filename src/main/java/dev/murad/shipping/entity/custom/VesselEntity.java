@@ -6,15 +6,15 @@ import dev.murad.shipping.util.Train;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.LilyPadBlock;
-import net.minecraft.entity.EntityType;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.entity.item.BoatEntity;
-import net.minecraft.entity.passive.WaterMobEntity;
+import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
@@ -34,7 +34,7 @@ import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -45,8 +45,8 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Optional;
 
-public abstract class VesselEntity extends WaterMobEntity implements ISpringableEntity {
-    protected VesselEntity(EntityType<? extends WaterMobEntity> type, World world) {
+public abstract class VesselEntity extends WaterAnimal implements ISpringableEntity {
+    protected VesselEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
         stuckCounter = 0;
         resetSpeedAttributes();
@@ -58,8 +58,8 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
     private int stuckCounter;
     private double waterLevel;
     private float landFriction;
-    private BoatEntity.Status status;
-    private BoatEntity.Status oldStatus;
+    private Boat.Status status;
+    private Boat.Status oldStatus;
     private double lastYd;
 
     protected Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();

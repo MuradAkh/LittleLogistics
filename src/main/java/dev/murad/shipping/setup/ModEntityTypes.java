@@ -7,7 +7,7 @@ import dev.murad.shipping.entity.custom.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.custom.tug.SteamTugEntity;
 import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
 import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityType;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.RegistryObject;
 

@@ -1,20 +1,20 @@
 package dev.murad.shipping.entity.accessor;
 
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.IIntArray;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.inventory.ContainerData;
 
-public class DataAccessor implements IIntArray {
-    protected IIntArray data;
+public class DataAccessor implements ContainerData {
+    protected ContainerData data;
 
-    public DataAccessor(IIntArray data) {
+    public DataAccessor(ContainerData data) {
         this.data = data;
     }
 
-    public IIntArray getRawData() {
+    public ContainerData getRawData() {
         return this.data;
     }
 
-    public void write(PacketBuffer buffer) {
+    public void write(FriendlyByteBuf buffer) {
         for (int i = 0; i < data.getCount(); i++) {
             buffer.writeInt(data.get(i));
         }

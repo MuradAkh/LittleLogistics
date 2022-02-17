@@ -5,9 +5,9 @@ import dev.murad.shipping.entity.custom.barge.FishingBargeEntity;
 import dev.murad.shipping.entity.models.FishingBargeDeployedModel;
 import dev.murad.shipping.entity.models.FishingBargeModel;
 import dev.murad.shipping.entity.models.FishingBargeTransitionModel;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.resources.ResourceLocation;
 
 public class FishingBargeRenderer extends VesselRenderer<FishingBargeEntity> {
 
@@ -18,7 +18,7 @@ public class FishingBargeRenderer extends VesselRenderer<FishingBargeEntity> {
     private final EntityModel transition = new FishingBargeTransitionModel();
     private final EntityModel deployed = new FishingBargeDeployedModel();
 
-    public FishingBargeRenderer(EntityRendererManager p_i46179_1_) {
+    public FishingBargeRenderer(EntityRenderDispatcher p_i46179_1_) {
         super(p_i46179_1_);
     }
 

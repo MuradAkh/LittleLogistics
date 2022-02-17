@@ -5,22 +5,30 @@ import dev.murad.shipping.item.container.TugRouteContainer;
 import dev.murad.shipping.util.LegacyTugRouteUtil;
 import dev.murad.shipping.util.TugRoute;
 import dev.murad.shipping.util.TugRouteNode;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.network.chat.Style;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.Item;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.text.*;
 import net.minecraft.world.World;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.network.NetworkHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,6 +36,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.item.Item.Properties;
 
 public class TugRouteItem extends Item {
     private static final Logger LOGGER = LogManager.getLogger(TugRouteItem.class);
@@ -37,45 +49,45 @@ public class TugRouteItem extends Item {
         super(properties);
     }
 
-    protected INamedContainerProvider createContainerProvider(Hand hand) {
-        return new INamedContainerProvider() {
+    protected MenuProvider createContainerProvider(InteractionHand hand) {
+        return new MenuProvider() {
             @Override
-            public ITextComponent getDisplayName() {
-                return new TranslationTextComponent("screen.littlelogistics.tug_route");
+            public Component getDisplayName() {
+                return new TranslatableComponent("screen.littlelogistics.tug_route");
             }
 
             @Nullable
             @Override
-            public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
+            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player playerEntity) {
                 return new TugRouteContainer(i, playerEntity.level, getDataAccessor(playerEntity, hand), playerInventory, playerEntity);
             }
         };
     }
 
-    public TugRouteScreenDataAccessor getDataAccessor(PlayerEntity entity, Hand hand) {
+    public TugRouteScreenDataAccessor getDataAccessor(Player entity, InteractionHand hand) {
         return new TugRouteScreenDataAccessor.Builder(entity.getId())
-                .withOffHand(hand == Hand.OFF_HAND)
+                .withOffHand(hand == InteractionHand.OFF_HAND.OFF_HAND)
                 .build();
     }
 
-    public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+    public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
         if(!player.level.isClientSide){
             if (player.isShiftKeyDown()) {
-                NetworkHooks.openGui((ServerPlayerEntity) player, createContainerProvider(hand), getDataAccessor(player, hand)::write);
+                NetworkHooks.openGui((ServerPlayer) player, createContainerProvider(hand), getDataAccessor(player, hand)::write);
             } else {
                 int x = (int) Math.floor(player.getX());
                 int z = (int) Math.floor(player.getZ());
                 if (!tryRemoveSpecific(itemstack, x, z)) {
-                    player.displayClientMessage(new TranslationTextComponent("item.littlelogistics.tug_route.added", x, z), false);
+                    player.displayClientMessage(new TranslatableComponent("item.littlelogistics.tug_route.added", x, z), false);
                     pushRoute(itemstack, x, z);
                 } else {
-                    player.displayClientMessage(new TranslationTextComponent("item.littlelogistics.tug_route.removed", x, z), false);
+                    player.displayClientMessage(new TranslatableComponent("item.littlelogistics.tug_route.removed", x, z), false);
                 }
             }
         }
 
-        return ActionResult.pass(itemstack);
+        return InteractionResultHolder.pass(itemstack);
     }
 
     @Override
@@ -96,12 +108,12 @@ public class TugRouteItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
         super.appendHoverText(stack, worldIn, tooltip, flagIn);
-        tooltip.add(new TranslationTextComponent("item.littlelogistics.tug_route.description"));
+        tooltip.add(new TranslatableComponent("item.littlelogistics.tug_route.description"));
         tooltip.add(
-                new TranslationTextComponent("item.littlelogistics.tug_route.num_nodes", getRoute(stack).size())
-                        .setStyle(Style.EMPTY.withColor(TextFormatting.YELLOW)));
+                new TranslatableComponent("item.littlelogistics.tug_route.num_nodes", getRoute(stack).size())
+                        .setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW)));
     }
 
     public static TugRoute getRoute(ItemStack itemStack) {

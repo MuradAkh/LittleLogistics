@@ -1,22 +1,24 @@
 package dev.murad.shipping.block.fluid.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
 import dev.murad.shipping.block.fluid.FluidHopperTileEntity;
 import dev.murad.shipping.util.FluidRenderUtil;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.core.Direction;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class FluidHopperTileEntityRenderer extends TileEntityRenderer<FluidHopperTileEntity> {
-    public FluidHopperTileEntityRenderer(TileEntityRendererDispatcher p_i226006_1_) {
+public class FluidHopperTileEntityRenderer extends BlockEntityRenderer<FluidHopperTileEntity> {
+    public FluidHopperTileEntityRenderer(BlockEntityRenderDispatcher p_i226006_1_) {
         super(p_i226006_1_);
     }
 
     @Override
-    public void render(FluidHopperTileEntity fluidHopperTileEntity, float p_225616_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int p_225616_5_, int p_225616_6_) {
+    public void render(FluidHopperTileEntity fluidHopperTileEntity, float p_225616_2_, PoseStack matrixStack, MultiBufferSource buffer, int p_225616_5_, int p_225616_6_) {
         matrixStack.pushPose();
         Direction direction = fluidHopperTileEntity.getBlockState().getValue(FluidHopperBlock.FACING);
         matrixStack.translate(0.5f, 0, 0.5f);

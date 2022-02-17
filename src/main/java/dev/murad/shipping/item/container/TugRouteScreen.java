@@ -7,12 +7,12 @@ import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.util.TugRouteNode;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -21,14 +21,14 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Optional;
 
-public class TugRouteScreen extends ContainerScreen<TugRouteContainer> {
+public class TugRouteScreen extends AbstractContainerScreen<TugRouteContainer> {
     private static final Logger LOGGER = LogManager.getLogger(TugRouteScreen.class);
     public static final ResourceLocation GUI = new ResourceLocation(ShippingMod.MOD_ID, "textures/container/tug_route.png");
 
     private final ItemStack stack;
     private final TugRouteClientHandler route;
 
-    public TugRouteScreen(TugRouteContainer menu, PlayerInventory inventory, ITextComponent title) {
+    public TugRouteScreen(TugRouteContainer menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
         this.imageWidth = 256;
         this.imageHeight = 233;

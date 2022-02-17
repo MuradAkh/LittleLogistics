@@ -4,12 +4,12 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.util.TugRouteNode;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,11 +20,11 @@ public class StringInputScreen extends Screen {
     public static final ResourceLocation GUI = new ResourceLocation(ShippingMod.MOD_ID, "textures/container/tug_route_rename.png");
 
     private String text;
-    private TextFieldWidget textFieldWidget;
+    private EditBox textFieldWidget;
     private Consumer<String> callback;
 
     public StringInputScreen(TugRouteNode node, int index, Consumer<String> callback) {
-        super(new TranslationTextComponent("screen.littlelogistics.tug_route.rename", node.getDisplayName(index)));
+        super(new TranslatableComponent("screen.littlelogistics.tug_route.rename", node.getDisplayName(index)));
 
         this.callback = callback;
         this.text = node.hasCustomName() ? node.getName() : "";

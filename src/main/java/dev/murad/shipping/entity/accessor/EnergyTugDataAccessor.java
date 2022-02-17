@@ -1,12 +1,12 @@
 package dev.murad.shipping.entity.accessor;
 
-import net.minecraft.util.IIntArray;
+import net.minecraft.world.inventory.ContainerData;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.IntSupplier;
 
 public class EnergyTugDataAccessor extends DataAccessor {
-    public EnergyTugDataAccessor(IIntArray data) {
+    public EnergyTugDataAccessor(ContainerData data) {
         super(data);
     }
 

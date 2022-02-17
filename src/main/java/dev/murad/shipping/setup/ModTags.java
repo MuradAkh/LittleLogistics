@@ -1,16 +1,16 @@
 package dev.murad.shipping.setup;
 
 import dev.murad.shipping.ShippingMod;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ITag;
+import net.minecraft.tags.Tag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 
 public class ModTags {
     public static final class Blocks {
-        private static ITag.INamedTag<Block> forge(String path) {
+        private static Tag.Named<Block> forge(String path) {
             return BlockTags.bind(new ResourceLocation("forge", path).toString());
         }
 

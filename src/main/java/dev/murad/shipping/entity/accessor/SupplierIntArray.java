@@ -1,10 +1,10 @@
 package dev.murad.shipping.entity.accessor;
 
-import net.minecraft.util.IIntArray;
+import net.minecraft.world.inventory.ContainerData;
 
 import java.util.function.IntSupplier;
 
-public class SupplierIntArray implements IIntArray {
+public class SupplierIntArray implements ContainerData {
     private int count;
     private IntSupplier[] suppliers;
 

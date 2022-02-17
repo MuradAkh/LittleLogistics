@@ -3,9 +3,9 @@ package dev.murad.shipping.entity.render;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.tug.SteamTugEntity;
 import dev.murad.shipping.entity.models.SteamTugModel;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.resources.ResourceLocation;
 
 public class SteamTugRenderer extends VesselRenderer<SteamTugEntity> {
     private static final ResourceLocation TEXTURE =
@@ -14,7 +14,7 @@ public class SteamTugRenderer extends VesselRenderer<SteamTugEntity> {
 
     private final EntityModel model = new SteamTugModel();
 
-    public SteamTugRenderer(EntityRendererManager p_i46179_1_) {
+    public SteamTugRenderer(EntityRenderDispatcher p_i46179_1_) {
         super(p_i46179_1_);
     }
 

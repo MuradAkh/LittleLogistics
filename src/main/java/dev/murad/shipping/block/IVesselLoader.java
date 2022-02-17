@@ -2,10 +2,10 @@ package dev.murad.shipping.block;
 
 import dev.murad.shipping.block.fluid.FluidHopperTileEntity;
 import dev.murad.shipping.entity.custom.VesselEntity;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.Capability;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public interface IVesselLoader {
         IMPORT
     }
 
-    static <T> Optional<T> getEntityCapability(BlockPos pos, Capability<T> capability, World level){
+    static <T> Optional<T> getEntityCapability(BlockPos pos, Capability<T> capability, Level level){
         List<Entity> fluidEntities = level.getEntities((Entity) null,
                 getSearchBox(pos),
                 (e -> entityPredicate(e, pos, capability))

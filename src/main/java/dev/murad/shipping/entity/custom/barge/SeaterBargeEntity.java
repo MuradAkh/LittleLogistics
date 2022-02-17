@@ -2,23 +2,23 @@ package dev.murad.shipping.entity.custom.barge;
 
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
+import net.minecraft.world.item.Item;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class SeaterBargeEntity extends AbstractBargeEntity{
-    public SeaterBargeEntity(EntityType<? extends SeaterBargeEntity> type, World world) {
+    public SeaterBargeEntity(EntityType<? extends SeaterBargeEntity> type, Level world) {
         super(type, world);
     }
 
-    public SeaterBargeEntity(World worldIn, double x, double y, double z) {
+    public SeaterBargeEntity(Level worldIn, double x, double y, double z) {
         super(ModEntityTypes.SEATER_BARGE.get(), worldIn, x, y, z);
     }
 

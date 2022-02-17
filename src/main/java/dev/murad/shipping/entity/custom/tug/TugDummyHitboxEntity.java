@@ -3,15 +3,15 @@ package dev.murad.shipping.entity.custom.tug;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
@@ -22,7 +22,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpawnData {
     private AbstractTugEntity tugEntity;
-    public static final DataParameter<Integer> TUG_ID = EntityDataManager.defineId(TugDummyHitboxEntity.class, DataSerializers.INT);
+    public static final EntityDataAccessor<Integer> TUG_ID = SynchedEntityData.defineId(TugDummyHitboxEntity.class, DataSerializers.INT);
 
 
     public TugDummyHitboxEntity(EntityType<TugDummyHitboxEntity> p_i48580_1_, World p_i48580_2_) {

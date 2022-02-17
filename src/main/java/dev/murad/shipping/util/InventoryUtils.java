@@ -2,7 +2,7 @@ package dev.murad.shipping.util;
 
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.world.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -15,7 +15,7 @@ import java.util.List;
 
 public class InventoryUtils {
 
-    public static boolean mayMoveIntoInventory(IInventory target, IInventory source) {
+    public static boolean mayMoveIntoInventory(Container target, Container source) {
         if (source.isEmpty()){
             return false;
         }

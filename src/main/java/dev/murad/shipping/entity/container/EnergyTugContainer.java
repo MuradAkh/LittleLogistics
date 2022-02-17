@@ -3,15 +3,15 @@ package dev.murad.shipping.entity.container;
 import dev.murad.shipping.entity.accessor.EnergyTugDataAccessor;
 import dev.murad.shipping.event.ModClientEventHandler;
 import dev.murad.shipping.setup.ModContainerTypes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
 public class EnergyTugContainer extends AbstractTugContainer<EnergyTugDataAccessor> {
-    public EnergyTugContainer(int windowId, World world, EnergyTugDataAccessor data,
-                             PlayerInventory playerInventory, PlayerEntity player) {
+    public EnergyTugContainer(int windowId, Level world, EnergyTugDataAccessor data,
+                             Inventory playerInventory, Player player) {
         super(ModContainerTypes.ENERGY_TUG_CONTAINER.get(), windowId, world, data, playerInventory, player);
 
         if(tugEntity != null) {

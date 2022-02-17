@@ -31,23 +31,25 @@ import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
 import dev.murad.shipping.util.Train;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
+import net.minecraft.world.item.Item.Properties;
+
 public class SpringItem extends Item {
 
-    private TranslationTextComponent springInfo = new TranslationTextComponent("item.littlelogistics.spring.description");
+    private TranslatableComponent springInfo = new TranslatableComponent("item.littlelogistics.spring.description");
 
     public SpringItem(Properties properties) {
         super(properties);
@@ -56,7 +58,7 @@ public class SpringItem extends Item {
     }
 
     // because 'itemInteractionForEntity' is only for Living entities
-    public void onUsedOnEntity(ItemStack stack, PlayerEntity player, World world, Entity target) {
+    public void onUsedOnEntity(ItemStack stack, Player player, Level world, Entity target) {
         if(target instanceof TugDummyHitboxEntity){
             target = ((TugDummyHitboxEntity) target).getTug();
         }

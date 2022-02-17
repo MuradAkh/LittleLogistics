@@ -4,11 +4,11 @@ import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.TugRoute;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
@@ -37,7 +37,7 @@ public final class TugRoutePacketHandler {
 
     public static void handleSetTag(SetTag operation, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            ServerPlayerEntity player = ctx.get().getSender();
+            ServerPlayer player = ctx.get().getSender();
             if (player == null) {
                 LOGGER.error("Received packet not from player, dropping packet");
                 return;

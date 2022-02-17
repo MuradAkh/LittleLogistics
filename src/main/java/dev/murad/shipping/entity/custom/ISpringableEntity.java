@@ -2,7 +2,7 @@ package dev.murad.shipping.entity.custom;
 
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.util.Train;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 import java.util.HashSet;
 import java.util.Optional;

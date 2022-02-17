@@ -1,17 +1,16 @@
 package dev.murad.shipping.util;
 
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MathUtil {
-    public static List<Pair<Vector3d, Vector3d>> getEdges(AxisAlignedBB bb) {
-        List<Pair<Vector3d, Vector3d>> edges = new ArrayList<>();
-        List<Vector3d> corners = getCorners(bb);
+    public static List<Pair<Vec3, Vec3>> getEdges(AABB bb) {
+        List<Pair<Vec3, Vec3>> edges = new ArrayList<>();
+        List<Vec3> corners = getCorners(bb);
 
         // minY plane
         edges.add(new Pair<>(corners.get(0), corners.get(1)));
@@ -36,20 +35,20 @@ public class MathUtil {
 
     // returns a list of corners in a set order, but I can't be bothered to write
     // out the order here.
-    public static List<Vector3d> getCorners(AxisAlignedBB bb) {
-        List<Vector3d> corners = new ArrayList<>();
-        corners.add(new Vector3d(bb.minX, bb.minY, bb.minZ)); // 000
-        corners.add(new Vector3d(bb.minX, bb.minY, bb.maxZ)); // 001
-        corners.add(new Vector3d(bb.minX, bb.maxY, bb.minZ)); // 010
-        corners.add(new Vector3d(bb.minX, bb.maxY, bb.maxZ)); // 011
-        corners.add(new Vector3d(bb.maxX, bb.minY, bb.minZ)); // 100
-        corners.add(new Vector3d(bb.maxX, bb.minY, bb.maxZ)); // 101
-        corners.add(new Vector3d(bb.maxX, bb.maxY, bb.minZ)); // 110
-        corners.add(new Vector3d(bb.maxX, bb.maxY, bb.maxZ)); // 111
+    public static List<Vec3> getCorners(AABB bb) {
+        List<Vec3> corners = new ArrayList<>();
+        corners.add(new Vec3(bb.minX, bb.minY, bb.minZ)); // 000
+        corners.add(new Vec3(bb.minX, bb.minY, bb.maxZ)); // 001
+        corners.add(new Vec3(bb.minX, bb.maxY, bb.minZ)); // 010
+        corners.add(new Vec3(bb.minX, bb.maxY, bb.maxZ)); // 011
+        corners.add(new Vec3(bb.maxX, bb.minY, bb.minZ)); // 100
+        corners.add(new Vec3(bb.maxX, bb.minY, bb.maxZ)); // 101
+        corners.add(new Vec3(bb.maxX, bb.maxY, bb.minZ)); // 110
+        corners.add(new Vec3(bb.maxX, bb.maxY, bb.maxZ)); // 111
         return corners;
     }
 
-    public static Vector3d lerp(Vector3d from, Vector3d to, double ratio) {
-        return new Vector3d(MathHelper.lerp(ratio, from.x, to.x), MathHelper.lerp(ratio, from.y, to.y), MathHelper.lerp(ratio, from.z, to.z));
+    public static Vec3 lerp(Vec3 from, Vec3 to, double ratio) {
+        return new Vec3(MathHelper.lerp(ratio, from.x, to.x), MathHelper.lerp(ratio, from.y, to.y), MathHelper.lerp(ratio, from.z, to.z));
     }
 }

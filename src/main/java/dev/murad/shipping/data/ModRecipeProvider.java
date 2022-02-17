@@ -13,6 +13,10 @@ import net.minecraftforge.registries.GameData;
 
 import java.util.function.Consumer;
 
+import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+
 public class ModRecipeProvider extends RecipeProvider {
 
     public ModRecipeProvider(DataGenerator p_i48262_1_) {
@@ -20,7 +24,7 @@ public class ModRecipeProvider extends RecipeProvider {
     }
 
     @Override
-    protected void buildShapelessRecipes(Consumer<IFinishedRecipe> consumer) {
+    protected void buildShapelessRecipes(Consumer<FinishedRecipe> consumer) {
         ShapedRecipeBuilder.shaped(ModBlocks.TUG_DOCK.get(), 2)
                 .define('#', ModItems.SPRING.get())
                 .define('_', Tags.Items.STONE)

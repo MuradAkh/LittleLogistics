@@ -1,9 +1,9 @@
 package dev.murad.shipping.entity.accessor;
 
-import net.minecraft.util.IIntArray;
+import net.minecraft.world.inventory.ContainerData;
 
 public class TugRouteScreenDataAccessor extends DataAccessor {
-    public TugRouteScreenDataAccessor(IIntArray data) {
+    public TugRouteScreenDataAccessor(ContainerData data) {
         super(data);
     }
 

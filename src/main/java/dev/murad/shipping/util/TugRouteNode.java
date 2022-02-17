@@ -1,6 +1,6 @@
 package dev.murad.shipping.util;
 
-import net.minecraft.client.resources.I18n;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.vector.Vector2f;
 

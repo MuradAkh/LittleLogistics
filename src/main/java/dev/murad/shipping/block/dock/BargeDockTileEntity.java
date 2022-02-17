@@ -7,12 +7,12 @@ import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.InventoryUtils;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.HopperTileEntity;
-import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 public class BargeDockTileEntity extends AbstractDockTileEntity {
-    public BargeDockTileEntity(TileEntityType<?> p_i48289_1_) {
+    public BargeDockTileEntity(BlockEntityType<?> p_i48289_1_) {
         super(p_i48289_1_);
     }
 

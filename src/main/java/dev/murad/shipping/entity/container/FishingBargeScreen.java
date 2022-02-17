@@ -2,16 +2,16 @@ package dev.murad.shipping.entity.container;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
 
-public class FishingBargeScreen extends ContainerScreen<FishingBargeContainer> {
+public class FishingBargeScreen extends AbstractContainerScreen<FishingBargeContainer> {
     private static final ResourceLocation CONTAINER_BACKGROUND = new ResourceLocation("textures/gui/container/generic_54.png");
     private final int containerRows;
 
-    public FishingBargeScreen(FishingBargeContainer p_i51095_1_, PlayerInventory p_i51095_2_, ITextComponent p_i51095_3_) {
+    public FishingBargeScreen(FishingBargeContainer p_i51095_1_, Inventory p_i51095_2_, Component p_i51095_3_) {
         super(p_i51095_1_, p_i51095_2_, p_i51095_3_);
         this.passEvents = false;
         this.containerRows = 1;

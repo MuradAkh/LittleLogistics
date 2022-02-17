@@ -29,10 +29,10 @@ import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.entity.item.*;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -42,7 +42,7 @@ public class EntitySpringAPI {
     private EntitySpringAPI() {
     }
 
-    private static final BiFunction<Entity, SpringEntity.SpringSide, Vector3d> DEFAULT_ANCHOR_LOCATION = (e, sideArg) -> e.position();
+    private static final BiFunction<Entity, SpringEntity.SpringSide, Vec3> DEFAULT_ANCHOR_LOCATION = (e, sideArg) -> e.position();
     private static final List<Predicate<Entity>> predicates = new ArrayList<>();
     private static final Map<Class<? extends Entity>, BiFunction<Entity, SpringEntity.SpringSide, Vector3d>> mapping = new HashMap<>();
     public static final BiFunction<Entity, SpringEntity.SpringSide, Vector3d> DEFAULT_BOAT_ANCHOR = (entity, side) -> {

@@ -1,23 +1,23 @@
 package dev.murad.shipping.entity.container;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.murad.shipping.ShippingMod;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.text.TranslationTextComponent;
 
 // Todo: consolidate tug screen code
 public class EnergyTugScreen extends AbstractTugScreen<EnergyTugContainer> {
     private static final ResourceLocation GUI = new ResourceLocation(ShippingMod.MOD_ID, "textures/container/energy_tug.png");
 
-    public EnergyTugScreen(EnergyTugContainer menu, PlayerInventory playerInventory, ITextComponent label) {
+    public EnergyTugScreen(EnergyTugContainer menu, Inventory playerInventory, Component label) {
         super(menu, playerInventory, label);
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         super.render(matrixStack, mouseX, mouseY, partialTicks);
 
         if (inBounds(mouseX - leftPos, mouseY - topPos, 56, 17, 68, 67)) {

@@ -9,7 +9,7 @@ import dev.murad.shipping.block.fluid.FluidHopperBlock;
 import dev.murad.shipping.block.guide_rail.CornerGuideRailBlock;
 import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
 import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;

@@ -3,15 +3,15 @@ package dev.murad.shipping.entity.models;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import dev.murad.shipping.entity.custom.barge.ChunkLoaderBargeEntity;
-import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.ModelPart;
 
 public class ChunkLoaderBargeModel extends EntityModel<ChunkLoaderBargeEntity> {
 
-    private final ModelRenderer bb_main;
-    private final ModelRenderer ring;
-    private final ModelRenderer ring2;
-    private final ModelRenderer ring3;
+    private final ModelPart bb_main;
+    private final ModelPart ring;
+    private final ModelPart ring2;
+    private final ModelPart ring3;
 
     public ChunkLoaderBargeModel() {
         texWidth = 64;

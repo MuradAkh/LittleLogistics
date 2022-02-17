@@ -1,15 +1,15 @@
 package dev.murad.shipping.entity.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.barge.FluidTankBargeEntity;
 import dev.murad.shipping.entity.models.FluidTankBargeModel;
 import dev.murad.shipping.util.FluidRenderUtil;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -20,7 +20,7 @@ public class FluidTankBargeRenderer extends VesselRenderer<FluidTankBargeEntity>
     private final EntityModel model = new FluidTankBargeModel();
 
 
-    public FluidTankBargeRenderer(EntityRendererManager p_i46179_1_) {
+    public FluidTankBargeRenderer(EntityRenderDispatcher p_i46179_1_) {
         super(p_i46179_1_);
     }
 
@@ -35,15 +35,15 @@ public class FluidTankBargeRenderer extends VesselRenderer<FluidTankBargeEntity>
     }
 
     @Override
-    public void render(FluidTankBargeEntity vesselEntity, float p_225623_2_, float p_225623_3_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int p_225623_6_) {
+    public void render(FluidTankBargeEntity vesselEntity, float p_225623_2_, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
         super.render(vesselEntity, p_225623_2_, p_225623_3_, matrixStack, buffer, p_225623_6_);
         renderFluid(vesselEntity, p_225623_2_, p_225623_3_, matrixStack, buffer, 0, p_225623_6_);
 
     }
 
 
-    public void renderFluid(FluidTankBargeEntity entity, float yaw, float partialTicks, MatrixStack matrixStackIn,
-                            IRenderTypeBuffer bufferIn, int combinedLightIn, int combinedOverlayIn) {
+    public void renderFluid(FluidTankBargeEntity entity, float yaw, float partialTicks, PoseStack matrixStackIn,
+                            MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlayIn) {
         FluidStack fluid = entity.getFluidStack();
         if (fluid == null) return;
 

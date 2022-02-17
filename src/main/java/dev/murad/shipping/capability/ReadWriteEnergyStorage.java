@@ -1,6 +1,6 @@
 package dev.murad.shipping.capability;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 
@@ -30,7 +30,7 @@ public class ReadWriteEnergyStorage implements IEnergyStorage {
         proxyStorage = new EnergyStorage(maxCapacity, maxReceive, maxExtract, clampInclusive(energy, 0, maxCapacity));
     }
 
-    public void readAdditionalSaveData(CompoundNBT compound) {
+    public void readAdditionalSaveData(CompoundTag compound) {
         int energy = compound.contains(ENERGY_TAG) ? compound.getInt(ENERGY_TAG) : 0;
         proxyStorage = new EnergyStorage(maxCapacity, maxReceive, maxExtract, clampInclusive(energy, 0, maxCapacity));
     }

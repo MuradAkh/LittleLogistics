@@ -6,12 +6,12 @@ package dev.murad.shipping.entity.models;// Made with Blockbench 4.1.1
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import dev.murad.shipping.entity.custom.barge.FluidTankBargeEntity;
-import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.entity.Entity;
 
 public class FluidTankBargeModel extends EntityModel<FluidTankBargeEntity> {
-	private final ModelRenderer bb_main;
+	private final ModelPart bb_main;
 
 	public FluidTankBargeModel() {
 		texWidth = 128;

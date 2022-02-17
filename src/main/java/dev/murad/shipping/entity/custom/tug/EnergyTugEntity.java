@@ -6,19 +6,19 @@ import dev.murad.shipping.entity.accessor.EnergyTugDataAccessor;
 import dev.murad.shipping.entity.container.EnergyTugContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.passive.WaterMobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -36,12 +36,12 @@ public class EnergyTugEntity extends AbstractTugEntity {
     private final ReadWriteEnergyStorage internalBattery = new ReadWriteEnergyStorage(MAX_ENERGY, MAX_TRANSFER, Integer.MAX_VALUE);
     private final LazyOptional<IEnergyStorage> holder = LazyOptional.of(() -> internalBattery);
 
-    public EnergyTugEntity(EntityType<? extends WaterMobEntity> type, World world) {
+    public EnergyTugEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
         internalBattery.setEnergy(0);
     }
 
-    public EnergyTugEntity(World worldIn, double x, double y, double z) {
+    public EnergyTugEntity(Level worldIn, double x, double y, double z) {
         super(ModEntityTypes.ENERGY_TUG.get(), worldIn, x, y, z);
         internalBattery.setEnergy(0);
     }
@@ -68,16 +68,16 @@ public class EnergyTugEntity extends AbstractTugEntity {
     }
 
     @Override
-    protected INamedContainerProvider createContainerProvider() {
-        return new INamedContainerProvider() {
+    protected MenuProvider createContainerProvider() {
+        return new MenuProvider() {
             @Override
-            public ITextComponent getDisplayName() {
-                return new TranslationTextComponent("screen.littlelogistics.energy_tug");
+            public Component getDisplayName() {
+                return new TranslatableComponent("screen.littlelogistics.energy_tug");
             }
 
             @Nullable
             @Override
-            public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
+            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player playerEntity) {
                 return new EnergyTugContainer(i, level, getDataAccessor(), playerInventory, playerEntity);
             }
         };

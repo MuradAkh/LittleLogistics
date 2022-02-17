@@ -29,16 +29,16 @@ import net.minecraft.entity.passive.DolphinEntity;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.ISidedInventory;
+import net.minecraft.world.Container;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
-import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.particles.BasicParticleType;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.pathfinding.PathNavigator;
@@ -64,7 +64,7 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.stream.IntStream;
 
-public abstract class AbstractTugEntity extends VesselEntity implements ISpringableEntity, IInventory, ISidedInventory {
+public abstract class AbstractTugEntity extends VesselEntity implements ISpringableEntity, Container, WorldlyContainer {
 
     // CONTAINER STUFF
     protected final ItemStackHandler itemHandler = createHandler();
@@ -74,7 +74,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     private int dockCheckCooldown = 0;
     private boolean independentMotion = false;
     private int pathfindCooldown = 0;
-    private static final DataParameter<Boolean> INDEPENDENT_MOTION = EntityDataManager.defineId(AbstractTugEntity.class, DataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractTugEntity.class, DataSerializers.BOOLEAN);
 
     public boolean allowDockInterface(){
         return isDocked();

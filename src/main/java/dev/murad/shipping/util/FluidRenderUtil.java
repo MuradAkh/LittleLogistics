@@ -25,7 +25,7 @@ package dev.murad.shipping.util;
 */
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
@@ -41,9 +41,14 @@ import net.minecraftforge.fluids.FluidStack;
 
 import java.awt.*;
 
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
+import net.minecraft.world.phys.Vec2;
+
 public class FluidRenderUtil {
 
-    private static void addQuadVertex(Matrix4f matrixPos, Matrix3f matrixNormal, IVertexBuilder renderBuffer, Vector3f pos, Vector2f texUV, Vector3f normalVector, int color, int lightmapValue) {
+    private static void addQuadVertex(Matrix4f matrixPos, Matrix3f matrixNormal, VertexConsumer renderBuffer, Vector3f pos, Vec2 texUV, Vector3f normalVector, int color, int lightmapValue) {
         float a = 1.0F;
         float r = (color >> 16 & 0xFF) / 255.0F;
         float g = (color >> 8 & 0xFF) / 255.0F;

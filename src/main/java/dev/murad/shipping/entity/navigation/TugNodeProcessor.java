@@ -2,23 +2,26 @@ package dev.murad.shipping.entity.navigation;
 
 import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
 import dev.murad.shipping.setup.ModBlocks;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.pathfinding.*;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.Arrays;
 
-public class TugNodeProcessor extends SwimNodeProcessor {
+import net.minecraft.world.level.pathfinder.Node;
+import net.minecraft.world.level.pathfinder.SwimNodeEvaluator;
+
+public class TugNodeProcessor extends SwimNodeEvaluator {
     public TugNodeProcessor() {
         super(false);
     }
 
-    private boolean isOppositeGuideRail(PathPoint pathPoint, Direction direction){
+    private boolean isOppositeGuideRail(Node pathPoint, Direction direction){
         BlockState state = this.level.getBlockState(pathPoint.asBlockPos().below());
         if (state.is(ModBlocks.GUIDE_RAIL_TUG.get())){
             return TugGuideRailBlock.getArrowsDirection(state).getOpposite().equals(direction);

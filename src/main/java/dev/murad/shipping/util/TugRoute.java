@@ -1,7 +1,7 @@
 package dev.murad.shipping.util;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,10 +47,10 @@ public class TugRoute extends ArrayList<TugRouteNode> {
         return Objects.hash(super.hashCode(), name);
     }
 
-    public CompoundNBT toNBT() {
-        CompoundNBT tag = new CompoundNBT();
+    public CompoundTag toNBT() {
+        CompoundTag tag = new CompoundTag();
 
-        ListNBT list = new ListNBT();
+        ListTag list = new ListTag();
         for (TugRouteNode node : this) {
             list.add(node.toNBT());
         }

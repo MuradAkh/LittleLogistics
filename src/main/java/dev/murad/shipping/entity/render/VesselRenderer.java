@@ -1,20 +1,20 @@
 package dev.murad.shipping.entity.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.entity.models.ChainModel;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.ClippingHelper;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
@@ -31,11 +31,11 @@ public abstract class VesselRenderer<T extends VesselEntity> extends EntityRende
     private static final ChainModel chainModel = new ChainModel();
 
 
-    public VesselRenderer(EntityRendererManager p_i46179_1_) {
+    public VesselRenderer(EntityRenderDispatcher p_i46179_1_) {
         super(p_i46179_1_);
     }
 
-    public void render(T vesselEntity, float p_225623_2_, float p_225623_3_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int p_225623_6_) {
+    public void render(T vesselEntity, float p_225623_2_, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
         matrixStack.pushPose();
         matrixStack.translate(0.0D, getModelYoffset(), 0.0D);
         matrixStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - p_225623_2_));

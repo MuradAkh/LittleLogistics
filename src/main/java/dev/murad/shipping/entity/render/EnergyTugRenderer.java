@@ -1,16 +1,16 @@
 package dev.murad.shipping.entity.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.entity.custom.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.models.EnergyTugModel;
 import dev.murad.shipping.entity.models.SteamTugModel;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.resources.ResourceLocation;
 
 public class EnergyTugRenderer extends VesselRenderer<EnergyTugEntity> {
     private static final ResourceLocation TEXTURE =
@@ -18,12 +18,12 @@ public class EnergyTugRenderer extends VesselRenderer<EnergyTugEntity> {
 
     private final EntityModel model = new EnergyTugModel();
 
-    public EnergyTugRenderer(EntityRendererManager p_i46179_1_) {
+    public EnergyTugRenderer(EntityRenderDispatcher p_i46179_1_) {
         super(p_i46179_1_);
     }
 
     @Override
-    public void render(EnergyTugEntity boatEntity, float p_225623_2_, float p_225623_3_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int p_225623_6_) {
+    public void render(EnergyTugEntity boatEntity, float p_225623_2_, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
         super.render(boatEntity, p_225623_2_, p_225623_3_, matrixStack, buffer, p_225623_6_);
     }
 

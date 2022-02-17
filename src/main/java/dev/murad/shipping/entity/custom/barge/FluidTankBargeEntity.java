@@ -9,15 +9,17 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidAttributes;
@@ -39,7 +41,7 @@ public class FluidTankBargeEntity extends AbstractBargeEntity{
             sendInfoToClient();
         }
     };
-    private static final DataParameter<Integer> VOLUME = EntityDataManager.defineId(AbstractTugEntity.class, DataSerializers.INT);
+    private static final EntityDataAccessor<Integer> VOLUME = SynchedEntityData.defineId(AbstractTugEntity.class, DataSerializers.INT);
     private static final DataParameter<String> FLUID_TYPE = EntityDataManager.defineId(AbstractTugEntity.class, DataSerializers.STRING);
     private Fluid clientCurrFluid = Fluids.EMPTY;
     private int clientCurrAmount = 0;
@@ -48,11 +50,11 @@ public class FluidTankBargeEntity extends AbstractBargeEntity{
     private final LazyOptional<IFluidHandler> holder = LazyOptional.of(() -> tank);
 
 
-    public FluidTankBargeEntity(EntityType<? extends AbstractBargeEntity> type, World world) {
+    public FluidTankBargeEntity(EntityType<? extends AbstractBargeEntity> type, Level world) {
         super(type, world);
     }
 
-    public FluidTankBargeEntity(World worldIn, double x, double y, double z) {
+    public FluidTankBargeEntity(Level worldIn, double x, double y, double z) {
         super(ModEntityTypes.FLUID_TANK_BARGE.get(), worldIn, x, y, z);
     }
 

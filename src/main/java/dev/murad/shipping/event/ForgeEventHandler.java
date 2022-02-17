@@ -4,7 +4,7 @@ import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.item.SpringItem;
 import dev.murad.shipping.util.EntitySpringAPI;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ShearsItem;
 import net.minecraft.util.ActionResultType;

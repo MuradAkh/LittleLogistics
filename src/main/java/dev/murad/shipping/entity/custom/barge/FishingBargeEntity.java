@@ -8,14 +8,14 @@ import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.InventoryUtils;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.EntityType;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.entity.item.BoatEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.ISidedInventory;
+import net.minecraft.world.Container;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
@@ -25,11 +25,11 @@ import net.minecraft.item.Items;
 import net.minecraft.loot.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -43,7 +43,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.IntStream;
 
-public class FishingBargeEntity extends AbstractBargeEntity implements IInventory, ISidedInventory {
+public class FishingBargeEntity extends AbstractBargeEntity implements Container, WorldlyContainer {
     protected final ItemStackHandler itemHandler = createHandler();
     protected final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
     protected boolean contentsChanged = false;
@@ -56,17 +56,17 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
             new ResourceLocation(ShippingConfig.Server.FISHING_LOOT_TABLE.get());
 
 
-    public FishingBargeEntity(EntityType<? extends FishingBargeEntity> type, World world) {
+    public FishingBargeEntity(EntityType<? extends FishingBargeEntity> type, Level world) {
         super(type, world);
     }
-    public FishingBargeEntity(World worldIn, double x, double y, double z) {
+    public FishingBargeEntity(Level worldIn, double x, double y, double z) {
         super(ModEntityTypes.FISHING_BARGE.get(), worldIn, x, y, z);
     }
 
 
     @Override
-    protected void doInteract(PlayerEntity player) {
-        NetworkHooks.openGui((ServerPlayerEntity) player, createContainerProvider(), buffer -> buffer.writeInt(this.getId()));
+    protected void doInteract(Player player) {
+        NetworkHooks.openGui((ServerPlayer) player, createContainerProvider(), buffer -> buffer.writeInt(this.getId()));
 
     }
 

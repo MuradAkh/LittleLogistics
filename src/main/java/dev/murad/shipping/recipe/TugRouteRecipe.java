@@ -4,10 +4,10 @@ import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModRecipeSerializers;
 import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.SpecialRecipe;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public class TugRouteRecipe extends SpecialRecipe {
+public class TugRouteRecipe extends CustomRecipe {
     private static final Logger LOGGER = LogManager.getLogger(TugRouteRecipe.class);
     public TugRouteRecipe(ResourceLocation resourceLocation) {
         super(resourceLocation);

@@ -6,13 +6,13 @@ package dev.murad.shipping.entity.models;// Made with Blockbench 4.0.5
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
-import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.ModelPart;
 
 public class ChainModel extends EntityModel<AbstractBargeEntity> {
-	private final ModelRenderer bb_main;
-	private final ModelRenderer cube_r1;
-	private final ModelRenderer bone2;
+	private final ModelPart bb_main;
+	private final ModelPart cube_r1;
+	private final ModelPart bone2;
 
 	public ChainModel() {
 		texWidth = 16;

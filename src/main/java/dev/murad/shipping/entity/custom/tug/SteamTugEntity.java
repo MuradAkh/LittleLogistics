@@ -6,19 +6,19 @@ import dev.murad.shipping.entity.container.SteamTugContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModSounds;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.passive.WaterMobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.FurnaceTileEntity;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeHooks;
 
 import javax.annotation.Nonnull;
@@ -30,11 +30,11 @@ public class SteamTugEntity extends AbstractTugEntity {
     protected int burnTime = 0;
     protected int burnCapacity = 0;
 
-    public SteamTugEntity(EntityType<? extends WaterMobEntity> type, World world) {
+    public SteamTugEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
     }
 
-    public SteamTugEntity(World worldIn, double x, double y, double z) {
+    public SteamTugEntity(Level worldIn, double x, double y, double z) {
         super(ModEntityTypes.STEAM_TUG.get(), worldIn, x, y, z);
     }
 
@@ -44,16 +44,16 @@ public class SteamTugEntity extends AbstractTugEntity {
     }
 
     @Override
-    protected INamedContainerProvider createContainerProvider() {
-        return new INamedContainerProvider() {
+    protected MenuProvider createContainerProvider() {
+        return new MenuProvider() {
             @Override
-            public ITextComponent getDisplayName() {
-                return new TranslationTextComponent("screen.littlelogistics.tug");
+            public Component getDisplayName() {
+                return new TranslatableComponent("screen.littlelogistics.tug");
             }
 
             @Nullable
             @Override
-            public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
+            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player playerEntity) {
                 return new SteamTugContainer(i, level, getDataAccessor(), playerInventory, playerEntity);
             }
         };

@@ -8,16 +8,16 @@ import dev.murad.shipping.entity.container.FishingBargeContainer;
 import dev.murad.shipping.entity.container.SteamTugContainer;
 import dev.murad.shipping.item.container.TugRouteContainer;
 import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.IntArray;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.fml.RegistryObject;
 
 public class ModContainerTypes {
 
-    private static IntArray makeIntArray(PacketBuffer buffer) {
+    private static SimpleContainerData makeIntArray(FriendlyByteBuf buffer) {
         int size = (buffer.readableBytes() + 1) / 4;
-        IntArray arr = new IntArray(size);
+        SimpleContainerData arr = new SimpleContainerData(size);
         for (int i = 0; i < size; i++) {
             arr.set(i, buffer.readInt());
         }

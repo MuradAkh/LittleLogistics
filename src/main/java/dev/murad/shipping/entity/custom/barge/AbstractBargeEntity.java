@@ -8,7 +8,7 @@ import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.util.Train;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.network.IPacket;
@@ -16,14 +16,14 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
 public abstract class AbstractBargeEntity extends VesselEntity implements ISpringableEntity {
-    public AbstractBargeEntity(EntityType<? extends AbstractBargeEntity> type, World world) {
+    public AbstractBargeEntity(EntityType<? extends AbstractBargeEntity> type, Level world) {
         super(type, world);
         this.blocksBuilding = true;
         this.train = new Train(this);

@@ -6,11 +6,11 @@ package dev.murad.shipping.entity.models;// Made with Blockbench 4.0.5
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
-import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.ModelPart;
 
 public class SteamTugModel extends EntityModel<AbstractTugEntity> {
-    private final ModelRenderer bb_main;
+    private final ModelPart bb_main;
 
     public SteamTugModel() {
         texWidth = 128;

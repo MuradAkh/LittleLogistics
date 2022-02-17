@@ -1,7 +1,7 @@
 package dev.murad.shipping.setup;
 import dev.murad.shipping.item.*;
 import dev.murad.shipping.item.creative.CreativeCapacitor;
-import net.minecraft.item.Item;
+import net.minecraft.world.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraftforge.fml.RegistryObject;
 

@@ -7,10 +7,10 @@ import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.Registration;
 import net.minecraft.block.Block;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.LootTableProvider;
+import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.data.loot.BlockLootTables;
 import net.minecraft.loot.*;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.RegistryObject;
 
 import java.util.List;
@@ -20,6 +20,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
+
 public class ModLootTableProvider extends LootTableProvider {
 
     public ModLootTableProvider(DataGenerator dataGenerator) {
@@ -27,7 +30,7 @@ public class ModLootTableProvider extends LootTableProvider {
     }
 
     @Override
-    protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootParameterSet>> getTables() {
+    protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> getTables() {
         return ImmutableList.of(
                 Pair.of(ModBlockLootTables::new, LootParameterSets.BLOCK)
         );

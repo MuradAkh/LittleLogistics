@@ -1,16 +1,16 @@
 package dev.murad.shipping.entity.navigation;
 
 import dev.murad.shipping.ShippingConfig;
-import net.minecraft.entity.MobEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.pathfinding.PathFinder;
-import net.minecraft.pathfinding.SwimmerPathNavigator;
+import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 
-public class TugPathNavigator extends SwimmerPathNavigator {
-    public TugPathNavigator(MobEntity p_i45873_1_, World p_i45873_2_) {
+public class TugPathNavigator extends WaterBoundPathNavigation {
+    public TugPathNavigator(Mob p_i45873_1_, Level p_i45873_2_) {
         super(p_i45873_1_, p_i45873_2_);
         setMaxVisitedNodesMultiplier(ShippingConfig.Server.TUG_PATHFINDING_MULTIPLIER.get());
     }

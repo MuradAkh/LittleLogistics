@@ -30,7 +30,7 @@ import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.EntitySpringAPI;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.InventoryHelper;
@@ -38,9 +38,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
@@ -60,7 +60,7 @@ import java.util.Optional;
 
 public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
 
-    public static final DataParameter<Integer> DOMINANT_ID = EntityDataManager.defineId(SpringEntity.class, DataSerializers.INT);
+    public static final EntityDataAccessor<Integer> DOMINANT_ID = SynchedEntityData.defineId(SpringEntity.class, DataSerializers.INT);
     public static final DataParameter<Integer> DOMINATED_ID = EntityDataManager.defineId(SpringEntity.class, DataSerializers.INT);
 
     private @Nullable CompoundNBT dominantNBT;
