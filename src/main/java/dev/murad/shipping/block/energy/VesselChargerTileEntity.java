@@ -5,27 +5,25 @@ import dev.murad.shipping.block.IVesselLoader;
 import dev.murad.shipping.capability.ReadWriteEnergyStorage;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
-import net.minecraft.block.BlockState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.entity.player.Player;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.level.block.entity.TickableBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class VesselChargerTileEntity extends BlockEntity implements TickableBlockEntity, IVesselLoader {
+public class VesselChargerTileEntity extends BlockEntity implements IVesselLoader {
     private static final int MAX_TRANSFER = ShippingConfig.Server.VESSEL_CHARGER_BASE_MAX_TRANSFER.get();
     private static final int MAX_CAPACITY = ShippingConfig.Server.VESSEL_CHARGER_BASE_CAPACITY.get();
     private final ReadWriteEnergyStorage internalBattery = new ReadWriteEnergyStorage(MAX_CAPACITY, MAX_TRANSFER, MAX_TRANSFER);
@@ -46,14 +44,17 @@ public class VesselChargerTileEntity extends BlockEntity implements TickableBloc
     }
 
 
-    @Override
-    public void tick() {
-        if (this.level != null && !this.level.isClientSide) {
+    private void serverTickInternal() {
+        if (this.level != null) {
             --this.cooldownTime;
             if (this.cooldownTime <= 0) {
                 this.cooldownTime = tryChargeEntity() ? 0 : 10;
             }
         }
+    }
+
+    public static void serverTick(Level pLevel, BlockPos pPos, BlockState pState, VesselChargerTileEntity e) {
+        e.serverTickInternal();
     }
 
 
@@ -67,13 +68,14 @@ public class VesselChargerTileEntity extends BlockEntity implements TickableBloc
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT compound) {
-        super.load(state, compound);
+    public void load(CompoundTag compound) {
+        super.load(compound);
         internalBattery.readAdditionalSaveData(compound.getCompound("energy_storage"));
     }
 
     @Override
     public CompoundNBT save(CompoundNBT compound) {
+        //FIXME: 1.18 changes
         CompoundNBT energyNBT = new CompoundNBT();
         internalBattery.addAdditionalSaveData(energyNBT);
         CompoundNBT sup = super.save(compound);
@@ -93,8 +95,8 @@ public class VesselChargerTileEntity extends BlockEntity implements TickableBloc
         }).orElse(false);
     }
 
-    public void use(Player player, Hand hand) {
-        player.displayClientMessage(new TranslationTextComponent("block.littlelogistics.vessel_charger.capacity",
+    public void use(Player player, InteractionHand hand) {
+        player.displayClientMessage(new TranslatableComponent("block.littlelogistics.vessel_charger.capacity",
                 internalBattery.getEnergyStored(), internalBattery.getMaxEnergyStored()), false);
     }
 }

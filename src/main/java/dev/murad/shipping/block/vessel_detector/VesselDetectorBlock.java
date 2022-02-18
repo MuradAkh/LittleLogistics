@@ -17,6 +17,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -111,5 +113,10 @@ public class VesselDetectorBlock extends BaseEntityBlock {
         }
 
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return level.isClientSide() ? null : createTickerHelper(type, ModTileEntitiesTypes.VESSEL_DETECTOR.get(), VesselDetectorTileEntity::serverTick);
     }
 }

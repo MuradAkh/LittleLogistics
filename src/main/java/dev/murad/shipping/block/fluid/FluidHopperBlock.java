@@ -1,43 +1,32 @@
 package dev.murad.shipping.block.fluid;
 
 
+import dev.murad.shipping.block.energy.VesselChargerTileEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalBlock;
-import net.minecraft.entity.Pose;
-import net.minecraft.entity.player.Player;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.InteractionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.shapes.IBooleanFunction;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.BlockGetter;
-import net.minecraft.world.World;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
 import java.util.stream.Stream;
 
-public class FluidHopperBlock extends Block {
+public class FluidHopperBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
     VoxelShape SHAPE_N = Stream.of(
@@ -59,7 +48,7 @@ public class FluidHopperBlock extends Block {
             Block.box(2, 1, 14, 5, 12, 16),
             Block.box(6.5, 2, 0, 9.5, 5, 5),
             Block.box(6.5, 2, 0, 9.5, 5, 5)
-    ).reduce((v1, v2) -> VoxelShapes.join(v1, v2, IBooleanFunction.OR)).get();
+    ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
 
     VoxelShape SHAPE_E = Stream.of(
             Block.box(0, 0, 0, 13, 1, 16),
@@ -80,7 +69,7 @@ public class FluidHopperBlock extends Block {
             Block.box(0, 1, 2, 2, 12, 5),
             Block.box(11, 2, 6.5, 16, 5, 9.5),
             Block.box(11, 2, 6.5, 16, 5, 9.5)
-            ).reduce((v1, v2) -> VoxelShapes.join(v1, v2, IBooleanFunction.OR)).get();;
+            ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();;
 
     VoxelShape SHAPE_S = Stream.of(
             Block.box(0, 0, 0, 16, 1, 13),
@@ -101,7 +90,7 @@ public class FluidHopperBlock extends Block {
             Block.box(11, 1, 0, 14, 12, 2),
             Block.box(6.5, 2, 11, 9.5, 5, 16),
             Block.box(6.5, 2, 11, 9.5, 5, 16)
-    ).reduce((v1, v2) -> VoxelShapes.join(v1, v2, IBooleanFunction.OR)).get();
+    ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
 
     VoxelShape SHAPE_W = Stream.of(
             Block.box(3, 0, 0, 16, 1, 16),
@@ -122,7 +111,7 @@ public class FluidHopperBlock extends Block {
             Block.box(14, 1, 11, 16, 12, 14),
             Block.box(0, 2, 6.5, 5, 5, 9.5),
             Block.box(0, 2, 6.5, 5, 5, 9.5)
-    ).reduce((v1, v2) -> VoxelShapes.join(v1, v2, IBooleanFunction.OR)).get();
+    ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
 
     public FluidHopperBlock(Properties p_i48440_1_) {
         super(p_i48440_1_);
@@ -141,20 +130,20 @@ public class FluidHopperBlock extends Block {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
     }
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context){
+    public BlockState getStateForPlacement(BlockPlaceContext context){
         return this.defaultBlockState()
                 .setValue(FACING, context.getHorizontalDirection().getOpposite());
 
     }
 
     @Override
-    public VoxelShape getShape(BlockState p_220053_1_, BlockGetter p_220053_2_, BlockPos p_220053_3_, ISelectionContext p_220053_4_) {
+    public VoxelShape getShape(BlockState p_220053_1_, BlockGetter p_220053_2_, BlockPos p_220053_3_, CollisionContext p_220053_4_) {
        switch (p_220053_1_.getValue(FACING)){
            case SOUTH:
                return SHAPE_S;
@@ -183,12 +172,11 @@ public class FluidHopperBlock extends Block {
 
     @Nullable
     @Override
-    public TileEntity createTileEntity(BlockState state, BlockGetter world) {
-        return ModTileEntitiesTypes.FLUID_HOPPER.get().create();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return ModTileEntitiesTypes.FLUID_HOPPER.get().create(pos, state);
     }
 
-    @Override
-    public boolean hasTileEntity(BlockState state) {
-        return true;
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return level.isClientSide() ? null : createTickerHelper(type, ModTileEntitiesTypes.FLUID_HOPPER.get(), FluidHopperTileEntity::serverTick);
     }
 }

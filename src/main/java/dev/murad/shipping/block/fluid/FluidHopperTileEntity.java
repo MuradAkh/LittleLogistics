@@ -4,9 +4,11 @@ import dev.murad.shipping.block.IVesselLoader;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.entity.player.Player;
 import net.minecraft.fluid.Fluid;
@@ -36,7 +38,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class FluidHopperTileEntity extends BlockEntity implements TickableBlockEntity, IVesselLoader {
+public class FluidHopperTileEntity extends BlockEntity implements IVesselLoader {
     public static final int CAPACITY = FluidAttributes.BUCKET_VOLUME * 10;
     private int cooldownTime = 0;
 
@@ -111,9 +113,8 @@ public class FluidHopperTileEntity extends BlockEntity implements TickableBlockE
         this.load(null,packet.getTag());
     }
 
-    @Override
-    public void tick() {
-        if (this.level != null && !this.level.isClientSide) {
+    private void serverTickInternal() {
+        if (this.level != null) {
             --this.cooldownTime;
             if (this.cooldownTime <= 0) {
                 // do not short-circuit
@@ -155,5 +156,9 @@ public class FluidHopperTileEntity extends BlockEntity implements TickableBlockE
                     return false;
             }
         }).orElse(false);
+    }
+
+    public static void serverTick(Level level, BlockPos blockPos, BlockState blockState, FluidHopperTileEntity e) {
+        e.serverTickInternal();
     }
 }
