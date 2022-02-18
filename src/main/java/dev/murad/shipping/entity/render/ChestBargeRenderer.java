@@ -3,8 +3,8 @@ package dev.murad.shipping.entity.render;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.barge.ChestBargeEntity;
 import dev.murad.shipping.entity.models.ChestBargeModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
 public class ChestBargeRenderer extends VesselRenderer<ChestBargeEntity> {
@@ -13,8 +13,8 @@ public class ChestBargeRenderer extends VesselRenderer<ChestBargeEntity> {
 
     private final EntityModel model = new ChestBargeModel();
 
-    public ChestBargeRenderer(EntityRenderDispatcher p_i46179_1_) {
-        super(p_i46179_1_);
+    public ChestBargeRenderer(EntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override

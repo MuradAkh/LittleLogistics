@@ -2,14 +2,11 @@ package dev.murad.shipping.entity.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.custom.VesselEntity;
-import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.entity.custom.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.models.EnergyTugModel;
-import dev.murad.shipping.entity.models.SteamTugModel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
 public class EnergyTugRenderer extends VesselRenderer<EnergyTugEntity> {
@@ -18,8 +15,8 @@ public class EnergyTugRenderer extends VesselRenderer<EnergyTugEntity> {
 
     private final EntityModel model = new EnergyTugModel();
 
-    public EnergyTugRenderer(EntityRenderDispatcher p_i46179_1_) {
-        super(p_i46179_1_);
+    public EnergyTugRenderer(EntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override

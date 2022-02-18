@@ -3,8 +3,8 @@ package dev.murad.shipping.entity.render;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.barge.ChunkLoaderBargeEntity;
 import dev.murad.shipping.entity.models.ChunkLoaderBargeModel;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
 public class ChunkLoaderBargeRenderer extends VesselRenderer<ChunkLoaderBargeEntity> {
@@ -14,8 +14,8 @@ public class ChunkLoaderBargeRenderer extends VesselRenderer<ChunkLoaderBargeEnt
     private final EntityModel model = new ChunkLoaderBargeModel();
 
 
-    public ChunkLoaderBargeRenderer(EntityRenderDispatcher p_i46179_1_) {
-        super(p_i46179_1_);
+    public ChunkLoaderBargeRenderer(EntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override

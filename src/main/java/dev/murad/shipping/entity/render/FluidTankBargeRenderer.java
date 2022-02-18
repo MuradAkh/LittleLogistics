@@ -1,16 +1,16 @@
 package dev.murad.shipping.entity.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.barge.FluidTankBargeEntity;
 import dev.murad.shipping.entity.models.FluidTankBargeModel;
 import dev.murad.shipping.util.FluidRenderUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.fluids.FluidStack;
 
 public class FluidTankBargeRenderer extends VesselRenderer<FluidTankBargeEntity> {
@@ -20,8 +20,8 @@ public class FluidTankBargeRenderer extends VesselRenderer<FluidTankBargeEntity>
     private final EntityModel model = new FluidTankBargeModel();
 
 
-    public FluidTankBargeRenderer(EntityRenderDispatcher p_i46179_1_) {
-        super(p_i46179_1_);
+    public FluidTankBargeRenderer(EntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override

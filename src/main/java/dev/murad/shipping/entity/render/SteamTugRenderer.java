@@ -5,6 +5,7 @@ import dev.murad.shipping.entity.custom.tug.SteamTugEntity;
 import dev.murad.shipping.entity.models.SteamTugModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
 public class SteamTugRenderer extends VesselRenderer<SteamTugEntity> {
@@ -14,8 +15,8 @@ public class SteamTugRenderer extends VesselRenderer<SteamTugEntity> {
 
     private final EntityModel model = new SteamTugModel();
 
-    public SteamTugRenderer(EntityRenderDispatcher p_i46179_1_) {
-        super(p_i46179_1_);
+    public SteamTugRenderer(EntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override
