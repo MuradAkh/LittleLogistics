@@ -7,14 +7,14 @@ import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.core.Direction;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Optional;
 
 
 public abstract class AbstractDockTileEntity extends BlockEntity {
-    public AbstractDockTileEntity(BlockEntityType<?> p_i48289_1_) {
-        super(p_i48289_1_);
+    public AbstractDockTileEntity(BlockEntityType<?> p_i48289_1_, BlockPos pos, BlockState s) {
+        super(p_i48289_1_, pos, s);
     }
 
     public abstract boolean holdVessel(VesselEntity vessel, Direction direction);

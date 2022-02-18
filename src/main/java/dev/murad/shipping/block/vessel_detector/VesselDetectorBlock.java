@@ -3,59 +3,59 @@ package dev.murad.shipping.block.vessel_detector;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.MathUtil;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.particles.RedstoneParticleData;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class VesselDetectorBlock extends Block {
+public class VesselDetectorBlock extends BaseEntityBlock {
 
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
 
-    private static final RedstoneParticleData PARTICLE = new RedstoneParticleData(0.9f, 0.65f, 0.2f, 1.0f);
+//    private static final RedstoneParticleData PARTICLE = new RedstoneParticleData(0.9f, 0.65f, 0.2f, 1.0f);
 
     @Nullable
     @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return ModTileEntitiesTypes.VESSEL_DETECTOR.get().create();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return ModTileEntitiesTypes.VESSEL_DETECTOR.get().create(pos, state);
     }
 
 
     @Override
-    public boolean hasTileEntity(BlockState state) {
-        return true;
-    }
-
-    @Override
-    public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, @Nullable Direction side) {
+    public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, @Nullable Direction side) {
         return state.getValue(FACING) == side;
     }
 
     @Override
-    public int getSignal(BlockState state, IBlockReader reader, BlockPos blockPos, Direction direction) {
+    public int getSignal(BlockState state, BlockGetter reader, BlockPos blockPos, Direction direction) {
         return state.getValue(POWERED) && direction == state.getValue(FACING) ? 15 : 0;
     }
 
 
     @Override
-    public int getDirectSignal(BlockState state, IBlockReader reader, BlockPos blockPos, Direction direction) {
+    public int getDirectSignal(BlockState state, BlockGetter reader, BlockPos blockPos, Direction direction) {
         return state.getValue(POWERED) && direction == state.getValue(FACING) ? 15 : 0;
     }
 
@@ -76,40 +76,40 @@ public class VesselDetectorBlock extends Block {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
         builder.add(POWERED);
     }
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context){
+    public BlockState getStateForPlacement(BlockPlaceContext context){
         return this.defaultBlockState()
                 .setValue(FACING, context.getNearestLookingDirection().getOpposite())
                 .setValue(POWERED, false);
     }
 
     // client only
-    private void showParticles(BlockPos pos, BlockState state, World level) {
-        AxisAlignedBB bb = VesselDetectorTileEntity.getSearchBox(pos, state.getValue(FACING), level);
-        List<Pair<Vector3d, Vector3d>> edges = MathUtil.getEdges(bb);
+    private void showParticles(BlockPos pos, BlockState state, Level level) {
+        AABB bb = VesselDetectorTileEntity.getSearchBox(pos, state.getValue(FACING), level);
+        List<Pair<Vec3, Vec3>> edges = MathUtil.getEdges(bb);
 
-        for (Pair<Vector3d, Vector3d> edge : edges) {
-            Vector3d from = edge.getFirst(), to = edge.getSecond();
+        for (Pair<Vec3, Vec3> edge : edges) {
+            Vec3 from = edge.getFirst(), to = edge.getSecond();
             for (int i = 0; i < 10; i++) {
-                Vector3d pPos = MathUtil.lerp(from, to, (float) i / 10);
-                level.addParticle(PARTICLE, pPos.x, pPos.y, pPos.z, 0, 0, 0);
+                Vec3 pPos = MathUtil.lerp(from, to, (float) i / 10);
+                level.addParticle(DustParticleOptions.REDSTONE, pPos.x, pPos.y, pPos.z, 0, 0, 0);
             }
         }
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public ActionResultType use(BlockState state, World level, BlockPos pos, PlayerEntity entity, Hand hand, BlockRayTraceResult hit) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player entity, InteractionHand hand, BlockHitResult hit) {
         if (level.isClientSide()) {
             showParticles(pos, state, entity.level);
         }
 
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 }

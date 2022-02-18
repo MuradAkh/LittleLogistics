@@ -7,14 +7,12 @@ import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.InventoryUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.world.Container;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.level.block.entity.HopperBlockEntity;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Container;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +22,11 @@ import java.util.stream.IntStream;
 
 public class TugDockTileEntity extends AbstractDockTileEntity {
 
-    public TugDockTileEntity(BlockEntityType<?> tileEntityTypeIn) {
-        super(tileEntityTypeIn);
+    public TugDockTileEntity(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
+        super(tileEntityTypeIn, pos, state);
     }
-    public TugDockTileEntity() {
-        super(ModTileEntitiesTypes.TUG_DOCK.get());
+    public TugDockTileEntity(BlockPos pos, BlockState state) {
+        super(ModTileEntitiesTypes.TUG_DOCK.get(), pos, state);
     }
 
     private boolean handleItemHopper(VesselEntity tugEntity, HopperBlockEntity hopper){
@@ -103,11 +101,6 @@ public class TugDockTileEntity extends AbstractDockTileEntity {
         return Optional.ofNullable(this.level.getBlockEntity(next))
                 .filter(e -> e instanceof BargeDockTileEntity)
                 .map(e -> (BargeDockTileEntity) e);
-    }
-
-    @Override
-    public CompoundNBT save(CompoundNBT p_189515_1_) {
-        return super.save(p_189515_1_);
     }
 
 }

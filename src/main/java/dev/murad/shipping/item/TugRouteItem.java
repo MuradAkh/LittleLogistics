@@ -47,8 +47,8 @@ public class TugRouteItem extends Item {
 
             @Nullable
             @Override
-            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player playerEntity) {
-                return new TugRouteContainer(i, playerEntity.level, getDataAccessor(playerEntity, hand), playerInventory, playerEntity);
+            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player Player) {
+                return new TugRouteContainer(i, Player.level, getDataAccessor(Player, hand), playerInventory, Player);
             }
         };
     }

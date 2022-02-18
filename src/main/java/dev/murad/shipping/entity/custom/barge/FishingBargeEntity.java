@@ -81,8 +81,8 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
 
             @Nullable
             @Override
-            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player playerEntity) {
-                return new FishingBargeContainer(i, level, getId(), playerInventory, playerEntity);
+            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player Player) {
+                return new FishingBargeContainer(i, level, getId(), playerInventory, Player);
             }
         };
     }

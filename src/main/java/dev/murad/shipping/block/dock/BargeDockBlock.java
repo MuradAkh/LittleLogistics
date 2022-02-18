@@ -1,20 +1,20 @@
 package dev.murad.shipping.block.dock;
 
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Pose;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.world.phys.BlockHitResult;
 
 import javax.annotation.Nullable;
 
@@ -27,10 +27,10 @@ public class BargeDockBlock extends AbstractDockBlock {
 
     @SuppressWarnings("deprecation")
     @Override
-    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult) {
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
         if(player.getPose().equals(Pose.CROUCHING)){
             world.setBlockAndUpdate(pos, state.setValue(EXTRACT_MODE, !state.getValue(EXTRACT_MODE)));
-            return ActionResultType.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
         return super.use(state, world, pos, player, hand, rayTraceResult);
@@ -38,12 +38,12 @@ public class BargeDockBlock extends AbstractDockBlock {
 
     @Nullable
     @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return ModTileEntitiesTypes.BARGE_DOCK.get().create();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return ModTileEntitiesTypes.BARGE_DOCK.get().create(pos, state);
     }
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(EXTRACT_MODE);
     }

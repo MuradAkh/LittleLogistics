@@ -3,8 +3,12 @@ package dev.murad.shipping.block.fluid;
 import dev.murad.shipping.block.IVesselLoader;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.Player;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.CompoundNBT;
@@ -17,6 +21,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidAttributes;
@@ -34,8 +40,8 @@ public class FluidHopperTileEntity extends BlockEntity implements TickableBlockE
     public static final int CAPACITY = FluidAttributes.BUCKET_VOLUME * 10;
     private int cooldownTime = 0;
 
-    public FluidHopperTileEntity() {
-        super(ModTileEntitiesTypes.FLUID_HOPPER.get());
+    public FluidHopperTileEntity(BlockPos pos, BlockState state) {
+        super(ModTileEntitiesTypes.FLUID_HOPPER.get(), pos, state);
     }
 
     protected FluidTank tank = new FluidTank(CAPACITY) {
@@ -49,15 +55,15 @@ public class FluidHopperTileEntity extends BlockEntity implements TickableBlockE
 
     private final LazyOptional<IFluidHandler> holder = LazyOptional.of(() -> tank);
 
-    private TranslationTextComponent getFluidDisplay() {
+    private TranslatableComponent getFluidDisplay() {
         Fluid fluid = tank.getFluid().getFluid();
         return fluid.equals(Fluids.EMPTY) ?
-                new TranslationTextComponent("block.littlelogistics.fluid_hopper.capacity_empty", tank.getCapacity()) :
-                new TranslationTextComponent("block.littlelogistics.fluid_hopper.capacity", tank.getFluid().getDisplayName().getString(),
+                new TranslatableComponent("block.littlelogistics.fluid_hopper.capacity_empty", tank.getCapacity()) :
+                new TranslatableComponent("block.littlelogistics.fluid_hopper.capacity", tank.getFluid().getDisplayName().getString(),
                         tank.getFluidAmount(), tank.getCapacity());
     }
 
-    public boolean use(PlayerEntity player, Hand hand){
+    public boolean use(Player player, InteractionHand hand){
         boolean result = FluidUtil.interactWithFluidHandler(player, hand, tank);
         player.displayClientMessage(getFluidDisplay(), false);
         return result;

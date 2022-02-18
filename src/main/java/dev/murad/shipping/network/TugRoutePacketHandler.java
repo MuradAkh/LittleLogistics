@@ -4,14 +4,14 @@ import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.TugRoute;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Hand;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,14 +43,14 @@ public final class TugRoutePacketHandler {
                 return;
             }
 
-            ItemStack heldStack = player.getItemInHand(operation.isOffhand ? Hand.OFF_HAND : Hand.MAIN_HAND);
+            ItemStack heldStack = player.getItemInHand(operation.isOffhand ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
             LOGGER.info("Item in hand is {}", heldStack);
             if (heldStack.getItem() != ModItems.TUG_ROUTE.get()) {
                 LOGGER.error("Item held in hand was not tug_route item, perhaps client has de-synced? Dropping packet");
                 return;
             }
 
-            CompoundNBT routeTag = operation.tag;
+            CompoundTag routeTag = operation.tag;
             LOGGER.info(routeTag);
             TugRouteItem.saveRoute(TugRoute.fromNBT(routeTag), heldStack);
         });

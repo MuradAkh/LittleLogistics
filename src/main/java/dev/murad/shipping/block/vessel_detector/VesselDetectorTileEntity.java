@@ -3,6 +3,12 @@ package dev.murad.shipping.block.vessel_detector;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.block.Block;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -13,20 +19,21 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
+import net.minecraft.world.phys.AABB;
 
 public class VesselDetectorTileEntity extends BlockEntity implements TickableBlockEntity {
     private static final int MAX_RANGE = 3;
     private int cooldown = 0;
 
-    public VesselDetectorTileEntity() {
-        super(ModTileEntitiesTypes.VESSEL_DETECTOR.get());
+    public VesselDetectorTileEntity(BlockPos pos, BlockState state) {
+        super(ModTileEntitiesTypes.VESSEL_DETECTOR.get(), pos, state);
     }
 
     private static boolean isValidBlock(BlockState state) {
         return state.is(Blocks.WATER) || state.is(Blocks.AIR);
     }
 
-    private static int getSearchLimit(BlockPos pos, Direction direction, World level){
+    private static int getSearchLimit(BlockPos pos, Direction direction, Level level){
         int i = 0;
         for (; i < MAX_RANGE && isValidBlock(level.getBlockState(pos)); i++) {
             pos = pos.relative(direction);
@@ -52,7 +59,7 @@ public class VesselDetectorTileEntity extends BlockEntity implements TickableBlo
         }
     }
 
-    public static AxisAlignedBB getSearchBox(BlockPos pos, Direction direction, World level) {
+    public static AABB getSearchBox(BlockPos pos, Direction direction, Level level) {
         int searchLimit = getSearchLimit(pos.relative(direction), direction, level);
 
         Direction.AxisDirection posNeg = direction.getAxisDirection();
@@ -64,7 +71,7 @@ public class VesselDetectorTileEntity extends BlockEntity implements TickableBlo
 
         BlockPos end = start.offset(offX, offY, offZ);
 
-        return new AxisAlignedBB(start, end);
+        return new AABB(start, end);
     }
 
     @Override

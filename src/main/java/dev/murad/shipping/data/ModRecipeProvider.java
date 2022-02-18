@@ -3,19 +3,17 @@ package dev.murad.shipping.data;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
-import net.minecraft.data.*;
-import net.minecraft.item.Items;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.data.ForgeRecipeProvider;
-import net.minecraftforge.registries.GameData;
-
-import java.util.function.Consumer;
-
+import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.Items;
+import net.minecraftforge.common.Tags;
+
+import java.util.function.Consumer;
 
 public class ModRecipeProvider extends RecipeProvider {
 
@@ -24,7 +22,7 @@ public class ModRecipeProvider extends RecipeProvider {
     }
 
     @Override
-    protected void buildShapelessRecipes(Consumer<FinishedRecipe> consumer) {
+    protected void buildCraftingRecipes(Consumer<FinishedRecipe> consumer) {
         ShapedRecipeBuilder.shaped(ModBlocks.TUG_DOCK.get(), 2)
                 .define('#', ModItems.SPRING.get())
                 .define('_', Tags.Items.STONE)

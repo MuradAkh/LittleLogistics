@@ -2,7 +2,6 @@ package dev.murad.shipping.setup;
 
 import dev.murad.shipping.recipe.TugRouteRecipe;
 import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
-import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.RegistryObject;
 
 public class ModRecipeSerializers {

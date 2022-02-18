@@ -10,8 +10,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.RegistryObject;
 
-import java.util.function.Supplier;
-
 public class ModTileEntitiesTypes {
     public static final RegistryObject<BlockEntityType<TugDockTileEntity>> TUG_DOCK = register(
             "tug_dock",
@@ -43,8 +41,12 @@ public class ModTileEntitiesTypes {
             ModBlocks.VESSEL_CHARGER
     );
 
-    private static <T extends BlockEntity> RegistryObject<BlockEntityType<T>> register(String name, Supplier<T> factory, RegistryObject<? extends Block> block) {
-        return Registration.TILE_ENTITIES.register(name, () -> BlockEntityType.Builder.of(factory, block.get()).build(null));
+    private static <T extends BlockEntity> RegistryObject<BlockEntityType<T>> register(
+            String name,
+            BlockEntityType.BlockEntitySupplier<T> factory,
+            RegistryObject<? extends Block> block) {
+        return Registration.TILE_ENTITIES.register(name, () ->
+                BlockEntityType.Builder.of(factory, block.get()).build(null));
     }
 
     public static void register () {

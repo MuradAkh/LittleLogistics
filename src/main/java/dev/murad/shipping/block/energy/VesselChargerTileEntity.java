@@ -6,7 +6,8 @@ import dev.murad.shipping.capability.ReadWriteEnergyStorage;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.entity.player.Player;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -14,6 +15,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -30,8 +32,8 @@ public class VesselChargerTileEntity extends BlockEntity implements TickableBloc
     private final LazyOptional<IEnergyStorage> holder = LazyOptional.of(() -> internalBattery);
     private int cooldownTime = 0;
 
-    public VesselChargerTileEntity() {
-        super(ModTileEntitiesTypes.VESSEL_CHARGER.get());
+    public VesselChargerTileEntity(BlockPos pos, BlockState state) {
+        super(ModTileEntitiesTypes.VESSEL_CHARGER.get(), pos, state);
         internalBattery.setEnergy(0);
     }
 
@@ -91,7 +93,7 @@ public class VesselChargerTileEntity extends BlockEntity implements TickableBloc
         }).orElse(false);
     }
 
-    public void use(PlayerEntity player, Hand hand) {
+    public void use(Player player, Hand hand) {
         player.displayClientMessage(new TranslationTextComponent("block.littlelogistics.vessel_charger.capacity",
                 internalBattery.getEnergyStored(), internalBattery.getMaxEnergyStored()), false);
     }

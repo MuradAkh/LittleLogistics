@@ -1,35 +1,26 @@
 package dev.murad.shipping.block.dock;
 
-import net.minecraft.world.level.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.HopperBlock;
-import net.minecraft.block.HorizontalBlock;
-import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public abstract class AbstractDockBlock extends Block {
-    public static final DirectionProperty FACING = HorizontalBlock.FACING;
+public abstract class AbstractDockBlock extends BaseEntityBlock {
+    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
     public AbstractDockBlock(Properties p_i48440_1_) {
         super(p_i48440_1_);
     }
 
-    @Override
-    public boolean hasTileEntity(BlockState state) {
-        return true;
-    }
-
-    protected Optional<AbstractDockTileEntity> getTileEntity(World world, BlockPos pos){
-        TileEntity tileEntity = world.getBlockEntity(pos);
+    protected Optional<AbstractDockTileEntity> getTileEntity(Level world, BlockPos pos){
+        BlockEntity tileEntity = world.getBlockEntity(pos);
         if (tileEntity instanceof AbstractDockTileEntity)
             return Optional.of((AbstractDockTileEntity) tileEntity);
         else
@@ -38,11 +29,11 @@ public abstract class AbstractDockBlock extends Block {
     }
 
     @Deprecated
-    public void neighborChanged(BlockState state, World world, BlockPos p_220069_3_, Block p_220069_4_, BlockPos p_220069_5_, boolean p_220069_6_) {
+    public void neighborChanged(BlockState state, Level world, BlockPos p_220069_3_, Block p_220069_4_, BlockPos p_220069_5_, boolean p_220069_6_) {
         super.neighborChanged(state, world, p_220069_3_, p_220069_4_, p_220069_5_, p_220069_6_);
         getTileEntity(world, p_220069_3_).flatMap(AbstractDockTileEntity::getHopper).ifPresent(te -> {
             if (te.getBlockPos().equals(p_220069_3_.above())){
-                world.setBlockAndUpdate(te.getBlockPos(), te.getBlockState().setValue(HopperBlock.FACING, state.getValue(FACING)));
+                world.setBlockAndUpdate(te.getBlockPos(), te.getBlockState().setValue(HorizontalDirectionalBlock.FACING, state.getValue(FACING)));
             }
         });
 
@@ -61,13 +52,13 @@ public abstract class AbstractDockBlock extends Block {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
     }
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context){
+    public BlockState getStateForPlacement(BlockPlaceContext context){
         return this.defaultBlockState()
                 .setValue(FACING, context.getHorizontalDirection().getOpposite());
 

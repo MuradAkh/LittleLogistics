@@ -13,12 +13,12 @@ import net.minecraftforge.items.wrapper.InvWrapper;
 import javax.annotation.Nullable;
 
 public abstract class AbstractItemHandlerContainer extends AbstractContainerMenu {
-    private final Player playerEntity;
+    private final Player Player;
     private final IItemHandler playerInventory;
 
     protected AbstractItemHandlerContainer(@Nullable MenuType<?> p_i50105_1_, int p_i50105_2_, Inventory playerInventory, Player player) {
         super(p_i50105_1_, p_i50105_2_);
-        playerEntity = player;
+        Player = player;
         this.playerInventory = new InvWrapper(playerInventory);
     }
 
@@ -94,7 +94,7 @@ public abstract class AbstractItemHandlerContainer extends AbstractContainerMenu
         } else {
             sourceSlot.setChanged();
         }
-        sourceSlot.onTake(playerEntity, sourceStack);
+        sourceSlot.onTake(Player, sourceStack);
         return copyOfSourceStack;
     }
 }

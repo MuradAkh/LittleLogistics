@@ -77,8 +77,8 @@ public class EnergyTugEntity extends AbstractTugEntity {
 
             @Nullable
             @Override
-            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player playerEntity) {
-                return new EnergyTugContainer(i, level, getDataAccessor(), playerInventory, playerEntity);
+            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player Player) {
+                return new EnergyTugContainer(i, level, getDataAccessor(), playerInventory, Player);
             }
         };
     }

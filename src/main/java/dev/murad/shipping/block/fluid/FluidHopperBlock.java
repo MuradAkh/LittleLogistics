@@ -2,16 +2,24 @@ package dev.murad.shipping.block.fluid;
 
 
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalBlock;
 import net.minecraft.entity.Pose;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.Player;
 import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
+import net.minecraft.util.InteractionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
@@ -21,14 +29,16 @@ import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.world.BlockGetter;
 import net.minecraft.world.World;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
 import java.util.stream.Stream;
 
 public class FluidHopperBlock extends Block {
-    public static final DirectionProperty FACING = HorizontalBlock.FACING;
+    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
     VoxelShape SHAPE_N = Stream.of(
             Block.box(0, 0, 3, 16, 1, 16),
@@ -144,7 +154,7 @@ public class FluidHopperBlock extends Block {
     }
 
     @Override
-    public VoxelShape getShape(BlockState p_220053_1_, IBlockReader p_220053_2_, BlockPos p_220053_3_, ISelectionContext p_220053_4_) {
+    public VoxelShape getShape(BlockState p_220053_1_, BlockGetter p_220053_2_, BlockPos p_220053_3_, ISelectionContext p_220053_4_) {
        switch (p_220053_1_.getValue(FACING)){
            case SOUTH:
                return SHAPE_S;
@@ -159,21 +169,21 @@ public class FluidHopperBlock extends Block {
     }
 
     @Override
-    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult) {
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
         if (!world.isClientSide){
-            TileEntity entity = world.getBlockEntity(pos);
+            BlockEntity entity = world.getBlockEntity(pos);
             if(entity instanceof FluidHopperTileEntity){
                 if(((FluidHopperTileEntity) entity).use(player, hand)){
-                    return ActionResultType.CONSUME;
+                    return InteractionResult.CONSUME;
                 }
             }
         }
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Nullable
     @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
+    public TileEntity createTileEntity(BlockState state, BlockGetter world) {
         return ModTileEntitiesTypes.FLUID_HOPPER.get().create();
     }
 

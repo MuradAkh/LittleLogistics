@@ -5,19 +5,20 @@ import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.InventoryUtils;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.tileentity.HopperTileEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.util.Direction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.Container;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class BargeDockTileEntity extends AbstractDockTileEntity {
-    public BargeDockTileEntity(BlockEntityType<?> p_i48289_1_) {
-        super(p_i48289_1_);
+    public BargeDockTileEntity(BlockEntityType<?> p_i48289_1_, BlockPos pos, BlockState state) {
+        super(p_i48289_1_, pos, state);
     }
 
-    public BargeDockTileEntity() {
-        super(ModTileEntitiesTypes.BARGE_DOCK.get());
+    public BargeDockTileEntity(BlockPos pos, BlockState state) {
+        super(ModTileEntitiesTypes.BARGE_DOCK.get(), pos, state);
     }
 
     protected BlockPos getTargetBlockPos(){
@@ -29,14 +30,14 @@ public class BargeDockTileEntity extends AbstractDockTileEntity {
     }
 
 
-    private boolean handleItemHopper(VesselEntity bargeEntity, HopperTileEntity hopper){
-        if(!(bargeEntity instanceof IInventory)){
+    private boolean handleItemHopper(VesselEntity bargeEntity, HopperBlockEntity hopper){
+        if(!(bargeEntity instanceof Container)){
             return false;
         }
         if (isExtract()) {
-            return InventoryUtils.mayMoveIntoInventory(hopper, (IInventory) bargeEntity);
+            return InventoryUtils.mayMoveIntoInventory(hopper, (Container) bargeEntity);
         } else {
-            return InventoryUtils.mayMoveIntoInventory((IInventory) bargeEntity, hopper);
+            return InventoryUtils.mayMoveIntoInventory((Container) bargeEntity, hopper);
         }
     }
 

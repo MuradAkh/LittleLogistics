@@ -1,27 +1,22 @@
 package dev.murad.shipping.item.container;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.util.TugRouteNode;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.network.chat.Component;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -70,7 +65,7 @@ public class TugRouteScreen extends AbstractContainerScreen<TugRouteContainer> {
                 topPos + 40, topPos + TugRouteScreen.this.imageHeight - 45, 20));
 
         this.addWidget(new Button(getRight() - 92, getBot() - 24, 20, 20,
-                new TextComponent("..\uA56F").withStyle(TextFormatting.BOLD),
+                new TextComponent("..\uA56F").withStyle(ChatFormatting.BOLD),
                 button -> {
                     Optional<Pair<Integer, TugRouteNode>> selectedOpt = route.getSelected();
                     if (selectedOpt.isPresent()) {
