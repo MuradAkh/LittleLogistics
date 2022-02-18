@@ -14,12 +14,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.LeadItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.entity.IEntityAdditionalSpawnData;
 import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpawnData {
     private AbstractTugEntity tugEntity;
@@ -91,8 +93,11 @@ public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpa
     }
 
     @Override
-    public InteractionResult interact(Player p_184230_1_, InteractionHand p_184230_2_) {
-        return tugEntity.mobInteract(p_184230_1_, p_184230_2_);
+    public InteractionResult interact(Player player, InteractionHand hand) {
+        if(player.getItemInHand(hand).getItem() instanceof LeadItem || Objects.equals(tugEntity.getLeashHolder(), player)){
+            return tugEntity.interact(player, hand);
+        }
+        return tugEntity.mobInteract(player, hand);
     }
 
     @Override

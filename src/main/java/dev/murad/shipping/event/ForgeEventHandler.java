@@ -1,9 +1,9 @@
 package dev.murad.shipping.event;
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.item.SpringItem;
 import dev.murad.shipping.util.EntitySpringAPI;
+import dev.murad.shipping.util.LinkableEntity;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
