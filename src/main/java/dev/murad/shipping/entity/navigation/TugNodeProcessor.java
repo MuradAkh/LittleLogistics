@@ -2,27 +2,24 @@ package dev.murad.shipping.entity.navigation;
 
 import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
 import dev.murad.shipping.setup.ModBlocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.pathfinding.*;
-import net.minecraft.tags.FluidTags;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.pathfinder.*;
 
 import java.util.Arrays;
-
-import net.minecraft.world.level.pathfinder.Node;
-import net.minecraft.world.level.pathfinder.SwimNodeEvaluator;
 
 public class TugNodeProcessor extends SwimNodeEvaluator {
     public TugNodeProcessor() {
         super(false);
     }
 
-    private boolean isOppositeGuideRail(Node pathPoint, Direction direction){
-        BlockState state = this.level.getBlockState(pathPoint.asBlockPos().below());
+    private boolean isOppositeGuideRail(Node Node, Direction direction){
+        BlockState state = this.level.getBlockState(Node.asBlockPos().below());
         if (state.is(ModBlocks.GUIDE_RAIL_TUG.get())){
             return TugGuideRailBlock.getArrowsDirection(state).getOpposite().equals(direction);
         }
@@ -30,35 +27,35 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
     }
 
     @Override
-    public int getNeighbors(PathPoint[] p_222859_1_, PathPoint p_222859_2_) {
+    public int getNeighbors(Node[] p_222859_1_, Node p_222859_2_) {
         int i = 0;
 
         for(Direction direction : Arrays.asList(Direction.WEST, Direction.EAST, Direction.SOUTH, Direction.NORTH)) {
-            PathPoint pathpoint = this.getWaterNode(p_222859_2_.x + direction.getStepX(), p_222859_2_.y + direction.getStepY(), p_222859_2_.z + direction.getStepZ());
-            if (pathpoint != null && !pathpoint.closed && !isOppositeGuideRail(pathpoint, direction)) {
-                p_222859_1_[i++] = pathpoint;
+            Node Node = this.getWaterNode(p_222859_2_.x + direction.getStepX(), p_222859_2_.y + direction.getStepY(), p_222859_2_.z + direction.getStepZ());
+            if (Node != null && !Node.closed && !isOppositeGuideRail(Node, direction)) {
+                p_222859_1_[i++] = Node;
             }
         }
 
         return i;
     }
 
-    private PathPoint getNodeSimple(int p_176159_1_, int p_176159_2_, int p_176159_3_) {
-        return this.nodes.computeIfAbsent(PathPoint.createHash(p_176159_1_, p_176159_2_, p_176159_3_), (p_215743_3_) -> {
-            return new PathPoint(p_176159_1_, p_176159_2_, p_176159_3_);
+    private Node getNodeSimple(int p_176159_1_, int p_176159_2_, int p_176159_3_) {
+        return this.nodes.computeIfAbsent(Node.createHash(p_176159_1_, p_176159_2_, p_176159_3_), (p_215743_3_) -> {
+            return new Node(p_176159_1_, p_176159_2_, p_176159_3_);
         });
     }
 
     @Override
-    public FlaggedPathPoint getGoal(double p_224768_1_, double p_224768_3_, double p_224768_5_) {
-        return new FlaggedPathPoint(getNodeSimple(MathHelper.floor(p_224768_1_), MathHelper.floor(p_224768_3_), MathHelper.floor(p_224768_5_)));
+    public Target getGoal(double p_224768_1_, double p_224768_3_, double p_224768_5_) {
+        return new Target(getNodeSimple(Mth.floor(p_224768_1_), Mth.floor(p_224768_3_), Mth.floor(p_224768_5_)));
     }
 
     @Override
-    protected PathPoint getNode(int p_176159_1_, int p_176159_2_, int p_176159_3_) {
-        PathPoint pathpoint = super.getNode(p_176159_1_, p_176159_2_, p_176159_3_);
-        if (pathpoint != null) {
-            BlockPos pos = pathpoint.asBlockPos();
+    protected Node getNode(int p_176159_1_, int p_176159_2_, int p_176159_3_) {
+        Node Node = super.getNode(p_176159_1_, p_176159_2_, p_176159_3_);
+        if (Node != null) {
+            BlockPos pos = Node.asBlockPos();
             float penalty = 0;
             for (BlockPos surr : Arrays.asList(
                     pos.east(),
@@ -89,39 +86,39 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
                     break;
                 }
             }
-            pathpoint.costMalus += penalty;
+            Node.costMalus += penalty;
         }
 
 
-        return pathpoint;
+        return Node;
     }
 
-    private PathPoint getWaterNode(int p_186328_1_, int p_186328_2_, int p_186328_3_) {
-        PathNodeType pathnodetype = this.isFree(p_186328_1_, p_186328_2_, p_186328_3_);
-        return  pathnodetype != PathNodeType.WATER ? null : this.getNode(p_186328_1_, p_186328_2_, p_186328_3_);
+    private Node getWaterNode(int p_186328_1_, int p_186328_2_, int p_186328_3_) {
+        BlockPathTypes BlockPathTypes = this.isFree(p_186328_1_, p_186328_2_, p_186328_3_);
+        return  BlockPathTypes != BlockPathTypes.WATER ? null : this.getNode(p_186328_1_, p_186328_2_, p_186328_3_);
     }
 
-    private PathNodeType isFree(int p_186327_1_, int p_186327_2_, int p_186327_3_) {
-        BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
+    private BlockPathTypes isFree(int p_186327_1_, int p_186327_2_, int p_186327_3_) {
+        BlockPos.MutableBlockPos blockpos$mutable = new BlockPos.MutableBlockPos();
 
         for(int i = p_186327_1_; i < p_186327_1_ + this.entityWidth; ++i) {
             for(int j = p_186327_2_; j < p_186327_2_ + this.entityHeight; ++j) {
                 for(int k = p_186327_3_; k < p_186327_3_ + this.entityDepth; ++k) {
                     FluidState fluidstate = this.level.getFluidState(blockpos$mutable.set(i, j, k));
                     BlockState blockstate = this.level.getBlockState(blockpos$mutable.set(i, j, k));
-                    if (fluidstate.isEmpty() && blockstate.isPathfindable(this.level, blockpos$mutable.below(), PathType.WATER) && blockstate.isAir()) {
-                        return PathNodeType.BREACH;
+                    if (fluidstate.isEmpty() && blockstate.isPathfindable(this.level, blockpos$mutable.below(), PathComputationType.WATER) && blockstate.isAir()) {
+                        return BlockPathTypes.BREACH;
                     }
 
                     if (!fluidstate.is(FluidTags.WATER)) {
-                        return PathNodeType.BLOCKED;
+                        return BlockPathTypes.BLOCKED;
                     }
                 }
             }
         }
 
         BlockState blockstate1 = this.level.getBlockState(blockpos$mutable);
-        return blockstate1.isPathfindable(this.level, blockpos$mutable, PathType.WATER) ? PathNodeType.WATER : PathNodeType.BLOCKED;
+        return blockstate1.isPathfindable(this.level, blockpos$mutable, PathComputationType.WATER) ? BlockPathTypes.WATER : BlockPathTypes.BLOCKED;
     }
 
 }

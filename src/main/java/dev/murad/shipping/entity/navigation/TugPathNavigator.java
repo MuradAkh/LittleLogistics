@@ -1,13 +1,13 @@
 package dev.murad.shipping.entity.navigation;
 
 import dev.murad.shipping.ShippingConfig;
+import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.pathfinding.PathFinder;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.pathfinder.PathFinder;
+import net.minecraft.world.phys.Vec3;
 
 public class TugPathNavigator extends WaterBoundPathNavigation {
     public TugPathNavigator(Mob p_i45873_1_, Level p_i45873_2_) {
@@ -27,7 +27,7 @@ public class TugPathNavigator extends WaterBoundPathNavigation {
     }
 
     @Override
-    protected void doStuckDetection(Vector3d p_179677_1_) {
+    protected void doStuckDetection(Vec3 p_179677_1_) {
         if (this.tick - this.lastStuckCheck > 100) {
             if (p_179677_1_.distanceToSqr(this.lastStuckCheckPos) < 2.25D) {
                 this.stop();
@@ -38,17 +38,17 @@ public class TugPathNavigator extends WaterBoundPathNavigation {
         }
 
         if (this.path != null && !this.path.isDone()) {
-            Vector3i vector3i = this.path.getNextNodePos();
+            BlockPos vector3i = this.path.getNextNodePos();
             if (vector3i.equals(this.timeoutCachedNode)) {
                 this.timeoutTimer += Util.getMillis() - this.lastTimeoutCheck;
             } else {
                 this.timeoutCachedNode = vector3i;
-                double d0 = p_179677_1_.distanceTo(Vector3d.atCenterOf(this.timeoutCachedNode));
+                double d0 = p_179677_1_.distanceTo(Vec3.atCenterOf(this.timeoutCachedNode));
                 this.timeoutLimit = this.mob.getSpeed() > 0.0F ? (d0 / (double)this.mob.getSpeed()) * 1000 : 0.0D;
             }
 
             if (this.timeoutLimit > 0.0D && (double)this.timeoutTimer > this.timeoutLimit * 2.0D) {
-                this.timeoutCachedNode = Vector3i.ZERO;
+                this.timeoutCachedNode = BlockPos.ZERO;
                 this.timeoutTimer = 0L;
                 this.timeoutLimit = 0.0D;
                 this.stop();

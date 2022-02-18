@@ -1,9 +1,9 @@
 package dev.murad.shipping.entity.container;
 
 import dev.murad.shipping.entity.custom.barge.FishingBargeEntity;
-import dev.murad.shipping.setup.ModContainerTypes;
-import net.minecraft.world.entity.player.Player;
+import dev.murad.shipping.setup.ModMenuTypes;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
@@ -13,7 +13,7 @@ public class FishingBargeContainer extends AbstractItemHandlerContainer {
 
     public FishingBargeContainer(int windowId, Level world, int entityId,
                                     Inventory playerInventory, Player player) {
-        super(ModContainerTypes.FISHING_BARGE_CONTAINER.get(), windowId, playerInventory, player);
+        super(ModMenuTypes.FISHING_BARGE_CONTAINER.get(), windowId, playerInventory, player);
         this.fishingBargeEntity = (FishingBargeEntity) world.getEntity(entityId);
         layoutPlayerInventorySlots(8, 49);
 
@@ -32,7 +32,7 @@ public class FishingBargeContainer extends AbstractItemHandlerContainer {
     }
 
     @Override
-    public boolean stillValid(PlayerEntity p_75145_1_) {
+    public boolean stillValid(Player p_75145_1_) {
         return fishingBargeEntity.stillValid(p_75145_1_);
     }
 }

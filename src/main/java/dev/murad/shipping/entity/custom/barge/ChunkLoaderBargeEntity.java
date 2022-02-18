@@ -4,13 +4,12 @@ import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.entity.item.BoatEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.world.ForgeChunkManager;
 
 import java.util.HashSet;
@@ -29,8 +28,8 @@ public class ChunkLoaderBargeEntity extends AbstractBargeEntity{
     }
 
     @Override
-    public void remove(){
-        super.remove();
+    public void remove(RemovalReason r){
+        super.remove(r);
         if(!this.level.isClientSide){
             loadedChunk.ifPresent(c -> getSurroundingChunks(c).forEach(ch -> this.setChunkLoad(false, ch)));
         }
@@ -42,8 +41,8 @@ public class ChunkLoaderBargeEntity extends AbstractBargeEntity{
         if(this.level.isClientSide){
             return;
         }
-        Pair<Integer, Integer> currChunk = new Pair<>(this.xChunk, this.zChunk);
-        if (!loadedChunk.isPresent()){
+        Pair<Integer, Integer> currChunk = new Pair<>(this.chunkPosition().x, this.chunkPosition().z);
+        if (loadedChunk.isEmpty()){
             getSurroundingChunks(currChunk).forEach(c -> setChunkLoad(true, c));
             loadedChunk = Optional.of(currChunk);
         } else if (!currChunk.equals(loadedChunk.get())){
@@ -65,7 +64,7 @@ public class ChunkLoaderBargeEntity extends AbstractBargeEntity{
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundNBT p_213281_1_) {
+    public void addAdditionalSaveData(CompoundTag p_213281_1_) {
         if(loadedChunk.isPresent()) {
             p_213281_1_.putInt("xchunk", loadedChunk.get().getFirst());
             p_213281_1_.putInt("zchunk", loadedChunk.get().getSecond());
@@ -73,7 +72,7 @@ public class ChunkLoaderBargeEntity extends AbstractBargeEntity{
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundNBT p_70037_1_) {
+    public void readAdditionalSaveData(CompoundTag p_70037_1_) {
         if (p_70037_1_.contains("xchunk")) {
             int x = p_70037_1_.getInt("xchunk");
             int z = p_70037_1_.getInt("zchunk");
@@ -92,7 +91,7 @@ public class ChunkLoaderBargeEntity extends AbstractBargeEntity{
     }
 
     private void setChunkLoad(boolean add, Pair<Integer, Integer> chunk) {
-        ForgeChunkManager.forceChunk((ServerWorld) this.level, ShippingMod.MOD_ID, this, chunk.getFirst(), chunk.getSecond(), add, true);
+        ForgeChunkManager.forceChunk((ServerLevel) this.level, ShippingMod.MOD_ID, this, chunk.getFirst(), chunk.getSecond(), add, true);
     }
 
     @Override
@@ -101,7 +100,7 @@ public class ChunkLoaderBargeEntity extends AbstractBargeEntity{
     }
 
     @Override
-    protected void doInteract(PlayerEntity player) {
+    protected void doInteract(Player player) {
 
     }
 }

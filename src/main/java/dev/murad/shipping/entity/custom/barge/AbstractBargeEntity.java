@@ -126,9 +126,9 @@ public abstract class AbstractBargeEntity extends VesselEntity implements ISprin
     }
 
     @Override
-    public void kill(){
+    public void remove(RemovalReason r){
         handleSpringableKill();
-        super.kill();
+        super.remove(r);
     }
 
     // hack to disable hoppers

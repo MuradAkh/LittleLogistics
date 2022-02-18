@@ -2,9 +2,9 @@ package dev.murad.shipping.entity.container;
 
 import dev.murad.shipping.entity.accessor.SteamTugDataAccessor;
 import dev.murad.shipping.event.ModClientEventHandler;
-import dev.murad.shipping.setup.ModContainerTypes;
-import net.minecraft.world.entity.player.Player;
+import dev.murad.shipping.setup.ModMenuTypes;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
@@ -13,7 +13,7 @@ import net.minecraftforge.items.SlotItemHandler;
 public class SteamTugContainer extends AbstractTugContainer<SteamTugDataAccessor> {
     public SteamTugContainer(int windowId, Level world, SteamTugDataAccessor data,
                              Inventory playerInventory, Player player) {
-        super(ModContainerTypes.TUG_CONTAINER.get(), windowId, world, data, playerInventory, player);
+        super(ModMenuTypes.TUG_CONTAINER.get(), windowId, world, data, playerInventory, player);
 
         if(tugEntity != null) {
             tugEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
@@ -35,7 +35,7 @@ public class SteamTugContainer extends AbstractTugContainer<SteamTugDataAccessor
     }
 
     @Override
-    public boolean stillValid(PlayerEntity p_75145_1_) {
+    public boolean stillValid(Player p_75145_1_) {
         return tugEntity.stillValid(p_75145_1_);
     }
 

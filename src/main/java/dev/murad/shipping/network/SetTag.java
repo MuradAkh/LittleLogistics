@@ -20,7 +20,7 @@ public class SetTag {
         this.tag = tag;
     }
 
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         buf.writeInt(routeChecksum);
         buf.writeBoolean(isOffhand);
         buf.writeNbt(tag);

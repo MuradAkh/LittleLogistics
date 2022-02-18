@@ -2,16 +2,14 @@ package dev.murad.shipping.entity.custom.barge;
 
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.phys.Vec3;
 
 public class SeaterBargeEntity extends AbstractBargeEntity{
     public SeaterBargeEntity(EntityType<? extends SeaterBargeEntity> type, Level world) {
@@ -34,12 +32,12 @@ public class SeaterBargeEntity extends AbstractBargeEntity{
     }
 
     private void clampRotation(Entity p_184454_1_) {
-        p_184454_1_.setYBodyRot(this.yRot);
-        float f = MathHelper.wrapDegrees(p_184454_1_.yRot - this.yRot);
-        float f1 = MathHelper.clamp(f, -105.0F, 105.0F);
+        p_184454_1_.setYBodyRot(this.getYRot());
+        float f = Mth.wrapDegrees(p_184454_1_.getYRot() - this.getYRot());
+        float f1 = Mth.clamp(f, -105.0F, 105.0F);
         p_184454_1_.yRotO += f1 - f;
-        p_184454_1_.yRot += f1 - f;
-        p_184454_1_.setYHeadRot(p_184454_1_.yRot);
+        p_184454_1_.setYRot(p_184454_1_.getYRot() + f1 - f);
+        p_184454_1_.setYHeadRot(p_184454_1_.getYRot());
     }
 
     public void onPassengerTurned(Entity p_184190_1_) {
@@ -49,12 +47,12 @@ public class SeaterBargeEntity extends AbstractBargeEntity{
     public void positionRider(Entity p_184232_1_) {
         if (this.hasPassenger(p_184232_1_)) {
             float f = -0.1F;
-            float f1 = (float)((this.removed ? (double)0.01F : this.getPassengersRidingOffset()) + p_184232_1_.getMyRidingOffset());
-            Vector3d vector3d = (new Vector3d((double)f, 0.0D, 0.0D)).yRot(-this.yRot * ((float)Math.PI / 180F) - ((float)Math.PI / 2F));
+            float f1 = (float)((this.dead ? (double)0.01F : this.getPassengersRidingOffset()) + p_184232_1_.getMyRidingOffset());
+            Vec3 vector3d = (new Vec3((double)f, 0.0D, 0.0D)).yRot(-this.getYRot() * ((float)Math.PI / 180F) - ((float)Math.PI / 2F));
             p_184232_1_.setPos(this.getX() + vector3d.x, this.getY() - 0.5 + (double)f1, this.getZ() + vector3d.z);
-            if (p_184232_1_ instanceof AnimalEntity && this.getPassengers().size() > 1) {
+            if (p_184232_1_ instanceof Animal && this.getPassengers().size() > 1) {
                 int j = p_184232_1_.getId() % 2 == 0 ? 90 : 270;
-                p_184232_1_.setYBodyRot(((AnimalEntity)p_184232_1_).yBodyRot + (float)j);
+                p_184232_1_.setYBodyRot(((Animal)p_184232_1_).yBodyRot + (float)j);
                 p_184232_1_.setYHeadRot(p_184232_1_.getYHeadRot() + (float)j);
             }
 
@@ -63,7 +61,7 @@ public class SeaterBargeEntity extends AbstractBargeEntity{
 
 
     @Override
-    protected void doInteract(PlayerEntity player) {
+    protected void doInteract(Player player) {
         player.startRiding(this);
     }
 }

@@ -1,31 +1,23 @@
 package dev.murad.shipping.entity.custom.barge;
 
-import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.*;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.entity.item.BoatEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.world.Container;
-import net.minecraft.world.WorldlyContainer;
-import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.inventory.ItemStackHelper;
-import net.minecraft.inventory.container.ChestContainer;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.item.Item;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.*;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.stream.IntStream;
-
-import net.minecraft.core.NonNullList;
 
 public class ChestBargeEntity extends AbstractBargeEntity implements Container, MenuProvider, WorldlyContainer {
     protected final NonNullList<ItemStack> itemStacks = createItemStacks();
@@ -46,10 +38,10 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
     public boolean hurt(DamageSource p_70097_1_, float p_70097_2_) {
         if (this.isInvulnerableTo(p_70097_1_)) {
             return false;
-        } else if (!this.level.isClientSide && !this.removed) {
+        } else if (!this.level.isClientSide && !this.isRemoved()) {
             this.spawnAtLocation(this.getDropItem());
-            InventoryHelper.dropContents(this.level, this, this);
-            this.remove();
+            Containers.dropContents(this.level, this, this);
+            this.kill();
             return true;
         } else {
             return true;
@@ -64,7 +56,7 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
 
 
 
-    protected void doInteract(PlayerEntity player) {
+    protected void doInteract(Player player) {
         player.openMenu(this);
     }
 
@@ -92,7 +84,7 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
 
     @Override
     public ItemStack removeItem(int p_70298_1_, int p_70298_2_) {
-        return ItemStackHelper.removeItem(this.itemStacks, p_70298_1_, p_70298_2_);
+        return ContainerHelper.removeItem(this.itemStacks, p_70298_1_, p_70298_2_);
 
     }
 
@@ -121,8 +113,8 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
     }
 
     @Override
-    public boolean stillValid(PlayerEntity p_70300_1_) {
-        if (this.removed) {
+    public boolean stillValid(Player p_70300_1_) {
+        if (this.isRemoved()) {
             return false;
         } else {
             return !(p_70300_1_.distanceToSqr(this) > 64.0D);
@@ -135,24 +127,23 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
     }
 
     @Nullable
-    @Override
-    public Container createMenu(int p_createMenu_1_, PlayerInventory p_createMenu_2_, PlayerEntity p_createMenu_3_) {
-        if (p_createMenu_3_.isSpectator()) {
+    public AbstractContainerMenu createMenu(int pContainerId, Inventory pInventory, Player pPlayer) {
+        if (pPlayer.isSpectator()) {
             return null;
+        } else {
+            return ChestMenu.threeRows(pContainerId, pInventory, this);
         }
-        return ChestContainer.threeRows(p_createMenu_1_, p_createMenu_2_, this);
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag p_213281_1_) {
+        ContainerHelper.saveAllItems(p_213281_1_, this.itemStacks);
 
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundNBT p_213281_1_) {
-        ItemStackHelper.saveAllItems(p_213281_1_, this.itemStacks);
-
-    }
-
-    @Override
-    public void readAdditionalSaveData(CompoundNBT p_70037_1_) {
-        ItemStackHelper.loadAllItems(p_70037_1_, this.itemStacks);
+    public void readAdditionalSaveData(CompoundTag p_70037_1_) {
+        ContainerHelper.loadAllItems(p_70037_1_, this.itemStacks);
     }
 
     @Override

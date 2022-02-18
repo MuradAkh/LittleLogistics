@@ -1,38 +1,36 @@
 package dev.murad.shipping.entity.custom.tug;
 
-import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.entity.IEntityAdditionalSpawnData;
+import net.minecraftforge.network.NetworkHooks;
 
 public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpawnData {
     private AbstractTugEntity tugEntity;
-    public static final EntityDataAccessor<Integer> TUG_ID = SynchedEntityData.defineId(TugDummyHitboxEntity.class, DataSerializers.INT);
+    public static final EntityDataAccessor<Integer> TUG_ID = SynchedEntityData.defineId(TugDummyHitboxEntity.class, EntityDataSerializers.INT);
 
 
-    public TugDummyHitboxEntity(EntityType<TugDummyHitboxEntity> p_i48580_1_, World p_i48580_2_) {
+    public TugDummyHitboxEntity(EntityType<TugDummyHitboxEntity> p_i48580_1_, Level p_i48580_2_) {
         super(p_i48580_1_, p_i48580_2_);
     }
 
     public TugDummyHitboxEntity(AbstractTugEntity tugEntity) {
         this(ModEntityTypes.TUG_DUMMY_HITBOX.get(), tugEntity.level);
         this.tugEntity = tugEntity;
-        this.setDeltaMovement(Vector3d.ZERO);
+        this.setDeltaMovement(Vec3.ZERO);
         updatePosition();
         this.xo = getX();
         this.yo = getY();
@@ -70,11 +68,11 @@ public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpa
     }
 
     public boolean isPickable() {
-        return !this.removed;
+        return !this.isAlive();
     }
 
     @Override
-    public ActionResultType interact(PlayerEntity p_184230_1_, Hand p_184230_2_) {
+    public InteractionResult interact(Player p_184230_1_, InteractionHand p_184230_2_) {
         return tugEntity.mobInteract(p_184230_1_, p_184230_2_);
     }
 
@@ -89,7 +87,7 @@ public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpa
     }
 
     @Override
-    public void onSyncedDataUpdated(DataParameter<?> key) {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
 
         if(level.isClientSide) {
@@ -107,23 +105,23 @@ public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpa
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundNBT nbt) {
-        this.remove();
+    public void readAdditionalSaveData(CompoundTag nbt) {
+        this.remove(RemovalReason.DISCARDED);
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundNBT nbt) {
+    public void addAdditionalSaveData(CompoundTag nbt) {
     }
 
     @Override
-    public void writeSpawnData(PacketBuffer buffer) {
+    public void writeSpawnData(FriendlyByteBuf buffer) {
         if (tugEntity != null){
             buffer.writeInt(tugEntity.getId());
         }
     }
 
     @Override
-    public void readSpawnData(PacketBuffer buffer) {
+    public void readSpawnData(FriendlyByteBuf buffer) {
         try {
             tugEntity = (AbstractTugEntity) this.level.getEntity(buffer.readInt());
         } catch (IndexOutOfBoundsException e){
@@ -132,7 +130,7 @@ public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpa
     }
 
     @Override
-    public IPacket<?> getAddEntityPacket() {
+    public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

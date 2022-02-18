@@ -3,12 +3,12 @@ package dev.murad.shipping.recipe;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModRecipeSerializers;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,7 +29,7 @@ public class TugRouteRecipe extends CustomRecipe {
     }
 
     // returns a pair of <Filled Tug Route, Unfilled Tug Route>
-    private Optional<Pair<ItemStack, Integer>> checkTugRoutes(CraftingInventory inventory) {
+    private Optional<Pair<ItemStack, Integer>> checkTugRoutes(CraftingContainer inventory) {
         int i = 0;
         ItemStack filledRoute = ItemStack.EMPTY;
 
@@ -62,13 +62,13 @@ public class TugRouteRecipe extends CustomRecipe {
     }
 
     @Override
-    public boolean matches(@Nonnull CraftingInventory inventory, @Nonnull World level) {
+    public boolean matches(@Nonnull CraftingContainer inventory, @Nonnull Level level) {
         return checkTugRoutes(inventory).isPresent();
     }
 
     @Nonnull
     @Override
-    public ItemStack assemble(@Nonnull CraftingInventory inventory) {
+    public ItemStack assemble(@Nonnull CraftingContainer inventory) {
         Optional<Pair<ItemStack, Integer>> matchOpt = checkTugRoutes(inventory);
         if (!matchOpt.isPresent()) return ItemStack.EMPTY;
 
@@ -88,7 +88,7 @@ public class TugRouteRecipe extends CustomRecipe {
 
     @Nonnull
     @Override
-    public IRecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<?> getSerializer() {
         return ModRecipeSerializers.TUG_ROUTE_COPY.get();
     }
 }

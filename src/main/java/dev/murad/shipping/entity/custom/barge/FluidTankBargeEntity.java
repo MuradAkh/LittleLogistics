@@ -3,23 +3,20 @@ package dev.murad.shipping.entity.custom.barge;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.Item;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidAttributes;
@@ -41,8 +38,8 @@ public class FluidTankBargeEntity extends AbstractBargeEntity{
             sendInfoToClient();
         }
     };
-    private static final EntityDataAccessor<Integer> VOLUME = SynchedEntityData.defineId(AbstractTugEntity.class, DataSerializers.INT);
-    private static final DataParameter<String> FLUID_TYPE = EntityDataManager.defineId(AbstractTugEntity.class, DataSerializers.STRING);
+    private static final EntityDataAccessor<Integer> VOLUME = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<String> FLUID_TYPE = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.STRING);
     private Fluid clientCurrFluid = Fluids.EMPTY;
     private int clientCurrAmount = 0;
 
@@ -70,17 +67,17 @@ public class FluidTankBargeEntity extends AbstractBargeEntity{
         entityData.define(VOLUME, 0);
     }
 
-    private TranslationTextComponent getFluidDisplay() {
+    private TranslatableComponent getFluidDisplay() {
         Fluid fluid = tank.getFluid().getFluid();
         return fluid.equals(Fluids.EMPTY) ?
-                new TranslationTextComponent("entity.littlelogistics.fluid_barge.capacity_empty", tank.getCapacity()) :
-                new TranslationTextComponent("entity.littlelogistics.fluid_barge.capacity", tank.getFluid().getDisplayName().getString(),
+                new TranslatableComponent("entity.littlelogistics.fluid_barge.capacity_empty", tank.getCapacity()) :
+                new TranslatableComponent("entity.littlelogistics.fluid_barge.capacity", tank.getFluid().getDisplayName().getString(),
                         tank.getFluidAmount(), tank.getCapacity());
     }
 
     @Override
-    protected void doInteract(PlayerEntity player) {
-        FluidUtil.interactWithFluidHandler(player, Hand.MAIN_HAND, tank);
+    protected void doInteract(Player player) {
+        FluidUtil.interactWithFluidHandler(player, InteractionHand.MAIN_HAND, tank);
         player.displayClientMessage(getFluidDisplay(), false);
     }
 
@@ -89,7 +86,7 @@ public class FluidTankBargeEntity extends AbstractBargeEntity{
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundNBT tag)
+    public void readAdditionalSaveData(CompoundTag tag)
     {
         super.readAdditionalSaveData(tag);
         tank.readFromNBT(tag);
@@ -97,7 +94,7 @@ public class FluidTankBargeEntity extends AbstractBargeEntity{
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundNBT tag)
+    public void addAdditionalSaveData(CompoundTag tag)
     {
         super.addAdditionalSaveData(tag);
         tank.writeToNBT(tag);
@@ -109,7 +106,7 @@ public class FluidTankBargeEntity extends AbstractBargeEntity{
     }
 
     @Override
-    public void onSyncedDataUpdated(DataParameter<?> key) {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
 
         if(level.isClientSide) {

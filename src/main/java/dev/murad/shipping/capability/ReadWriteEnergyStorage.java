@@ -35,7 +35,7 @@ public class ReadWriteEnergyStorage implements IEnergyStorage {
         proxyStorage = new EnergyStorage(maxCapacity, maxReceive, maxExtract, clampInclusive(energy, 0, maxCapacity));
     }
 
-    public void addAdditionalSaveData(CompoundNBT compound) {
+    public void addAdditionalSaveData(CompoundTag compound) {
         compound.putInt(ENERGY_TAG, proxyStorage.getEnergyStored());
     }
 

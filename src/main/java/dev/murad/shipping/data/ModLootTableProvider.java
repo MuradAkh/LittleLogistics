@@ -11,6 +11,7 @@ import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.data.loot.BlockLootTables;
 import net.minecraft.loot.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.fml.RegistryObject;
 
 import java.util.List;

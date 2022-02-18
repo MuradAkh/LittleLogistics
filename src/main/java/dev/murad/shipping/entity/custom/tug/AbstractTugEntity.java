@@ -2,7 +2,6 @@ package dev.murad.shipping.entity.custom.tug;
 
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
-import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
 import dev.murad.shipping.entity.accessor.DataAccessor;
@@ -17,60 +16,43 @@ import dev.murad.shipping.setup.ModSounds;
 import dev.murad.shipping.util.Train;
 import dev.murad.shipping.util.TugRoute;
 import dev.murad.shipping.util.TugRouteNode;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MoverType;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.controller.MovementController;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.passive.DolphinEntity;
-import net.minecraft.entity.passive.WaterMobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.world.Container;
-import net.minecraft.world.WorldlyContainer;
-import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.ItemStack;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.IPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.particles.BasicParticleType;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.pathfinding.PathNavigator;
-import net.minecraft.util.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.*;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.stream.IntStream;
 
 public abstract class AbstractTugEntity extends VesselEntity implements ISpringableEntity, Container, WorldlyContainer {
@@ -83,7 +65,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     private int dockCheckCooldown = 0;
     private boolean independentMotion = false;
     private int pathfindCooldown = 0;
-    private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractTugEntity.class, DataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.BOOLEAN);
 
     public boolean allowDockInterface(){
         return isDocked();
@@ -188,7 +170,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         return extraHitbox;
     }
 
-    protected abstract INamedContainerProvider createContainerProvider();
+    protected abstract MenuProvider createContainerProvider();
 
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
@@ -244,7 +226,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
 
         if (this.docked && dockCheckCooldown > 0){
             dockCheckCooldown--;
-            this.setDeltaMovement(Vector3d.ZERO);
+            this.setDeltaMovement(Vec3.ZERO);
             this.moveTo(x + 0.5 ,getY(),z + 0.5);
             return;
         }
@@ -267,7 +249,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
 
         if(this.docked) {
             dockCheckCooldown = 20; // todo: magic number
-            this.setDeltaMovement(Vector3d.ZERO);
+            this.setDeltaMovement(Vec3.ZERO);
             this.moveTo(x + 0.5 ,getY(),z + 0.5);
         } else {
             dockCheckCooldown = 0;
@@ -283,7 +265,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     }
 
     protected void makeSmoke() {
-        World world = this.level;
+        Level world = this.level;
         if (world != null) {
             BlockPos blockpos = this.getOnPos().above().above();
             Random random = world.random;
@@ -295,31 +277,31 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
         }
     }
 
-    public static void makeParticles(World p_220098_0_, BlockPos p_220098_1_, boolean p_220098_2_, boolean p_220098_3_) {
+    public static void makeParticles(Level p_220098_0_, BlockPos p_220098_1_, boolean p_220098_2_, boolean p_220098_3_) {
         Random random = p_220098_0_.getRandom();
         Supplier<Boolean> h = () -> random.nextDouble() < 0.5;
-        BasicParticleType basicparticletype = p_220098_2_ ? ParticleTypes.CAMPFIRE_SIGNAL_SMOKE : ParticleTypes.CAMPFIRE_COSY_SMOKE;
+        SimpleParticleType basicparticletype = p_220098_2_ ? ParticleTypes.CAMPFIRE_SIGNAL_SMOKE : ParticleTypes.CAMPFIRE_COSY_SMOKE;
         double xdrift = (h.get() ? 1 : -1) * random.nextDouble() * 2;
         double zdrift = (h.get() ? 1 : -1) * random.nextDouble() * 2;
         p_220098_0_.addAlwaysVisibleParticle(basicparticletype, true, (double)p_220098_1_.getX() + 0.5D + random.nextDouble() / 3.0D * (double)(random.nextBoolean() ? 1 : -1), (double)p_220098_1_.getY() + random.nextDouble() + random.nextDouble(), (double)p_220098_1_.getZ() + 0.5D + random.nextDouble() / 3.0D * (double)(random.nextBoolean() ? 1 : -1), 0.007D * xdrift, 0.05D, 0.007D * zdrift);
     }
 
     @Override
-    protected PathNavigator createNavigation(World p_175447_1_) {
+    protected PathNavigation createNavigation(Level p_175447_1_) {
         return new TugPathNavigator(this, p_175447_1_);
     }
 
     @Override
-    public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (!player.level.isClientSide()) {
-            NetworkHooks.openGui((ServerPlayerEntity) player, createContainerProvider(), getDataAccessor()::write);
+            NetworkHooks.openGui((ServerPlayer) player, createContainerProvider(), getDataAccessor()::write);
         }
         // don't open GUI *and* use item in hand
-        return ActionResultType.CONSUME;
+        return InteractionResult.CONSUME;
     }
 
     @Override
-    public void onSyncedDataUpdated(DataParameter<?> key) {
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
 
         if(level.isClientSide) {
@@ -470,9 +452,9 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     public boolean hurt(DamageSource p_70097_1_, float p_70097_2_) {
         if (this.isInvulnerableTo(p_70097_1_)) {
             return false;
-        } else if (!this.level.isClientSide && !this.removed) {
+        } else if (!this.level.isClientSide && !this.isRemoved()) {
             this.spawnAtLocation(this.getDropItem());
-            this.remove();
+            this.kill();
             return true;
         } else {
             return true;
@@ -480,12 +462,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     }
 
     @Override
-    public void remove() {
+    public void remove(RemovalReason r) {
         if (!this.level.isClientSide) {
-            InventoryHelper.dropContents(this.level, this, this);
+            Containers.dropContents(this.level, this, this);
         }
         handleSpringableKill();
-        super.remove();
+        super.remove(r);
     }
 
 
@@ -518,8 +500,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     }
 
     @Override
-    public boolean stillValid(PlayerEntity p_70300_1_) {
-        if (this.removed) {
+    public boolean stillValid(Player p_70300_1_) {
+        if (this.isRemoved()) {
             return false;
         } else {
             return !(p_70300_1_.distanceToSqr(this) > 64.0D);
@@ -555,7 +537,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     }
 
     @Override
-    public boolean canBeLeashed(PlayerEntity p_184652_1_) {
+    public boolean canBeLeashed(Player p_184652_1_) {
         return true;
     }
 

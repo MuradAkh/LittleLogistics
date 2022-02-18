@@ -1,6 +1,5 @@
 package dev.murad.shipping;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.BooleanType;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 public class ShippingConfig {

@@ -7,33 +7,34 @@ import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.InventoryUtils;
-import net.minecraft.block.Blocks;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.entity.item.BoatEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.world.Container;
-import net.minecraft.world.WorldlyContainer;
-import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.loot.*;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.Containers;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
@@ -71,27 +72,27 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
 
     }
 
-    protected INamedContainerProvider createContainerProvider() {
-        return new INamedContainerProvider() {
+    protected MenuProvider createContainerProvider() {
+        return new MenuProvider() {
             @Override
-            public ITextComponent getDisplayName() {
-                return new TranslationTextComponent("screen.littlelogistics.fishing_barge");
+            public Component getDisplayName() {
+                return new TranslatableComponent("screen.littlelogistics.fishing_barge");
             }
 
             @Nullable
             @Override
-            public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
+            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player playerEntity) {
                 return new FishingBargeContainer(i, level, getId(), playerInventory, playerEntity);
             }
         };
     }
 
     @Override
-    public void remove() {
+    public void remove(RemovalReason r) {
         if (!this.level.isClientSide) {
-            InventoryHelper.dropContents(this.level, this, this);
+            Containers.dropContents(this.level, this, this);
         }
-        super.remove();
+        super.remove(r);
     }
 
 
@@ -125,7 +126,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
 
     private double computeDepthPenalty(){
         int count = 0;
-        for (BlockPos pos = this.getOnPos();  this.level.getBlockState(pos).getBlock().equals(Blocks.WATER); pos = pos.below()){
+        for (BlockPos pos = this.getOnPos(); this.level.getBlockState(pos).getBlock().equals(Blocks.WATER); pos = pos.below()){
             count ++;
         }
         count = Math.min(count, 20);
@@ -140,15 +141,15 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
                 * ShippingConfig.Server.FISHING_TREASURE_CHANCE_MODIFIER.get() : 0;
         double r = Math.random();
         if(r < chance){
-            LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerWorld)this.level))
-                    .withParameter(LootParameters.ORIGIN, this.position())
-                    .withParameter(LootParameters.THIS_ENTITY, this)
-                    .withParameter(LootParameters.TOOL, new ItemStack(Items.FISHING_ROD))
+            LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerLevel) this.level))
+                    .withParameter(LootContextParams.ORIGIN, this.position())
+                    .withParameter(LootContextParams.THIS_ENTITY, this)
+                    .withParameter(LootContextParams.TOOL, new ItemStack(Items.FISHING_ROD))
                     .withRandom(this.random);
 
-            lootcontext$builder.withParameter(LootParameters.KILLER_ENTITY, this).withParameter(LootParameters.THIS_ENTITY, this);
-            LootTable loottable = this.level.getServer().getLootTables().get(r < treasure_chance ? LootTables.FISHING_TREASURE : fishingLootTable);
-            List<ItemStack> list = loottable.getRandomItems(lootcontext$builder.create(LootParameterSets.FISHING));
+            lootcontext$builder.withParameter(LootContextParams.KILLER_ENTITY, this).withParameter(LootContextParams.THIS_ENTITY, this);
+            LootTable loottable = this.level.getServer().getLootTables().get(r < treasure_chance ? BuiltInLootTables.FISHING_TREASURE : fishingLootTable);
+            List<ItemStack> list = loottable.getRandomItems(lootcontext$builder.create(LootContextParamSets.FISHING));
             for (ItemStack stack : list) {
                 int slot = InventoryUtils.findSlotFotItem(this, stack);
                 if (slot != -1) {
@@ -175,14 +176,14 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundNBT compound) {
+    public void readAdditionalSaveData(CompoundTag compound) {
         itemHandler.deserializeNBT(compound.getCompound("inv"));
         populateOverfish(compound.getString("overfish"));
         super.readAdditionalSaveData(compound);
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundNBT compound) {
+    public void addAdditionalSaveData(CompoundTag compound) {
         compound.put("inv", itemHandler.serializeNBT());
         compound.putString("overfish", overFishedString());
         super.addAdditionalSaveData(compound);
@@ -276,8 +277,8 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
     }
 
     @Override
-    public boolean stillValid(PlayerEntity p_70300_1_) {
-        if (this.removed) {
+    public boolean stillValid(Player p_70300_1_) {
+        if (this.dead) {
             return false;
         } else {
             return !(p_70300_1_.distanceToSqr(this) > 64.0D);

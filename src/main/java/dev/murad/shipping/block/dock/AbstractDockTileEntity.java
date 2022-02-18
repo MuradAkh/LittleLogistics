@@ -21,16 +21,16 @@ public abstract class AbstractDockTileEntity extends BlockEntity {
 
     public Optional<HopperBlockEntity> getHopper(){
         BlockEntity mayBeHopper = this.level.getBlockEntity(this.getTargetBlockPos());
-        if (mayBeHopper instanceof HopperBlockEntity) {
-            return Optional.of((HopperTileEntity) mayBeHopper);
+        if (mayBeHopper instanceof HopperBlockEntity h) {
+            return Optional.of(h);
         }
         else return Optional.empty();
     }
 
     public Optional<IVesselLoader> getVesselLoader(){
-        TileEntity mayBeHopper = this.level.getBlockEntity(this.getTargetBlockPos());
-        if (mayBeHopper instanceof IVesselLoader) {
-            return Optional.of((IVesselLoader) mayBeHopper);
+        BlockEntity mayBeHopper = this.level.getBlockEntity(this.getTargetBlockPos());
+        if (mayBeHopper instanceof IVesselLoader l) {
+            return Optional.of(l);
         }
         else return Optional.empty();
     }
