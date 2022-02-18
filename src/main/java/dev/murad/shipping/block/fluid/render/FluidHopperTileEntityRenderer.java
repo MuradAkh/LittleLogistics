@@ -11,9 +11,8 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 
 public class FluidHopperTileEntityRenderer implements BlockEntityRenderer<FluidHopperTileEntity> {
-    private BlockEntityRendererProvider.Context context;
     public FluidHopperTileEntityRenderer(BlockEntityRendererProvider.Context context) {
-        this.context = context;
+
     }
 
     @Override

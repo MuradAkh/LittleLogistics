@@ -7,7 +7,6 @@ import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;
@@ -74,13 +73,11 @@ public class VesselChargerTileEntity extends BlockEntity implements IVesselLoade
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT compound) {
-        //FIXME: 1.18 changes
-        CompoundNBT energyNBT = new CompoundNBT();
+    public void saveAdditional(CompoundTag compound) {
+        CompoundTag energyNBT = new CompoundTag();
         internalBattery.addAdditionalSaveData(energyNBT);
-        CompoundNBT sup = super.save(compound);
-        sup.put("energy_storage", energyNBT);
-        return sup;
+        super.saveAdditional(compound);
+        compound.put("energy_storage", energyNBT);
     }
 
     @Override
