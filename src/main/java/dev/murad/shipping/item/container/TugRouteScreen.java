@@ -2,13 +2,19 @@ package dev.murad.shipping.item.container;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.util.TugRouteNode;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
@@ -50,7 +56,7 @@ public class TugRouteScreen extends AbstractContainerScreen<TugRouteContainer> {
     // https://github.com/ChAoSUnItY/EkiLib/blob/9b63591608cefafce32113a68bc8fd4b71972ece/src/main/java/com/chaos/eki_lib/utils/network/PacketInitStationHandler.java
     // https://github.com/ChAoSUnItY/EkiLib/blob/9b63591608cefafce32113a68bc8fd4b71972ece/src/main/java/com/chaos/eki_lib/utils/handlers/PacketHandler.java
 
-    private Button.ITooltip getTooltip(ITextComponent tooltip) {
+    private Button.OnTooltip getTooltip(TranslatableComponent tooltip) {
         return (button, stack, x, y) -> renderTooltip(stack, tooltip, x, y);
     }
 
@@ -63,8 +69,8 @@ public class TugRouteScreen extends AbstractContainerScreen<TugRouteContainer> {
         this.addWidget(this.route.initializeWidget(TugRouteScreen.this.width, TugRouteScreen.this.height,
                 topPos + 40, topPos + TugRouteScreen.this.imageHeight - 45, 20));
 
-        this.addButton(new Button(getRight() - 92, getBot() - 24, 20, 20,
-                new StringTextComponent("..\uA56F").withStyle(TextFormatting.BOLD),
+        this.addWidget(new Button(getRight() - 92, getBot() - 24, 20, 20,
+                new TextComponent("..\uA56F").withStyle(TextFormatting.BOLD),
                 button -> {
                     Optional<Pair<Integer, TugRouteNode>> selectedOpt = route.getSelected();
                     if (selectedOpt.isPresent()) {
@@ -72,26 +78,26 @@ public class TugRouteScreen extends AbstractContainerScreen<TugRouteContainer> {
                         this.minecraft.pushGuiLayer(new StringInputScreen(selected.getSecond(), selected.getFirst(), this.route::renameSelected));
                     }
                 },
-                getTooltip(new TranslationTextComponent("screen.littlelogistics.tug_route.rename_button"))));
+                getTooltip(new TranslatableComponent("screen.littlelogistics.tug_route.rename_button"))));
 
-        this.addButton(new Button(getRight() - 70, getBot() - 24, 20, 20,
-                new StringTextComponent("\u25B2"),
+        this.addWidget(new Button(getRight() - 70, getBot() - 24, 20, 20,
+                new TextComponent("\u25B2"),
                 button -> route.moveSelectedUp(),
-                getTooltip(new TranslationTextComponent("screen.littlelogistics.tug_route.up_button"))));
+                getTooltip(new TranslatableComponent("screen.littlelogistics.tug_route.up_button"))));
 
-        this.addButton(new Button(getRight() - 47, getBot() - 24, 20, 20,
-                new StringTextComponent("\u25BC"),
+        this.addWidget(new Button(getRight() - 47, getBot() - 24, 20, 20,
+                new TextComponent("\u25BC"),
                 button -> route.moveSelectedDown(),
-                getTooltip(new TranslationTextComponent("screen.littlelogistics.tug_route.down_button"))));
+                getTooltip(new TranslatableComponent("screen.littlelogistics.tug_route.down_button"))));
 
-        this.addButton(new Button(getRight() - 24, getBot() - 24, 20, 20,
-                new StringTextComponent("\u2718"),
+        this.addWidget(new Button(getRight() - 24, getBot() - 24, 20, 20,
+                new TextComponent("\u2718"),
                 button -> route.deleteSelected(),
-                getTooltip(new TranslationTextComponent("screen.littlelogistics.tug_route.delete_button"))));
+                getTooltip(new TranslatableComponent("screen.littlelogistics.tug_route.delete_button"))));
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(matrixStack);
         super.render(matrixStack, mouseX, mouseY, partialTicks);
         this.renderTooltip(matrixStack, mouseX, mouseY);
@@ -101,9 +107,10 @@ public class TugRouteScreen extends AbstractContainerScreen<TugRouteContainer> {
     }
 
     @Override
-    protected void renderBg(MatrixStack matrixStack, float partialTicks, int x, int y) {
-        RenderSystem.color4f(1f, 1f, 1f, 1f);
-        this.minecraft.getTextureManager().bind(GUI);
+    protected void renderBg(PoseStack matrixStack, float partialTicks, int x, int y) {
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, GUI);
         int left = this.getGuiLeft();
         int top = this.getGuiTop();
         int right = this.getRight();
@@ -148,16 +155,16 @@ public class TugRouteScreen extends AbstractContainerScreen<TugRouteContainer> {
     }
 
     // This is the correct version of Minecraft's Blit, without texH and texW being flipped...
-    private void correctBlit(MatrixStack stack, int x, int y, int z, float u, float v, int w, int h, int texW, int texH) {
+    private void correctBlit(PoseStack stack, int x, int y, int z, float u, float v, int w, int h, int texW, int texH) {
         blit(stack, x, y, z, u, v, w, h, texH, texW);
     }
 
     // remove inventory tag
-    protected void renderLabels(MatrixStack stack, int p_230451_2_, int p_230451_3_) {
+    protected void renderLabels(PoseStack stack, int p_230451_2_, int p_230451_3_) {
         this.font.draw(stack, this.title, (float)this.titleLabelX, (float)this.titleLabelY, 4210752);
     }
 
-    public FontRenderer getFont() {
+    public Font getFont() {
         return font;
     }
 }
