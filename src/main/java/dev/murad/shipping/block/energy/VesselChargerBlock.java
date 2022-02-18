@@ -2,6 +2,7 @@ package dev.murad.shipping.block.energy;
 
 import dev.murad.shipping.block.vessel_detector.VesselDetectorTileEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import dev.murad.shipping.util.TickerUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -25,7 +26,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import javax.annotation.Nullable;
 import java.util.stream.Stream;
 
-public class VesselChargerBlock extends BaseEntityBlock {
+public class VesselChargerBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     private static final VoxelShape SHAPE_N = Stream.of(
             Block.box(3, 2, 3, 13, 13, 13),
@@ -123,7 +124,7 @@ public class VesselChargerBlock extends BaseEntityBlock {
     }
 
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide() ? null : createTickerHelper(type, ModTileEntitiesTypes.VESSEL_CHARGER.get(), VesselChargerTileEntity::serverTick);
+        return level.isClientSide() ? null : TickerUtil.createTickerHelper(type, ModTileEntitiesTypes.VESSEL_CHARGER.get(), VesselChargerTileEntity::serverTick);
     }
 }
 

@@ -1,8 +1,10 @@
 package dev.murad.shipping.block.vessel_detector;
 
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Vector3f;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.MathUtil;
+import dev.murad.shipping.util.TickerUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -12,10 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -31,12 +30,12 @@ import net.minecraft.world.phys.Vec3;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class VesselDetectorBlock extends BaseEntityBlock {
+public class VesselDetectorBlock extends Block implements EntityBlock {
 
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
 
-//    private static final RedstoneParticleData PARTICLE = new RedstoneParticleData(0.9f, 0.65f, 0.2f, 1.0f);
+    private static final DustParticleOptions PARTICLE = new DustParticleOptions(new Vector3f(0.9f, 0.65f, 0.2f), 1.0f);
 
     @Nullable
     @Override
@@ -100,7 +99,7 @@ public class VesselDetectorBlock extends BaseEntityBlock {
             Vec3 from = edge.getFirst(), to = edge.getSecond();
             for (int i = 0; i < 10; i++) {
                 Vec3 pPos = MathUtil.lerp(from, to, (float) i / 10);
-                level.addParticle(DustParticleOptions.REDSTONE, pPos.x, pPos.y, pPos.z, 0, 0, 0);
+                level.addParticle(PARTICLE, pPos.x, pPos.y, pPos.z, 0, 0, 0);
             }
         }
     }
@@ -117,6 +116,6 @@ public class VesselDetectorBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide() ? null : createTickerHelper(type, ModTileEntitiesTypes.VESSEL_DETECTOR.get(), VesselDetectorTileEntity::serverTick);
+        return level.isClientSide() ? null : TickerUtil.createTickerHelper(type, ModTileEntitiesTypes.VESSEL_DETECTOR.get(), VesselDetectorTileEntity::serverTick);
     }
 }

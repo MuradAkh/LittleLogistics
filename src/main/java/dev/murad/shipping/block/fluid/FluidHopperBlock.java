@@ -3,6 +3,7 @@ package dev.murad.shipping.block.fluid;
 
 import dev.murad.shipping.block.energy.VesselChargerTileEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import dev.murad.shipping.util.TickerUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -26,7 +27,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import javax.annotation.Nullable;
 import java.util.stream.Stream;
 
-public class FluidHopperBlock extends BaseEntityBlock {
+public class FluidHopperBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
     VoxelShape SHAPE_N = Stream.of(
@@ -177,6 +178,6 @@ public class FluidHopperBlock extends BaseEntityBlock {
     }
 
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide() ? null : createTickerHelper(type, ModTileEntitiesTypes.FLUID_HOPPER.get(), FluidHopperTileEntity::serverTick);
+        return level.isClientSide() ? null : TickerUtil.createTickerHelper(type, ModTileEntitiesTypes.FLUID_HOPPER.get(), FluidHopperTileEntity::serverTick);
     }
 }
