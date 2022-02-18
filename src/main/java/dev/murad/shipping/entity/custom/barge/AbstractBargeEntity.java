@@ -70,7 +70,7 @@ public abstract class AbstractBargeEntity extends VesselEntity implements ISprin
             return false;
         } else if (!this.level.isClientSide && !this.dead) {
             this.spawnAtLocation(this.getDropItem());
-            this.kill();
+            this.remove(RemovalReason.KILLED);
             return true;
         } else {
             return true;

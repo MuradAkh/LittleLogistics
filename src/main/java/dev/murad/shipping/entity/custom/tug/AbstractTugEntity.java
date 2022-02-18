@@ -378,7 +378,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
             TugRouteNode stop = path.get(nextStop);
             if (navigation.getPath() == null || navigation.getPath().isDone()
             ) {
-                if(pathfindCooldown < 0){
+                if(pathfindCooldown < 0 || navigation.getPath() != null){  //only go on cooldown when the path was not completed
                     navigation.moveTo(stop.getX(), this.getY(), stop.getZ(), 0.3);
                     pathfindCooldown = 20;
                 } else {
@@ -454,7 +454,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
             return false;
         } else if (!this.level.isClientSide && !this.isRemoved()) {
             this.spawnAtLocation(this.getDropItem());
-            this.kill();
+            this.remove(RemovalReason.KILLED);
             return true;
         } else {
             return true;

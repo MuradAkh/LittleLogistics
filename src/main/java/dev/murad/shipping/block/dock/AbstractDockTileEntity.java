@@ -3,12 +3,15 @@ package dev.murad.shipping.block.dock;
 import dev.murad.shipping.block.IVesselLoader;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 

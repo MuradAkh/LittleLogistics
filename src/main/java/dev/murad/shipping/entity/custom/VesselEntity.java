@@ -22,6 +22,8 @@ import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WaterlilyBlock;
@@ -160,6 +162,11 @@ public abstract class VesselEntity extends WaterAnimal implements ISpringableEnt
     @Override
     public void checkDespawn() {
 
+    }
+
+    @Nullable
+    public ItemStack getPickResult() {
+        return new ItemStack(getDropItem());
     }
 
     private void floatBoat() {

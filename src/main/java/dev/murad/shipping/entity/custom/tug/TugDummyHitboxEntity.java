@@ -13,10 +13,13 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.entity.IEntityAdditionalSpawnData;
 import net.minecraftforge.network.NetworkHooks;
+
+import javax.annotation.Nullable;
 
 public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpawnData {
     private AbstractTugEntity tugEntity;
@@ -37,6 +40,19 @@ public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpa
         this.zo = getZ();
     }
 
+    public boolean canBeCollidedWith() {
+        return false;
+    }
+
+    @Nullable
+    public ItemStack getPickResult() {
+        if(tugEntity == null){
+            return null;
+        }
+        return new ItemStack(tugEntity.getDropItem());
+    }
+
+
     public AbstractTugEntity getTug(){
         return tugEntity;
     }
@@ -45,14 +61,17 @@ public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpa
     public void tick(){
         if(this.level.isClientSide && tugEntity == null){
             setTug();
+            if(tugEntity == null){
+                this.remove(RemovalReason.DISCARDED);
+            }
         }
         if(!this.level.isClientSide) {
-            if (tugEntity == null || !tugEntity.isAlive()) {
-                this.kill();
+            if (tugEntity == null || tugEntity.isRemoved()) {
+                this.remove(RemovalReason.DISCARDED);
             } else {
                 TugDummyHitboxEntity p = tugEntity.getDummyHitbox();
                 if (p != null && !p.equals(this)) {
-                    this.kill();
+                    this.remove(RemovalReason.DISCARDED);
                 } else {
                     entityData.set(TUG_ID, tugEntity.getId());
                 }
@@ -68,7 +87,7 @@ public class TugDummyHitboxEntity extends Entity implements IEntityAdditionalSpa
     }
 
     public boolean isPickable() {
-        return !this.isAlive();
+        return !this.isRemoved();
     }
 
     @Override
