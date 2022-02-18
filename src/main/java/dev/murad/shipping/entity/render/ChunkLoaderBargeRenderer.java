@@ -11,11 +11,12 @@ public class ChunkLoaderBargeRenderer extends VesselRenderer<ChunkLoaderBargeEnt
     private static final ResourceLocation BARGE_TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/chunk_loader_barge.png");
 
-    private final EntityModel model = new ChunkLoaderBargeModel();
+    private final EntityModel model;
 
 
     public ChunkLoaderBargeRenderer(EntityRendererProvider.Context context) {
         super(context);
+        model = new ChunkLoaderBargeModel(context.bakeLayer(ChunkLoaderBargeModel.LAYER_LOCATION));
     }
 
     @Override

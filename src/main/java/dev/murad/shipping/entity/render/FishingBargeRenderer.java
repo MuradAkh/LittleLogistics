@@ -14,12 +14,15 @@ public class FishingBargeRenderer extends VesselRenderer<FishingBargeEntity> {
     private static final ResourceLocation BARGE_TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/fishing_barge.png");
 
-    private final EntityModel stashed = new FishingBargeModel();
-    private final EntityModel transition = new FishingBargeTransitionModel();
-    private final EntityModel deployed = new FishingBargeDeployedModel();
+    private final EntityModel stashed;
+    private final EntityModel transition;
+    private final EntityModel deployed;
 
     public FishingBargeRenderer(EntityRendererProvider.Context context) {
         super(context);
+        stashed = new FishingBargeModel(context.bakeLayer(FishingBargeModel.LAYER_LOCATION));
+        transition = new FishingBargeTransitionModel(context.bakeLayer(FishingBargeTransitionModel.LAYER_LOCATION));
+        deployed = new FishingBargeDeployedModel(context.bakeLayer(FishingBargeDeployedModel.LAYER_LOCATION));
     }
 
     @Override

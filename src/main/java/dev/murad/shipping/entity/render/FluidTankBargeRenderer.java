@@ -17,11 +17,12 @@ public class FluidTankBargeRenderer extends VesselRenderer<FluidTankBargeEntity>
     private static final ResourceLocation BARGE_TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/fluid_barge.png");
 
-    private final EntityModel model = new FluidTankBargeModel();
+    private final EntityModel model;
 
 
     public FluidTankBargeRenderer(EntityRendererProvider.Context context) {
         super(context);
+        model = new FluidTankBargeModel(context.bakeLayer(FluidTankBargeModel.LAYER_LOCATION));
     }
 
     @Override

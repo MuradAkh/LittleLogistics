@@ -13,10 +13,11 @@ public class SteamTugRenderer extends VesselRenderer<SteamTugEntity> {
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/tug.png");
 
 
-    private final EntityModel model = new SteamTugModel();
+    private final EntityModel model;
 
     public SteamTugRenderer(EntityRendererProvider.Context context) {
         super(context);
+        model = new SteamTugModel(context.bakeLayer(SteamTugModel.LAYER_LOCATION));
     }
 
     @Override

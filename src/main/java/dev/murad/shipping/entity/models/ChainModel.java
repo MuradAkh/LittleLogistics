@@ -1,55 +1,52 @@
-package dev.murad.shipping.entity.models;// Made with Blockbench 4.0.5
-// Exported for Minecraft version 1.15 - 1.16 with Mojang mappings
-// Paste this class into your mod and generate all required imports
+package dev.murad.shipping.entity.models;
 
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.resources.ResourceLocation;
 
+// Made with Blockbench 4.1.5
+// Exported for Minecraft version 1.17 with Mojang mappings
+// Paste this class into your mod and generate all required imports
 public class ChainModel extends EntityModel<AbstractBargeEntity> {
+	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "chainmodel"), "main");
 	private final ModelPart bb_main;
-	private final ModelPart cube_r1;
-	private final ModelPart bone2;
 
-	public ChainModel() {
-		texWidth = 16;
-		texHeight = 16;
+	public ChainModel(ModelPart root) {
+		this.bb_main = root.getChild("bb_main");
+	}
 
-		bb_main = new ModelRenderer(this);
-		bb_main.setPos(-13.0F, 24.0F, 0.0F);
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshdefinition = new MeshDefinition();
+		PartDefinition partdefinition = meshdefinition.getRoot();
 
+		PartDefinition bb_main = partdefinition.addOrReplaceChild("bb_main", CubeListBuilder.create(), PartPose.offset(-13.0F, 24.0F, 0.0F));
 
-		cube_r1 = new ModelRenderer(this);
-		cube_r1.setPos(0.0F, 0.0F, 0.0F);
-		bb_main.addChild(cube_r1);
-		setRotationAngle(cube_r1, 0.0F, -1.5708F, 0.0F);
+		PartDefinition cube_r1 = bb_main.addOrReplaceChild("cube_r1", CubeListBuilder.create(), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
 
+		PartDefinition bone2 = cube_r1.addOrReplaceChild("bone2", CubeListBuilder.create().texOffs(0, 2).addBox(1.0F, -25.0F, -11.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+				.texOffs(0, 0).addBox(0.0F, -25.0F, -13.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+				.texOffs(3, 8).addBox(0.0F, -26.0F, -13.0F, 2.0F, 1.0F, 4.0F, new CubeDeformation(0.0F))
+				.texOffs(4, 4).addBox(0.0F, -24.0F, -13.0F, 2.0F, 1.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(-1.0F, 0.0F, 1.0F));
 
-		bone2 = new ModelRenderer(this);
-		bone2.setPos(-1.0F, 0.0F, 1.0F);
-		cube_r1.addChild(bone2);
-		bone2.texOffs(0, 2).addBox(1.0F, -25.0F, -11.0F, 1.0F, 1.0F, 1.0F, 0.0F, false);
-		bone2.texOffs(0, 0).addBox(0.0F, -25.0F, -13.0F, 1.0F, 1.0F, 1.0F, 0.0F, false);
-		bone2.texOffs(3, 8).addBox(0.0F, -26.0F, -13.0F, 2.0F, 1.0F, 4.0F, 0.0F, false);
-		bone2.texOffs(4, 4).addBox(0.0F, -24.0F, -13.0F, 2.0F, 1.0F, 4.0F, 0.0F, false);
+		return LayerDefinition.create(meshdefinition, 16, 16);
 	}
 
 	@Override
-	public void setupAnim(AbstractBargeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch){
-		//previously the render function, render code was moved to a method below
+	public void setupAnim(AbstractBargeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+
 	}
 
 	@Override
-	public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha){
-		bb_main.render(matrixStack, buffer, packedLight, packedOverlay);
-	}
-
-	public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
-		modelRenderer.xRot = x;
-		modelRenderer.yRot = y;
-		modelRenderer.zRot = z;
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+		bb_main.render(poseStack, buffer, packedLight, packedOverlay);
 	}
 }

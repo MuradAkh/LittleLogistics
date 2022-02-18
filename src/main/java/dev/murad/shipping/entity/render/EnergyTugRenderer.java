@@ -13,10 +13,11 @@ public class EnergyTugRenderer extends VesselRenderer<EnergyTugEntity> {
     private static final ResourceLocation TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/energy_tug.png");
 
-    private final EntityModel model = new EnergyTugModel();
+    private final EntityModel model;
 
     public EnergyTugRenderer(EntityRendererProvider.Context context) {
         super(context);
+        model = new EnergyTugModel(context.bakeLayer(EnergyTugModel.LAYER_LOCATION));
     }
 
     @Override

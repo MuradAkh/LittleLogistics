@@ -12,11 +12,12 @@ public class SeaterBargeRenderer extends VesselRenderer<SeaterBargeEntity> {
     private static final ResourceLocation BARGE_TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/seater_barge.png");
 
-    private final EntityModel model = new SeaterBargeModel();
+    private final EntityModel model;
 
 
     public SeaterBargeRenderer(EntityRendererProvider.Context context) {
         super(context);
+        model = new SeaterBargeModel(context.bakeLayer(SeaterBargeModel.LAYER_LOCATION));
     }
 
     @Override

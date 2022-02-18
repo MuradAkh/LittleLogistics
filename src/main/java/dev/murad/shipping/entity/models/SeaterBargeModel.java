@@ -1,61 +1,56 @@
 package dev.murad.shipping.entity.models;
-// Made with Blockbench 4.1.1
-// Exported for Minecraft version 1.15 - 1.16 with Mojang mappings
-// Paste this class into your mod and generate all required imports
 
-
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.murad.shipping.ShippingMod;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 
 public class SeaterBargeModel extends EntityModel<Entity> {
+	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "seaterbargemodel"), "main");
 	private final ModelPart bb_main;
-	private final ModelPart cube_r1;
 	private final ModelPart bb_main2;
 
-	public SeaterBargeModel() {
-		texWidth = 128;
-		texHeight = 128;
+	public SeaterBargeModel(ModelPart root) {
+		this.bb_main = root.getChild("bb_main");
+		this.bb_main2 = root.getChild("bb_main2");
+	}
 
-		bb_main = new ModelRenderer(this);
-		bb_main.setPos(0.0F, 23.0F, 0.0F);
-		bb_main.texOffs(0, 0).addBox(-6.0F, -27.0F, -7.0F, 12.0F, 5.0F, 14.0F, 0.0F, false);
-		bb_main.texOffs(38, 5).addBox(-8.0F, -29.0F, -7.0F, 2.0F, 4.0F, 14.0F, 0.0F, false);
-		bb_main.texOffs(28, 43).addBox(-6.0F, -29.0F, -9.0F, 11.0F, 4.0F, 2.0F, 0.0F, false);
-		bb_main.texOffs(0, 41).addBox(-6.0F, -29.0F, 7.0F, 11.0F, 4.0F, 2.0F, 0.0F, false);
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshdefinition = new MeshDefinition();
+		PartDefinition partdefinition = meshdefinition.getRoot();
 
-		cube_r1 = new ModelRenderer(this);
-		cube_r1.setPos(0.0F, 0.0F, 0.0F);
-		bb_main.addChild(cube_r1);
-		setRotationAngle(cube_r1, 0.0F, -1.5708F, 0.0F);
+		PartDefinition bb_main = partdefinition.addOrReplaceChild("bb_main", CubeListBuilder.create().texOffs(0, 0).addBox(-6.0F, -27.0F, -7.0F, 12.0F, 5.0F, 14.0F, new CubeDeformation(0.0F))
+				.texOffs(38, 5).addBox(-8.0F, -29.0F, -7.0F, 2.0F, 4.0F, 14.0F, new CubeDeformation(0.0F))
+				.texOffs(28, 43).addBox(-6.0F, -29.0F, -9.0F, 11.0F, 4.0F, 2.0F, new CubeDeformation(0.0F))
+				.texOffs(0, 41).addBox(-6.0F, -29.0F, 7.0F, 11.0F, 4.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 23.0F, 0.0F));
 
+		PartDefinition cube_r1 = bb_main.addOrReplaceChild("cube_r1", CubeListBuilder.create(), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
 
-		bb_main2 = new ModelRenderer(this);
-		bb_main2.setPos(0.0F, 24.0F, 0.0F);
-		bb_main2.texOffs(0, 19).addBox(-5.0F, -29.0F, -5.0F, 9.0F, 1.0F, 10.0F, 0.0F, false);
-		bb_main2.texOffs(9, 22).addBox(-5.0F, -35.0F, -5.0F, 1.0F, 6.0F, 10.0F, 0.0F, false);
-		bb_main2.texOffs(11, 23).addBox(-4.0F, -31.0F, -5.0F, 8.0F, 2.0F, 1.0F, 0.0F, false);
-		bb_main2.texOffs(11, 24).addBox(-4.0F, -31.0F, 4.0F, 8.0F, 2.0F, 1.0F, 0.0F, false);
-		bb_main2.texOffs(0, 49).addBox(-4.0F, -32.0F, -6.0F, 8.0F, 1.0F, 2.0F, 0.0F, false);
-		bb_main2.texOffs(0, 49).addBox(-4.0F, -32.0F, 4.0F, 8.0F, 1.0F, 2.0F, 0.0F, false);
+		PartDefinition bb_main2 = partdefinition.addOrReplaceChild("bb_main2", CubeListBuilder.create().texOffs(0, 19).addBox(-5.0F, -29.0F, -5.0F, 9.0F, 1.0F, 10.0F, new CubeDeformation(0.0F))
+				.texOffs(9, 22).addBox(-5.0F, -35.0F, -5.0F, 1.0F, 6.0F, 10.0F, new CubeDeformation(0.0F))
+				.texOffs(11, 23).addBox(-4.0F, -31.0F, -5.0F, 8.0F, 2.0F, 1.0F, new CubeDeformation(0.0F))
+				.texOffs(11, 24).addBox(-4.0F, -31.0F, 4.0F, 8.0F, 2.0F, 1.0F, new CubeDeformation(0.0F))
+				.texOffs(0, 49).addBox(-4.0F, -32.0F, -6.0F, 8.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+				.texOffs(0, 49).addBox(-4.0F, -32.0F, 4.0F, 8.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 24.0F, 0.0F));
+
+		return LayerDefinition.create(meshdefinition, 128, 128);
 	}
 
 	@Override
-	public void setupAnim(Entity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch){
-		//previously the render function, render code was moved to a method below
+	public void setupAnim(Entity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+
 	}
 
 	@Override
-	public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha){
-		bb_main.render(matrixStack, buffer, packedLight, packedOverlay);
-		bb_main2.render(matrixStack, buffer, packedLight, packedOverlay);
-	}
-
-	public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
-		modelRenderer.xRot = x;
-		modelRenderer.yRot = y;
-		modelRenderer.zRot = z;
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+		bb_main.render(poseStack, buffer, packedLight, packedOverlay);
+		bb_main2.render(poseStack, buffer, packedLight, packedOverlay);
 	}
 }

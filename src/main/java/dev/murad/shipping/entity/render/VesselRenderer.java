@@ -1,7 +1,6 @@
 package dev.murad.shipping.entity.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3d;
@@ -10,26 +9,17 @@ import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.entity.models.ChainModel;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.culling.ClippingHelper;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.entity.Entity;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Mth;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.world.LightType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
@@ -40,11 +30,12 @@ public abstract class VesselRenderer<T extends VesselEntity> extends EntityRende
     private static final ResourceLocation CHAIN_TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/chain.png");
 
-    private static final ChainModel chainModel = new ChainModel();
+    private final ChainModel chainModel;
 
 
     public VesselRenderer(EntityRendererProvider.Context context) {
         super(context);
+        chainModel = new ChainModel(context.bakeLayer(ChainModel.LAYER_LOCATION));
     }
 
     public void render(T vesselEntity, float p_225623_2_, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
@@ -118,6 +109,7 @@ public abstract class VesselRenderer<T extends VesselEntity> extends EntityRende
 
     abstract EntityModel getModel(T entity);
 
+
     private <E extends Entity> void renderLeash(T p_229118_1_, float p_229118_2_, PoseStack p_229118_3_, MultiBufferSource p_229118_4_, E p_229118_5_) {
         p_229118_3_.pushPose();
         Vec3 vector3d = p_229118_5_.getRopeHoldPosition(p_229118_2_);
@@ -142,10 +134,49 @@ public abstract class VesselRenderer<T extends VesselEntity> extends EntityRende
         int i = this.getBlockLightLevel(p_229118_1_, blockpos);
         int k = p_229118_1_.level.getBrightness(LightLayer.SKY, blockpos);
         int l = p_229118_1_.level.getBrightness(LightLayer.SKY, blockpos1);
-        MobRenderer.renderSide(ivertexbuilder, matrix4f, f, f1, f2, i, i, k, l, 0.025F, 0.025F, f5, f6);
-        MobRenderer.renderSide(ivertexbuilder, matrix4f, f, f1, f2, i, i, k, l, 0.025F, 0.0F, f5, f6);
+        renderSide(ivertexbuilder, matrix4f, f, f1, f2, i, i, k, l, 0.025F, 0.025F, f5, f6);
+        renderSide(ivertexbuilder, matrix4f, f, f1, f2, i, i, k, l, 0.025F, 0.0F, f5, f6);
         p_229118_3_.popPose();
     }
 
+    /*
+        Shamelessly stolen from LuaX's fabric port of this mod
+     */
+    public static void renderSide(VertexConsumer p_229119_0_, Matrix4f p_229119_1_, float p_229119_2_, float p_229119_3_, float p_229119_4_, int p_229119_5_, int p_229119_6_, int p_229119_7_, int p_229119_8_, float p_229119_9_, float p_229119_10_, float p_229119_11_, float p_229119_12_) {
+        int i = 24;
 
+        for(int j = 0; j < 24; ++j) {
+            float f = (float)j / 23.0F;
+            int k = (int)Mth.lerp(f, (float)p_229119_5_, (float)p_229119_6_);
+            int l = (int)Mth.lerp(f, (float)p_229119_7_, (float)p_229119_8_);
+            int i1 = LightTexture.pack(k, l);
+            addVertexPair(p_229119_0_, p_229119_1_, i1, p_229119_2_, p_229119_3_, p_229119_4_, p_229119_9_, p_229119_10_, 24, j, false, p_229119_11_, p_229119_12_);
+            addVertexPair(p_229119_0_, p_229119_1_, i1, p_229119_2_, p_229119_3_, p_229119_4_, p_229119_9_, p_229119_10_, 24, j + 1, true, p_229119_11_, p_229119_12_);
+        }
+
+    }
+    public static void addVertexPair(VertexConsumer p_229120_0_, Matrix4f p_229120_1_, int lightUV, float p_229120_3_, float p_229120_4_, float p_229120_5_, float p_229120_6_, float p_229120_7_, int p_229120_8_, int p_229120_9_, boolean p_229120_10_, float p_229120_11_, float p_229120_12_) {
+        float f = 0.5F;
+        float f1 = 0.4F;
+        float f2 = 0.3F;
+        if (p_229120_9_ % 2 == 0) {
+            f *= 0.7F;
+            f1 *= 0.7F;
+            f2 *= 0.7F;
+        }
+
+        float f3 = (float)p_229120_9_ / (float)p_229120_8_;
+        float f4 = p_229120_3_ * f3;
+        float f5 = p_229120_4_ > 0.0F ? p_229120_4_ * f3 * f3 : p_229120_4_ - p_229120_4_ * (1.0F - f3) * (1.0F - f3);
+        float f6 = p_229120_5_ * f3;
+        if (!p_229120_10_) {
+            p_229120_0_.vertex(p_229120_1_, f4 + p_229120_11_, f5 + p_229120_6_ - p_229120_7_, f6 - p_229120_12_).color(f, f1, f2, 1.0F).uv2(lightUV).endVertex();
+        }
+
+        p_229120_0_.vertex(p_229120_1_, f4 - p_229120_11_, f5 + p_229120_7_, f6 + p_229120_12_).color(f, f1, f2, 1.0F).uv2(lightUV).endVertex();
+        if (p_229120_10_) {
+            p_229120_0_.vertex(p_229120_1_, f4 + p_229120_11_, f5 + p_229120_6_ - p_229120_7_, f6 - p_229120_12_).color(f, f1, f2, 1.0F).uv2(lightUV).endVertex();
+        }
+
+    }
 }
