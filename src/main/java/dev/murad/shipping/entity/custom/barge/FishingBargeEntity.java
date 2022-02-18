@@ -3,7 +3,7 @@ package dev.murad.shipping.entity.custom.barge;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.entity.container.FishingBargeContainer;
-import dev.murad.shipping.entity.custom.ISpringableEntity;
+import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.InventoryUtils;
@@ -293,7 +293,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
         if (ticksDeployable < 40){
             return Status.TRANSITION;
         } else {
-            return this.applyWithDominant(ISpringableEntity::hasWaterOnSides)
+            return this.applyWithDominant(LinkableEntity::hasWaterOnSides)
                     .reduce(true, Boolean::logicalAnd)
                     ? Status.DEPLOYED : Status.TRANSITION;
         }

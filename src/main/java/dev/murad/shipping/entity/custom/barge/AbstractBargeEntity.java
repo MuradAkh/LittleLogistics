@@ -2,7 +2,7 @@ package dev.murad.shipping.entity.custom.barge;
 
 
 import com.mojang.datafixers.util.Pair;
-import dev.murad.shipping.entity.custom.ISpringableEntity;
+import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.util.Train;
@@ -22,7 +22,7 @@ import net.minecraftforge.network.NetworkHooks;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public abstract class AbstractBargeEntity extends VesselEntity implements ISpringableEntity {
+public abstract class AbstractBargeEntity extends VesselEntity implements LinkableEntity {
     public AbstractBargeEntity(EntityType<? extends AbstractBargeEntity> type, Level world) {
         super(type, world);
         this.blocksBuilding = true;
@@ -85,12 +85,12 @@ public abstract class AbstractBargeEntity extends VesselEntity implements ISprin
     }
 
     @Override
-    public void setDominated(ISpringableEntity entity, SpringEntity spring) {
+    public void setDominated(LinkableEntity entity, SpringEntity spring) {
         this.dominated = Optional.of(new Pair<>(entity, spring));
     }
 
     @Override
-    public void setDominant(ISpringableEntity entity, SpringEntity spring) {
+    public void setDominant(LinkableEntity entity, SpringEntity spring) {
         this.setTrain(entity.getTrain());
         this.dominant = Optional.of(new Pair<>(entity, spring));
     }

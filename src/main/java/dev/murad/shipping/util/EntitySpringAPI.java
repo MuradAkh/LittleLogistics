@@ -24,7 +24,6 @@ SOFTWARE.
  */
 
 
-import dev.murad.shipping.entity.custom.ISpringableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
@@ -58,7 +57,7 @@ public class EntitySpringAPI {
     }
 
     public static boolean isValidTarget(Entity target) {
-        return target instanceof ISpringableEntity || target instanceof TugDummyHitboxEntity;
+        return target instanceof LinkableEntity || target instanceof TugDummyHitboxEntity;
     }
 
     public static void addGenericAnchorMapping(Class<? extends Entity> entity, BiFunction<Entity, SpringEntity.SpringSide, Vec3> function) {

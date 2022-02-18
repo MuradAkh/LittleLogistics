@@ -2,6 +2,7 @@ package dev.murad.shipping.block.dock;
 
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.block.IVesselLoader;
+import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
@@ -73,10 +74,10 @@ public class TugDockTileEntity extends AbstractDockTileEntity {
     }
 
     private List<Pair<AbstractBargeEntity, BargeDockTileEntity>> getBargeDockPairs(AbstractTugEntity tug){
-        List<AbstractBargeEntity> barges = tug.getTrain().getBarges();
+        List<LinkableEntity> barges = tug.getTrain().getNonTugList();
         List<BargeDockTileEntity> docks = getBargeDocks();
         return IntStream.range(0, Math.min(barges.size(), docks.size()))
-                .mapToObj(i -> new Pair<>(barges.get(i), docks.get(i)))
+                .mapToObj(i -> new Pair<>((AbstractBargeEntity) barges.get(i), docks.get(i)))
                 .collect(Collectors.toList());
     }
 

@@ -28,6 +28,7 @@ import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.EntitySpringAPI;
+import dev.murad.shipping.util.LinkableEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -196,7 +197,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
 
 
                 double distSq = dominant.distanceToSqr(dominated);
-                double maxDstSq = ((ISpringableEntity) dominant).getTrain().getTug().map(tug -> tug.isDocked() ? 1 : 1.2).orElse(1.2);
+                double maxDstSq = ((LinkableEntity) dominant).getTrain().getTug().map(tug -> ((AbstractTugEntity) tug).isDocked() ? 1 : 1.2).orElse(1.2);
                 if (distSq > maxDstSq) {
                     Vec3 frontAnchor = calculateAnchorPosition(dominant, SpringSide.DOMINATED);
                     Vec3 backAnchor = calculateAnchorPosition(dominated, SpringSide.DOMINANT);

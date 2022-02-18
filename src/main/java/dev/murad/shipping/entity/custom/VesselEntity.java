@@ -2,6 +2,7 @@ package dev.murad.shipping.entity.custom;
 
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.Train;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -23,7 +24,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WaterlilyBlock;
@@ -45,7 +45,7 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Optional;
 
-public abstract class VesselEntity extends WaterAnimal implements ISpringableEntity {
+public abstract class VesselEntity extends WaterAnimal implements LinkableEntity {
     protected VesselEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
         stuckCounter = 0;
@@ -62,8 +62,8 @@ public abstract class VesselEntity extends WaterAnimal implements ISpringableEnt
     private Boat.Status oldStatus;
     private double lastYd;
 
-    protected Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
-    protected Optional<Pair<ISpringableEntity, SpringEntity>> dominant = Optional.empty();
+    protected Optional<Pair<LinkableEntity, SpringEntity>> dominated = Optional.empty();
+    protected Optional<Pair<LinkableEntity, SpringEntity>> dominant = Optional.empty();
     protected Train train;
 
     @Override
@@ -145,12 +145,12 @@ public abstract class VesselEntity extends WaterAnimal implements ISpringableEnt
     public abstract Item getDropItem();
 
     @Override
-    public Optional<Pair<ISpringableEntity, SpringEntity>> getDominated() {
+    public Optional<Pair<LinkableEntity, SpringEntity>> getDominated() {
         return this.dominated;
     }
 
     @Override
-    public Optional<Pair<ISpringableEntity, SpringEntity>> getDominant() {
+    public Optional<Pair<LinkableEntity, SpringEntity>> getDominant() {
         return this.dominant;
     }
 

@@ -1,7 +1,7 @@
 package dev.murad.shipping.event;
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.custom.ISpringableEntity;
+import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.item.SpringItem;
 import dev.murad.shipping.util.EntitySpringAPI;
 import net.minecraft.world.InteractionResult;
@@ -42,8 +42,8 @@ public class ForgeEventHandler {
             }
 
             if(item instanceof ShearsItem) {
-                if(target instanceof ISpringableEntity) {
-                    ((ISpringableEntity) target).getDominant().ifPresent(pair -> pair.getSecond().kill());
+                if(target instanceof LinkableEntity) {
+                    ((LinkableEntity) target).getDominant().ifPresent(pair -> pair.getSecond().kill());
                     event.setCanceled(true);
                     event.setCancellationResult(InteractionResult.SUCCESS);
                 }

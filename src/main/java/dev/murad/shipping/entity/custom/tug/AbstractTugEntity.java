@@ -5,7 +5,7 @@ import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
 import dev.murad.shipping.entity.accessor.DataAccessor;
-import dev.murad.shipping.entity.custom.ISpringableEntity;
+import dev.murad.shipping.util.*;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.entity.navigation.TugPathNavigator;
@@ -13,9 +13,6 @@ import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModSounds;
-import dev.murad.shipping.util.Train;
-import dev.murad.shipping.util.TugRoute;
-import dev.murad.shipping.util.TugRouteNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -55,7 +52,7 @@ import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-public abstract class AbstractTugEntity extends VesselEntity implements ISpringableEntity, Container, WorldlyContainer {
+public abstract class AbstractTugEntity extends VesselEntity implements LinkableEntityHead, Container, WorldlyContainer {
 
     // CONTAINER STUFF
     protected final ItemStackHandler itemHandler = createHandler();
@@ -422,12 +419,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
     }
 
     @Override
-    public void setDominated(ISpringableEntity entity, SpringEntity spring) {
+    public void setDominated(LinkableEntity entity, SpringEntity spring) {
         this.dominated = Optional.of(new Pair<>(entity, spring));
     }
 
     @Override
-    public void setDominant(ISpringableEntity entity, SpringEntity spring) {
+    public void setDominant(LinkableEntity entity, SpringEntity spring) {
 
     }
 

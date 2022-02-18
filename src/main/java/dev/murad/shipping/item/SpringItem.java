@@ -25,7 +25,7 @@ SOFTWARE.
  */
 
 
-import dev.murad.shipping.entity.custom.ISpringableEntity;
+import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
@@ -81,9 +81,9 @@ public class SpringItem extends Item {
             return;
         if(dominant == target) {
             player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.notToSelf"), true);
-        } else if(dominant instanceof ISpringableEntity) {
-            Train firstTrain =  ((ISpringableEntity) dominant).getTrain();
-            Train secondTrain = ((ISpringableEntity) target).getTrain();
+        } else if(dominant instanceof LinkableEntity) {
+            Train firstTrain =  ((LinkableEntity) dominant).getTrain();
+            Train secondTrain = ((LinkableEntity) target).getTrain();
             if (dominant.distanceTo(target) > 15){
                 player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.tooFar"), true);
             } else if (firstTrain.getTug().isPresent() && secondTrain.getTug().isPresent()) {
