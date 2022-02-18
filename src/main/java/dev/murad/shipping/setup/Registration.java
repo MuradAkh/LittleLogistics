@@ -3,10 +3,7 @@ package dev.murad.shipping.setup;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.network.TugRoutePacketHandler;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.block.SoundType;
-import net.minecraft.client.audio.Sound;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.inventory.container.Container;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -25,7 +22,7 @@ public class Registration  {
     public static final DeferredRegister<EntityType<?>> ENTITIES = create(ForgeRegistries.ENTITIES);
     public static final DeferredRegister<Item> ITEMS = create(ForgeRegistries.ITEMS);
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = create(ForgeRegistries.RECIPE_SERIALIZERS);
-    public static final DeferredRegister<BlockEntityType<?>> TILE_ENTITIES = create(ForgeRegistries.TILE_ENTITIES);
+    public static final DeferredRegister<BlockEntityType<?>> TILE_ENTITIES = create(ForgeRegistries.BLOCK_ENTITIES);
     public static final DeferredRegister<SoundEvent> SOUND_EVENTS = create(ForgeRegistries.SOUND_EVENTS);
 
 
@@ -47,7 +44,7 @@ public class Registration  {
         ModBlocks.register();
         ModTileEntitiesTypes.register();
         ModRecipeSerializers.register();
-        ModContainerTypes.register();
+        ModMenuTypes.register();
         ModEntityTypes.register();
         TugRoutePacketHandler.register();
         ModSounds.register();

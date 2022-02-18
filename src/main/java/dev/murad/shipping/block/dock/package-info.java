@@ -2,6 +2,6 @@
 @MethodsReturnNonnullByDefault
 package dev.murad.shipping.block.dock;
 
-import mcp.MethodsReturnNonnullByDefault;
+import net.minecraft.MethodsReturnNonnullByDefault;
 
 import javax.annotation.ParametersAreNonnullByDefault;
