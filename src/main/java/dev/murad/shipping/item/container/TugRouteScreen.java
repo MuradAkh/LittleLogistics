@@ -61,10 +61,10 @@ public class TugRouteScreen extends AbstractContainerScreen<TugRouteContainer> {
 
         LOGGER.info("Initializing TugRouteScreen");
 
-        this.addWidget(this.route.initializeWidget(TugRouteScreen.this.width, TugRouteScreen.this.height,
+        this.addRenderableWidget(this.route.initializeWidget(TugRouteScreen.this.width, TugRouteScreen.this.height,
                 topPos + 40, topPos + TugRouteScreen.this.imageHeight - 45, 20));
 
-        this.addWidget(new Button(getRight() - 92, getBot() - 24, 20, 20,
+        this.addRenderableWidget(new Button(getRight() - 92, getBot() - 24, 20, 20,
                 new TextComponent("..\uA56F").withStyle(ChatFormatting.BOLD),
                 button -> {
                     Optional<Pair<Integer, TugRouteNode>> selectedOpt = route.getSelected();
@@ -75,17 +75,17 @@ public class TugRouteScreen extends AbstractContainerScreen<TugRouteContainer> {
                 },
                 getTooltip(new TranslatableComponent("screen.littlelogistics.tug_route.rename_button"))));
 
-        this.addWidget(new Button(getRight() - 70, getBot() - 24, 20, 20,
+        this.addRenderableWidget(new Button(getRight() - 70, getBot() - 24, 20, 20,
                 new TextComponent("\u25B2"),
                 button -> route.moveSelectedUp(),
                 getTooltip(new TranslatableComponent("screen.littlelogistics.tug_route.up_button"))));
 
-        this.addWidget(new Button(getRight() - 47, getBot() - 24, 20, 20,
+        this.addRenderableWidget(new Button(getRight() - 47, getBot() - 24, 20, 20,
                 new TextComponent("\u25BC"),
                 button -> route.moveSelectedDown(),
                 getTooltip(new TranslatableComponent("screen.littlelogistics.tug_route.down_button"))));
 
-        this.addWidget(new Button(getRight() - 24, getBot() - 24, 20, 20,
+        this.addRenderableWidget(new Button(getRight() - 24, getBot() - 24, 20, 20,
                 new TextComponent("\u2718"),
                 button -> route.deleteSelected(),
                 getTooltip(new TranslatableComponent("screen.littlelogistics.tug_route.delete_button"))));
@@ -96,9 +96,6 @@ public class TugRouteScreen extends AbstractContainerScreen<TugRouteContainer> {
         this.renderBackground(matrixStack);
         super.render(matrixStack, mouseX, mouseY, partialTicks);
         this.renderTooltip(matrixStack, mouseX, mouseY);
-
-        // render panel
-        this.route.render(matrixStack, mouseX, mouseY, partialTicks);
     }
 
     @Override
@@ -122,36 +119,31 @@ public class TugRouteScreen extends AbstractContainerScreen<TugRouteContainer> {
 
         int zoom = 1000;
         // top
-        correctBlit(matrixStack, left + 4, top, this.getBlitOffset(),
+        blit(matrixStack, left + 4, top, this.getBlitOffset(),
                 4 * zoom, 0,
                 getXSize() - 8, 4,
                 256 * zoom, 256);
 
         // bottom
-        correctBlit(matrixStack, left + 4, bot - 4, this.getBlitOffset(),
+        blit(matrixStack, left + 4, bot - 4, this.getBlitOffset(),
                 4 * zoom, 8,
                 getXSize() - 8, 4,
                 256 * zoom, 256);
 
         // left
-        correctBlit(matrixStack, left, top + 4, this.getBlitOffset(),
+        blit(matrixStack, left, top + 4, this.getBlitOffset(),
                 0, 4 * zoom,
                 4, getYSize() - 8,
                 256, 256 * zoom);
 
         // right
-        correctBlit(matrixStack, right - 4, top + 4, this.getBlitOffset(),
+        blit(matrixStack, right - 4, top + 4, this.getBlitOffset(),
                 8, 4 * zoom,
                 4, getYSize() - 8,
                 256, 256 * zoom);
 
         // middle
-        correctBlit(matrixStack, left + 4, top + 4, this.getBlitOffset(), 4 * zoom, 4 * zoom, getXSize() - 8, getYSize() - 8, 256 * zoom, 256 * zoom);
-    }
-
-    // This is the correct version of Minecraft's Blit, without texH and texW being flipped...
-    private void correctBlit(PoseStack stack, int x, int y, int z, float u, float v, int w, int h, int texW, int texH) {
-        blit(stack, x, y, z, u, v, w, h, texH, texW);
+        blit(matrixStack, left + 4, top + 4, this.getBlitOffset(), 4 * zoom, 4 * zoom, getXSize() - 8, getYSize() - 8, 256 * zoom, 256 * zoom);
     }
 
     // remove inventory tag

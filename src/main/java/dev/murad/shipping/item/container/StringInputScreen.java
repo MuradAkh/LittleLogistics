@@ -51,10 +51,10 @@ public class StringInputScreen extends Screen {
         this.textFieldWidget.setValue(text);
         this.textFieldWidget.setMaxLength(20);
         this.textFieldWidget.setResponder((s) -> text = s);
-        this.addWidget(textFieldWidget);
+        this.addRenderableWidget(textFieldWidget);
 
         // add button
-        this.addWidget(new Button(left + 105, top + 37, 40, 20, new TranslatableComponent("screen.littlelogistics.tug_route.confirm"), (b) -> {
+        this.addRenderableWidget(new Button(left + 105, top + 37, 40, 20, new TranslatableComponent("screen.littlelogistics.tug_route.confirm"), (b) -> {
             LOGGER.info("Setting to {}", text);
             callback.accept(text.isEmpty() ? null : text);
             this.minecraft.popGuiLayer();
@@ -65,7 +65,6 @@ public class StringInputScreen extends Screen {
     public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(matrixStack);
         super.render(matrixStack, mouseX, mouseY, partialTicks);
-        this.textFieldWidget.render(matrixStack, mouseX, mouseY, partialTicks);
     }
 
     public void renderBackground(PoseStack p_230446_1_) {
