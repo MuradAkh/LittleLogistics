@@ -3,6 +3,7 @@ package dev.murad.shipping.util;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -19,6 +20,7 @@ public interface LinkableEntity {
     void removeDominated();
     void removeDominant();
     Train getTrain();
+    boolean linkEntities(Player player, Entity target);
     void setTrain(Train train);
     boolean hasWaterOnSides();
 
