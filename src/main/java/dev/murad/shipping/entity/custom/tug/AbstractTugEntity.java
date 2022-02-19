@@ -18,6 +18,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -30,6 +31,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -38,6 +40,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
@@ -62,13 +65,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private int dockCheckCooldown = 0;
     private boolean independentMotion = false;
     private int pathfindCooldown = 0;
+    private TugFrontPart frontHitbox;
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.BOOLEAN);
 
     public boolean allowDockInterface(){
         return isDocked();
     }
-
-    private TugDummyHitboxEntity extraHitbox = null;
 
     private TugRoute path;
     private int nextStop;
@@ -79,6 +81,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         this.blocksBuilding = true;
         this.train = new Train(this);
         this.path = new TugRoute();
+        frontHitbox = new TugFrontPart(this);
     }
 
     public AbstractTugEntity(EntityType type, Level worldIn, double x, double y, double z) {
@@ -163,10 +166,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         return 0;
     }
 
-    public TugDummyHitboxEntity getDummyHitbox(){
-        return extraHitbox;
-    }
-
     protected abstract MenuProvider createContainerProvider();
 
     @Override
@@ -174,7 +173,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         itemHandler.deserializeNBT(compound.getCompound("inv"));
         nextStop = compound.contains("next_stop") ? compound.getInt("next_stop") : 0;
         contentsChanged = true;
-        extraHitbox = null;
         super.readAdditionalSaveData(compound);
     }
 
@@ -330,14 +328,34 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         }
     }
 
-    public void tick() {
-        if(!level.isClientSide){
-            if (extraHitbox == null || !extraHitbox.isAlive()){
-                this.extraHitbox = new TugDummyHitboxEntity(this);
-                level.addFreshEntity(this.extraHitbox);
-            }
-            extraHitbox.updatePosition();
+    @Override
+    public boolean isMultipartEntity() {
+        return true;
+    }
+
+    @Override
+    public PartEntity<?>[] getParts()
+    {
+        return new PartEntity<?>[]{frontHitbox};
+    }
+
+    @Override
+    public void aiStep(){
+        super.aiStep();
+        if(!isDeadOrDying() && !this.isNoAi()){
+            frontHitbox.updatePosition(this);
         }
+
+    }
+
+    @Override
+    public void recreateFromPacket(ClientboundAddMobPacket p_149572_) {
+        super.recreateFromPacket(p_149572_);
+        frontHitbox.setId(p_149572_.getId());
+    }
+
+    public void tick() {
+
 
         if(this.level.isClientSide
                 && independentMotion){

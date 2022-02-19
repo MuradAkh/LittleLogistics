@@ -54,7 +54,6 @@ public class ModClientEventHandler {
     public static void onRegisterEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntityTypes.CHEST_BARGE.get(), ChestBargeRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.CHUNK_LOADER_BARGE.get(), ChunkLoaderBargeRenderer::new);
-        event.registerEntityRenderer(ModEntityTypes.TUG_DUMMY_HITBOX.get(), DummyEntityRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.ENERGY_TUG.get(), EnergyTugRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.FISHING_BARGE.get(), FishingBargeRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.FLUID_TANK_BARGE.get(), FluidTankBargeRenderer::new);
