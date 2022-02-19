@@ -386,7 +386,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             independentMotion = true;
             entityData.set(INDEPENDENT_MOTION, true);
 
-            if (distance < 0.6) {
+            if (distance < 0.9) {
                 incrementStop();
             }
 
