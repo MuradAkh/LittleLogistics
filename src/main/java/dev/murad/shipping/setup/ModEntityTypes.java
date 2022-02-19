@@ -5,7 +5,6 @@ import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.barge.*;
 import dev.murad.shipping.entity.custom.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.custom.tug.SteamTugEntity;
-import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -53,12 +52,6 @@ public class ModEntityTypes {
                     () -> EntityType.Builder.<EnergyTugEntity>of(EnergyTugEntity::new,
                                     MobCategory.MISC).sized(0.7f, 0.9f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "energy_tug").toString()));
-
-    public static final RegistryObject<EntityType<TugDummyHitboxEntity>> TUG_DUMMY_HITBOX =
-            Registration.ENTITIES.register("tug_dummy_hitbox",
-                    () -> EntityType.Builder.<TugDummyHitboxEntity>of(TugDummyHitboxEntity::new,
-                                    MobCategory.MISC).sized(0.75f, 0.9f)
-                            .build(new ResourceLocation(ShippingMod.MOD_ID, "tug_dummy_hitbox").toString()));
 
     public static final RegistryObject<EntityType<SpringEntity>> SPRING =
             Registration.ENTITIES.register("spring",
