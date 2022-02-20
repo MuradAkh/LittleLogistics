@@ -2,6 +2,7 @@ package dev.murad.shipping.setup;
 
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.SpringEntity;
+import dev.murad.shipping.entity.custom.TrainCar;
 import dev.murad.shipping.entity.custom.barge.*;
 import dev.murad.shipping.entity.custom.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.custom.tug.SteamTugEntity;
@@ -58,6 +59,12 @@ public class ModEntityTypes {
                     () -> EntityType.Builder.<SpringEntity>of(SpringEntity::new,
                                     MobCategory.MISC).sized(0.05f, 0.2f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "spring").toString()));
+
+    public static final RegistryObject<EntityType<TrainCar>> TRAIN_CAR =
+            Registration.ENTITIES.register("train_car",
+                    () -> EntityType.Builder.<TrainCar>of(TrainCar::new,
+                                    MobCategory.MISC).sized(0.75f, 0.9f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "train_car").toString()));
 
 
 

@@ -1,5 +1,6 @@
 package dev.murad.shipping.setup;
 
+import dev.murad.shipping.entity.custom.TrainCar;
 import dev.murad.shipping.item.*;
 import dev.murad.shipping.item.creative.CreativeCapacitor;
 import net.minecraft.world.item.CreativeModeTab;
@@ -33,6 +34,9 @@ public class ModItems {
 
     public static final RegistryObject<Item> TUG_ROUTE = Registration.ITEMS.register("tug_route",
             () -> new TugRouteItem(new Item.Properties().stacksTo(16).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+
+    public static final RegistryObject<Item> TRAIN_CAR = Registration.ITEMS.register("train_car",
+            () -> new TrainCarItem(TrainCar::new, new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
 
     public static final RegistryObject<Item> CREATIVE_CAPACITOR = Registration.ITEMS.register("creative_capacitor",
             () -> new CreativeCapacitor(new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION)));

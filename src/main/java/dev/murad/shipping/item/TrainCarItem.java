@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.gameevent.GameEvent;
 
-// taken   from Minecart item
+// taken from Minecart item
 public class TrainCarItem extends Item {
     private static final DispenseItemBehavior DISPENSE_ITEM_BEHAVIOR = new DefaultDispenseItemBehavior() {
         private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
@@ -77,7 +77,7 @@ public class TrainCarItem extends Item {
     };
     final Function4<Level, Double, Double, Double, TrainCar> constructor;
 
-    public TrainCarItem(Function4 constructor, Item.Properties pProperties) {
+    public TrainCarItem(Function4<Level, Double, Double, Double, TrainCar> constructor, Item.Properties pProperties) {
         super(pProperties);
         this.constructor = constructor;
         DispenserBlock.registerBehavior(this, DISPENSE_ITEM_BEHAVIOR);
