@@ -5,6 +5,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.VesselEntity;
+import dev.murad.shipping.util.SpringableEntity;
 import dev.murad.shipping.util.Train;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.InteractionHand;
@@ -85,14 +86,24 @@ public abstract class AbstractBargeEntity extends VesselEntity implements Linkab
     }
 
     @Override
-    public void setDominated(LinkableEntity entity, SpringEntity spring) {
-        this.dominated = Optional.of(new Pair<>(entity, spring));
+    public void setDominated(LinkableEntity entity) {
+        this.dominated = Optional.of((SpringableEntity) entity);
     }
 
     @Override
-    public void setDominant(LinkableEntity entity, SpringEntity spring) {
+    public void setDominatedSpring(SpringEntity spring) {
+        this.dominatedS = Optional.of(spring);
+    }
+
+    @Override
+    public void setDominant(LinkableEntity entity) {
         this.setTrain(entity.getTrain());
-        this.dominant = Optional.of(new Pair<>(entity, spring));
+        this.dominant = Optional.of((SpringableEntity) entity);
+    }
+
+    @Override
+    public void setDominantSpring(SpringEntity spring) {
+        this.dominantS = Optional.of(spring);
     }
 
     @Override
@@ -101,6 +112,7 @@ public abstract class AbstractBargeEntity extends VesselEntity implements Linkab
             return;
         }
         this.dominated = Optional.empty();
+        this.dominatedS = Optional.empty();
         this.train.setTail(this);
     }
 
@@ -110,6 +122,7 @@ public abstract class AbstractBargeEntity extends VesselEntity implements Linkab
             return;
         }
         this.dominant = Optional.empty();
+        this.dominantS = Optional.empty();
         this.setTrain(new Train(this));
     }
 
@@ -119,21 +132,21 @@ public abstract class AbstractBargeEntity extends VesselEntity implements Linkab
         train.setTail(this);
         dominated.ifPresent(dominated -> {
             // avoid recursion loops
-            if(!dominated.getFirst().getTrain().equals(train)){
-                dominated.getFirst().setTrain(train);
+            if(!dominated.getTrain().equals(train)){
+                dominated.setTrain(train);
             }
         });
     }
 
     @Override
     public void remove(RemovalReason r){
-        handleSpringableKill();
+        handleLinkableKill();
         super.remove(r);
     }
 
     // hack to disable hoppers
     public boolean isDockable() {
-        return this.dominant.map(dom -> this.distanceToSqr((Entity) dom.getFirst()) < 1.1).orElse(true);
+        return this.dominant.map(dom -> this.distanceToSqr((Entity) dom) < 1.1).orElse(true);
     }
 
     public boolean allowDockInterface(){

@@ -31,7 +31,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.WaterAnimal;
-import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -55,7 +54,7 @@ import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-public abstract class AbstractTugEntity extends VesselEntity implements LinkableEntityHead, Container, WorldlyContainer {
+public abstract class AbstractTugEntity extends VesselEntity implements LinkableEntityHead, SpringableEntity, Container, WorldlyContainer {
 
     // CONTAINER STUFF
     protected final ItemStackHandler itemHandler = createHandler();
@@ -437,12 +436,22 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Override
-    public void setDominated(LinkableEntity entity, SpringEntity spring) {
-        this.dominated = Optional.of(new Pair<>(entity, spring));
+    public void setDominated(LinkableEntity entity) {
+        this.dominated = Optional.of((SpringableEntity) entity);
     }
 
     @Override
-    public void setDominant(LinkableEntity entity, SpringEntity spring) {
+    public void setDominatedSpring(SpringEntity spring) {
+        this.dominatedS = Optional.of(spring);
+    }
+
+    @Override
+    public void setDominant(LinkableEntity entity) {
+
+    }
+
+    @Override
+    public void setDominantSpring(SpringEntity entity) {
 
     }
 
@@ -481,7 +490,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         if (!this.level.isClientSide) {
             Containers.dropContents(this.level, this, this);
         }
-        handleSpringableKill();
+        handleLinkableKill();
         super.remove(r);
     }
 
