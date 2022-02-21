@@ -7,11 +7,15 @@ import dev.murad.shipping.block.energy.VesselChargerBlock;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
 import dev.murad.shipping.block.guide_rail.CornerGuideRailBlock;
 import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
+import dev.murad.shipping.block.rail.JunctionRail;
+import dev.murad.shipping.block.rail.SwitchRail;
 import dev.murad.shipping.block.vessel_detector.VesselDetectorBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -67,13 +71,23 @@ public class ModBlocks {
             ),
             CreativeModeTab.TAB_TRANSPORTATION);
 
+    public static final RegistryObject<Block> SWITCH_RAIL = register(
+            "switch_rail",
+            () -> new SwitchRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL)),
+            CreativeModeTab.TAB_TRANSPORTATION);
+
+    public static final RegistryObject<Block> JUNCTION_RAIL = register(
+            "junction_rail",
+            () -> new JunctionRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL)),
+            CreativeModeTab.TAB_TRANSPORTATION);
+
     public static <T extends Block> RegistryObject<T> registerNoItem(String name, Supplier<T> block){
         return Registration.BLOCKS.register(name, block);
     }
 
     public static <T extends Block> RegistryObject<T> register(String name, Supplier<T> block, CreativeModeTab group){
         RegistryObject<T> ret = registerNoItem(name, block);
-        Registration.ITEMS.register(name, () -> new BlockItem(ret.get(), new Item.Properties().tab(CreativeModeTab.TAB_TRANSPORTATION)));
+        Registration.ITEMS.register(name, () -> new BlockItem(ret.get(), new Item.Properties().tab(group)));
         return ret;
     }
 
