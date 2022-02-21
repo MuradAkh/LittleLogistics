@@ -36,7 +36,7 @@ public abstract class AbstractDockBlock extends Block implements EntityBlock {
         super.neighborChanged(state, world, p_220069_3_, p_220069_4_, p_220069_5_, p_220069_6_);
         getTileEntity(world, p_220069_3_).flatMap(AbstractDockTileEntity::getHopper).ifPresent(te -> {
             if (te.getBlockPos().equals(p_220069_3_.above())){
-                world.setBlockAndUpdate(te.getBlockPos(), te.getBlockState().setValue(HorizontalDirectionalBlock.FACING, state.getValue(FACING)));
+                world.setBlockAndUpdate(te.getBlockPos(), te.getBlockState().setValue(HopperBlock.FACING, state.getValue(FACING)));
             }
         });
 
