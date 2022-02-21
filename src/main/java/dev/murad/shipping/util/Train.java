@@ -1,11 +1,10 @@
 package dev.murad.shipping.util;
 
-import com.mojang.datafixers.util.Pair;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class Train {
     private final Optional<LinkableEntityHead> tug;
     private LinkableEntity tail;
@@ -37,7 +36,7 @@ public class Train {
         if(this.head.checkNoLoopsDominated()) {
             // just in case - to avoid crashing the world.
             this.head.removeDominated();
-            this.head.getDominated().map(Pair::getFirst).ifPresent(LinkableEntity::removeDominant);
+            this.head.getDominated().ifPresent(LinkableEntity::removeDominant);
             return new ArrayList<>();
         }
         return tug.map(tugEntity -> {
@@ -50,7 +49,7 @@ public class Train {
     }
 
     public Optional<LinkableEntity> getNext(LinkableEntity entity){
-        return entity.getDominated().map(Pair::getFirst).map(e -> e);
+        return entity.getDominated();
     }
 
     public void setHead(LinkableEntity head) {
