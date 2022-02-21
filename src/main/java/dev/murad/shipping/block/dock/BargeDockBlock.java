@@ -30,6 +30,7 @@ public class BargeDockBlock extends AbstractDockBlock {
     public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
         if(player.getPose().equals(Pose.CROUCHING)){
             world.setBlockAndUpdate(pos, state.setValue(EXTRACT_MODE, !state.getValue(EXTRACT_MODE)));
+            fixHopperPos(state, world, pos);
             return InteractionResult.SUCCESS;
         }
 
