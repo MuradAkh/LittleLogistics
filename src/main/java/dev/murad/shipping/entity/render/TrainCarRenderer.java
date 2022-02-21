@@ -47,7 +47,7 @@ public class TrainCarRenderer extends EntityRenderer<TrainCar> {
 
     private void getAndRenderChain(TrainCar bargeEntity, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
         if(bargeEntity.getDominant().isPresent()) {
-            double dist = ((Entity) bargeEntity.getDominant().get().getFirst()).distanceTo(bargeEntity);
+            double dist = ((Entity) bargeEntity.getDominant().get()).distanceTo(bargeEntity);
             VertexConsumer ivertexbuilderChain = buffer.getBuffer(chainModel.renderType(CHAIN_TEXTURE));
             int segments = (int) Math.ceil(dist * 4);
             matrixStack.pushPose();
