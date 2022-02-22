@@ -1,8 +1,10 @@
 package dev.murad.shipping.setup;
 
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.entity.custom.train.ChestCarEntity;
+import dev.murad.shipping.entity.custom.train.LocomotiveEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.entity.custom.TrainCar;
+import dev.murad.shipping.entity.custom.train.TrainCar;
 import dev.murad.shipping.entity.custom.barge.*;
 import dev.murad.shipping.entity.custom.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.custom.tug.SteamTugEntity;
@@ -60,13 +62,17 @@ public class ModEntityTypes {
                                     MobCategory.MISC).sized(0.05f, 0.2f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "spring").toString()));
 
-    public static final RegistryObject<EntityType<TrainCar>> TRAIN_CAR =
+    public static final RegistryObject<EntityType<TrainCar>> CHEST_CAR =
             Registration.ENTITIES.register("train_car",
-                    () -> EntityType.Builder.<TrainCar>of(TrainCar::new,
+                    () -> EntityType.Builder.<TrainCar>of(ChestCarEntity::new,
                                     MobCategory.MISC).sized(0.75f, 0.9f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "train_car").toString()));
 
-
+    public static final RegistryObject<EntityType<LocomotiveEntity>> LOCOMOTIVE =
+            Registration.ENTITIES.register("locomotive",
+                    () -> EntityType.Builder.<LocomotiveEntity>of(LocomotiveEntity::new,
+                                    MobCategory.MISC).sized(0.75f, 0.9f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "locomotive").toString()));
 
 
     public static void register () {

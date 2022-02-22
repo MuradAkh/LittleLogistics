@@ -1,7 +1,7 @@
 package dev.murad.shipping.item;
 
 import com.mojang.datafixers.util.Function4;
-import dev.murad.shipping.entity.custom.TrainCar;
+import dev.murad.shipping.entity.custom.train.TrainCar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;

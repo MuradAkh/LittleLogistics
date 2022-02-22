@@ -9,7 +9,6 @@ import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.MinecartRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.api.distmarker.Dist;
@@ -54,7 +53,8 @@ public class ModClientEventHandler {
         event.registerEntityRenderer(ModEntityTypes.SEATER_BARGE.get(), SeaterBargeRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.STEAM_TUG.get(), SteamTugRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.SPRING.get(), DummyEntityRenderer::new);
-        event.registerEntityRenderer(ModEntityTypes.TRAIN_CAR.get(), TrainCarRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.LOCOMOTIVE.get(), LocomotiveRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.CHEST_CAR.get(), ChestCarRenderer::new);
 
         event.registerBlockEntityRenderer(ModTileEntitiesTypes.FLUID_HOPPER.get(), FluidHopperTileEntityRenderer::new);
     }
