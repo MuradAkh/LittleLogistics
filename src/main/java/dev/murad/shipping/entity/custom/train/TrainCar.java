@@ -2,6 +2,7 @@ package dev.murad.shipping.entity.custom.train;
 
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.util.LinkableEntity;
+import dev.murad.shipping.util.RailUtils;
 import dev.murad.shipping.util.Train;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,7 +22,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.extensions.IForgeAbstractMinecart;
 
@@ -49,9 +52,17 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
     }
 
 
-
     public TrainCar(EntityType<?> p_38087_, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
         super(p_38087_, level, aDouble, aDouble1, aDouble2);
+        var pos = new BlockPos(aDouble, aDouble1, aDouble2);
+        var state = level.getBlockState(pos);
+        if (state.getBlock() instanceof BaseRailBlock railBlock) {
+            RailShape railshape = (railBlock).getRailDirection(state, this.level, pos, this);
+            var exit = RailUtils.EXITS.get(railshape).getFirst();
+            Optional.ofNullable(Direction.fromNormal(exit.getX(), exit.getY(), exit.getZ()))
+                    .map(Direction::toYRot)
+                    .ifPresent(this::setYRot);
+        }
 
     }
 
@@ -66,8 +77,8 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
 
-        if(level.isClientSide) {
-            if(DOMINANT_ID.equals(key)) {
+        if (level.isClientSide) {
+            if (DOMINANT_ID.equals(key)) {
                 fetchDominantClient();
             }
         }
@@ -75,14 +86,35 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
 
     private void fetchDominantClient() {
         Entity potential = level.getEntity(getEntityData().get(DOMINANT_ID));
-        if(potential instanceof TrainCar t) {
+        if (potential instanceof TrainCar t) {
             dominant = Optional.of(t);
-        }else{
+        } else {
             dominant = Optional.empty();
         }
     }
 
     public void tick() {
+        tickMinecart();
+
+        tickAdjustments();
+    }
+
+    protected void tickAdjustments() {
+        if (!this.level.isClientSide()) {
+            doChainMath();
+        }
+        var dir = this.getDeltaMovement().normalize();
+        Optional.ofNullable(Direction.fromNormal((int) dir.x, (int) dir.y, (int) dir.z))
+                .map(Direction::toYRot).ifPresent(this::setYRot);
+
+        if (this.level.isClientSide) {
+            fetchDominantClient();
+        } else {
+            entityData.set(DOMINANT_ID, dominant.map(Entity::getId).orElse(-1));
+        }
+    }
+
+    protected void tickMinecart() {
         if (this.getHurtTime() > 0) {
             this.setHurtTime(this.getHurtTime() - 1);
         }
@@ -182,57 +214,42 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
 
             this.firstTick = false;
         }
-
-        if (!this.level.isClientSide()) {
-            doChainMath();
-
-        }
-        var dir = this.getDeltaMovement().normalize();
-        Optional.ofNullable(Direction.fromNormal((int) dir.x, (int) dir.y, (int) dir.z))
-                    .map(Direction::toYRot).ifPresent(this::setYRot);
-
-        if (this.level.isClientSide){
-            fetchDominantClient();
-        } else {
-            entityData.set(DOMINANT_ID, dominant.map(Entity::getId).orElse(-1));
-        }
     }
 
     @Override
     public void lerpTo(double pX, double pY, double pZ, float pYaw, float pPitch, int pPosRotationIncrements, boolean pTeleport) {
-            this.lx = pX;
-            this.ly = pY;
-            this.lz = pZ;
-            this.lyr = (double)pYaw;
-            this.lxr = (double)pPitch;
-            this.lSteps = pPosRotationIncrements + 2;
+        this.lx = pX;
+        this.ly = pY;
+        this.lz = pZ;
+        this.lyr = (double) pYaw;
+        this.lxr = (double) pPitch;
+        this.lSteps = pPosRotationIncrements + 2;
         super.lerpTo(pX, pY, pZ, pYaw, pPitch, pPosRotationIncrements, pTeleport);
     }
 
     @Override
-    public void remove(RemovalReason r){
+    public void remove(RemovalReason r) {
         handleLinkableKill();
         super.remove(r);
     }
 
-    private void doChainMath(){
+    private void doChainMath() {
         dominant.ifPresent(trainCar -> {
             var distance = trainCar.distanceTo(this);
-            if(distance <= 5) {
+            if (distance <= 5) {
                 Vec3 direction = trainCar.position().subtract(position()).normalize();
 
-                if(distance > 1.1) {
+                // TODO: conditional on docking like with vessels
+                if (distance > 1.05) {
                     Vec3 parentVelocity = trainCar.getDeltaMovement();
 
-                    if(parentVelocity.length() == 0) {
+                    if (parentVelocity.length() == 0) {
                         setDeltaMovement(direction.scale(0.05));
-                    }
-                    else {
+                    } else {
                         setDeltaMovement(direction.scale(parentVelocity.length()));
                         setDeltaMovement(getDeltaMovement().scale(distance));
                     }
-                }
-                else if(distance < 0.8)
+                } else if (distance < 0.8)
                     setDeltaMovement(direction.scale(-0.05));
                 else
                     setDeltaMovement(Vec3.ZERO);
@@ -243,7 +260,6 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
             }
         });
     }
-
     @Override
     public Type getMinecartType() {
         // Why does this even exist
@@ -292,7 +308,7 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
 
     @Override
     public boolean linkEntities(Player player, Entity target) {
-        if(target instanceof TrainCar t){
+        if (target instanceof TrainCar t) {
             t.setDominant(this);
             this.setDominated(t);
             return true;
@@ -308,7 +324,7 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
         train.setTail(this);
         dominated.ifPresent(dominated -> {
             // avoid recursion loops
-            if(!dominated.getTrain().equals(train)){
+            if (!dominated.getTrain().equals(train)) {
                 dominated.setTrain(train);
             }
         });

@@ -34,10 +34,10 @@ public abstract class TrainCarRenderer extends EntityRenderer<TrainCar> {
 
     public void render(TrainCar vesselEntity, float yaw, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
         matrixStack.pushPose();
-        renderModel(vesselEntity, yaw, matrixStack, buffer, p_225623_6_);
+        getAndRenderChain(vesselEntity, matrixStack, buffer, p_225623_6_);
         matrixStack.popPose();
         matrixStack.pushPose();
-        getAndRenderChain(vesselEntity, matrixStack, buffer, p_225623_6_);
+        renderModel(vesselEntity, yaw, matrixStack, buffer, p_225623_6_);
         matrixStack.popPose();
     }
 
@@ -46,21 +46,22 @@ public abstract class TrainCarRenderer extends EntityRenderer<TrainCar> {
             var parent = (TrainCar) linkableEntity;
             double dist = parent.distanceTo(bargeEntity);
             int segments = (int) Math.ceil(dist * 4);
-            var vec = bargeEntity.position().vectorTo(parent.position());
+            var vec = bargeEntity.position()
+                    .subtract(0, 0.2, 0)
+                    .vectorTo(parent.position()
+                            .subtract(0, 0.2, 0));
             // TODO: fix pitch
-            matrixStack.mulPose(Vector3f.ZP.rotation((float) (Math.asin(vec.y))));
+            matrixStack.translate(bargeEntity.getDirection().getStepX() * 0.25, 0.44, bargeEntity.getDirection().getStepZ() * 0.25);
             matrixStack.mulPose(Vector3f.YP.rotation(-(float) Math.atan2(vec.z, vec.x)));
-            matrixStack.translate(0, 0.44, 0);
+            matrixStack.mulPose(Vector3f.ZP.rotation((float) (Math.asin(vec.y))));
             matrixStack.pushPose();
             VertexConsumer ivertexbuilderChain = buffer.getBuffer(chainModel.renderType(CHAIN_TEXTURE));
-            for (int i = 0; i < segments; i++) {
+            for (int i = 1; i < segments; i++) {
                 matrixStack.pushPose();
                 matrixStack.translate(i / 4.0, 0, 0);
                 chainModel.renderToBuffer(matrixStack, ivertexbuilderChain, p_225623_6_, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
                 matrixStack.popPose();
             }
-
-
 
             matrixStack.popPose();
         });
