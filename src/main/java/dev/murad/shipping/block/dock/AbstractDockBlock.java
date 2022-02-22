@@ -34,12 +34,16 @@ public abstract class AbstractDockBlock extends Block implements EntityBlock {
     @Deprecated
     public void neighborChanged(BlockState state, Level world, BlockPos p_220069_3_, Block p_220069_4_, BlockPos p_220069_5_, boolean p_220069_6_) {
         super.neighborChanged(state, world, p_220069_3_, p_220069_4_, p_220069_5_, p_220069_6_);
+        fixHopperPos(state, world, p_220069_3_);
+
+    }
+
+    protected void fixHopperPos(BlockState state, Level world, BlockPos p_220069_3_) {
         getTileEntity(world, p_220069_3_).flatMap(AbstractDockTileEntity::getHopper).ifPresent(te -> {
             if (te.getBlockPos().equals(p_220069_3_.above())){
-                world.setBlockAndUpdate(te.getBlockPos(), te.getBlockState().setValue(HorizontalDirectionalBlock.FACING, state.getValue(FACING)));
+                world.setBlockAndUpdate(te.getBlockPos(), te.getBlockState().setValue(HopperBlock.FACING, state.getValue(FACING)));
             }
         });
-
     }
 
     @SuppressWarnings("deprecation")
