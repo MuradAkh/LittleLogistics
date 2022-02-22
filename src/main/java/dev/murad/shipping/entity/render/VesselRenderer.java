@@ -41,6 +41,7 @@ public abstract class VesselRenderer<T extends VesselEntity> extends EntityRende
     public void render(T vesselEntity, float p_225623_2_, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
         matrixStack.pushPose();
         matrixStack.translate(0.0D, getModelYoffset(), 0.0D);
+        matrixStack.translate(0.0D, 0.07, 0.0D);
         matrixStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - p_225623_2_));
         matrixStack.scale(-1.0F, -1.0F, 1.0F);
         matrixStack.mulPose(Vector3f.YP.rotationDegrees(getModelYrot()));
