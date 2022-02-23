@@ -25,11 +25,8 @@ SOFTWARE.
  */
 
 
+import dev.murad.shipping.entity.custom.tug.TugFrontPart;
 import dev.murad.shipping.util.LinkableEntity;
-import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.entity.custom.VesselEntity;
-import dev.murad.shipping.entity.custom.tug.TugDummyHitboxEntity;
-import dev.murad.shipping.util.Train;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -57,8 +54,8 @@ public class SpringItem extends Item {
 
     // because 'itemInteractionForEntity' is only for Living entities
     public void onUsedOnEntity(ItemStack stack, Player player, Level world, Entity target) {
-        if(target instanceof TugDummyHitboxEntity){
-            target = ((TugDummyHitboxEntity) target).getTug();
+        if(target instanceof TugFrontPart){
+            target = ((TugFrontPart) target).getParent();
         }
         if(world.isClientSide)
             return;
@@ -81,25 +78,9 @@ public class SpringItem extends Item {
             return;
         if(dominant == target) {
             player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.notToSelf"), true);
-        } else if(dominant instanceof LinkableEntity) {
-            Train firstTrain =  ((LinkableEntity) dominant).getTrain();
-            Train secondTrain = ((LinkableEntity) target).getTrain();
-            if (dominant.distanceTo(target) > 15){
-                player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.tooFar"), true);
-            } else if (firstTrain.getTug().isPresent() && secondTrain.getTug().isPresent()) {
-                player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.noTwoTugs"), true);
-            } else if (secondTrain.equals(firstTrain)){
-                player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.noLoops"), true);
-            } else if (firstTrain.getTug().isPresent()) {
-                SpringEntity.createSpring((VesselEntity) firstTrain.getTail(), (VesselEntity) secondTrain.getHead());
-            } else {
-                SpringEntity.createSpring((VesselEntity) secondTrain.getTail(), (VesselEntity) firstTrain.getHead());
-            }
-            // First entity clicked is the dominant
-            if(!player.isCreative())
+        } else if(dominant instanceof LinkableEntity d) {
+            if(d.linkEntities(player, target) && !player.isCreative())
                 stack.shrink(1);
-
-
         }
         resetLinked(stack);
     }

@@ -1,17 +1,19 @@
 package dev.murad.shipping.entity.custom;
 
-import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.util.LinkableEntity;
+import dev.murad.shipping.util.SpringableEntity;
 import dev.murad.shipping.util.Train;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
@@ -45,7 +47,8 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Optional;
 
-public abstract class VesselEntity extends WaterAnimal implements LinkableEntity {
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+public abstract class VesselEntity extends WaterAnimal implements SpringableEntity {
     protected VesselEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
         stuckCounter = 0;
@@ -62,8 +65,10 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     private Boat.Status oldStatus;
     private double lastYd;
 
-    protected Optional<Pair<LinkableEntity, SpringEntity>> dominated = Optional.empty();
-    protected Optional<Pair<LinkableEntity, SpringEntity>> dominant = Optional.empty();
+    protected Optional<SpringableEntity> dominated = Optional.empty();
+    protected Optional<SpringableEntity> dominant = Optional.empty();
+    protected Optional<SpringEntity> dominantS = Optional.empty();
+    protected Optional<SpringEntity> dominatedS = Optional.empty();
     protected Train train;
 
     @Override
@@ -145,13 +150,23 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     public abstract Item getDropItem();
 
     @Override
-    public Optional<Pair<LinkableEntity, SpringEntity>> getDominated() {
-        return this.dominated;
+    public Optional<LinkableEntity> getDominated() {
+        return this.dominated.map(s -> s); // Java...
     }
 
     @Override
-    public Optional<Pair<LinkableEntity, SpringEntity>> getDominant() {
-        return this.dominant;
+    public Optional<SpringEntity> getDominatedSpring() {
+        return this.dominatedS; // Java...
+    }
+
+    @Override
+    public Optional<LinkableEntity> getDominant() {
+        return this.dominant.map(s -> s); // Java...
+    }
+
+    @Override
+    public Optional<SpringEntity> getDominantSpring() {
+        return this.dominantS; // Java...
     }
 
     @Override
@@ -162,6 +177,29 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     @Override
     public void checkDespawn() {
 
+    }
+
+    public boolean linkEntities(Player player, Entity target) {
+        if(!(target instanceof VesselEntity)){
+            player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.badTypes"), true);
+            return false;
+        }
+        Train firstTrain =  this.getTrain();
+        Train secondTrain = ((LinkableEntity) target).getTrain();
+        if (this.distanceTo(target) > 15){
+            player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.tooFar"), true);
+        } else if (firstTrain.getTug().isPresent() && secondTrain.getTug().isPresent()) {
+            player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.noTwoTugs"), true);
+        } else if (secondTrain.equals(firstTrain)){
+            player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.noLoops"), true);
+        } else if (firstTrain.getTug().isPresent()) {
+            SpringEntity.createSpring((VesselEntity) firstTrain.getTail(), (VesselEntity) secondTrain.getHead());
+            return true;
+        } else {
+            SpringEntity.createSpring((VesselEntity) secondTrain.getTail(), (VesselEntity) firstTrain.getHead());
+            return true;
+        }
+        return false;
     }
 
     @Nullable

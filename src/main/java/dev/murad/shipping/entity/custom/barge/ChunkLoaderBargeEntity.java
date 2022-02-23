@@ -91,7 +91,7 @@ public class ChunkLoaderBargeEntity extends AbstractBargeEntity{
     }
 
     private void setChunkLoad(boolean add, Pair<Integer, Integer> chunk) {
-        ForgeChunkManager.forceChunk((ServerLevel) this.level, ShippingMod.MOD_ID, this, chunk.getFirst(), chunk.getSecond(), add, true);
+        ForgeChunkManager.forceChunk((ServerLevel) this.level, ShippingMod.MOD_ID, this, chunk.getFirst(), chunk.getSecond(), add, false);
     }
 
     @Override

@@ -41,6 +41,7 @@ public abstract class VesselRenderer<T extends VesselEntity> extends EntityRende
     public void render(T vesselEntity, float p_225623_2_, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
         matrixStack.pushPose();
         matrixStack.translate(0.0D, getModelYoffset(), 0.0D);
+        matrixStack.translate(0.0D, 0.07, 0.0D);
         matrixStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - p_225623_2_));
         matrixStack.scale(-1.0F, -1.0F, 1.0F);
         matrixStack.mulPose(Vector3f.YP.rotationDegrees(getModelYrot()));
@@ -67,7 +68,7 @@ public abstract class VesselRenderer<T extends VesselEntity> extends EntityRende
 
     private void getAndRenderChain(T bargeEntity, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
         if(bargeEntity.getDominant().isPresent()) {
-            double dist = ((Entity) bargeEntity.getDominant().get().getFirst()).distanceTo(bargeEntity);
+            double dist = ((Entity) bargeEntity.getDominant().get()).distanceTo(bargeEntity);
             VertexConsumer ivertexbuilderChain = buffer.getBuffer(chainModel.renderType(CHAIN_TEXTURE));
             int segments = (int) Math.ceil(dist * 4);
             matrixStack.pushPose();
@@ -96,10 +97,10 @@ public abstract class VesselRenderer<T extends VesselEntity> extends EntityRende
     @Override
     public boolean shouldRender(T p_225626_1_, Frustum p_225626_2_, double p_225626_3_, double p_225626_5_, double p_225626_7_) {
         if(p_225626_1_.getDominant().isPresent()){
-            if(((Entity) p_225626_1_.getDominant().get().getFirst()).shouldRender(p_225626_3_, p_225626_5_, p_225626_7_)){
+            if(((Entity) p_225626_1_.getDominant().get()).shouldRender(p_225626_3_, p_225626_5_, p_225626_7_)){
                 return true;
             }
-            if(p_225626_1_.getDominant().get().getSecond().shouldRender(p_225626_3_, p_225626_5_, p_225626_7_)){
+            if(p_225626_1_.getDominantSpring().get().shouldRender(p_225626_3_, p_225626_5_, p_225626_7_)){
                 return true;
             }
         }

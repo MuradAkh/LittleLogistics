@@ -3,6 +3,7 @@ package dev.murad.shipping.util;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -12,27 +13,29 @@ import java.util.stream.Stream;
 
 public interface LinkableEntity {
 
-    Optional<Pair<LinkableEntity, SpringEntity>> getDominated();
-    Optional<Pair<LinkableEntity, SpringEntity>> getDominant();
-    void setDominated(LinkableEntity entity, SpringEntity spring);
-    void setDominant(LinkableEntity entity, SpringEntity spring);
+    Optional<LinkableEntity> getDominated();
+    Optional<LinkableEntity> getDominant();
+    void setDominated(LinkableEntity entity);
+    void setDominant(LinkableEntity entity);
     void removeDominated();
     void removeDominant();
+    void handleShearsCut();
     Train getTrain();
+    boolean linkEntities(Player player, Entity target);
     void setTrain(Train train);
     boolean hasWaterOnSides();
 
-    default void handleSpringableKill(){
-        this.getDominated().map(Pair::getFirst).ifPresent(LinkableEntity::removeDominant);
-        this.getDominant().map(Pair::getFirst).ifPresent(LinkableEntity::removeDominated);
+    default void handleLinkableKill(){
+        this.getDominated().ifPresent(LinkableEntity::removeDominant);
+        this.getDominant().ifPresent(LinkableEntity::removeDominated);
     }
 
     default boolean checkNoLoopsDominated(){
-        return checkNoLoopsHelper(this, (entity -> entity.getDominated().map(Pair::getFirst)), new HashSet<>());
+        return checkNoLoopsHelper(this, (LinkableEntity::getDominated), new HashSet<>());
     }
 
     default boolean checkNoLoopsDominant(){
-        return checkNoLoopsHelper(this, (entity -> entity.getDominant().map(Pair::getFirst)), new HashSet<>());
+        return checkNoLoopsHelper(this, (LinkableEntity::getDominant), new HashSet<>());
     }
 
     default boolean checkNoLoopsHelper(LinkableEntity entity, Function<LinkableEntity, Optional<LinkableEntity>> next, Set<LinkableEntity> set){
@@ -52,7 +55,7 @@ public interface LinkableEntity {
         Stream<U> ofThis = Stream.of(function.apply(this));
 
         return checkNoLoopsDominant() ? ofThis : this.getDominant().map(dom ->
-                Stream.concat(ofThis, dom.getFirst().applyWithDominant(function))
+                Stream.concat(ofThis, dom.applyWithDominant(function))
         ).orElse(ofThis);
 
     }
@@ -61,24 +64,8 @@ public interface LinkableEntity {
         Stream<U> ofThis = Stream.of(function.apply(this));
 
         return checkNoLoopsDominated() ? ofThis : this.getDominated().map(dom ->
-                Stream.concat(ofThis, dom.getFirst().applyWithDominated(function))
+                Stream.concat(ofThis, dom.applyWithDominated(function))
         ).orElse(ofThis);
-
-    }
-
-    default void tickSpringAliveCheck(){
-        this.getDominant().map(Pair::getSecond).map(Entity::isAlive).ifPresent(alive -> {
-            if(!alive){
-                this.removeDominant();
-            }
-        });
-
-        this.getDominated().map(Pair::getSecond).map(Entity::isAlive).ifPresent(alive -> {
-            if(!alive){
-                this.removeDominated();
-            }
-        });
-
 
     }
 }

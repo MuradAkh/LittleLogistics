@@ -41,7 +41,7 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
         } else if (!this.level.isClientSide && !this.isRemoved()) {
             this.spawnAtLocation(this.getDropItem());
             Containers.dropContents(this.level, this, this);
-            this.kill();
+            this.remove(RemovalReason.KILLED);
             return true;
         } else {
             return true;
