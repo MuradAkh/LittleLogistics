@@ -54,7 +54,7 @@ import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-public abstract class AbstractTugEntity extends VesselEntity implements LinkableEntityHead, SpringableEntity, Container, WorldlyContainer {
+public abstract class AbstractTugEntity extends VesselEntity implements LinkableEntityHead<VesselEntity>, SpringableEntity, Container, WorldlyContainer {
 
     // CONTAINER STUFF
     protected final ItemStackHandler itemHandler = createHandler();
@@ -436,8 +436,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Override
-    public void setDominated(LinkableEntity entity) {
-        this.dominated = Optional.of((SpringableEntity) entity);
+    public void setDominated(VesselEntity entity) {
+        this.dominated = Optional.of(entity);
     }
 
     @Override
@@ -446,7 +446,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Override
-    public void setDominant(LinkableEntity entity) {
+    public void setDominant(VesselEntity entity) {
 
     }
 
