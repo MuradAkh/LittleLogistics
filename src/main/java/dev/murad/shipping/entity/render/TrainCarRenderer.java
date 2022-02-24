@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.custom.train.TrainCar;
+import dev.murad.shipping.entity.custom.train.AbstractTrainCar;
 import dev.murad.shipping.entity.models.ChainModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -16,15 +16,12 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
-public abstract class TrainCarRenderer extends EntityRenderer<TrainCar> {
-
+public abstract class TrainCarRenderer extends EntityRenderer<AbstractTrainCar> {
 
     private static final ResourceLocation CHAIN_TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/chain.png");
 
     private final ChainModel chainModel;
-
-
 
     public TrainCarRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -32,7 +29,7 @@ public abstract class TrainCarRenderer extends EntityRenderer<TrainCar> {
 
     }
 
-    public void render(TrainCar vesselEntity, float yaw, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
+    public void render(AbstractTrainCar vesselEntity, float yaw, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
         matrixStack.pushPose();
         getAndRenderChain(vesselEntity, matrixStack, buffer, p_225623_6_);
         matrixStack.popPose();
@@ -41,17 +38,17 @@ public abstract class TrainCarRenderer extends EntityRenderer<TrainCar> {
         matrixStack.popPose();
     }
 
-    private void getAndRenderChain(TrainCar bargeEntity, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
-        bargeEntity.getDominant().ifPresent(linkableEntity -> {
-            var parent = (TrainCar) linkableEntity;
-            double dist = parent.distanceTo(bargeEntity);
+    private void getAndRenderChain(AbstractTrainCar car, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
+        car.getDominant().ifPresent(linkableEntity -> {
+            var parent = (AbstractTrainCar) linkableEntity;
+            double dist = parent.distanceTo(car);
             int segments = (int) Math.ceil(dist * 4);
-            var vec = bargeEntity.position()
+            var vec = car.position()
                     .subtract(0, 0.2, 0)
                     .vectorTo(parent.position()
                             .subtract(0, 0.2, 0));
             // TODO: fix pitch
-            matrixStack.translate(bargeEntity.getDirection().getStepX() * 0.25, 0.44, bargeEntity.getDirection().getStepZ() * 0.25);
+            matrixStack.translate(car.getDirection().getStepX() * 0.25, 0.44, car.getDirection().getStepZ() * 0.25);
             matrixStack.mulPose(Vector3f.YP.rotation(-(float) Math.atan2(vec.z, vec.x)));
             matrixStack.mulPose(Vector3f.ZP.rotation((float) (Math.asin(vec.y))));
             matrixStack.pushPose();
@@ -67,22 +64,22 @@ public abstract class TrainCarRenderer extends EntityRenderer<TrainCar> {
         });
     }
 
-    private void renderModel(TrainCar pEntity, float pEntityYaw, PoseStack pMatrixStack, MultiBufferSource buffer, int pPartialTicks) {
-        long i = (long)pEntity.getId() * 493286711L;
+    private void renderModel(AbstractTrainCar car, float pEntityYaw, PoseStack pMatrixStack, MultiBufferSource buffer, int pPartialTicks) {
+        long i = (long)car.getId() * 493286711L;
         i = i * i * 4392167121L + i * 98761L;
         float f = (((float)(i >> 16 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
         float f1 = (((float)(i >> 20 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
         float f2 = (((float)(i >> 24 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
         pMatrixStack.translate((double)f, (double)f1, (double)f2);
-        double d0 = Mth.lerp((double)pPartialTicks, pEntity.xOld, pEntity.getX());
-        double d1 = Mth.lerp((double)pPartialTicks, pEntity.yOld, pEntity.getY());
-        double d2 = Mth.lerp((double)pPartialTicks, pEntity.zOld, pEntity.getZ());
+        double d0 = Mth.lerp((double)pPartialTicks, car.xOld, car.getX());
+        double d1 = Mth.lerp((double)pPartialTicks, car.yOld, car.getY());
+        double d2 = Mth.lerp((double)pPartialTicks, car.zOld, car.getZ());
         double d3 = (double)0.3F;
-        Vec3 vec3 = pEntity.getPos(d0, d1, d2);
-        float f3 = Mth.lerp(pPartialTicks, pEntity.xRotO, pEntity.getXRot());
+        Vec3 vec3 = car.getPos(d0, d1, d2);
+        float f3 = Mth.lerp(pPartialTicks, car.xRotO, car.getXRot());
         if (vec3 != null) {
-            Vec3 vec31 = pEntity.getPosOffs(d0, d1, d2, (double)0.3F);
-            Vec3 vec32 = pEntity.getPosOffs(d0, d1, d2, (double)-0.3F);
+            Vec3 vec31 = car.getPosOffs(d0, d1, d2, (double)0.3F);
+            Vec3 vec32 = car.getPosOffs(d0, d1, d2, (double)-0.3F);
             if (vec31 == null) {
                 vec31 = vec3;
             }
@@ -102,21 +99,21 @@ public abstract class TrainCarRenderer extends EntityRenderer<TrainCar> {
 
         pMatrixStack.translate(0.0D, 0.375D, 0.0D);
         pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(-pEntity.getDirection().toYRot()));
+        pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(-car.getDirection().toYRot()));
         pMatrixStack.mulPose(Vector3f.ZP.rotationDegrees(-f3));
-        float f5 = (float)pEntity.getHurtTime() - pPartialTicks;
-        float f6 = pEntity.getDamage() - pPartialTicks;
+        float f5 = (float)car.getHurtTime() - pPartialTicks;
+        float f6 = car.getDamage() - pPartialTicks;
         if (f6 < 0.0F) {
             f6 = 0.0F;
         }
 
         if (f5 > 0.0F) {
-            pMatrixStack.mulPose(Vector3f.XP.rotationDegrees(Mth.sin(f5) * f5 * f6 / 10.0F * (float)pEntity.getHurtDir()));
+            pMatrixStack.mulPose(Vector3f.XP.rotationDegrees(Mth.sin(f5) * f5 * f6 / 10.0F * (float)car.getHurtDir()));
         }
 
         pMatrixStack.scale(-1.0F, -1.0F, 1.0F);
-        VertexConsumer ivertexbuilder = buffer.getBuffer(getModel(pEntity).renderType(this.getTextureLocation(pEntity)));
-        getModel(pEntity).renderToBuffer(pMatrixStack, ivertexbuilder, pPartialTicks, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        VertexConsumer ivertexbuilder = buffer.getBuffer(getModel(car).renderType(this.getTextureLocation(car)));
+        getModel(car).renderToBuffer(pMatrixStack, ivertexbuilder, pPartialTicks, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     abstract Model getModel(Entity entity);

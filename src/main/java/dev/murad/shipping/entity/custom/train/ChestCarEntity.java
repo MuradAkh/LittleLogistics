@@ -4,7 +4,7 @@ import dev.murad.shipping.setup.ModEntityTypes;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 
-public class ChestCarEntity extends TrainCar{
+public class ChestCarEntity extends AbstractTrainCar {
     public ChestCarEntity(EntityType<?> p_38087_, Level p_38088_) {
         super(p_38087_, p_38088_);
     }

@@ -53,7 +53,7 @@ public class ModClientEventHandler {
         event.registerEntityRenderer(ModEntityTypes.SEATER_BARGE.get(), SeaterBargeRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.STEAM_TUG.get(), SteamTugRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.SPRING.get(), DummyEntityRenderer::new);
-        event.registerEntityRenderer(ModEntityTypes.LOCOMOTIVE.get(), LocomotiveRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.STEAM_LOCOMOTIVE.get(), LocomotiveRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.CHEST_CAR.get(), ChestCarRenderer::new);
 
         event.registerBlockEntityRenderer(ModTileEntitiesTypes.FLUID_HOPPER.get(), FluidHopperTileEntityRenderer::new);

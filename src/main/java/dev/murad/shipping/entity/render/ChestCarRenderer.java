@@ -1,7 +1,7 @@
 package dev.murad.shipping.entity.render;
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.custom.train.TrainCar;
+import dev.murad.shipping.entity.custom.train.AbstractTrainCar;
 import dev.murad.shipping.entity.models.ChestBargeModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.Model;
@@ -27,7 +27,7 @@ public class ChestCarRenderer extends TrainCarRenderer{
 
 
     @Override
-    public ResourceLocation getTextureLocation(TrainCar pEntity) {
+    public ResourceLocation getTextureLocation(AbstractTrainCar pEntity) {
         return BARGE_TEXTURE;
     }
 

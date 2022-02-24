@@ -3,7 +3,7 @@ package dev.murad.shipping.entity.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.custom.train.TrainCar;
+import dev.murad.shipping.entity.custom.train.AbstractTrainCar;
 import dev.murad.shipping.entity.models.SteamTugModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.Model;
@@ -25,7 +25,7 @@ public class LocomotiveRenderer extends TrainCarRenderer{
     }
 
     @Override
-    public void render(TrainCar vesselEntity, float yaw, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
+    public void render(AbstractTrainCar vesselEntity, float yaw, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
         matrixStack.pushPose();
         matrixStack.translate(0, 1, 0);
         matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
@@ -40,7 +40,7 @@ public class LocomotiveRenderer extends TrainCarRenderer{
     }
 
     @Override
-    public ResourceLocation getTextureLocation(TrainCar pEntity) {
+    public ResourceLocation getTextureLocation(AbstractTrainCar pEntity) {
         return TEXTURE;
     }
 

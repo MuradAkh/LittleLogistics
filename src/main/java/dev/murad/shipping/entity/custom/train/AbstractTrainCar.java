@@ -1,6 +1,5 @@
 package dev.murad.shipping.entity.custom.train;
 
-import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.RailUtils;
 import dev.murad.shipping.util.Train;
@@ -24,35 +23,44 @@ import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.extensions.IForgeAbstractMinecart;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public abstract class TrainCar extends AbstractMinecart implements IForgeAbstractMinecart, LinkableEntity {
-    protected Optional<TrainCar> dominant = Optional.empty();
-    protected Optional<TrainCar> dominated = Optional.empty();
-    public static final EntityDataAccessor<Integer> DOMINANT_ID = SynchedEntityData.defineId(TrainCar.class, EntityDataSerializers.INT);
-    protected Train train;
+public abstract class AbstractTrainCar extends AbstractMinecart implements IForgeAbstractMinecart, LinkableEntity<AbstractTrainCar> {
+    protected Optional<AbstractTrainCar> dominant = Optional.empty();
+    protected Optional<AbstractTrainCar> dominated = Optional.empty();
+    public static final EntityDataAccessor<Integer> DOMINANT_ID = SynchedEntityData.defineId(AbstractTrainCar.class, EntityDataSerializers.INT);
+    protected Train<AbstractTrainCar> train;
     private boolean flipped = false;
     private int lSteps;
     private double lx;
     private double ly;
     private double lz;
-    private double lyr;
     private double lxr;
 
-
-    public TrainCar(EntityType<?> p_38087_, Level p_38088_) {
+    public AbstractTrainCar(EntityType<?> p_38087_, Level p_38088_) {
         super(p_38087_, p_38088_);
-        train = new Train(this);
+        train = new Train<>(this);
+    }
+
+    protected Optional<RailShape> getRailShape(){
+        for(var pos: Arrays.asList(getOnPos().above(), getOnPos())) {
+            var state = level.getBlockState(pos);
+            if (state.getBlock() instanceof BaseRailBlock railBlock) {
+                return Optional.of((railBlock).getRailDirection(state, this.level, pos, this));
+            }
+        }
+        return Optional.empty();
     }
 
 
-    public TrainCar(EntityType<?> p_38087_, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
+    public AbstractTrainCar(EntityType<?> p_38087_, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
         super(p_38087_, level, aDouble, aDouble1, aDouble2);
         var pos = new BlockPos(aDouble, aDouble1, aDouble2);
         var state = level.getBlockState(pos);
@@ -63,7 +71,6 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
                     .map(Direction::toYRot)
                     .ifPresent(this::setYRot);
         }
-
     }
 
     @Override
@@ -74,7 +81,7 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
 
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+    public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
 
         if (level.isClientSide) {
@@ -86,7 +93,7 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
 
     private void fetchDominantClient() {
         Entity potential = level.getEntity(getEntityData().get(DOMINANT_ID));
-        if (potential instanceof TrainCar t) {
+        if (potential instanceof AbstractTrainCar t) {
             dominant = Optional.of(t);
         } else {
             dominant = Optional.empty();
@@ -100,12 +107,14 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
     }
 
     protected void tickAdjustments() {
-        if (!this.level.isClientSide()) {
-            doChainMath();
-        }
+
         var dir = this.getDeltaMovement().normalize();
         Optional.ofNullable(Direction.fromNormal((int) dir.x, (int) dir.y, (int) dir.z))
                 .map(Direction::toYRot).ifPresent(this::setYRot);
+
+        if (!this.level.isClientSide()) {
+            doChainMath();
+        }
 
         if (this.level.isClientSide) {
             fetchDominantClient();
@@ -130,8 +139,6 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
                 double d5 = this.getX() + (this.lx - this.getX()) / (double) this.lSteps;
                 double d6 = this.getY() + (this.ly - this.getY()) / (double) this.lSteps;
                 double d7 = this.getZ() + (this.lz - this.getZ()) / (double) this.lSteps;
-                double d2 = Mth.wrapDegrees(this.lyr - (double) this.getYRot());
-//                this.setYRot(this.getYRot() + (float) d2 / (float) this.lSteps);
                 this.setXRot(this.getXRot() + (float) (this.lxr - (double) this.getXRot()) / (float) this.lSteps);
                 --this.lSteps;
                 this.setPos(d5, d6, d7);
@@ -167,18 +174,9 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
 
             this.checkInsideBlocks();
             this.setXRot(0.0F);
-            double d1 = this.xo - this.getX();
-            double d3 = this.zo - this.getZ();
-            if (d1 * d1 + d3 * d3 > 0.001D) {
-//                this.setYRot((float) (Mth.atan2(d3, d1) * 180.0D / Math.PI));
-                if (this.flipped) {
-//                    this.setYRot(this.getYRot() + 180.0F);
-                }
-            }
 
             double d4 = (double) Mth.wrapDegrees(this.getYRot() - this.yRotO);
             if (d4 < -170.0D || d4 >= 170.0D) {
-//                this.setYRot(this.getYRot() + 180.0F);
                 this.flipped = !this.flipped;
             }
 
@@ -221,7 +219,6 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
         this.lx = pX;
         this.ly = pY;
         this.lz = pZ;
-        this.lyr = (double) pYaw;
         this.lxr = (double) pPitch;
         this.lSteps = pPosRotationIncrements + 2;
         super.lerpTo(pX, pY, pZ, pYaw, pPitch, pPosRotationIncrements, pTeleport);
@@ -234,18 +231,20 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
     }
 
     private void doChainMath() {
-        dominant.ifPresent(trainCar -> {
-            var distance = trainCar.distanceTo(this);
+        dominant.ifPresent(dom -> {
+            var distance = dom.distanceTo(this);
             if (distance <= 5) {
-                Vec3 direction = trainCar.position().subtract(position()).normalize();
+                Vec3 direction = dom.position().subtract(position()).normalize();
 
                 // TODO: conditional on docking like with vessels
-                if (distance > 1.05) {
-                    Vec3 parentVelocity = trainCar.getDeltaMovement();
+                if (distance > 1) {
+                    Vec3 parentVelocity = dom.getDeltaMovement();
 
                     if (parentVelocity.length() == 0) {
                         setDeltaMovement(direction.scale(0.05));
                     } else {
+                        // TODO: sharp corners are hell
+                        var thisdir = Vec3.atLowerCornerOf(getDirection().getNormal());
                         setDeltaMovement(direction.scale(parentVelocity.length()));
                         setDeltaMovement(getDeltaMovement().scale(distance));
                     }
@@ -267,23 +266,23 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
     }
 
     @Override
-    public Optional<LinkableEntity> getDominated() {
-        return dominated.map(t -> t);
+    public Optional<AbstractTrainCar> getDominated() {
+        return dominated;
     }
 
     @Override
-    public Optional<LinkableEntity> getDominant() {
-        return dominant.map(t -> t);
+    public Optional<AbstractTrainCar> getDominant() {
+        return dominant;
     }
 
     @Override
-    public void setDominated(LinkableEntity entity) {
-        dominated = Optional.of((TrainCar) entity);
+    public void setDominated(AbstractTrainCar entity) {
+        dominated = Optional.of(entity);
     }
 
     @Override
-    public void setDominant(LinkableEntity entity) {
-        dominant = Optional.of((TrainCar) entity);
+    public void setDominant(AbstractTrainCar entity) {
+        dominant = Optional.of(entity);
     }
 
     @Override
@@ -298,17 +297,18 @@ public abstract class TrainCar extends AbstractMinecart implements IForgeAbstrac
 
     @Override
     public void handleShearsCut() {
-
+        this.dominant.ifPresent(LinkableEntity::removeDominated);
+        removeDominant();
     }
 
     @Override
-    public Train getTrain() {
+    public Train<AbstractTrainCar> getTrain() {
         return train;
     }
 
     @Override
     public boolean linkEntities(Player player, Entity target) {
-        if (target instanceof TrainCar t) {
+        if (target instanceof AbstractTrainCar t) {
             t.setDominant(this);
             this.setDominated(t);
             return true;
