@@ -1,11 +1,8 @@
 package dev.murad.shipping.entity.custom.barge;
 
 
-import com.mojang.datafixers.util.Pair;
-import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.VesselEntity;
-import dev.murad.shipping.util.SpringableEntity;
 import dev.murad.shipping.util.Train;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.InteractionHand;
@@ -23,7 +20,7 @@ import net.minecraftforge.network.NetworkHooks;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public abstract class AbstractBargeEntity extends VesselEntity implements LinkableEntity {
+public abstract class AbstractBargeEntity extends VesselEntity {
     public AbstractBargeEntity(EntityType<? extends AbstractBargeEntity> type, Level world) {
         super(type, world);
         this.blocksBuilding = true;
@@ -86,8 +83,8 @@ public abstract class AbstractBargeEntity extends VesselEntity implements Linkab
     }
 
     @Override
-    public void setDominated(LinkableEntity entity) {
-        this.dominated = Optional.of((SpringableEntity) entity);
+    public void setDominated(VesselEntity entity) {
+        this.dominated = Optional.of(entity);
     }
 
     @Override
@@ -96,9 +93,9 @@ public abstract class AbstractBargeEntity extends VesselEntity implements Linkab
     }
 
     @Override
-    public void setDominant(LinkableEntity entity) {
+    public void setDominant(VesselEntity entity) {
         this.setTrain(entity.getTrain());
-        this.dominant = Optional.of((SpringableEntity) entity);
+        this.dominant = Optional.of(entity);
     }
 
     @Override
