@@ -68,17 +68,7 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
 
     }
 
-    private void prevent180() {
-        var dir = new Vec3(this.getDirection().getStepX(), this.getDirection().getStepY(), this.getDirection().getStepZ());
-        var vel = this.getDeltaMovement();
-        var mag = vel.multiply(dir);
-        var fixer = new Vec3(fixUtil(mag.x), 1, fixUtil(mag.z));
-        this.setDeltaMovement(this.getDeltaMovement().multiply(fixer));
-    }
 
-    private double fixUtil(double mag) {
-        return mag < 0 ? 0 : 1;
-    }
 
     private double getSpeedModifier(){
         // adjust speed based on slope etc.
@@ -91,8 +81,8 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
             }
         }
         return getRailShape().map(shape -> switch (shape) {
-            case NORTH_SOUTH, EAST_WEST -> 0.05;
-            case SOUTH_WEST, NORTH_WEST, SOUTH_EAST, NORTH_EAST -> 0.02;
+            case NORTH_SOUTH, EAST_WEST -> 0.07;
+            case SOUTH_WEST, NORTH_WEST, SOUTH_EAST, NORTH_EAST -> 0.03;
             default -> this.getDeltaMovement().y > 0 ? 0.02 : 0.01;
         }).orElse(0d);
     }
@@ -100,7 +90,7 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
     private void doMove() {
         var dir = this.getDirection();
         var dirvel = new Vec3(Math.abs(dir.getStepX()), 0, Math.abs(dir.getStepZ()));
-        if(Math.abs(this.getDeltaMovement().dot(dirvel)) < 0.2){
+        if(Math.abs(this.getDeltaMovement().dot(dirvel)) < 0.12){
             var mod = this.getSpeedModifier();
             this.push(dir.getStepX() * mod, 0, dir.getStepZ() * mod);
         }
