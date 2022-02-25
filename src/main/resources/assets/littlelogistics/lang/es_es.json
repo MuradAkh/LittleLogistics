@@ -1,0 +1,70 @@
+{
+  "item.littlelogistics.tug": "Remolcador de vapor",
+  "item.littlelogistics.barge": "Barca con cofre",
+  "item.littlelogistics.chunk_loader_barge": "Barca con cargador de Chunks",
+  "item.littlelogistics.seater_barge": "Barca con asiento",
+  "item.littlelogistics.fishing_barge": "Barca de auto-pesca",
+  "item.littlelogistics.spring": "Vinculador",
+  "item.littlelogistics.tug_route": "Ruta del remolcador",
+  "item.littlelogistics.energy_tug": "Remolcador eléctrico",
+  "item.littlelogistics.fluid_barge": "Barca con tanque de fluidos",
+
+
+  "entity.littlelogistics.tug": "Remolcador de vapor",
+  "entity.littlelogistics.barge": "Barca con cofre",
+  "entity.littlelogistics.chunk_loader_barge": "Barca con cargador de Chunks",
+  "entity.littlelogistics.fishing_barge": "Barca de auto-pesca",
+  "entity.littlelogistics.spring": "Vinculador",
+  "entity.littlelogistics.energy_tug": "Remolcador eléctrico",
+  "entity.littlelogistics.fluid_barge": "Barca con tanque de fluidos",
+  "entity.littlelogistics.seater_barge": "Barca con asiento",
+
+  "block.littlelogistics.tug_dock": "Muelle de remolcadores",
+  "block.littlelogistics.barge_dock": "Muelle de barcas",
+  "block.littlelogistics.guide_rail_tug": "Riel de guía",
+  "block.littlelogistics.guide_rail_corner": "Riel de guía de esquina",
+  "block.littlelogistics.vessel_charger": "Cargador eléctrico",
+  "block.littlelogistics.fluid_hopper": "Tolva de fluidos",
+  "block.littlelogistics.vessel_detector": "Detector de buques",
+
+  "screen.littlelogistics.tug": "Remolcador de vapor",
+  "screen.littlelogistics.fishing_barge": "Barca de auto-pesca",
+  "screen.littlelogistics.energy_tug": "Remolcador eléctrico",
+  "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
+
+  "screen.littlelogistics.tug_route": "Configurador de rutas de remolcadores",
+  "screen.littlelogistics.tug_route.rename_button": "Renombrar nodo",
+  "screen.littlelogistics.tug_route.up_button": "Mover nodo arriba",
+  "screen.littlelogistics.tug_route.down_button": "Mover nodo abajo",
+  "screen.littlelogistics.tug_route.delete_button": "Eliminar nodo",
+
+  "screen.littlelogistics.tug_route.rename": "Renombrar %s",
+  "screen.littlelogistics.tug_route.confirm": "Guardar",
+
+  "item.littlelogistics.tug_route.description": "Haga click derecho para agregar un nodo al final de la ruta, haga clic con el botón derecho en la misma ubicación para eliminarlo. Shift + click derecho para abrir el menú.",
+  "item.littlelogistics.tug_route.num_nodes": "Nodos en la ruta: %s",
+  "item.littlelogistics.tug_route.added": "Nodo de ruta agregado en X:%s Z:%s",
+  "item.littlelogistics.tug_route.removed": "Nodo de ruta eliminado en X:%s Z:%s",
+  "item.littlelogistics.tug_route.node": "%s. Nodo",
+  "item.littlelogistics.tug_route.node_named": "%s. %s",
+  "item.littlelogistics.tug_route.node_line": "Nodo %s: %s, %s",
+  "item.littlelogistics.spring.description": "Se utiliza para vincular vehículos.",
+  "item.littlelogistics.spring.notToSelf": "No se pueden vincular vehículos a uno mismo",
+  "item.littlelogistics.spring.noTwoTugs": "No se pueden vincular dos remolcadores",
+  "item.littlelogistics.spring.tooFar": "Vehículos demasiado lejos para ser vinculados",
+  "item.littlelogistics.spring.noLoops": "No se pueden vincular vehículos en un bucle",
+  "item.littlelogistics.spring.badTypes": "¡No se pueden unir estos tipos de vehículos!",
+  "item.littlelogistics.fishing_barge.description": "Para obtener el mejor rendimiento, utilícelo en rutas largas en aguas profundas y abiertas",
+
+  "item.littlelogistics.creative_capacitor": "Energía infinita ( Creativo )",
+
+  "block.littlelogistics.vessel_charger.capacity": "%s/%s FE",
+  "block.littlelogistics.fluid_hopper.capacity": "%s %s/%s mB",
+  "block.littlelogistics.fluid_hopper.capacity_empty": "Vacío 0/%s mB",
+  "entity.littlelogistics.fluid_barge.capacity": "%s %s/%s mB",
+  "entity.littlelogistics.fluid_barge.capacity_empty": "Vacío 0/%s mB",
+
+  "subtitle.littlelogistics.steam_tug_whistle": "Silbato de vapor del remolcador",
+  "subtitle.littlelogistics.tug_docking": "Atracador de remolcador",
+  "subtitle.littlelogistics.tug_undocking": "Desatracador de remolcador"
+}
