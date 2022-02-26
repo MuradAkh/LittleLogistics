@@ -20,12 +20,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.extensions.IForgeAbstractMinecart;
 import org.jetbrains.annotations.NotNull;
@@ -236,81 +234,6 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
         super.remove(r);
     }
 
-    public static final double COUPLED_DRAG = 0.95;
-    public static final float MAX_DISTANCE = 8F;
-    private static final float STIFFNESS = 0.1F;
-    private static final float DAMPING = 0.1F;
-
-    public static Vec2 subtract(final Vec2 a, final Vec2 b) {
-        return new Vec2(a.x - b.x, a.y - b.y);
-    }
-
-    protected void adjustVelocity() {
-        // Railcraft version
-        var cart1 = this;
-        dominant.ifPresent(cart2 -> {
-            double dist = cart1.distanceTo(cart2);
-
-            boolean adj1 = (cart1 != cart2) && !(cart1 instanceof LocomotiveEntity);
-            boolean adj2 = (cart1 != cart2) && !(cart2 instanceof LocomotiveEntity);
-
-            Vec2 cart1Pos = new Vec2(cart1.getOnPos().getX(), cart1.getOnPos().getZ());
-            Vec2 cart2Pos = new Vec2(cart2.getOnPos().getX(), cart2.getOnPos().getZ());
-
-            Vec2 unit = subtract(cart2Pos, cart1Pos).normalized();
-
-            // Spring force
-
-            float optDist = 1;
-            double stretch = dist - optDist;
-
-            double stiffness = STIFFNESS;
-            double springX = stiffness * stretch * unit.x;
-            double springZ = stiffness * stretch * unit.y;
-
-            springX = limitForce(springX);
-            springZ = limitForce(springZ);
-
-            if (adj1) {
-                cart1.push(springX, 0, springZ);
-            }
-
-            if (adj2) {
-                cart2.push(-springX, 0, -springZ);
-
-            }
-
-            // Damping
-
-            Vec2 cart1Vel = new Vec2((float) cart1.getDeltaMovement().x, (float) cart1.getDeltaMovement().z);
-            Vec2 cart2Vel = new Vec2((float) cart2.getDeltaMovement().x, (float) cart2.getDeltaMovement().z);
-
-            double dot = subtract(cart2Vel, cart1Vel).dot(unit);
-
-            double damping = DAMPING;
-            double dampX = damping * dot * unit.x;
-            double dampZ = damping * dot * unit.y;
-
-            dampX = limitForce(dampX);
-            dampZ = limitForce(dampZ);
-
-            if (adj1) {
-                cart1.push(dampX, 0, dampZ);
-            }
-
-            if (adj2) {
-                cart2.push(-dampX, 0, -dampZ);
-
-            }
-
-        });
-    }
-
-    private double limitForce(double force) {
-        return Math.copySign(Math.min(Math.abs(force), 6f), force);
-    }
-
-
     protected void prevent180() {
         var dir = new Vec3(this.getDirection().getStepX(), this.getDirection().getStepY(), this.getDirection().getStepZ());
         var vel = this.getDeltaMovement();
@@ -334,7 +257,7 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
                 var euclid = this.distanceTo(dom);
                 return euclid < 1 ? di : euclid;
             }).orElse(this.distanceTo(dom));
-            
+
             if (distance <= 5) {
                 Vec3 euclideanDir = dom.position().subtract(position()).normalize();
 
