@@ -1,6 +1,7 @@
 package dev.murad.shipping.setup;
 
 
+import dev.murad.shipping.block.create.BargeAssemblerBlock;
 import dev.murad.shipping.block.dock.BargeDockBlock;
 import dev.murad.shipping.block.dock.TugDockBlock;
 import dev.murad.shipping.block.energy.VesselChargerBlock;
@@ -12,8 +13,10 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.registries.RegistryObject;
+import org.lwjgl.system.CallbackI;
 
 import java.util.function.Supplier;
 
@@ -63,6 +66,13 @@ public class ModBlocks {
     public static final RegistryObject<Block> VESSEL_CHARGER = register(
             "vessel_charger",
             () -> new VesselChargerBlock(Block.Properties.of(Material.METAL)
+                    .destroyTime(0.5f)
+            ),
+            CreativeModeTab.TAB_TRANSPORTATION);
+
+    public static final RegistryObject<Block> BARGE_ASSEMBLER = register(
+            "barge_assembler",
+            () -> new BargeAssemblerBlock(BlockBehaviour.Properties.of(Material.METAL).noCollission()
                     .destroyTime(0.5f)
             ),
             CreativeModeTab.TAB_TRANSPORTATION);

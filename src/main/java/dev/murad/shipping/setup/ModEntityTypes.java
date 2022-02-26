@@ -59,9 +59,6 @@ public class ModEntityTypes {
                                     MobCategory.MISC).sized(0.05f, 0.2f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "spring").toString()));
 
-
-
-
     public static void register () {
 
     }

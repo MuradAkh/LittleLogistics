@@ -1,5 +1,6 @@
 package dev.murad.shipping.setup;
 
+import dev.murad.shipping.block.create.BargeAssemblerTileEntity;
 import dev.murad.shipping.block.dock.BargeDockTileEntity;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.energy.VesselChargerTileEntity;
@@ -39,6 +40,13 @@ public class ModTileEntitiesTypes {
             "vessel_charger",
             VesselChargerTileEntity::new,
             ModBlocks.VESSEL_CHARGER
+    );
+
+    // create
+    public static final RegistryObject<BlockEntityType<BargeAssemblerTileEntity>> BARGE_ASSEMBLER = register(
+            "barge_assembler",
+            BargeAssemblerTileEntity::new,
+            ModBlocks.BARGE_ASSEMBLER
     );
 
     private static <T extends BlockEntity> RegistryObject<BlockEntityType<T>> register(

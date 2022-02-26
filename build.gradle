@@ -161,8 +161,8 @@ dependencies {
 //    runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
 //
 //    runtimeOnly fg.deobf("com.teamcofh:cofh_core:1.16.5-1.4.2.9")
-//    runtimeOnly fg.deobf("com.teamcofh:thermal_foundation:1.16.5-1.4.3.10")
-//    runtimeOnly fg.deobf("com.teamcofh:thermal_expansion:1.16.5-1.4.2.4")
+    implementation fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:1.18-0.5.0.34")
+    implementation fg.deobf("com.simibubi.create:Create:mc1.18.1_v0.4b+45")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
