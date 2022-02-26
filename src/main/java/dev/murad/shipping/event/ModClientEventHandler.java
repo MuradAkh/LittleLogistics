@@ -3,7 +3,7 @@ package dev.murad.shipping.event;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.fluid.render.FluidHopperTileEntityRenderer;
 import dev.murad.shipping.entity.models.*;
-import dev.murad.shipping.entity.render.DummyEntityRenderer;
+import dev.murad.shipping.entity.render.*;
 import dev.murad.shipping.entity.render.barge.FishingBargeRenderer;
 import dev.murad.shipping.entity.render.barge.FluidTankBargeRenderer;
 import dev.murad.shipping.entity.render.barge.StaticVesselRenderer;
@@ -96,6 +96,8 @@ public class ModClientEventHandler {
                 });
 
         event.registerEntityRenderer(ModEntityTypes.SPRING.get(), DummyEntityRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.STEAM_LOCOMOTIVE.get(), LocomotiveRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.CHEST_CAR.get(), ChestCarRenderer::new);
 
         event.registerBlockEntityRenderer(ModTileEntitiesTypes.FLUID_HOPPER.get(), FluidHopperTileEntityRenderer::new);
     }
