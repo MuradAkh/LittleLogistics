@@ -64,7 +64,7 @@
   "entity.littlelogistics.fluid_barge.capacity": "%s %s/%s mB",
   "entity.littlelogistics.fluid_barge.capacity_empty": "Vacío 0/%s mB",
 
-  "subtitle.littlelogistics.steam_tug_whistle": "Silbato de vapor del remolcador",
+  "subtitle.littlelogistics.steam_tug_whistle": "Silbato de vapor",
   "subtitle.littlelogistics.tug_docking": "Atracador de remolcador",
   "subtitle.littlelogistics.tug_undocking": "Desatracador de remolcador"
 }
