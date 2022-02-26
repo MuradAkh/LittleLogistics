@@ -11,6 +11,7 @@ import dev.murad.shipping.setup.ModBlocks;
 import net.minecraft.core.Direction;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.HopperBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
@@ -126,6 +127,14 @@ public class ModBlockStateProvider extends BlockStateProvider {
                         .withExistingParent("vessel_charger", modLoc("vessel_charger_parent_model"))
                 )
                 .rotationY((int) state.getValue(VesselChargerBlock.FACING).getOpposite().toYRot())
+                .build()
+        );
+
+        getVariantBuilder(ModBlocks.RAPID_HOPPER.get()).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(models()
+                        .withExistingParent("rapid_hopper", mcLoc("hopper"))
+                )
+                .rotationY((int) state.getValue(HopperBlock.FACING).getOpposite().toYRot())
                 .build()
         );
     }

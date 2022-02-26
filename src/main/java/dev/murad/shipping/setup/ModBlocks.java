@@ -7,6 +7,7 @@ import dev.murad.shipping.block.energy.VesselChargerBlock;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
 import dev.murad.shipping.block.guide_rail.CornerGuideRailBlock;
 import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
+import dev.murad.shipping.block.rapidhopper.RapidHopperBlock;
 import dev.murad.shipping.block.vessel_detector.VesselDetectorBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -63,6 +64,13 @@ public class ModBlocks {
     public static final RegistryObject<Block> VESSEL_CHARGER = register(
             "vessel_charger",
             () -> new VesselChargerBlock(Block.Properties.of(Material.METAL)
+                    .destroyTime(0.5f)
+            ),
+            CreativeModeTab.TAB_TRANSPORTATION);
+
+    public static final RegistryObject<Block> RAPID_HOPPER = register(
+            "rapid_hopper",
+            () -> new RapidHopperBlock(Block.Properties.of(Material.METAL)
                     .destroyTime(0.5f)
             ),
             CreativeModeTab.TAB_TRANSPORTATION);
