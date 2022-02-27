@@ -92,12 +92,15 @@ public class SpringItem extends Item {
                 player.displayClientMessage(new TranslationTextComponent("item.littlelogistics.spring.noLoops"), true);
             } else if (firstTrain.getTug().isPresent()) {
                 SpringEntity.createSpring((VesselEntity) firstTrain.getTail(), (VesselEntity) secondTrain.getHead());
+                if(!player.isCreative())
+                    stack.shrink(1);
             } else {
                 SpringEntity.createSpring((VesselEntity) secondTrain.getTail(), (VesselEntity) firstTrain.getHead());
+                if(!player.isCreative())
+                    stack.shrink(1);
             }
             // First entity clicked is the dominant
-            if(!player.isCreative())
-                stack.shrink(1);
+
 
 
         }
