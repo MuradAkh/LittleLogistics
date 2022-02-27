@@ -2,6 +2,7 @@ package dev.murad.shipping.block.rail;
 
 import dev.murad.shipping.recipe.TugRouteRecipe;
 import dev.murad.shipping.util.RailShapeUtil;
+import dev.murad.shipping.util.RailUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
@@ -22,6 +23,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public class JunctionRail extends BaseRailBlock {
     private static final Logger log = LogManager.getLogger(JunctionRail.class);
@@ -68,7 +71,8 @@ public class JunctionRail extends BaseRailBlock {
         if (cart == null) {
             return state.getValue(getShapeProperty());
         }
-        return cart.getMotionDirection().getAxis() == Direction.Axis.X ? RailShape.EAST_WEST : RailShape.NORTH_SOUTH;
+
+        return RailUtils.directionFromVelocity(cart.getDeltaMovement()).getAxis() == Direction.Axis.X ? RailShape.EAST_WEST : RailShape.NORTH_SOUTH;
     }
 
     public BlockState rotate(BlockState pState, Rotation pRot) {

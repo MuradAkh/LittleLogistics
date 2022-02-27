@@ -34,11 +34,8 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
             }
         }
         if(pPlayer.isCrouching()){
-            if(this.getDeltaMovement().dot(new Vec3(1,0,1)) < 0.005) {
                 this.setDeltaMovement(Vec3.ZERO);
                 doflip = true;
-            } else if (!this.level.isClientSide)
-                pPlayer.sendMessage(new TextComponent("Locomotive must be stationary"), this.getUUID());
         }
         return InteractionResult.PASS;
     }
@@ -63,6 +60,7 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
         }
 
         if(doflip){
+            this.setDeltaMovement(Vec3.ZERO);
             this.setYRot(getDirection().getOpposite().toYRot());
             doflip = false;
         }

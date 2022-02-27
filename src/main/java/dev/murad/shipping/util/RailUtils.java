@@ -10,6 +10,7 @@ import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.state.properties.RailShape;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -82,6 +83,15 @@ public class RailUtils {
             }
         }
         return Optional.empty();
+    }
+
+    public static Direction directionFromVelocity(Vec3 deltaMovement){
+        if (Math.abs(deltaMovement.x) > Math.abs(deltaMovement.z)) {
+            return deltaMovement.x > 0 ? Direction.EAST : Direction.WEST;
+        } else {
+            return deltaMovement.z > 0 ? Direction.SOUTH : Direction.NORTH;
+        }
+
     }
 
     public static Optional<Pair<Direction, Integer>> traverseBi(BlockPos railPos, Level level, BiPredicate<Level, BlockPos> predicate, int limit){
