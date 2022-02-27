@@ -67,7 +67,7 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
 
 
     public boolean canBeCollidedWith() {
-        return true;
+        return false;
     }
 
 
@@ -78,9 +78,7 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
         if (state.getBlock() instanceof BaseRailBlock railBlock) {
             RailShape railshape = (railBlock).getRailDirection(state, this.level, pos, this);
             var exit = RailUtils.EXITS.get(railshape).getFirst();
-            Optional.ofNullable(Direction.fromNormal(exit.getX(), exit.getY(), exit.getZ()))
-                    .map(Direction::toYRot)
-                    .ifPresent(this::setYRot);
+            this.setYRot(RailUtils.directionFromVelocity(new Vec3(exit.getX(), exit.getY(), exit.getZ())).toYRot());
         }
     }
 
@@ -176,14 +174,16 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
     }
 
     protected void tickAdjustments() {
-        prevent180();
-        var dir = this.getDeltaMovement().normalize();
-        Optional.ofNullable(Direction.fromNormal((int) dir.x, (int) dir.y, (int) dir.z))
-                .map(Direction::toYRot).ifPresent(this::setYRot);
+        this.setYRot(RailUtils.directionFromVelocity(this.getDeltaMovement()).toYRot());
 
         if (!this.level.isClientSide()) {
             doChainMath();
         }
+    }
+
+    @Override
+    public Direction getMotionDirection() {
+        return this.getDirection();
     }
 
     protected void tickMinecart() {
@@ -333,7 +333,7 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
                     if (parentVelocity.length() == 0) {
                         setDeltaMovement(euclideanDir.scale(0.05));
                     } else {
-                        // TODO: sharp corners are hell
+                        // TODO: sharp corners are    hell
                         setDeltaMovement(dir.scale(parentVelocity.length()));
                         setDeltaMovement(getDeltaMovement().scale(distance));
                     }
