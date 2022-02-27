@@ -168,6 +168,7 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
         } else {
             if(dominant.isEmpty() && dominantNBT != null){
                 dominant = tryToLoadFromNBT(dominantNBT);
+                dominant.ifPresent(d -> d.setDominated(this));
             }
             entityData.set(DOMINANT_ID, dominant.map(Entity::getId).orElse(-1));
         }
@@ -396,16 +397,45 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
         return train;
     }
 
+    private void invertDoms(){
+        var temp = dominant;
+        dominant = dominated;
+        dominated = temp;
+    }
+
+    private static Optional<Pair<AbstractTrainCar, AbstractTrainCar>> tryFindAndPrepareClosePair(Train<AbstractTrainCar> train1, Train<AbstractTrainCar> train2){
+        return Optional.empty();
+    }
+
     @Override
     public boolean linkEntities(Player player, Entity target) {
         if (target instanceof AbstractTrainCar t) {
-            t.setDominant(this);
-            this.setDominated(t);
+            Train<AbstractTrainCar> train1 = t.getTrain();
+            Train<AbstractTrainCar> train2 = this.getTrain();
+            if(train2.getTug().isPresent() && train2.getTug().isPresent()){
+                // TODO: ERROR two tug
+                return false;
+            } else if (train2.equals(train1)){
+                // TODO: ERROR loop
+                return false;
+            } else {
+                tryFindAndPrepareClosePair(train1, train2)
+                        .ifPresentOrElse(pair -> createLinks(pair.getFirst(), pair.getSecond()), () -> {
+                            // TODO: ERROR too far
+                        });
+            }
+
+            createLinks(this, t);
             return true;
         } else {
             player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.badTypes"), true);
             return false;
         }
+    }
+
+    private void createLinks(AbstractTrainCar dominant, AbstractTrainCar dominated) {
+        dominated.setDominant(this);
+        dominant.setDominated(dominated);
     }
 
     @Override
