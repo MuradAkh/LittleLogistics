@@ -65,13 +65,13 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<AbstractTrainCar>> CHEST_CAR =
             Registration.ENTITIES.register("chest_car",
                     () -> EntityType.Builder.<AbstractTrainCar>of(ChestCarEntity::new,
-                                    MobCategory.MISC).sized(0.6f, 0.9f)
+                                    MobCategory.MISC).sized(0.7f, 0.9f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "train_car").toString()));
 
     public static final RegistryObject<EntityType<LocomotiveEntity>> STEAM_LOCOMOTIVE =
             Registration.ENTITIES.register("steam_locomotive",
                     () -> EntityType.Builder.<LocomotiveEntity>of(LocomotiveEntity::new,
-                                    MobCategory.MISC).sized(0.6f, 0.9f)
+                                    MobCategory.MISC).sized(0.7f, 0.9f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "locomotive").toString()));
 
 

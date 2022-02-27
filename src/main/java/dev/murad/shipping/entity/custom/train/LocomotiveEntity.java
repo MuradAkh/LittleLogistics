@@ -46,6 +46,7 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
 
     @Override
     public void tick(){
+        super.tickLoad();
         super.tickMinecart();
 
         if(!this.level.isClientSide){

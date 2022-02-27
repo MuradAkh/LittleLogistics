@@ -1,11 +1,14 @@
 package dev.murad.shipping.entity.custom.train;
 
 import com.mojang.datafixers.util.Pair;
+import dev.murad.shipping.entity.custom.SpringEntity;
+import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.RailUtils;
 import dev.murad.shipping.util.Train;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -28,6 +31,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.extensions.IForgeAbstractMinecart;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +40,7 @@ import java.util.Optional;
 public abstract class AbstractTrainCar extends AbstractMinecart implements IForgeAbstractMinecart, LinkableEntity<AbstractTrainCar> {
     protected Optional<AbstractTrainCar> dominant = Optional.empty();
     protected Optional<AbstractTrainCar> dominated = Optional.empty();
+    private @Nullable CompoundTag dominantNBT;
     public static final EntityDataAccessor<Integer> DOMINANT_ID = SynchedEntityData.defineId(AbstractTrainCar.class, EntityDataSerializers.INT);
     protected Train<AbstractTrainCar> train;
     private boolean flipped = false;
@@ -61,6 +66,9 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
     }
 
 
+    public boolean canBeCollidedWith() {
+        return true;
+    }
 
 
     public AbstractTrainCar(EntityType<?> p_38087_, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
@@ -74,6 +82,53 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
                     .map(Direction::toYRot)
                     .ifPresent(this::setYRot);
         }
+    }
+
+    @Override
+    protected void readAdditionalSaveData(CompoundTag compound) {
+        super.readAdditionalSaveData(compound);
+        dominantNBT = compound.getCompound("dominant");
+    }
+
+    @Override
+    protected void addAdditionalSaveData(CompoundTag compound) {
+        super.addAdditionalSaveData(compound);
+        if(dominant.isPresent()) {
+            writeNBT(dominant.get(), compound);
+        } else if(dominantNBT != null) {
+                compound.put(SpringEntity.SpringSide.DOMINANT.name(), dominantNBT);
+        }
+    }
+
+    private Optional<AbstractTrainCar> tryToLoadFromNBT(CompoundTag compound) {
+        try {
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+            pos.set(compound.getInt("X"), compound.getInt("Y"), compound.getInt("Z"));
+            String uuid = compound.getString("UUID");
+            AABB searchBox = new AABB(
+                    pos.getX() - 2,
+                    pos.getY() - 2,
+                    pos.getZ() - 2,
+                    pos.getX() + 2,
+                    pos.getY() + 2,
+                    pos.getZ() + 2
+            );
+            List<Entity> entities = level.getEntities(this, searchBox, e -> e.getStringUUID().equals(uuid));
+            return entities.stream().findFirst().map(e -> (AbstractTrainCar) e);
+        } catch (Exception e){
+            return Optional.empty();
+        }
+    }
+
+    private void writeNBT(Entity entity, CompoundTag globalCompound) {
+        CompoundTag compound = new CompoundTag();
+        compound.putInt("X", (int)Math.floor(entity.getX()));
+        compound.putInt("Y", (int)Math.floor(entity.getY()));
+        compound.putInt("Z", (int)Math.floor(entity.getZ()));
+
+        compound.putString("UUID", entity.getUUID().toString());
+
+        globalCompound.put("dominant", compound);
     }
 
     @Override
@@ -104,9 +159,20 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
     }
 
     public void tick() {
+        tickLoad();
         tickMinecart();
-        var pos = this.getOnPos().above();
         tickAdjustments();
+    }
+
+    protected void tickLoad(){
+        if (this.level.isClientSide) {
+            fetchDominantClient();
+        } else {
+            if(dominant.isEmpty() && dominantNBT != null){
+                dominant = tryToLoadFromNBT(dominantNBT);
+            }
+            entityData.set(DOMINANT_ID, dominant.map(Entity::getId).orElse(-1));
+        }
     }
 
     protected void tickAdjustments() {
@@ -117,13 +183,6 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
 
         if (!this.level.isClientSide()) {
             doChainMath();
-//            adjustVelocity();
-        }
-
-        if (this.level.isClientSide) {
-            fetchDominantClient();
-        } else {
-            entityData.set(DOMINANT_ID, dominant.map(Entity::getId).orElse(-1));
         }
     }
 
@@ -260,6 +319,11 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
 
             if (distance <= 5) {
                 Vec3 euclideanDir = dom.position().subtract(position()).normalize();
+                var dir = railDirDis
+                        .map(Pair::getFirst)
+                        .map(Direction::getNormal)
+                        .map(Vec3::atLowerCornerOf)
+                        .orElse(euclideanDir);
 
 
                 // TODO: conditional on docking like with vessels
@@ -270,17 +334,11 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
                         setDeltaMovement(euclideanDir.scale(0.05));
                     } else {
                         // TODO: sharp corners are hell
-                        var dir = railDirDis
-                                .map(Pair::getFirst)
-                                .map(Direction::getNormal)
-                                .map(Vec3::atLowerCornerOf)
-                                .orElse(euclideanDir);
                         setDeltaMovement(dir.scale(parentVelocity.length()));
                         setDeltaMovement(getDeltaMovement().scale(distance));
                     }
                 } else if (distance < 0.8){
-                    setDeltaMovement(euclideanDir.scale(-0.05));
-                    prevent180();
+                    setDeltaMovement(dir.scale(-0.05));
                 }
                 else
                     setDeltaMovement(Vec3.ZERO);
