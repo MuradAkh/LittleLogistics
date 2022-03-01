@@ -2,6 +2,8 @@ package dev.murad.shipping.entity.custom.train;
 
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.util.LinkableEntityHead;
+import dev.murad.shipping.util.RailUtils;
+import dev.murad.shipping.util.Train;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -11,6 +13,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.Optional;
 
 public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntityHead<AbstractTrainCar> {
     private boolean move = false;
@@ -59,11 +63,17 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
             }
         }
 
-        if(doflip){
+        if(this.dominated.isPresent()){
+            var r = RailUtils.traverseBi(getOnPos().above(), this.level, (w, p) ->
+                    RailUtils.getRail(dominated.get().getOnPos().above(), this.level).map(rp -> rp.equals(p)).orElse(false), 5);
+            r.ifPresent(pair -> this.setYRot(pair.getFirst().getOpposite().toYRot()));
+        } else if(doflip){
             this.setDeltaMovement(Vec3.ZERO);
             this.setYRot(getDirection().getOpposite().toYRot());
             doflip = false;
         }
+
+
 
     }
 
@@ -93,5 +103,31 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
             var mod = this.getSpeedModifier();
             this.push(dir.getStepX() * mod, 0, dir.getStepZ() * mod);
         }
+    }
+
+    @Override
+    public void setDominated(AbstractTrainCar entity) {
+        dominated = Optional.of(entity);
+    }
+
+    @Override
+    public void setDominant(AbstractTrainCar entity) {
+    }
+
+    @Override
+    public void removeDominated() {
+        dominated = Optional.empty();
+        this.train.setTail(this);
+    }
+
+    @Override
+    public void removeDominant() {
+
+    }
+
+
+    @Override
+    public void setTrain(Train train) {
+        this.train = train;
     }
 }
