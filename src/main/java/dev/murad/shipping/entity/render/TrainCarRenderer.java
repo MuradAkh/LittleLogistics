@@ -14,6 +14,8 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public abstract class TrainCarRenderer extends EntityRenderer<AbstractTrainCar> {
@@ -64,22 +66,23 @@ public abstract class TrainCarRenderer extends EntityRenderer<AbstractTrainCar> 
         });
     }
 
-    private void renderModel(AbstractTrainCar car, float pEntityYaw, PoseStack pMatrixStack, MultiBufferSource buffer, int pPartialTicks) {
-        long i = (long)car.getId() * 493286711L;
+    private void renderModel(AbstractTrainCar pEntity, float pEntityYaw, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPartialTicks) {
+        pMatrixStack.pushPose();
+        long i = (long)pEntity.getId() * 493286711L;
         i = i * i * 4392167121L + i * 98761L;
         float f = (((float)(i >> 16 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
         float f1 = (((float)(i >> 20 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
         float f2 = (((float)(i >> 24 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
         pMatrixStack.translate((double)f, (double)f1, (double)f2);
-        double d0 = Mth.lerp((double)pPartialTicks, car.xOld, car.getX());
-        double d1 = Mth.lerp((double)pPartialTicks, car.yOld, car.getY());
-        double d2 = Mth.lerp((double)pPartialTicks, car.zOld, car.getZ());
+        double d0 = Mth.lerp((double)pPartialTicks, pEntity.xOld, pEntity.getX());
+        double d1 = Mth.lerp((double)pPartialTicks, pEntity.yOld, pEntity.getY());
+        double d2 = Mth.lerp((double)pPartialTicks, pEntity.zOld, pEntity.getZ());
         double d3 = (double)0.3F;
-        Vec3 vec3 = car.getPos(d0, d1, d2);
-        float f3 = Mth.lerp(pPartialTicks, car.xRotO, car.getXRot());
+        Vec3 vec3 = pEntity.getPos(d0, d1, d2);
+        float f3 = Mth.lerp(pPartialTicks, pEntity.xRotO, pEntity.getXRot());
         if (vec3 != null) {
-            Vec3 vec31 = car.getPosOffs(d0, d1, d2, (double)0.3F);
-            Vec3 vec32 = car.getPosOffs(d0, d1, d2, (double)-0.3F);
+            Vec3 vec31 = pEntity.getPosOffs(d0, d1, d2, (double)0.3F);
+            Vec3 vec32 = pEntity.getPosOffs(d0, d1, d2, (double)-0.3F);
             if (vec31 == null) {
                 vec31 = vec3;
             }
@@ -98,22 +101,27 @@ public abstract class TrainCarRenderer extends EntityRenderer<AbstractTrainCar> 
         }
 
         pMatrixStack.translate(0.0D, 0.375D, 0.0D);
-        pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(-car.getDirection().toYRot()));
-        pMatrixStack.mulPose(Vector3f.ZP.rotationDegrees(-f3));
-        float f5 = (float)car.getHurtTime() - pPartialTicks;
-        float f6 = car.getDamage() - pPartialTicks;
+        pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(180 - pEntity.getYRot()));
+        pMatrixStack.mulPose(Vector3f.XN.rotationDegrees(f3));
+        float f5 = (float)pEntity.getHurtTime() - pPartialTicks;
+        float f6 = pEntity.getDamage() - pPartialTicks;
         if (f6 < 0.0F) {
             f6 = 0.0F;
         }
 
         if (f5 > 0.0F) {
-            pMatrixStack.mulPose(Vector3f.XP.rotationDegrees(Mth.sin(f5) * f5 * f6 / 10.0F * (float)car.getHurtDir()));
+            pMatrixStack.mulPose(Vector3f.XP.rotationDegrees(Mth.sin(f5) * f5 * f6 / 10.0F * (float)pEntity.getHurtDir()));
         }
 
+        pMatrixStack.translate(0, 1.1, 0);
+        int j = pEntity.getDisplayOffset();
+        BlockState blockstate = pEntity.getDisplayBlockState();
+
+
         pMatrixStack.scale(-1.0F, -1.0F, 1.0F);
-        VertexConsumer ivertexbuilder = buffer.getBuffer(getModel(car).renderType(this.getTextureLocation(car)));
-        getModel(car).renderToBuffer(pMatrixStack, ivertexbuilder, pPartialTicks, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        VertexConsumer vertexconsumer = pBuffer.getBuffer(this.getModel(pEntity).renderType(this.getTextureLocation(pEntity)));
+        getModel(pEntity).renderToBuffer(pMatrixStack, vertexconsumer, pPartialTicks, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        pMatrixStack.popPose();
     }
 
     abstract Model getModel(Entity entity);

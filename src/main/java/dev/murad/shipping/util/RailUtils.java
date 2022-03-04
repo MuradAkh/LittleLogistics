@@ -2,6 +2,7 @@ package dev.murad.shipping.util;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
+import dev.murad.shipping.entity.custom.train.AbstractTrainCar;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -41,7 +42,7 @@ public class RailUtils {
         map.put(RailShape.NORTH_EAST, Pair.of(north, east));
     });
 
-    private static class RailDir {
+    public static class RailDir {
         public Direction horizontal;
         public boolean above;
 
@@ -113,7 +114,7 @@ public class RailUtils {
 
     }
 
-    private static Optional<RailDir> getExistFromEntrance(Direction direction, RailShape shape){
+    public static Optional<RailDir> getOtherExit(Direction direction, RailShape shape){
         var dirs = EXITS_DIRECTION.get(shape);
         if(dirs.getFirst().horizontal.equals(direction)){
             return Optional.of(dirs.getSecond());
@@ -134,10 +135,15 @@ public class RailUtils {
         var entrance = prevExitTaken.getOpposite();
         return getRail(railPos, level).flatMap(pos -> {
             var shape = getShape(pos, level, Optional.empty());
-            return getExistFromEntrance(entrance, shape).flatMap(raildir ->
+            return getOtherExit(entrance, shape).flatMap(raildir ->
                     traverse(raildir.above ? pos.relative(raildir.horizontal).above() : pos.relative(raildir.horizontal), level, raildir.horizontal, predicate, limit - 1).map(ans -> ans + 1));
 
         });
+    }
+
+    public static BiPredicate<Level, BlockPos> samePositionPredicate(AbstractTrainCar entity){
+        return (level, p) -> getRail(p, level).flatMap(pos ->
+            getRail(entity.getOnPos().above(), level).map(rp -> rp.equals(pos))).orElse(false);
     }
 
 
