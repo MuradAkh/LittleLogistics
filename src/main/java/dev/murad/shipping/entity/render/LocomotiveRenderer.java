@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCar;
+import dev.murad.shipping.entity.models.SteamLocomotiveModel;
 import dev.murad.shipping.entity.models.SteamTugModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.Model;
@@ -14,22 +15,19 @@ import net.minecraft.world.entity.Entity;
 
 public class LocomotiveRenderer extends TrainCarRenderer{
     private static final ResourceLocation TEXTURE =
-            new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/tug.png");
+            new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/steam_locomotive.png");
 
 
     private final EntityModel model;
 
     public LocomotiveRenderer(EntityRendererProvider.Context context) {
         super(context);
-        model = new SteamTugModel(context.bakeLayer(SteamTugModel.LAYER_LOCATION));
+        model = new SteamLocomotiveModel(context.bakeLayer(SteamLocomotiveModel.LAYER_LOCATION));
     }
 
     @Override
     public void render(AbstractTrainCar vesselEntity, float yaw, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
         matrixStack.pushPose();
-        matrixStack.translate(0, 1, 0);
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-
         super.render(vesselEntity, yaw, p_225623_3_, matrixStack, buffer, p_225623_6_);
         matrixStack.popPose();
     }
