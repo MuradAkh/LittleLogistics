@@ -1,8 +1,8 @@
 package dev.murad.shipping.entity.custom.train;
 
+import com.mojang.datafixers.util.Function3;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.RailUtils;
 import dev.murad.shipping.util.Train;
@@ -35,6 +35,9 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class AbstractTrainCar extends AbstractMinecart implements IForgeAbstractMinecart, LinkableEntity<AbstractTrainCar> {
@@ -192,12 +195,73 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
     }
 
     protected void tickAdjustments() {
+        // direction based on velocity
         if(this.getDeltaMovement().length() > 0) {
             this.setYRot(RailUtils.directionFromVelocity(this.getDeltaMovement()).toYRot());
         }
+
+        // try to get direction based on train
+        var railshape = getRailShape();
+        if(this.dominated.isPresent() && railshape.isPresent()) {
+            var r = RailUtils.traverseBi(getOnPos().above(), this.level,
+                    RailUtils.samePositionPredicate(dominated.get()), 5);
+            r.flatMap(pair -> RailUtils.getOtherExit(pair.getFirst(), railshape.get()))
+                    .map(rd -> rd.horizontal.toYRot()).ifPresent(this::setYRot);
+        }
+
         if (!this.level.isClientSide()) {
             doChainMath();
+        }else {
+            adjustClientSideRot();
         }
+    }
+
+    private void adjustClientSideRot(){
+        if(this.getDeltaMovement().length() < 0.01){
+            return;
+        }
+        BiConsumer<Direction, Direction> pitchHelper = (Direction dir, Direction tdir) -> {
+            if (dir.equals(tdir)) {
+                setXRot(-45f);
+            } else if (dir.equals(tdir.getOpposite())) {
+                setXRot(45f);
+            } else {
+                setXRot(0f);
+            }
+        };
+        Function3<Direction, Direction, Direction, Void> yawHelper = (Direction dir, Direction tdir1, Direction tdir2) -> {
+            if (dir.equals(tdir1)) {
+                setYRot(this.getYRot() - 45f);
+            } else if (dir.equals(tdir2)) {
+                setYRot(this.getYRot() + 45f);
+            }
+            return null;
+        };
+        this.setXRot(0);
+        getRailShape().ifPresent(shape -> {
+            var dir = RailUtils.directionFromVelocity(this.getDeltaMovement());
+            switch (shape) {
+                case ASCENDING_EAST -> pitchHelper.accept(dir, Direction.EAST);
+                case ASCENDING_WEST -> pitchHelper.accept(dir, Direction.WEST);
+                case ASCENDING_NORTH -> pitchHelper.accept(dir, Direction.NORTH);
+                case ASCENDING_SOUTH -> pitchHelper.accept(dir, Direction.SOUTH);
+                case SOUTH_EAST -> {
+                    yawHelper.apply(dir, Direction.EAST, Direction.SOUTH);
+                }
+                case SOUTH_WEST -> {
+                    yawHelper.apply(dir, Direction.SOUTH, Direction.WEST);
+                }
+                case NORTH_WEST -> {
+                    yawHelper.apply(dir, Direction.WEST, Direction.NORTH);
+
+                }
+                case NORTH_EAST -> {
+                    yawHelper.apply(dir, Direction.NORTH, Direction.EAST);
+                }
+                default -> setXRot(0);
+            }
+
+        });
     }
 
     @Override
@@ -331,9 +395,14 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
             var railDirDis = RailUtils.getRail(dom.getOnPos().above(), level).flatMap(target ->
                     RailUtils.traverseBi(this.getOnPos().above(), level, (level, p) -> p.equals(target), 20));
 
-            float distance = railDirDis.map(Pair::getSecond).filter(a -> a > 1).map(di -> {
+            //TODO: based on "docked" instead
+            var maxdist =
+                    this.getTrain().getTug().isPresent() && this.getTrain().getTug().get().getDeltaMovement().equals(Vec3.ZERO)
+                    ? 1 : 1.2;
+
+            float distance = railDirDis.map(Pair::getSecond).filter(a -> a > 0).map(di -> {
                 var euclid = this.distanceTo(dom);
-                return euclid < 1 ? di : euclid;
+                return euclid < maxdist ? di : euclid;
             }).orElse(this.distanceTo(dom));
 
             if (distance <= 5) {
@@ -345,18 +414,16 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
                         .orElse(euclideanDir);
 
 
-                // TODO: conditional on docking like with vessels
-                if (distance > 1.1) {
+                if (distance > maxdist) {
                     Vec3 parentVelocity = dom.getDeltaMovement();
 
                     if (parentVelocity.length() == 0) {
-                        setDeltaMovement(euclideanDir.scale(0.05));
+                        setDeltaMovement(dir.scale(0.05));
                     } else {
-                        // TODO: sharp corners are    hell
                         setDeltaMovement(dir.scale(parentVelocity.length()));
                         setDeltaMovement(getDeltaMovement().scale(distance));
                     }
-                } else if (distance < 0.8){
+                } else if (distance < maxdist - 0.2){
                     setDeltaMovement(dir.scale(-0.05));
                 }
                 else

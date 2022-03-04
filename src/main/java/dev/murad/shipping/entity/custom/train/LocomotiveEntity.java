@@ -63,11 +63,8 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
             }
         }
 
-        if(this.dominated.isPresent()){
-            var r = RailUtils.traverseBi(getOnPos().above(), this.level, (w, p) ->
-                    RailUtils.getRail(dominated.get().getOnPos().above(), this.level).map(rp -> rp.equals(p)).orElse(false), 5);
-            r.ifPresent(pair -> this.setYRot(pair.getFirst().getOpposite().toYRot()));
-        } else if(doflip){
+
+        if(doflip && dominated.isEmpty()){
             this.setDeltaMovement(Vec3.ZERO);
             this.setYRot(getDirection().getOpposite().toYRot());
             doflip = false;
@@ -92,7 +89,7 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
         return getRailShape().map(shape -> switch (shape) {
             case NORTH_SOUTH, EAST_WEST -> 0.07;
             case SOUTH_WEST, NORTH_WEST, SOUTH_EAST, NORTH_EAST -> 0.03;
-            default -> this.getDeltaMovement().y > 0 ? 0.02 : 0.01;
+            default -> 0.07; //TODO lower if descending
         }).orElse(0d);
     }
 
