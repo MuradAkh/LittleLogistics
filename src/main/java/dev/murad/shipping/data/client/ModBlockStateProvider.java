@@ -13,6 +13,7 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.HopperBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.client.model.generators.ModelFile;
@@ -131,15 +132,20 @@ public class ModBlockStateProvider extends BlockStateProvider {
         );
 
         getVariantBuilder(ModBlocks.RAPID_HOPPER.get()).forAllStates(state -> ConfiguredModel.builder()
-                .modelFile(models()
-                        .withExistingParent("rapid_hopper", mcLoc("hopper"))
-                        .texture("particle", getBlTx("rapid_hopper_outside"))
-                        .texture("top", getBlTx("rapid_hopper_top"))
-                        .texture("side", getBlTx("rapid_hopper_outside"))
-                        .texture("inside", getBlTx("rapid_hopper_inside"))
+                .modelFile(getRapidHopperModel(state)
                 )
                 .rotationY((int) state.getValue(HopperBlock.FACING).getOpposite().toYRot())
                 .build()
         );
+    }
+
+    private BlockModelBuilder getRapidHopperModel(BlockState state) {
+        var side = state.getValue(HopperBlock.FACING).equals(Direction.DOWN) ? "" : "_side";
+        return models()
+                .withExistingParent("rapid_hopper" + side, mcLoc("hopper" + side))
+                .texture("particle", getBlTx("rapid_hopper_outside"))
+                .texture("top", getBlTx("rapid_hopper_top"))
+                .texture("side", getBlTx("rapid_hopper_outside"))
+                .texture("inside", getBlTx("rapid_hopper_inside"));
     }
 }
