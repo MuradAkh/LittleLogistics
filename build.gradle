@@ -229,6 +229,16 @@ publishing {
                 password = System.getenv("GITHUB_TOKEN")
             }
         }
+
+        maven {
+            name = "edtoaster.ca"
+            url = uri("https://maven.edtoaster.ca/")
+
+            credentials {
+                username = System.getenv("EDTOASTER_MAVEN_USER")
+                password = System.getenv("EDTOASTER_MAVEN_PASS")
+            }
+        }
     }
 }
 
