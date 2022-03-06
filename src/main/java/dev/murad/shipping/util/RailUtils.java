@@ -2,11 +2,13 @@ package dev.murad.shipping.util;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
+import dev.murad.shipping.block.rail.MultiExitRailBlock;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCar;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
@@ -76,6 +78,18 @@ public class RailUtils {
         return ((BaseRailBlock) state.getBlock()).getRailDirection(state, level, pos, car.orElse(null));
     }
 
+    @NotNull
+    public static RailShape getShape(BlockPos pos, Level level, Direction direction) {
+
+        var state = level.getBlockState(pos);
+        if(state.getBlock() instanceof MultiExitRailBlock){
+            return ((MultiExitRailBlock) state.getBlock()).getRailShapeFromDirection(state, pos, level, direction);
+        } else {
+            return ((BaseRailBlock) state.getBlock()).getRailDirection(state, level, pos, null);
+        }
+    }
+
+
     public static Optional<BlockPos> getRail(BlockPos inpos, Level level){ // if using with carts, pass in getOnPos.above
         for(var pos: Arrays.asList(inpos, inpos.below())) { // check for ascending rail.
             var state = level.getBlockState(pos);
@@ -95,9 +109,9 @@ public class RailUtils {
 
     }
 
-    public static Optional<Pair<Direction, Integer>> traverseBi(BlockPos railPos, Level level, BiPredicate<Level, BlockPos> predicate, int limit){
+    public static Optional<Pair<Direction, Integer>> traverseBi(BlockPos railPos, Level level, BiPredicate<Level, BlockPos> predicate, int limit, AbstractTrainCar car){
         return getRail(railPos, level).flatMap(pos -> {
-            var shape = getShape(pos, level, Optional.empty());
+            var shape = getShape(pos, level, car.getDirection().getOpposite());
             var dirs = EXITS_DIRECTION.get(shape);
             var first = traverse(pos, level, dirs.getSecond().horizontal.getOpposite(), predicate, limit);
             var second = traverse(pos, level, dirs.getFirst().horizontal.getOpposite(), predicate, limit);
@@ -134,7 +148,7 @@ public class RailUtils {
         }
         var entrance = prevExitTaken.getOpposite();
         return getRail(railPos, level).flatMap(pos -> {
-            var shape = getShape(pos, level, Optional.empty());
+            var shape = getShape(pos, level, prevExitTaken);
             return getOtherExit(entrance, shape).flatMap(raildir ->
                     traverse(raildir.above ? pos.relative(raildir.horizontal).above() : pos.relative(raildir.horizontal), level, raildir.horizontal, predicate, limit - 1).map(ans -> ans + 1));
 

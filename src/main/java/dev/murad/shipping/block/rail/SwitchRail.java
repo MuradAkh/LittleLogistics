@@ -18,7 +18,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-public class SwitchRail extends BaseRailBlock {
+public class SwitchRail extends BaseRailBlock implements MultiExitRailBlock {
+
+
     public enum OutDirection implements StringRepresentable {
         LEFT("left"), RIGHT("right");
 
@@ -101,6 +103,22 @@ public class SwitchRail extends BaseRailBlock {
         Direction outDirection = state.getValue(POWERED) ? turnDirection : facing;
 
         if (cart != null && cart.getMotionDirection().getOpposite() == facing) {
+            outDirection = facing;
+        }
+
+        RailShape shape = RailShapeUtil.getRailShape(inDirection, outDirection);
+        return shape;
+    }
+    @Override
+    public RailShape getRailShapeFromDirection(BlockState state, BlockPos pos, Level level, Direction direction) {
+        Direction facing = state.getValue(FACING);
+        OutDirection out = state.getValue(OUT_DIRECTION);
+
+        Direction inDirection = facing.getOpposite();
+        Direction turnDirection = out.getOutDirection(inDirection);
+        Direction outDirection = state.getValue(POWERED) ? turnDirection : facing;
+
+        if (direction == facing) {
             outDirection = facing;
         }
 
