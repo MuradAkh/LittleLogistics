@@ -186,7 +186,7 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
             fetchDominatedClient();
         } else {
             if(dominant.isEmpty() && dominantNBT != null){
-                dominant = tryToLoadFromNBT(dominantNBT);
+                tryToLoadFromNBT(dominantNBT).ifPresent(this::setDominant);
                 dominant.ifPresent(d -> d.setDominated(this));
             }
             entityData.set(DOMINANT_ID, dominant.map(Entity::getId).orElse(-1));
@@ -204,7 +204,7 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
         var railshape = getRailShape();
         if(this.dominated.isPresent() && railshape.isPresent()) {
             var r = RailUtils.traverseBi(getOnPos().above(), this.level,
-                    RailUtils.samePositionPredicate(dominated.get()), 5);
+                    RailUtils.samePositionPredicate(dominated.get()), 5, this);
             r.flatMap(pair -> RailUtils.getOtherExit(pair.getFirst(), railshape.get()))
                     .map(rd -> rd.horizontal.toYRot()).ifPresent(this::setYRot);
         }
@@ -393,7 +393,7 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
     private void doChainMath() {
         dominant.ifPresent(dom -> {
             var railDirDis = RailUtils.getRail(dom.getOnPos().above(), level).flatMap(target ->
-                    RailUtils.traverseBi(this.getOnPos().above(), level, (level, p) -> p.equals(target), 20));
+                    RailUtils.traverseBi(this.getOnPos().above(), level, (level, p) -> p.equals(target), 20, this));
 
             //TODO: based on "docked" instead
             var maxdist =
@@ -476,7 +476,7 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
     private static Optional<Integer> distHelper(AbstractTrainCar car1, AbstractTrainCar car2){
         return RailUtils.traverseBi(car1.getOnPos().above(), car1.level,
                 (l, p) -> RailUtils.getRail(car2.getOnPos().above(), car2.level)
-                        .map(rp -> rp.equals(p)).orElse(false), 5).map(Pair::getSecond);
+                        .map(rp -> rp.equals(p)).orElse(false), 5, car1).map(Pair::getSecond);
     }
 
     private static Optional<Pair<AbstractTrainCar, AbstractTrainCar>> findClosestPair(Train<AbstractTrainCar> train1, Train<AbstractTrainCar> train2){
@@ -557,16 +557,15 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
             Train<AbstractTrainCar> train1 = t.getTrain();
             Train<AbstractTrainCar> train2 = this.getTrain();
             if(train2.getTug().isPresent() && train1.getTug().isPresent()){
-                // TODO: ERROR two tug
+                player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.noTwoLoco"), true);
                 return false;
             } else if (train2.equals(train1)){
-                // TODO: ERROR loop
+                player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.noLoops"), true);
                 return false;
             } else {
                 tryFindAndPrepareClosePair(train1, train2)
                         .ifPresentOrElse(pair -> createLinks(pair.getFirst(), pair.getSecond()), () -> {
-                            // TODO: ERROR too far
-                            player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.badTypes"), true);
+                            player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.tooFar"), true);
 
                         });
             }
