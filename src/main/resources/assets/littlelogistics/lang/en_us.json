@@ -51,6 +51,7 @@
   "item.littlelogistics.spring.description": "Used to link vehicles",
   "item.littlelogistics.spring.notToSelf": "Can't link vehicles to self",
   "item.littlelogistics.spring.noTwoTugs": "Can't link two tugs",
+  "item.littlelogistics.spring.noTwoLoco": "Can't link two locomotives",
   "item.littlelogistics.spring.tooFar": "Vehicles too far to link",
   "item.littlelogistics.spring.noLoops": "Can't link vehicles in a loop",
   "item.littlelogistics.spring.badTypes": "Can't link these types of vehicles together!",

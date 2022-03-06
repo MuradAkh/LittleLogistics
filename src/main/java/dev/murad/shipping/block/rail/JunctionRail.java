@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-public class JunctionRail extends BaseRailBlock {
+public class JunctionRail extends BaseRailBlock implements MultiExitRailBlock {
     private static final Logger log = LogManager.getLogger(JunctionRail.class);
     // for compatibilty issues
     public static final EnumProperty<RailShape> RAIL_SHAPE = RailShapeUtil.RAIL_SHAPE_STRAIGHT_FLAT;
@@ -87,5 +87,12 @@ public class JunctionRail extends BaseRailBlock {
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
         super.createBlockStateDefinition(pBuilder);
         pBuilder.add(WATERLOGGED, RAIL_SHAPE);
+    }
+
+    @Override
+    public RailShape getRailShapeFromDirection(BlockState state, BlockPos pos, Level level, Direction direction) {
+        if(direction.equals(Direction.EAST) || direction.equals(Direction.WEST)){
+            return RailShape.EAST_WEST;
+        } else return RailShape.NORTH_SOUTH;
     }
 }
