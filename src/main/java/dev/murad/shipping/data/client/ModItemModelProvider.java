@@ -33,6 +33,8 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "seater_barge");
         builder(itemGenerated, "tug");
         builder(itemGenerated, "energy_tug");
+        builder(itemGenerated, "steam_locomotive");
+        builder(itemGenerated, "chest_car");
         builder(itemGenerated, "book");
         builder(itemGenerated, "tug_route")
                 .override()

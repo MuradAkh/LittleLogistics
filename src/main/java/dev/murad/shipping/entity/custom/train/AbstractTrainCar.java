@@ -1,11 +1,14 @@
 package dev.murad.shipping.entity.custom.train;
 
+import com.mojang.datafixers.util.Function3;
 import com.mojang.datafixers.util.Pair;
+import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.RailUtils;
 import dev.murad.shipping.util.Train;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -28,15 +31,21 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.extensions.IForgeAbstractMinecart;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class AbstractTrainCar extends AbstractMinecart implements IForgeAbstractMinecart, LinkableEntity<AbstractTrainCar> {
     protected Optional<AbstractTrainCar> dominant = Optional.empty();
     protected Optional<AbstractTrainCar> dominated = Optional.empty();
+    private @Nullable CompoundTag dominantNBT;
     public static final EntityDataAccessor<Integer> DOMINANT_ID = SynchedEntityData.defineId(AbstractTrainCar.class, EntityDataSerializers.INT);
+    public static final EntityDataAccessor<Integer> DOMINATED_ID = SynchedEntityData.defineId(AbstractTrainCar.class, EntityDataSerializers.INT);
     protected Train<AbstractTrainCar> train;
     private boolean flipped = false;
     private int lSteps;
@@ -47,6 +56,18 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
 
     public AbstractTrainCar(EntityType<?> p_38087_, Level p_38088_) {
         super(p_38087_, p_38088_);
+        train = new Train<>(this);
+    }
+
+    public AbstractTrainCar(EntityType<?> p_38087_, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
+        super(p_38087_, level, aDouble, aDouble1, aDouble2);
+        var pos = new BlockPos(aDouble, aDouble1, aDouble2);
+        var state = level.getBlockState(pos);
+        if (state.getBlock() instanceof BaseRailBlock railBlock) {
+            RailShape railshape = (railBlock).getRailDirection(state, this.level, pos, this);
+            var exit = RailUtils.EXITS.get(railshape).getFirst();
+            this.setYRot(RailUtils.directionFromVelocity(new Vec3(exit.getX(), exit.getY(), exit.getZ())).toYRot());
+        }
         train = new Train<>(this);
     }
 
@@ -61,25 +82,65 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
     }
 
 
+    public boolean canBeCollidedWith() {
+        return false;
+    }
 
 
-    public AbstractTrainCar(EntityType<?> p_38087_, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
-        super(p_38087_, level, aDouble, aDouble1, aDouble2);
-        var pos = new BlockPos(aDouble, aDouble1, aDouble2);
-        var state = level.getBlockState(pos);
-        if (state.getBlock() instanceof BaseRailBlock railBlock) {
-            RailShape railshape = (railBlock).getRailDirection(state, this.level, pos, this);
-            var exit = RailUtils.EXITS.get(railshape).getFirst();
-            Optional.ofNullable(Direction.fromNormal(exit.getX(), exit.getY(), exit.getZ()))
-                    .map(Direction::toYRot)
-                    .ifPresent(this::setYRot);
+
+
+    @Override
+    protected void readAdditionalSaveData(CompoundTag compound) {
+        super.readAdditionalSaveData(compound);
+        dominantNBT = compound.getCompound("dominant");
+    }
+
+    @Override
+    protected void addAdditionalSaveData(CompoundTag compound) {
+        super.addAdditionalSaveData(compound);
+        if(dominant.isPresent()) {
+            writeNBT(dominant.get(), compound);
+        } else if(dominantNBT != null) {
+                compound.put(SpringEntity.SpringSide.DOMINANT.name(), dominantNBT);
         }
+    }
+
+    private Optional<AbstractTrainCar> tryToLoadFromNBT(CompoundTag compound) {
+        try {
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+            pos.set(compound.getInt("X"), compound.getInt("Y"), compound.getInt("Z"));
+            String uuid = compound.getString("UUID");
+            AABB searchBox = new AABB(
+                    pos.getX() - 2,
+                    pos.getY() - 2,
+                    pos.getZ() - 2,
+                    pos.getX() + 2,
+                    pos.getY() + 2,
+                    pos.getZ() + 2
+            );
+            List<Entity> entities = level.getEntities(this, searchBox, e -> e.getStringUUID().equals(uuid));
+            return entities.stream().findFirst().map(e -> (AbstractTrainCar) e);
+        } catch (Exception e){
+            return Optional.empty();
+        }
+    }
+
+    private void writeNBT(Entity entity, CompoundTag globalCompound) {
+        CompoundTag compound = new CompoundTag();
+        compound.putInt("X", (int)Math.floor(entity.getX()));
+        compound.putInt("Y", (int)Math.floor(entity.getY()));
+        compound.putInt("Z", (int)Math.floor(entity.getZ()));
+
+        compound.putString("UUID", entity.getUUID().toString());
+
+        globalCompound.put("dominant", compound);
     }
 
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         getEntityData().define(DOMINANT_ID, -1);
+        getEntityData().define(DOMINATED_ID, -1);
     }
 
 
@@ -88,8 +149,9 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
         super.onSyncedDataUpdated(key);
 
         if (level.isClientSide) {
-            if (DOMINANT_ID.equals(key)) {
+            if (DOMINANT_ID.equals(key) || DOMINATED_ID.equals(key)) {
                 fetchDominantClient();
+                fetchDominatedClient();
             }
         }
     }
@@ -103,28 +165,108 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
         }
     }
 
+    private void fetchDominatedClient() {
+        Entity potential = level.getEntity(getEntityData().get(DOMINATED_ID));
+        if (potential instanceof AbstractTrainCar t) {
+            dominated = Optional.of(t);
+        } else {
+            dominated = Optional.empty();
+        }
+    }
+
     public void tick() {
+        tickLoad();
         tickMinecart();
-        var pos = this.getOnPos().above();
         tickAdjustments();
     }
 
+    protected void tickLoad(){
+        if (this.level.isClientSide) {
+            fetchDominantClient();
+            fetchDominatedClient();
+        } else {
+            if(dominant.isEmpty() && dominantNBT != null){
+                tryToLoadFromNBT(dominantNBT).ifPresent(this::setDominant);
+                dominant.ifPresent(d -> d.setDominated(this));
+            }
+            entityData.set(DOMINANT_ID, dominant.map(Entity::getId).orElse(-1));
+            entityData.set(DOMINATED_ID, dominated.map(Entity::getId).orElse(-1));
+        }
+    }
+
     protected void tickAdjustments() {
-        prevent180();
-        var dir = this.getDeltaMovement().normalize();
-        Optional.ofNullable(Direction.fromNormal((int) dir.x, (int) dir.y, (int) dir.z))
-                .map(Direction::toYRot).ifPresent(this::setYRot);
+        // direction based on velocity
+        if(this.getDeltaMovement().length() > 0) {
+            this.setYRot(RailUtils.directionFromVelocity(this.getDeltaMovement()).toYRot());
+        }
+
+        // try to get direction based on train
+        var railshape = getRailShape();
+        if(this.dominated.isPresent() && railshape.isPresent()) {
+            var r = RailUtils.traverseBi(getOnPos().above(), this.level,
+                    RailUtils.samePositionPredicate(dominated.get()), 5, this);
+            r.flatMap(pair -> RailUtils.getOtherExit(pair.getFirst(), railshape.get()))
+                    .map(rd -> rd.horizontal.toYRot()).ifPresent(this::setYRot);
+        }
 
         if (!this.level.isClientSide()) {
             doChainMath();
-//            adjustVelocity();
+        }else {
+            adjustClientSideRot();
         }
+    }
 
-        if (this.level.isClientSide) {
-            fetchDominantClient();
-        } else {
-            entityData.set(DOMINANT_ID, dominant.map(Entity::getId).orElse(-1));
+    private void adjustClientSideRot(){
+        if(this.getDeltaMovement().length() < 0.01){
+            return;
         }
+        BiConsumer<Direction, Direction> pitchHelper = (Direction dir, Direction tdir) -> {
+            if (dir.equals(tdir)) {
+                setXRot(-45f);
+            } else if (dir.equals(tdir.getOpposite())) {
+                setXRot(45f);
+            } else {
+                setXRot(0f);
+            }
+        };
+        Function3<Direction, Direction, Direction, Void> yawHelper = (Direction dir, Direction tdir1, Direction tdir2) -> {
+            if (dir.equals(tdir1)) {
+                setYRot(this.getYRot() - 45f);
+            } else if (dir.equals(tdir2)) {
+                setYRot(this.getYRot() + 45f);
+            }
+            return null;
+        };
+        this.setXRot(0);
+        getRailShape().ifPresent(shape -> {
+            var dir = RailUtils.directionFromVelocity(this.getDeltaMovement());
+            switch (shape) {
+                case ASCENDING_EAST -> pitchHelper.accept(dir, Direction.EAST);
+                case ASCENDING_WEST -> pitchHelper.accept(dir, Direction.WEST);
+                case ASCENDING_NORTH -> pitchHelper.accept(dir, Direction.NORTH);
+                case ASCENDING_SOUTH -> pitchHelper.accept(dir, Direction.SOUTH);
+                case SOUTH_EAST -> {
+                    yawHelper.apply(dir, Direction.EAST, Direction.SOUTH);
+                }
+                case SOUTH_WEST -> {
+                    yawHelper.apply(dir, Direction.SOUTH, Direction.WEST);
+                }
+                case NORTH_WEST -> {
+                    yawHelper.apply(dir, Direction.WEST, Direction.NORTH);
+
+                }
+                case NORTH_EAST -> {
+                    yawHelper.apply(dir, Direction.NORTH, Direction.EAST);
+                }
+                default -> setXRot(0);
+            }
+
+        });
+    }
+
+    @Override
+    public Direction getMotionDirection() {
+        return this.getDirection();
     }
 
     protected void tickMinecart() {
@@ -179,7 +321,7 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
             this.checkInsideBlocks();
             this.setXRot(0.0F);
 
-            double d4 = (double) Mth.wrapDegrees(this.getYRot() - this.yRotO);
+            double d4 = Mth.wrapDegrees(this.getYRot() - this.yRotO);
             if (d4 < -170.0D || d4 >= 170.0D) {
                 this.flipped = !this.flipped;
             }
@@ -223,7 +365,7 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
         this.lx = pX;
         this.ly = pY;
         this.lz = pZ;
-        this.lxr = (double) pPitch;
+        this.lxr = pPitch;
         this.lSteps = pPosRotationIncrements + 2;
         super.lerpTo(pX, pY, pZ, pYaw, pPitch, pPosRotationIncrements, pTeleport);
     }
@@ -251,36 +393,38 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
     private void doChainMath() {
         dominant.ifPresent(dom -> {
             var railDirDis = RailUtils.getRail(dom.getOnPos().above(), level).flatMap(target ->
-                    RailUtils.traverseBi(this.getOnPos().above(), level, (level, p) -> p.equals(target), 20));
+                    RailUtils.traverseBi(this.getOnPos().above(), level, (level, p) -> p.equals(target), 20, this));
 
-            float distance = railDirDis.map(Pair::getSecond).filter(a -> a > 1).map(di -> {
+            //TODO: based on "docked" instead
+            var maxdist =
+                    this.getTrain().getTug().isPresent() && this.getTrain().getTug().get().getDeltaMovement().equals(Vec3.ZERO)
+                    ? 1 : 1.2;
+
+            float distance = railDirDis.map(Pair::getSecond).filter(a -> a > 0).map(di -> {
                 var euclid = this.distanceTo(dom);
-                return euclid < 1 ? di : euclid;
+                return euclid < maxdist ? di : euclid;
             }).orElse(this.distanceTo(dom));
 
             if (distance <= 5) {
                 Vec3 euclideanDir = dom.position().subtract(position()).normalize();
+                var dir = railDirDis
+                        .map(Pair::getFirst)
+                        .map(Direction::getNormal)
+                        .map(Vec3::atLowerCornerOf)
+                        .orElse(euclideanDir);
 
 
-                // TODO: conditional on docking like with vessels
-                if (distance > 1.1) {
+                if (distance > maxdist) {
                     Vec3 parentVelocity = dom.getDeltaMovement();
 
                     if (parentVelocity.length() == 0) {
-                        setDeltaMovement(euclideanDir.scale(0.05));
+                        setDeltaMovement(dir.scale(0.05));
                     } else {
-                        // TODO: sharp corners are hell
-                        var dir = railDirDis
-                                .map(Pair::getFirst)
-                                .map(Direction::getNormal)
-                                .map(Vec3::atLowerCornerOf)
-                                .orElse(euclideanDir);
                         setDeltaMovement(dir.scale(parentVelocity.length()));
                         setDeltaMovement(getDeltaMovement().scale(distance));
                     }
-                } else if (distance < 0.8){
-                    setDeltaMovement(euclideanDir.scale(-0.05));
-                    prevent180();
+                } else if (distance < maxdist - 0.2){
+                    setDeltaMovement(dir.scale(-0.05));
                 }
                 else
                     setDeltaMovement(Vec3.ZERO);
@@ -308,26 +452,6 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
     }
 
     @Override
-    public void setDominated(AbstractTrainCar entity) {
-        dominated = Optional.of(entity);
-    }
-
-    @Override
-    public void setDominant(AbstractTrainCar entity) {
-        dominant = Optional.of(entity);
-    }
-
-    @Override
-    public void removeDominated() {
-        dominated = Optional.empty();
-    }
-
-    @Override
-    public void removeDominant() {
-        dominant = Optional.empty();
-    }
-
-    @Override
     public void handleShearsCut() {
         this.dominant.ifPresent(LinkableEntity::removeDominated);
         removeDominant();
@@ -339,10 +463,113 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
     }
 
     @Override
+    public boolean hasWaterOnSides() {
+        return false;
+    }
+
+    private void invertDoms(){
+        var temp = dominant;
+        dominant = dominated;
+        dominated = temp;
+    }
+
+    private static Optional<Integer> distHelper(AbstractTrainCar car1, AbstractTrainCar car2){
+        return RailUtils.traverseBi(car1.getOnPos().above(), car1.level,
+                (l, p) -> RailUtils.getRail(car2.getOnPos().above(), car2.level)
+                        .map(rp -> rp.equals(p)).orElse(false), 5, car1).map(Pair::getSecond);
+    }
+
+    private static Optional<Pair<AbstractTrainCar, AbstractTrainCar>> findClosestPair(Train<AbstractTrainCar> train1, Train<AbstractTrainCar> train2){
+        int mindistance = Integer.MAX_VALUE;
+        Optional<Pair<AbstractTrainCar, AbstractTrainCar>> curr = Optional.empty();
+        var pairs = Arrays.asList(
+                Pair.of(train1.getHead(), train2.getTail()),
+                Pair.of(train1.getTail(), train2.getHead()),
+                Pair.of(train1.getTail(), train2.getTail()),
+                Pair.of(train1.getHead(), train2.getHead())
+                );
+        for (var pair: pairs) {
+
+            var d = distHelper(pair.getFirst(), pair.getSecond());
+            if(d.isPresent() && d.get() < mindistance)
+            {
+                mindistance = d.get();
+                curr = Optional.of(pair);
+            }
+
+        }
+
+        return curr.filter(pair -> (!(pair.getFirst() instanceof LocomotiveEntity) || pair.getFirst().getDominated().isEmpty())
+                && (!(pair.getSecond() instanceof LocomotiveEntity) || pair.getSecond().getDominated().isEmpty()));
+
+
+    }
+
+    private static Pair<AbstractTrainCar, AbstractTrainCar> caseTailHead(Train <AbstractTrainCar> trainTail, Train<AbstractTrainCar> trainHead, Pair<AbstractTrainCar, AbstractTrainCar> targetPair){
+
+        if(trainHead.getTug().isPresent()){
+            invertTrain(trainHead);
+            invertTrain(trainTail);
+            return targetPair.swap();
+        }else{
+            return targetPair;
+        }
+    }
+
+    private static void invertTrain(Train<AbstractTrainCar> train) {
+        var head = train.getHead();
+        var tail = train.getTail();
+        train.asList().forEach(AbstractTrainCar::invertDoms);
+        train.setHead(tail);
+        train.setTail(head);
+    }
+
+    private static Optional<Pair<AbstractTrainCar, AbstractTrainCar>> tryFindAndPrepareClosePair(Train<AbstractTrainCar> train1, Train<AbstractTrainCar> train2){
+        return findClosestPair(train1, train2).flatMap(targetPair -> {
+            if(targetPair.getFirst().equals(train1.getHead()) && targetPair.getSecond().equals(train2.getHead())){
+                // if trying to attach to head loco then loco is solo
+                 if (train1.getTug().isPresent()){
+                    return Optional.of(targetPair);
+                } else {
+                    invertTrain(train2);
+                    return Optional.of(targetPair.swap());
+                }
+            }else if(targetPair.getFirst().equals(train1.getHead()) && targetPair.getSecond().equals(train2.getTail())){
+                return Optional.of(caseTailHead(train2, train1, targetPair.swap()));
+            }else if(targetPair.getFirst().equals(train1.getTail()) && targetPair.getSecond().equals(train2.getHead())){
+                return Optional.of(caseTailHead(train1, train2, targetPair));
+            }else if(targetPair.getFirst().equals(train1.getTail()) && targetPair.getSecond().equals(train2.getTail())){
+                if(train2.getTug().isPresent()){
+                    invertTrain(train1);
+                    return Optional.of(targetPair.swap());
+                } else {
+                    invertTrain(train2);
+                    return Optional.of(targetPair);
+                }
+            }
+
+            return Optional.empty();
+        });
+    }
+    @Override
     public boolean linkEntities(Player player, Entity target) {
         if (target instanceof AbstractTrainCar t) {
-            t.setDominant(this);
-            this.setDominated(t);
+            Train<AbstractTrainCar> train1 = t.getTrain();
+            Train<AbstractTrainCar> train2 = this.getTrain();
+            if(train2.getTug().isPresent() && train1.getTug().isPresent()){
+                player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.noTwoLoco"), true);
+                return false;
+            } else if (train2.equals(train1)){
+                player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.noLoops"), true);
+                return false;
+            } else {
+                tryFindAndPrepareClosePair(train1, train2)
+                        .ifPresentOrElse(pair -> createLinks(pair.getFirst(), pair.getSecond()), () -> {
+                            player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.tooFar"), true);
+
+                        });
+            }
+
             return true;
         } else {
             player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.badTypes"), true);
@@ -350,20 +577,10 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
         }
     }
 
-    @Override
-    public void setTrain(Train train) {
-        this.train = train;
-        train.setTail(this);
-        dominated.ifPresent(dominated -> {
-            // avoid recursion loops
-            if (!dominated.getTrain().equals(train)) {
-                dominated.setTrain(train);
-            }
-        });
+    private static void createLinks(AbstractTrainCar dominant, AbstractTrainCar dominated) {
+        dominated.setDominant(dominant);
+        dominant.setDominated(dominated);
     }
 
-    @Override
-    public boolean hasWaterOnSides() {
-        return false;
-    }
+
 }

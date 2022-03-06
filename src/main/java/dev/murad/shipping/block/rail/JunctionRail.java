@@ -2,6 +2,7 @@ package dev.murad.shipping.block.rail;
 
 import dev.murad.shipping.recipe.TugRouteRecipe;
 import dev.murad.shipping.util.RailShapeUtil;
+import dev.murad.shipping.util.RailUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
@@ -23,7 +24,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-public class JunctionRail extends BaseRailBlock {
+import java.util.Optional;
+
+public class JunctionRail extends BaseRailBlock implements MultiExitRailBlock {
     private static final Logger log = LogManager.getLogger(JunctionRail.class);
     // for compatibilty issues
     public static final EnumProperty<RailShape> RAIL_SHAPE = RailShapeUtil.RAIL_SHAPE_STRAIGHT_FLAT;
@@ -68,7 +71,8 @@ public class JunctionRail extends BaseRailBlock {
         if (cart == null) {
             return state.getValue(getShapeProperty());
         }
-        return cart.getMotionDirection().getAxis() == Direction.Axis.X ? RailShape.EAST_WEST : RailShape.NORTH_SOUTH;
+
+        return RailUtils.directionFromVelocity(cart.getDeltaMovement()).getAxis() == Direction.Axis.X ? RailShape.EAST_WEST : RailShape.NORTH_SOUTH;
     }
 
     public BlockState rotate(BlockState pState, Rotation pRot) {
@@ -83,5 +87,12 @@ public class JunctionRail extends BaseRailBlock {
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
         super.createBlockStateDefinition(pBuilder);
         pBuilder.add(WATERLOGGED, RAIL_SHAPE);
+    }
+
+    @Override
+    public RailShape getRailShapeFromDirection(BlockState state, BlockPos pos, Level level, Direction direction) {
+        if(direction.equals(Direction.EAST) || direction.equals(Direction.WEST)){
+            return RailShape.EAST_WEST;
+        } else return RailShape.NORTH_SOUTH;
     }
 }

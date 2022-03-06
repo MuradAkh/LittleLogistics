@@ -2,6 +2,8 @@ package dev.murad.shipping.entity.custom.train;
 
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.util.LinkableEntityHead;
+import dev.murad.shipping.util.RailUtils;
+import dev.murad.shipping.util.Train;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -11,6 +13,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.Optional;
 
 public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntityHead<AbstractTrainCar> {
     private boolean move = false;
@@ -34,11 +38,8 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
             }
         }
         if(pPlayer.isCrouching()){
-            if(this.getDeltaMovement().dot(new Vec3(1,0,1)) < 0.005) {
                 this.setDeltaMovement(Vec3.ZERO);
                 doflip = true;
-            } else if (!this.level.isClientSide)
-                pPlayer.sendMessage(new TextComponent("Locomotive must be stationary"), this.getUUID());
         }
         return InteractionResult.PASS;
     }
@@ -46,6 +47,7 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
 
     @Override
     public void tick(){
+        super.tickLoad();
         super.tickMinecart();
 
         if(!this.level.isClientSide){
@@ -61,10 +63,14 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
             }
         }
 
-        if(doflip){
+
+        if(doflip && dominated.isEmpty()){
+            this.setDeltaMovement(Vec3.ZERO);
             this.setYRot(getDirection().getOpposite().toYRot());
             doflip = false;
         }
+
+
 
     }
 
@@ -83,7 +89,7 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
         return getRailShape().map(shape -> switch (shape) {
             case NORTH_SOUTH, EAST_WEST -> 0.07;
             case SOUTH_WEST, NORTH_WEST, SOUTH_EAST, NORTH_EAST -> 0.03;
-            default -> this.getDeltaMovement().y > 0 ? 0.02 : 0.01;
+            default -> 0.07; //TODO lower if descending
         }).orElse(0d);
     }
 
@@ -94,5 +100,31 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
             var mod = this.getSpeedModifier();
             this.push(dir.getStepX() * mod, 0, dir.getStepZ() * mod);
         }
+    }
+
+    @Override
+    public void setDominated(AbstractTrainCar entity) {
+        dominated = Optional.of(entity);
+    }
+
+    @Override
+    public void setDominant(AbstractTrainCar entity) {
+    }
+
+    @Override
+    public void removeDominated() {
+        dominated = Optional.empty();
+        this.train.setTail(this);
+    }
+
+    @Override
+    public void removeDominant() {
+
+    }
+
+
+    @Override
+    public void setTrain(Train train) {
+        this.train = train;
     }
 }
