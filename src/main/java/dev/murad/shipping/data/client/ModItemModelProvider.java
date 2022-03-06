@@ -25,7 +25,6 @@ public class ModItemModelProvider extends ItemModelProvider {
         withExistingParent("fluid_hopper", modLoc("block/fluid_hopper"));
         withExistingParent("vessel_detector", modLoc("block/vessel_detector"));
         withExistingParent("vessel_charger", modLoc("block/vessel_charger"));
-        withExistingParent("rapid_hopper", modLoc("block/rapid_hopper"));
 
         builder(itemGenerated, "barge");
         builder(itemGenerated, "chunk_loader_barge");
@@ -46,6 +45,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 .predicate(new ResourceLocation(ShippingMod.MOD_ID, "springstate"), 1f).end();
 
         builder(itemGenerated, "creative_capacitor");
+        builder(itemGenerated, "rapid_hopper");
     }
 
 
