@@ -105,7 +105,6 @@ public class RailUtils {
         } else {
             return deltaMovement.z > 0 ? Direction.SOUTH : Direction.NORTH;
         }
-
     }
 
     public static Optional<Pair<Direction, Integer>> traverseBi(BlockPos railPos, Level level, BiPredicate<Level, BlockPos> predicate, int limit, AbstractTrainCarEntity car){

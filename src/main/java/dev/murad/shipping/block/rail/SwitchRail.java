@@ -4,6 +4,9 @@ import dev.murad.shipping.util.RailShapeUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -14,6 +17,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.*;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -36,6 +40,10 @@ public class SwitchRail extends BaseRailBlock implements MultiExitRailBlock {
 
         public Direction getOutDirection(Direction inDirection) {
             return this == RIGHT ? inDirection.getCounterClockWise() : inDirection.getClockWise();
+        }
+
+        public OutDirection opposite() {
+            return this == LEFT ? RIGHT : LEFT;
         }
     }
 
@@ -131,7 +139,20 @@ public class SwitchRail extends BaseRailBlock implements MultiExitRailBlock {
     }
 
     public BlockState mirror(BlockState pState, Mirror pMirror) {
-        return rotate(pState, pMirror.getRotation(pState.getValue(FACING)));
+        if (pMirror == Mirror.LEFT_RIGHT)
+            return pState.setValue(OUT_DIRECTION, pState.getValue(OUT_DIRECTION).opposite());
+        else if (pMirror == Mirror.FRONT_BACK)
+            return rotate(pState, pMirror.getRotation(pState.getValue(FACING)));
+        return pState;
+    }
+
+    @Override
+    public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+        if (pPlayer.isShiftKeyDown()) {
+            pLevel.setBlockAndUpdate(pPos, this.mirror(pState, Mirror.LEFT_RIGHT));
+            return InteractionResult.SUCCESS;
+        }
+        return InteractionResult.PASS;
     }
 
     @Override
