@@ -3,14 +3,10 @@ package dev.murad.shipping.event;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.fluid.render.FluidHopperTileEntityRenderer;
 import dev.murad.shipping.entity.models.*;
-import dev.murad.shipping.entity.render.ChestBargeRenderer;
-import dev.murad.shipping.entity.render.ChunkLoaderBargeRenderer;
 import dev.murad.shipping.entity.render.DummyEntityRenderer;
-import dev.murad.shipping.entity.render.EnergyTugRenderer;
-import dev.murad.shipping.entity.render.FishingBargeRenderer;
-import dev.murad.shipping.entity.render.FluidTankBargeRenderer;
-import dev.murad.shipping.entity.render.SeaterBargeRenderer;
-import dev.murad.shipping.entity.render.SteamTugRenderer;
+import dev.murad.shipping.entity.render.barge.FishingBargeRenderer;
+import dev.murad.shipping.entity.render.barge.FluidTankBargeRenderer;
+import dev.murad.shipping.entity.render.barge.StaticVesselRenderer;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
@@ -52,13 +48,53 @@ public class ModClientEventHandler {
 
     @SubscribeEvent
     public static void onRegisterEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(ModEntityTypes.CHEST_BARGE.get(), ChestBargeRenderer::new);
-        event.registerEntityRenderer(ModEntityTypes.CHUNK_LOADER_BARGE.get(), ChunkLoaderBargeRenderer::new);
-        event.registerEntityRenderer(ModEntityTypes.ENERGY_TUG.get(), EnergyTugRenderer::new);
+        // Barges
+        event.registerEntityRenderer(ModEntityTypes.CHEST_BARGE.get(),
+                (ctx) -> new StaticVesselRenderer<>(ctx, ChestBargeModel::new, ChestBargeModel.LAYER_LOCATION,
+                        new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/barge.png")));
+        event.registerEntityRenderer(ModEntityTypes.CHUNK_LOADER_BARGE.get(),
+                (ctx) -> new StaticVesselRenderer<>(ctx, ChunkLoaderBargeModel::new, ChunkLoaderBargeModel.LAYER_LOCATION,
+                        new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/chunk_loader_barge.png")));
+
+        event.registerEntityRenderer(ModEntityTypes.SEATER_BARGE.get(),
+                (ctx) -> new StaticVesselRenderer<>(ctx, SeaterBargeModel::new, SeaterBargeModel.LAYER_LOCATION,
+                        new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/seater_barge.png")));
+
         event.registerEntityRenderer(ModEntityTypes.FISHING_BARGE.get(), FishingBargeRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.FLUID_TANK_BARGE.get(), FluidTankBargeRenderer::new);
-        event.registerEntityRenderer(ModEntityTypes.SEATER_BARGE.get(), SeaterBargeRenderer::new);
-        event.registerEntityRenderer(ModEntityTypes.STEAM_TUG.get(), SteamTugRenderer::new);
+
+        // Tugs
+        event.registerEntityRenderer(ModEntityTypes.ENERGY_TUG.get(),
+                (ctx) -> new StaticVesselRenderer<>(ctx, EnergyTugModel::new, EnergyTugModel.LAYER_LOCATION,
+                        new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/energy_tug.png")) {
+                    // todo: fix in models itself
+                    @Override
+                    protected double getModelYoffset() {
+                        return 1.55D;
+                    }
+
+                    @Override
+                    protected float getModelYrot() {
+                        return 0.0F;
+                    }
+                });
+
+
+        event.registerEntityRenderer(ModEntityTypes.STEAM_TUG.get(),
+                (ctx) -> new StaticVesselRenderer<>(ctx, SteamTugModel::new, SteamTugModel.LAYER_LOCATION,
+                        new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/tug.png")) {
+                    // todo: fix in models itself
+                    @Override
+                    protected double getModelYoffset() {
+                        return 1.45D;
+                    }
+
+                    @Override
+                    protected float getModelYrot() {
+                        return 0;
+                    }
+                });
+
         event.registerEntityRenderer(ModEntityTypes.SPRING.get(), DummyEntityRenderer::new);
 
         event.registerBlockEntityRenderer(ModTileEntitiesTypes.FLUID_HOPPER.get(), FluidHopperTileEntityRenderer::new);
@@ -77,8 +113,5 @@ public class ModClientEventHandler {
         event.registerLayerDefinition(FluidTankBargeModel.LAYER_LOCATION, FluidTankBargeModel::createBodyLayer);
         event.registerLayerDefinition(SeaterBargeModel.LAYER_LOCATION, SeaterBargeModel::createBodyLayer);
         event.registerLayerDefinition(SteamTugModel.LAYER_LOCATION, SteamTugModel::createBodyLayer);
-
     }
-
-
 }

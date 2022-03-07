@@ -1,4 +1,4 @@
-package dev.murad.shipping.entity.render;
+package dev.murad.shipping.entity.render.barge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -24,7 +24,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 
-public abstract class VesselRenderer<T extends VesselEntity> extends EntityRenderer<T> {
+public abstract class AbstractVesselRenderer<T extends VesselEntity> extends EntityRenderer<T> {
 
 
     private static final ResourceLocation CHAIN_TEXTURE =
@@ -33,7 +33,7 @@ public abstract class VesselRenderer<T extends VesselEntity> extends EntityRende
     private final ChainModel chainModel;
 
 
-    public VesselRenderer(EntityRendererProvider.Context context) {
+    public AbstractVesselRenderer(EntityRendererProvider.Context context) {
         super(context);
         chainModel = new ChainModel(context.bakeLayer(ChainModel.LAYER_LOCATION));
     }
@@ -108,7 +108,7 @@ public abstract class VesselRenderer<T extends VesselEntity> extends EntityRende
     }
 
 
-    abstract EntityModel getModel(T entity);
+    abstract EntityModel<T> getModel(T entity);
 
 
     private <E extends Entity> void renderLeash(T pEntityLiving, float pPartialTicks, PoseStack pMatrixStack, MultiBufferSource pBuffer, E pLeashHolder) {
