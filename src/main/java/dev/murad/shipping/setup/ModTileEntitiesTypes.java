@@ -4,6 +4,7 @@ import dev.murad.shipping.block.dock.BargeDockTileEntity;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.energy.VesselChargerTileEntity;
 import dev.murad.shipping.block.fluid.FluidHopperTileEntity;
+import dev.murad.shipping.block.rapidhopper.RapidHopperTileEntity;
 import dev.murad.shipping.block.vessel_detector.VesselDetectorTileEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -39,6 +40,12 @@ public class ModTileEntitiesTypes {
             "vessel_charger",
             VesselChargerTileEntity::new,
             ModBlocks.VESSEL_CHARGER
+    );
+
+    public static final RegistryObject<BlockEntityType<RapidHopperTileEntity>> RAPID_HOPPER = register(
+            "rapid_hopper",
+            RapidHopperTileEntity::new,
+            ModBlocks.RAPID_HOPPER
     );
 
     private static <T extends BlockEntity> RegistryObject<BlockEntityType<T>> register(

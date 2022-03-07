@@ -51,6 +51,7 @@ public class ModLootTableProvider extends LootTableProvider {
             dropSelf(ModBlocks.FLUID_HOPPER.get());
             dropSelf(ModBlocks.VESSEL_CHARGER.get());
             dropSelf(ModBlocks.VESSEL_DETECTOR.get());
+            dropSelf(ModBlocks.RAPID_HOPPER.get());
         }
 
         @Override
