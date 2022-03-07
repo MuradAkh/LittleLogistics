@@ -2,11 +2,18 @@ package dev.murad.shipping.entity.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.datafixers.util.Function3;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3f;
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.custom.train.AbstractTrainCar;
+import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
+import dev.murad.shipping.entity.custom.train.wagon.ChestCarEntity;
 import dev.murad.shipping.entity.models.ChainModel;
+import dev.murad.shipping.entity.models.ChestCarModel;
+import dev.murad.shipping.setup.ModEntityTypes;
 import net.minecraft.client.model.Model;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -14,24 +21,29 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public abstract class TrainCarRenderer extends EntityRenderer<AbstractTrainCar> {
+import java.util.function.Function;
+
+
+public class TrainCarRenderer extends EntityRenderer<AbstractTrainCarEntity> {
+    private final Model entityModel;
+    private final ResourceLocation texture;
 
     private static final ResourceLocation CHAIN_TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/chain.png");
 
     private final ChainModel chainModel;
 
-    public TrainCarRenderer(EntityRendererProvider.Context context) {
+    public TrainCarRenderer(EntityRendererProvider.Context context, Function<ModelPart, Model> baseModel, ModelLayerLocation layerLocation, String baseTexture) {
         super(context);
         chainModel = new ChainModel(context.bakeLayer(ChainModel.LAYER_LOCATION));
-
+        entityModel = baseModel.apply(context.bakeLayer(layerLocation));
+        texture = new ResourceLocation(ShippingMod.MOD_ID, baseTexture);
     }
 
-    public void render(AbstractTrainCar vesselEntity, float yaw, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
+    public void render(AbstractTrainCarEntity vesselEntity, float yaw, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
         matrixStack.pushPose();
         getAndRenderChain(vesselEntity, matrixStack, buffer, p_225623_6_);
         matrixStack.popPose();
@@ -40,9 +52,10 @@ public abstract class TrainCarRenderer extends EntityRenderer<AbstractTrainCar> 
         matrixStack.popPose();
     }
 
-    private void getAndRenderChain(AbstractTrainCar car, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
+
+    private void getAndRenderChain(AbstractTrainCarEntity car, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
         car.getDominant().ifPresent(linkableEntity -> {
-            var parent = (AbstractTrainCar) linkableEntity;
+            var parent = (AbstractTrainCarEntity) linkableEntity;
             double dist = parent.distanceTo(car);
             int segments = (int) Math.ceil(dist * 4);
             var vec = car.position()
@@ -66,7 +79,7 @@ public abstract class TrainCarRenderer extends EntityRenderer<AbstractTrainCar> 
         });
     }
 
-    private void renderModel(AbstractTrainCar pEntity, float pEntityYaw, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPartialTicks) {
+    private void renderModel(AbstractTrainCarEntity pEntity, float pEntityYaw, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPartialTicks) {
         pMatrixStack.pushPose();
         long i = (long)pEntity.getId() * 493286711L;
         i = i * i * 4392167121L + i * 98761L;
@@ -124,5 +137,12 @@ public abstract class TrainCarRenderer extends EntityRenderer<AbstractTrainCar> 
         pMatrixStack.popPose();
     }
 
-    abstract Model getModel(Entity entity);
+    protected Model getModel(Entity entity){
+        return entityModel;
+    };
+
+    @Override
+    public ResourceLocation getTextureLocation(AbstractTrainCarEntity entity) {
+        return texture;
+    }
 }

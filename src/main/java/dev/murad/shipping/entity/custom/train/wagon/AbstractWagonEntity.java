@@ -1,7 +1,6 @@
-package dev.murad.shipping.entity.custom.train;
+package dev.murad.shipping.entity.custom.train.wagon;
 
-import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.entity.custom.VesselEntity;
+import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.util.Train;
 import net.minecraft.world.entity.EntityType;
@@ -9,24 +8,24 @@ import net.minecraft.world.level.Level;
 
 import java.util.Optional;
 
-public class ChestCarEntity extends AbstractTrainCar {
-    public ChestCarEntity(EntityType<?> p_38087_, Level p_38088_) {
+public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
+    public AbstractWagonEntity(EntityType<?> p_38087_, Level p_38088_) {
         super(p_38087_, p_38088_);
     }
 
-    public ChestCarEntity(Level level, Double aDouble, Double aDouble1, Double aDouble2) {
+    public AbstractWagonEntity(EntityType<?> p_38087_, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
         super(ModEntityTypes.CHEST_CAR.get(), level, aDouble, aDouble1, aDouble2);
 
     }
 
     @Override
-    public void setDominated(AbstractTrainCar entity) {
+    public void setDominated(AbstractTrainCarEntity entity) {
         this.dominated = Optional.of(entity);
     }
 
 
     @Override
-    public void setDominant(AbstractTrainCar entity) {
+    public void setDominant(AbstractTrainCarEntity entity) {
         this.setTrain(entity.getTrain());
         this.dominant = Optional.of(entity);
     }
@@ -60,5 +59,4 @@ public class ChestCarEntity extends AbstractTrainCar {
             }
         });
     }
-
 }
