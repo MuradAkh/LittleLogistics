@@ -52,7 +52,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             prevent180();
 
         }
-        tickAdjustments();
+        tickYRot();
         if(!this.level.isClientSide){
             tickMovement();
         }

@@ -97,15 +97,15 @@ public class ModClientEventHandler {
 
         event.registerEntityRenderer(ModEntityTypes.SPRING.get(), DummyEntityRenderer::new);
         event.registerBlockEntityRenderer(ModTileEntitiesTypes.FLUID_HOPPER.get(), FluidHopperTileEntityRenderer::new);
-        event.registerEntityRenderer(ModEntityTypes.STEAM_LOCOMOTIVE.get(), ctx -> new TrainCarRenderer(ctx,
+        event.registerEntityRenderer(ModEntityTypes.STEAM_LOCOMOTIVE.get(), ctx -> new TrainCarRenderer<>(ctx,
                 SteamLocomotiveModel::new,
                 SteamLocomotiveModel.LAYER_LOCATION,
                 "textures/entity/steam_locomotive.png"));
-        event.registerEntityRenderer(ModEntityTypes.ENERGY_LOCOMOTIVE.get(), ctx -> new TrainCarRenderer(ctx,
+        event.registerEntityRenderer(ModEntityTypes.ENERGY_LOCOMOTIVE.get(), ctx -> new TrainCarRenderer<>(ctx,
                 EnergyLocomotiveModel::new,
                 EnergyLocomotiveModel.LAYER_LOCATION,
                 "textures/entity/energy_locomotive.png"));
-        event.registerEntityRenderer(ModEntityTypes.CHEST_CAR.get(), ctx -> new TrainCarRenderer(ctx,
+        event.registerEntityRenderer(ModEntityTypes.CHEST_CAR.get(), ctx -> new TrainCarRenderer<>(ctx,
                 ChestCarModel::new,
                 ChestCarModel.LAYER_LOCATION,
                 "textures/entity/chest_car.png"));
