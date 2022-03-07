@@ -7,10 +7,12 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3f;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
+import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.entity.custom.train.wagon.ChestCarEntity;
 import dev.murad.shipping.entity.models.ChainModel;
 import dev.murad.shipping.entity.models.ChestCarModel;
 import dev.murad.shipping.setup.ModEntityTypes;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -21,14 +23,15 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.function.Function;
 
 
-public class TrainCarRenderer extends EntityRenderer<AbstractTrainCarEntity> {
-    private final Model entityModel;
+public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRenderer<T> {
+    private final EntityModel<T> entityModel;
     private final ResourceLocation texture;
 
     private static final ResourceLocation CHAIN_TEXTURE =
@@ -36,24 +39,21 @@ public class TrainCarRenderer extends EntityRenderer<AbstractTrainCarEntity> {
 
     private final ChainModel chainModel;
 
-    public TrainCarRenderer(EntityRendererProvider.Context context, Function<ModelPart, Model> baseModel, ModelLayerLocation layerLocation, String baseTexture) {
+    public TrainCarRenderer(EntityRendererProvider.Context context, Function<ModelPart, EntityModel> baseModel, ModelLayerLocation layerLocation, String baseTexture) {
         super(context);
         chainModel = new ChainModel(context.bakeLayer(ChainModel.LAYER_LOCATION));
         entityModel = baseModel.apply(context.bakeLayer(layerLocation));
         texture = new ResourceLocation(ShippingMod.MOD_ID, baseTexture);
     }
 
-    public void render(AbstractTrainCarEntity vesselEntity, float yaw, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
-        matrixStack.pushPose();
-        getAndRenderChain(vesselEntity, matrixStack, buffer, p_225623_6_);
-        matrixStack.popPose();
-        matrixStack.pushPose();
-        renderModel(vesselEntity, yaw, matrixStack, buffer, p_225623_6_);
-        matrixStack.popPose();
+    public void render(T vesselEntity, float yaw, float pPartialTicks, PoseStack matrixStack, MultiBufferSource buffer, int pPackedLight) {
+        getAndRenderChain(vesselEntity, matrixStack, buffer, pPackedLight);
+        renderModel(vesselEntity, yaw, pPartialTicks, matrixStack, buffer, pPackedLight);
     }
 
 
-    private void getAndRenderChain(AbstractTrainCarEntity car, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
+    private void getAndRenderChain(T car, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
+        matrixStack.pushPose();
         car.getDominant().ifPresent(linkableEntity -> {
             var parent = (AbstractTrainCarEntity) linkableEntity;
             double dist = parent.distanceTo(car);
@@ -77,9 +77,10 @@ public class TrainCarRenderer extends EntityRenderer<AbstractTrainCarEntity> {
 
             matrixStack.popPose();
         });
+        matrixStack.popPose();
     }
 
-    private void renderModel(AbstractTrainCarEntity pEntity, float pEntityYaw, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPartialTicks) {
+    private void renderModel(T pEntity, float pEntityYaw, float pPartialTicks, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPackedLight) {
         pMatrixStack.pushPose();
         long i = (long)pEntity.getId() * 493286711L;
         i = i * i * 4392167121L + i * 98761L;
@@ -91,31 +92,31 @@ public class TrainCarRenderer extends EntityRenderer<AbstractTrainCarEntity> {
         double d1 = Mth.lerp((double)pPartialTicks, pEntity.yOld, pEntity.getY());
         double d2 = Mth.lerp((double)pPartialTicks, pEntity.zOld, pEntity.getZ());
         double d3 = (double)0.3F;
-        Vec3 vec3 = pEntity.getPos(d0, d1, d2);
-        float f3 = Mth.lerp(pPartialTicks, pEntity.xRotO, pEntity.getXRot());
-        if (vec3 != null) {
-            Vec3 vec31 = pEntity.getPosOffs(d0, d1, d2, (double)0.3F);
-            Vec3 vec32 = pEntity.getPosOffs(d0, d1, d2, (double)-0.3F);
-            if (vec31 == null) {
-                vec31 = vec3;
+        Vec3 pos = pEntity.getPos(d0, d1, d2);
+        float pitch = Mth.lerp(pPartialTicks, pEntity.xRotO, pEntity.getXRot());
+        if (pos != null) {
+            Vec3 forwardDir = pEntity.getPosOffs(d0, d1, d2, (double)0.5F);
+            Vec3 backDir = pEntity.getPosOffs(d0, d1, d2, (double)-0.5F);
+            if (forwardDir == null) {
+                forwardDir = pos;
             }
 
-            if (vec32 == null) {
-                vec32 = vec3;
+            if (backDir == null) {
+                backDir = pos;
             }
 
-            pMatrixStack.translate(vec3.x - d0, (vec31.y + vec32.y) / 2.0D - d1, vec3.z - d2);
-            Vec3 vec33 = vec32.add(-vec31.x, -vec31.y, -vec31.z);
-            if (vec33.length() != 0.0D) {
-                vec33 = vec33.normalize();
-                pEntityYaw = (float)(Math.atan2(vec33.z, vec33.x) * 180.0D / Math.PI);
-                f3 = (float)(Math.atan(vec33.y) * 73.0D);
+            pMatrixStack.translate(pos.x - d0, (forwardDir.y + backDir.y) / 2.0D - d1, pos.z - d2);
+            Vec3 trackDirection = backDir.add(-forwardDir.x, -forwardDir.y, -forwardDir.z);
+            if (trackDirection.length() != 0.0D) {
+                trackDirection = trackDirection.normalize();
+                pEntityYaw = (float)(Math.atan2(trackDirection.z, trackDirection.x) * 180.0D / Math.PI + 90);
+                pitch = (float)(Math.atan(trackDirection.y) * 73.0D);
             }
         }
 
         pMatrixStack.translate(0.0D, 0.375D, 0.0D);
-        pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(180 - pEntity.getYRot()));
-        pMatrixStack.mulPose(Vector3f.XN.rotationDegrees(f3));
+        pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - pEntityYaw));
+        pMatrixStack.mulPose(Vector3f.XN.rotationDegrees(pitch));
         float f5 = (float)pEntity.getHurtTime() - pPartialTicks;
         float f6 = pEntity.getDamage() - pPartialTicks;
         if (f6 < 0.0F) {
@@ -127,22 +128,20 @@ public class TrainCarRenderer extends EntityRenderer<AbstractTrainCarEntity> {
         }
 
         pMatrixStack.translate(0, 1.1, 0);
-        int j = pEntity.getDisplayOffset();
-        BlockState blockstate = pEntity.getDisplayBlockState();
-
 
         pMatrixStack.scale(-1.0F, -1.0F, 1.0F);
-        VertexConsumer vertexconsumer = pBuffer.getBuffer(this.getModel(pEntity).renderType(this.getTextureLocation(pEntity)));
-        getModel(pEntity).renderToBuffer(pMatrixStack, vertexconsumer, pPartialTicks, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        this.entityModel.setupAnim(pEntity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+        VertexConsumer vertexconsumer = pBuffer.getBuffer(this.entityModel.renderType(this.getTextureLocation(pEntity)));
+        this.entityModel.renderToBuffer(pMatrixStack, vertexconsumer, pPackedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
         pMatrixStack.popPose();
     }
 
-    protected Model getModel(Entity entity){
+    protected Model getModel(T entity){
         return entityModel;
     };
 
     @Override
-    public ResourceLocation getTextureLocation(AbstractTrainCarEntity entity) {
+    public ResourceLocation getTextureLocation(T entity) {
         return texture;
     }
 }

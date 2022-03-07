@@ -1,14 +1,16 @@
 package dev.murad.shipping.entity.custom.train;
 
-import com.mojang.datafixers.util.Function3;
+import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.RailUtils;
 import dev.murad.shipping.util.Train;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -36,6 +38,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
@@ -52,7 +55,33 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     private double lx;
     private double ly;
     private double lz;
+    private double lyr;
     private double lxr;
+
+    private static final Map<RailShape, Pair<Vec3i, Vec3i>> EXITS = Util.make(Maps.newEnumMap(RailShape.class), (p_38135_) -> {
+        Vec3i west = Direction.WEST.getNormal();
+        Vec3i east = Direction.EAST.getNormal();
+        Vec3i north = Direction.NORTH.getNormal();
+        Vec3i south = Direction.SOUTH.getNormal();
+        Vec3i westUnder = west.below();
+        Vec3i eastUnder = east.below();
+        Vec3i northUnder = north.below();
+        Vec3i southUnder = south.below();
+        p_38135_.put(RailShape.NORTH_SOUTH, Pair.of(north, south));
+        p_38135_.put(RailShape.EAST_WEST, Pair.of(west, east));
+        p_38135_.put(RailShape.ASCENDING_EAST, Pair.of(westUnder, east));
+        p_38135_.put(RailShape.ASCENDING_WEST, Pair.of(west, eastUnder));
+        p_38135_.put(RailShape.ASCENDING_NORTH, Pair.of(north, southUnder));
+        p_38135_.put(RailShape.ASCENDING_SOUTH, Pair.of(northUnder, south));
+        p_38135_.put(RailShape.SOUTH_EAST, Pair.of(south, east));
+        p_38135_.put(RailShape.SOUTH_WEST, Pair.of(south, west));
+        p_38135_.put(RailShape.NORTH_WEST, Pair.of(north, west));
+        p_38135_.put(RailShape.NORTH_EAST, Pair.of(north, east));
+    });
+
+    private static Pair<Vec3i, Vec3i> exits(RailShape pShape) {
+        return EXITS.get(pShape);
+    }
 
     public AbstractTrainCarEntity(EntityType<?> p_38087_, Level p_38088_) {
         super(p_38087_, p_38088_);
@@ -176,8 +205,12 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     public void tick() {
         tickLoad();
+        tickYRot();
+        if (!level.isClientSide) {
+            doChainMath();
+        }
+
         tickMinecart();
-        tickAdjustments();
     }
 
     protected void tickLoad(){
@@ -194,74 +227,80 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         }
     }
 
-    protected void tickAdjustments() {
+    protected void tickYRot() {
         // direction based on velocity
-        if(this.getDeltaMovement().length() > 0) {
-            this.setYRot(RailUtils.directionFromVelocity(this.getDeltaMovement()).toYRot());
+//            this.setYRot(RailUtils.directionFromVelocity(this.getDeltaMovement()).toYRot());
+        double d1 = this.xo - this.getX();
+        double d3 = this.zo - this.getZ();
+        if (d1 * d1 + d3 * d3 > 0.001D) {
+            this.setYRot((float)(Mth.atan2(d3, d1) * 180.0D / Math.PI) + 90);
         }
 
-        // try to get direction based on train
+        // if the car is part of a train, enforce that direction instead
         var railshape = getRailShape();
         if(this.dominated.isPresent() && railshape.isPresent()) {
-            var r = RailUtils.traverseBi(getOnPos().above(), this.level,
+            Optional<Pair<Direction, Integer>> r = RailUtils.traverseBi(getOnPos().above(), this.level,
                     RailUtils.samePositionPredicate(dominated.get()), 5, this);
             r.flatMap(pair -> RailUtils.getOtherExit(pair.getFirst(), railshape.get()))
                     .map(rd -> rd.horizontal.toYRot()).ifPresent(this::setYRot);
         }
-
-        if (!this.level.isClientSide()) {
-            doChainMath();
-        }else {
-            adjustClientSideRot();
-        }
     }
 
-    private void adjustClientSideRot(){
-        if(this.getDeltaMovement().length() < 0.01){
-            return;
+    /**
+     * This method returns the specific position on the track at
+     * pOffset blocks from the current position. This overridden
+     * method takes into account of the minecart's yRot, which
+     * the vanilla code does not (leading to lots of flipping)
+     */
+    @Nullable
+    public Vec3 getPosOffs(double pX, double pY, double pZ, double pOffset) {
+        int i = Mth.floor(pX);
+        int j = Mth.floor(pY);
+        int k = Mth.floor(pZ);
+        if (this.level.getBlockState(new BlockPos(i, j - 1, k)).is(BlockTags.RAILS)) {
+            --j;
         }
-        BiConsumer<Direction, Direction> pitchHelper = (Direction dir, Direction tdir) -> {
-            if (dir.equals(tdir)) {
-                setXRot(-45f);
-            } else if (dir.equals(tdir.getOpposite())) {
-                setXRot(45f);
-            } else {
-                setXRot(0f);
+
+        BlockState blockstate = this.level.getBlockState(new BlockPos(i, j, k));
+        if (BaseRailBlock.isRail(blockstate)) {
+            RailShape railshape = ((BaseRailBlock)blockstate.getBlock()).getRailDirection(blockstate, this.level, new BlockPos(i, j, k), this);
+            pY = j;
+            if (railshape.isAscending()) {
+                pY = j + 1;
             }
-        };
-        Function3<Direction, Direction, Direction, Void> yawHelper = (Direction dir, Direction tdir1, Direction tdir2) -> {
-            if (dir.equals(tdir1)) {
-                setYRot(this.getYRot() - 45f);
-            } else if (dir.equals(tdir2)) {
-                setYRot(this.getYRot() + 45f);
+
+            Pair<Vec3i, Vec3i> pair = exits(railshape);
+            Vec3i exit1 = pair.getFirst();
+            Vec3i exit2 = pair.getSecond();
+
+            // check if need to swap end points to make calculation correct
+            double yawX = -Math.sin(Math.toRadians(getYRot()));
+            double yawZ = Math.cos(Math.toRadians(getYRot()));
+            if (new Vec3(yawX, 0, yawZ).dot(new Vec3(exit2.getX() - exit1.getX(), exit2.getY() - exit1.getY(), exit2.getZ() - exit1.getZ())) <= 0) {
+                Vec3i temp = exit1;
+                exit1 = exit2;
+                exit2 = temp;
             }
+
+            // get direction from e1 to e2
+            double xDiff = exit2.getX() - exit1.getX();
+            double zDiff = exit2.getZ() - exit1.getZ();
+            // normalize x and z diff
+            double dist = Math.sqrt(xDiff * xDiff + zDiff * zDiff);
+            xDiff /= dist;
+            zDiff /= dist;
+            pX += xDiff * pOffset;
+            pZ += zDiff * pOffset;
+            if (exit1.getY() != 0 && Mth.floor(pX) - i == exit1.getX() && Mth.floor(pZ) - k == exit1.getZ()) {
+                pY += exit1.getY();
+            } else if (exit2.getY() != 0 && Mth.floor(pX) - i == exit2.getX() && Mth.floor(pZ) - k == exit2.getZ()) {
+                pY += exit2.getY();
+            }
+
+            return this.getPos(pX, pY, pZ);
+        } else {
             return null;
-        };
-        this.setXRot(0);
-        getRailShape().ifPresent(shape -> {
-            var dir = RailUtils.directionFromVelocity(this.getDeltaMovement());
-            switch (shape) {
-                case ASCENDING_EAST -> pitchHelper.accept(dir, Direction.EAST);
-                case ASCENDING_WEST -> pitchHelper.accept(dir, Direction.WEST);
-                case ASCENDING_NORTH -> pitchHelper.accept(dir, Direction.NORTH);
-                case ASCENDING_SOUTH -> pitchHelper.accept(dir, Direction.SOUTH);
-                case SOUTH_EAST -> {
-                    yawHelper.apply(dir, Direction.EAST, Direction.SOUTH);
-                }
-                case SOUTH_WEST -> {
-                    yawHelper.apply(dir, Direction.SOUTH, Direction.WEST);
-                }
-                case NORTH_WEST -> {
-                    yawHelper.apply(dir, Direction.WEST, Direction.NORTH);
-
-                }
-                case NORTH_EAST -> {
-                    yawHelper.apply(dir, Direction.NORTH, Direction.EAST);
-                }
-                default -> setXRot(0);
-            }
-
-        });
+        }
     }
 
     @Override
@@ -285,6 +324,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                 double d5 = this.getX() + (this.lx - this.getX()) / (double) this.lSteps;
                 double d6 = this.getY() + (this.ly - this.getY()) / (double) this.lSteps;
                 double d7 = this.getZ() + (this.lz - this.getZ()) / (double) this.lSteps;
+                double d2 = Mth.wrapDegrees(this.lyr - (double)this.getYRot());
                 this.setXRot(this.getXRot() + (float) (this.lxr - (double) this.getXRot()) / (float) this.lSteps);
                 --this.lSteps;
                 this.setPos(d5, d6, d7);
@@ -293,7 +333,6 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                 this.reapplyPosition();
                 this.setRot(this.getYRot(), this.getXRot());
             }
-
         } else {
             if (!this.isNoGravity()) {
                 double d0 = this.isInWater() ? -0.005D : -0.04D;
@@ -320,6 +359,113 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
             this.checkInsideBlocks();
             this.setXRot(0.0F);
+
+            double d4 = Mth.wrapDegrees(this.getYRot() - this.yRotO);
+            if (d4 < -170.0D || d4 >= 170.0D) {
+                this.flipped = !this.flipped;
+            }
+
+            this.setRot(this.getYRot(), this.getXRot());
+            AABB box;
+            if (getCollisionHandler() != null) box = getCollisionHandler().getMinecartCollisionBox(this);
+            else box = this.getBoundingBox().inflate(0.2F, 0.0D, 0.2F);
+            if (canBeRidden() && this.getDeltaMovement().horizontalDistanceSqr() > 0.01D) {
+                List<Entity> list = this.level.getEntities(this, box, EntitySelector.pushableBy(this));
+                if (!list.isEmpty()) {
+                    for (int l = 0; l < list.size(); ++l) {
+                        Entity collidingEntity = list.get(l);
+                        if (!(collidingEntity instanceof Player) &&
+                                !(collidingEntity instanceof IronGolem) &&
+                                !(collidingEntity instanceof AbstractMinecart) &&
+                                !this.isVehicle() &&
+                                !collidingEntity.isPassenger()) {
+                            collidingEntity.startRiding(this);
+                        } else if (!(collidingEntity instanceof AbstractTrainCarEntity)){
+                            collidingEntity.push(this);
+                        }
+                    }
+                }
+            } else {
+                for (Entity entity : this.level.getEntities(this, box)) {
+                    if (!this.hasPassenger(entity) &&
+                            entity.isPushable() &&
+                            entity instanceof AbstractMinecart) {
+                        entity.push(this);
+                    }
+                }
+            }
+
+            this.updateInWaterStateAndDoFluidPushing();
+            if (this.isInLava()) {
+                this.lavaHurt();
+                this.fallDistance *= 0.5F;
+            }
+
+            this.firstTick = false;
+        }
+    }
+
+    protected void tickMinecartWithRotChanges() {
+        // STOPSHIP: 2022-03-07
+        if (this.getHurtTime() > 0) {
+            this.setHurtTime(this.getHurtTime() - 1);
+        }
+
+        if (this.getDamage() > 0.0F) {
+            this.setDamage(this.getDamage() - 1.0F);
+        }
+
+        this.checkOutOfWorld();
+        this.handleNetherPortal();
+        if (this.level.isClientSide) {
+            if (this.lSteps > 0) {
+                double d5 = this.getX() + (this.lx - this.getX()) / (double) this.lSteps;
+                double d6 = this.getY() + (this.ly - this.getY()) / (double) this.lSteps;
+                double d7 = this.getZ() + (this.lz - this.getZ()) / (double) this.lSteps;
+                double d2 = Mth.wrapDegrees(this.lyr - (double)this.getYRot());
+                this.setYRot(this.getYRot() + (float)d2 / (float)this.lSteps);
+                this.setXRot(this.getXRot() + (float) (this.lxr - (double) this.getXRot()) / (float) this.lSteps);
+                --this.lSteps;
+                this.setPos(d5, d6, d7);
+                this.setRot(this.getYRot(), this.getXRot());
+            } else {
+                this.reapplyPosition();
+                this.setRot(this.getYRot(), this.getXRot());
+            }
+        } else {
+            if (!this.isNoGravity()) {
+                double d0 = this.isInWater() ? -0.005D : -0.04D;
+                this.setDeltaMovement(this.getDeltaMovement().add(0.0D, d0, 0.0D));
+            }
+
+            int k = Mth.floor(this.getX());
+            int i = Mth.floor(this.getY());
+            int j = Mth.floor(this.getZ());
+            if (this.level.getBlockState(new BlockPos(k, i - 1, j)).is(BlockTags.RAILS)) {
+                --i;
+            }
+
+            BlockPos blockpos = new BlockPos(k, i, j);
+            BlockState blockstate = this.level.getBlockState(blockpos);
+            if (canUseRail() && BaseRailBlock.isRail(blockstate)) {
+                this.moveAlongTrack(blockpos, blockstate);
+                if (blockstate.getBlock() instanceof PoweredRailBlock && ((PoweredRailBlock) blockstate.getBlock()).isActivatorRail()) {
+                    this.activateMinecart(k, i, j, blockstate.getValue(PoweredRailBlock.POWERED));
+                }
+            } else {
+                this.comeOffTrack();
+            }
+
+            this.checkInsideBlocks();
+            this.setXRot(0.0F);
+            double d1 = this.xo - this.getX();
+            double d3 = this.zo - this.getZ();
+            if (d1 * d1 + d3 * d3 > 0.001D) {
+                this.setYRot((float)(Mth.atan2(d3, d1) * 180.0D / Math.PI) + 90);
+                if (this.flipped) {
+                    this.setYRot(this.getYRot() + 180.0F);
+                }
+            }
 
             double d4 = Mth.wrapDegrees(this.getYRot() - this.yRotO);
             if (d4 < -170.0D || d4 >= 170.0D) {
@@ -362,9 +508,11 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     @Override
     public void lerpTo(double pX, double pY, double pZ, float pYaw, float pPitch, int pPosRotationIncrements, boolean pTeleport) {
+        System.out.println(pYaw);
         this.lx = pX;
         this.ly = pY;
         this.lz = pZ;
+        this.lyr = pYaw;
         this.lxr = pPitch;
         this.lSteps = pPosRotationIncrements + 2;
         super.lerpTo(pX, pY, pZ, pYaw, pPitch, pPosRotationIncrements, pTeleport);
@@ -398,7 +546,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
             //TODO: based on "docked" instead
             var maxdist =
                     this.getTrain().getTug().isPresent() && this.getTrain().getTug().get().getDeltaMovement().equals(Vec3.ZERO)
-                    ? 1 : 1.2;
+                    ? 1 : 1.7;
 
             float distance = railDirDis.map(Pair::getSecond).filter(a -> a > 0).map(di -> {
                 var euclid = this.distanceTo(dom);
