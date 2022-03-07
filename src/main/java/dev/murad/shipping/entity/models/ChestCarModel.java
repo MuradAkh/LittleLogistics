@@ -6,14 +6,13 @@ package dev.murad.shipping.entity.models;// Made with Blockbench 4.1.1
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.custom.train.ChestCarEntity;
+import dev.murad.shipping.entity.custom.train.wagon.ChestCarEntity;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 
 public class ChestCarModel extends EntityModel<ChestCarEntity> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor

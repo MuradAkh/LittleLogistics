@@ -1,30 +1,28 @@
-package dev.murad.shipping.entity.custom.train;
+package dev.murad.shipping.entity.custom.train.locomotive;
 
-import dev.murad.shipping.setup.ModEntityTypes;
+import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.util.LinkableEntityHead;
-import dev.murad.shipping.util.RailUtils;
 import dev.murad.shipping.util.Train;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
 
-public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntityHead<AbstractTrainCar> {
-    private boolean move = false;
+public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity implements LinkableEntityHead<AbstractTrainCarEntity> {
+    protected boolean engineOn = false;
+
     private boolean doflip = false;
-    public LocomotiveEntity(EntityType<?> p_38087_, Level p_38088_) {
-        super(p_38087_, p_38088_);
+    public AbstractLocomotiveEntity(EntityType<?> type, Level p_38088_) {
+        super(type, p_38088_);
     }
 
-    public LocomotiveEntity(Level level, Double aDouble, Double aDouble1, Double aDouble2) {
-        super(ModEntityTypes.STEAM_LOCOMOTIVE.get(), level, aDouble, aDouble1, aDouble2);
+    public AbstractLocomotiveEntity(EntityType<?> type, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
+        super(type, level, aDouble, aDouble1, aDouble2);
     }
 
     @Override
@@ -34,7 +32,7 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
         }
         if(!this.level.isClientSide){
             if (!pPlayer.isCrouching()) {
-                move = !move;
+                engineOn = !engineOn;
             }
         }
         if(pPlayer.isCrouching()){
@@ -56,11 +54,7 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
         }
         tickAdjustments();
         if(!this.level.isClientSide){
-            if(move) {
-                doMove();
-            }else{
-                setDeltaMovement(Vec3.ZERO);
-            }
+            tickMovement();
         }
 
 
@@ -69,11 +63,17 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
             this.setYRot(getDirection().getOpposite().toYRot());
             doflip = false;
         }
-
-
-
     }
 
+    abstract protected boolean checkMovementAndTickFuel();
+
+    private void tickMovement() {
+        if(checkMovementAndTickFuel()) {
+            accelerate();
+        }else{
+            setDeltaMovement(Vec3.ZERO);
+        }
+    }
 
 
     private double getSpeedModifier(){
@@ -93,7 +93,7 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
         }).orElse(0d);
     }
 
-    private void doMove() {
+    private void accelerate() {
         var dir = this.getDirection();
         var dirvel = new Vec3(Math.abs(dir.getStepX()), 0, Math.abs(dir.getStepZ()));
         if(Math.abs(this.getDeltaMovement().dot(dirvel)) < 0.12){
@@ -103,12 +103,12 @@ public class LocomotiveEntity extends AbstractTrainCar implements LinkableEntity
     }
 
     @Override
-    public void setDominated(AbstractTrainCar entity) {
+    public void setDominated(AbstractTrainCarEntity entity) {
         dominated = Optional.of(entity);
     }
 
     @Override
-    public void setDominant(AbstractTrainCar entity) {
+    public void setDominant(AbstractTrainCarEntity entity) {
     }
 
     @Override

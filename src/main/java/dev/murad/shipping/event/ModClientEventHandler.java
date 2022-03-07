@@ -4,6 +4,7 @@ import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.fluid.render.FluidHopperTileEntityRenderer;
 import dev.murad.shipping.entity.models.*;
 import dev.murad.shipping.entity.render.*;
+import dev.murad.shipping.entity.render.TrainCarRenderer;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
@@ -55,10 +56,19 @@ public class ModClientEventHandler {
         event.registerEntityRenderer(ModEntityTypes.SEATER_BARGE.get(), SeaterBargeRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.STEAM_TUG.get(), SteamTugRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.SPRING.get(), DummyEntityRenderer::new);
-        event.registerEntityRenderer(ModEntityTypes.STEAM_LOCOMOTIVE.get(), LocomotiveRenderer::new);
-        event.registerEntityRenderer(ModEntityTypes.CHEST_CAR.get(), ChestCarRenderer::new);
-
         event.registerBlockEntityRenderer(ModTileEntitiesTypes.FLUID_HOPPER.get(), FluidHopperTileEntityRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.STEAM_LOCOMOTIVE.get(), ctx -> new TrainCarRenderer(ctx,
+                SteamLocomotiveModel::new,
+                SteamLocomotiveModel.LAYER_LOCATION,
+                "textures/entity/steam_locomotive.png"));
+        event.registerEntityRenderer(ModEntityTypes.ENERGY_LOCOMOTIVE.get(), ctx -> new TrainCarRenderer(ctx,
+                EnergyLocomotiveModel::new,
+                EnergyLocomotiveModel.LAYER_LOCATION,
+                "textures/entity/energy_locomotive.png"));
+        event.registerEntityRenderer(ModEntityTypes.CHEST_CAR.get(), ctx -> new TrainCarRenderer(ctx,
+                ChestCarModel::new,
+                ChestCarModel.LAYER_LOCATION,
+                "textures/entity/chest_car.png"));
     }
 
     @SubscribeEvent

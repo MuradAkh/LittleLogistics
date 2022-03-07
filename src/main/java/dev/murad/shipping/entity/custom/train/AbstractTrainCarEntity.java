@@ -3,6 +3,7 @@ package dev.murad.shipping.entity.custom.train;
 import com.mojang.datafixers.util.Function3;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.entity.custom.SpringEntity;
+import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.RailUtils;
 import dev.murad.shipping.util.Train;
@@ -21,6 +22,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.PoweredRailBlock;
@@ -36,17 +38,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public abstract class AbstractTrainCar extends AbstractMinecart implements IForgeAbstractMinecart, LinkableEntity<AbstractTrainCar> {
-    protected Optional<AbstractTrainCar> dominant = Optional.empty();
-    protected Optional<AbstractTrainCar> dominated = Optional.empty();
+public abstract class AbstractTrainCarEntity extends AbstractMinecart implements IForgeAbstractMinecart, LinkableEntity<AbstractTrainCarEntity> {
+    protected Optional<AbstractTrainCarEntity> dominant = Optional.empty();
+    protected Optional<AbstractTrainCarEntity> dominated = Optional.empty();
     private @Nullable CompoundTag dominantNBT;
-    public static final EntityDataAccessor<Integer> DOMINANT_ID = SynchedEntityData.defineId(AbstractTrainCar.class, EntityDataSerializers.INT);
-    public static final EntityDataAccessor<Integer> DOMINATED_ID = SynchedEntityData.defineId(AbstractTrainCar.class, EntityDataSerializers.INT);
-    protected Train<AbstractTrainCar> train;
+    public static final EntityDataAccessor<Integer> DOMINANT_ID = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
+    public static final EntityDataAccessor<Integer> DOMINATED_ID = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
+    protected Train<AbstractTrainCarEntity> train;
     private boolean flipped = false;
     private int lSteps;
     private double lx;
@@ -54,12 +54,12 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
     private double lz;
     private double lxr;
 
-    public AbstractTrainCar(EntityType<?> p_38087_, Level p_38088_) {
+    public AbstractTrainCarEntity(EntityType<?> p_38087_, Level p_38088_) {
         super(p_38087_, p_38088_);
         train = new Train<>(this);
     }
 
-    public AbstractTrainCar(EntityType<?> p_38087_, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
+    public AbstractTrainCarEntity(EntityType<?> p_38087_, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
         super(p_38087_, level, aDouble, aDouble1, aDouble2);
         var pos = new BlockPos(aDouble, aDouble1, aDouble2);
         var state = level.getBlockState(pos);
@@ -105,7 +105,7 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
         }
     }
 
-    private Optional<AbstractTrainCar> tryToLoadFromNBT(CompoundTag compound) {
+    private Optional<AbstractTrainCarEntity> tryToLoadFromNBT(CompoundTag compound) {
         try {
             BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
             pos.set(compound.getInt("X"), compound.getInt("Y"), compound.getInt("Z"));
@@ -119,7 +119,7 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
                     pos.getZ() + 2
             );
             List<Entity> entities = level.getEntities(this, searchBox, e -> e.getStringUUID().equals(uuid));
-            return entities.stream().findFirst().map(e -> (AbstractTrainCar) e);
+            return entities.stream().findFirst().map(e -> (AbstractTrainCarEntity) e);
         } catch (Exception e){
             return Optional.empty();
         }
@@ -158,7 +158,7 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
 
     private void fetchDominantClient() {
         Entity potential = level.getEntity(getEntityData().get(DOMINANT_ID));
-        if (potential instanceof AbstractTrainCar t) {
+        if (potential instanceof AbstractTrainCarEntity t) {
             dominant = Optional.of(t);
         } else {
             dominant = Optional.empty();
@@ -167,7 +167,7 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
 
     private void fetchDominatedClient() {
         Entity potential = level.getEntity(getEntityData().get(DOMINATED_ID));
-        if (potential instanceof AbstractTrainCar t) {
+        if (potential instanceof AbstractTrainCarEntity t) {
             dominated = Optional.of(t);
         } else {
             dominated = Optional.empty();
@@ -442,12 +442,12 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
     }
 
     @Override
-    public Optional<AbstractTrainCar> getDominated() {
+    public Optional<AbstractTrainCarEntity> getDominated() {
         return dominated;
     }
 
     @Override
-    public Optional<AbstractTrainCar> getDominant() {
+    public Optional<AbstractTrainCarEntity> getDominant() {
         return dominant;
     }
 
@@ -458,7 +458,7 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
     }
 
     @Override
-    public Train<AbstractTrainCar> getTrain() {
+    public Train<AbstractTrainCarEntity> getTrain() {
         return train;
     }
 
@@ -473,15 +473,15 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
         dominated = temp;
     }
 
-    private static Optional<Integer> distHelper(AbstractTrainCar car1, AbstractTrainCar car2){
+    private static Optional<Integer> distHelper(AbstractTrainCarEntity car1, AbstractTrainCarEntity car2){
         return RailUtils.traverseBi(car1.getOnPos().above(), car1.level,
                 (l, p) -> RailUtils.getRail(car2.getOnPos().above(), car2.level)
                         .map(rp -> rp.equals(p)).orElse(false), 5, car1).map(Pair::getSecond);
     }
 
-    private static Optional<Pair<AbstractTrainCar, AbstractTrainCar>> findClosestPair(Train<AbstractTrainCar> train1, Train<AbstractTrainCar> train2){
+    private static Optional<Pair<AbstractTrainCarEntity, AbstractTrainCarEntity>> findClosestPair(Train<AbstractTrainCarEntity> train1, Train<AbstractTrainCarEntity> train2){
         int mindistance = Integer.MAX_VALUE;
-        Optional<Pair<AbstractTrainCar, AbstractTrainCar>> curr = Optional.empty();
+        Optional<Pair<AbstractTrainCarEntity, AbstractTrainCarEntity>> curr = Optional.empty();
         var pairs = Arrays.asList(
                 Pair.of(train1.getHead(), train2.getTail()),
                 Pair.of(train1.getTail(), train2.getHead()),
@@ -499,13 +499,13 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
 
         }
 
-        return curr.filter(pair -> (!(pair.getFirst() instanceof LocomotiveEntity) || pair.getFirst().getDominated().isEmpty())
-                && (!(pair.getSecond() instanceof LocomotiveEntity) || pair.getSecond().getDominated().isEmpty()));
+        return curr.filter(pair -> (!(pair.getFirst() instanceof AbstractLocomotiveEntity) || pair.getFirst().getDominated().isEmpty())
+                && (!(pair.getSecond() instanceof AbstractLocomotiveEntity) || pair.getSecond().getDominated().isEmpty()));
 
 
     }
 
-    private static Pair<AbstractTrainCar, AbstractTrainCar> caseTailHead(Train <AbstractTrainCar> trainTail, Train<AbstractTrainCar> trainHead, Pair<AbstractTrainCar, AbstractTrainCar> targetPair){
+    private static Pair<AbstractTrainCarEntity, AbstractTrainCarEntity> caseTailHead(Train <AbstractTrainCarEntity> trainTail, Train<AbstractTrainCarEntity> trainHead, Pair<AbstractTrainCarEntity, AbstractTrainCarEntity> targetPair){
 
         if(trainHead.getTug().isPresent()){
             invertTrain(trainHead);
@@ -516,15 +516,15 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
         }
     }
 
-    private static void invertTrain(Train<AbstractTrainCar> train) {
+    private static void invertTrain(Train<AbstractTrainCarEntity> train) {
         var head = train.getHead();
         var tail = train.getTail();
-        train.asList().forEach(AbstractTrainCar::invertDoms);
+        train.asList().forEach(AbstractTrainCarEntity::invertDoms);
         train.setHead(tail);
         train.setTail(head);
     }
 
-    private static Optional<Pair<AbstractTrainCar, AbstractTrainCar>> tryFindAndPrepareClosePair(Train<AbstractTrainCar> train1, Train<AbstractTrainCar> train2){
+    private static Optional<Pair<AbstractTrainCarEntity, AbstractTrainCarEntity>> tryFindAndPrepareClosePair(Train<AbstractTrainCarEntity> train1, Train<AbstractTrainCarEntity> train2){
         return findClosestPair(train1, train2).flatMap(targetPair -> {
             if(targetPair.getFirst().equals(train1.getHead()) && targetPair.getSecond().equals(train2.getHead())){
                 // if trying to attach to head loco then loco is solo
@@ -553,9 +553,9 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
     }
     @Override
     public boolean linkEntities(Player player, Entity target) {
-        if (target instanceof AbstractTrainCar t) {
-            Train<AbstractTrainCar> train1 = t.getTrain();
-            Train<AbstractTrainCar> train2 = this.getTrain();
+        if (target instanceof AbstractTrainCarEntity t) {
+            Train<AbstractTrainCarEntity> train1 = t.getTrain();
+            Train<AbstractTrainCarEntity> train2 = this.getTrain();
             if(train2.getTug().isPresent() && train1.getTug().isPresent()){
                 player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.noTwoLoco"), true);
                 return false;
@@ -577,10 +577,13 @@ public abstract class AbstractTrainCar extends AbstractMinecart implements IForg
         }
     }
 
-    private static void createLinks(AbstractTrainCar dominant, AbstractTrainCar dominated) {
+    private static void createLinks(AbstractTrainCarEntity dominant, AbstractTrainCarEntity dominated) {
         dominated.setDominant(dominant);
         dominant.setDominated(dominated);
     }
+
+    @Override
+    public abstract ItemStack getPickResult();
 
 
 }

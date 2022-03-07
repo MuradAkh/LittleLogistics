@@ -1,7 +1,7 @@
 package dev.murad.shipping.item;
 
 import com.mojang.datafixers.util.Function4;
-import dev.murad.shipping.entity.custom.train.AbstractTrainCar;
+import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
@@ -75,9 +75,9 @@ public class TrainCarItem extends Item {
             p_42947_.getLevel().levelEvent(1000, p_42947_.getPos(), 0);
         }
     };
-    final Function4<Level, Double, Double, Double, AbstractTrainCar> constructor;
+    final Function4<Level, Double, Double, Double, AbstractTrainCarEntity> constructor;
 
-    public TrainCarItem(Function4<Level, Double, Double, Double, AbstractTrainCar> constructor, Item.Properties pProperties) {
+    public TrainCarItem(Function4<Level, Double, Double, Double, AbstractTrainCarEntity> constructor, Item.Properties pProperties) {
         super(pProperties);
         this.constructor = constructor;
         DispenserBlock.registerBehavior(this, DISPENSE_ITEM_BEHAVIOR);
