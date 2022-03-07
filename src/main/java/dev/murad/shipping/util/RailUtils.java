@@ -3,12 +3,11 @@ package dev.murad.shipping.util;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.block.rail.MultiExitRailBlock;
-import dev.murad.shipping.entity.custom.train.AbstractTrainCar;
+import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
@@ -109,7 +108,7 @@ public class RailUtils {
 
     }
 
-    public static Optional<Pair<Direction, Integer>> traverseBi(BlockPos railPos, Level level, BiPredicate<Level, BlockPos> predicate, int limit, AbstractTrainCar car){
+    public static Optional<Pair<Direction, Integer>> traverseBi(BlockPos railPos, Level level, BiPredicate<Level, BlockPos> predicate, int limit, AbstractTrainCarEntity car){
         return getRail(railPos, level).flatMap(pos -> {
             var shape = getShape(pos, level, car.getDirection().getOpposite());
             var dirs = EXITS_DIRECTION.get(shape);
@@ -155,7 +154,7 @@ public class RailUtils {
         });
     }
 
-    public static BiPredicate<Level, BlockPos> samePositionPredicate(AbstractTrainCar entity){
+    public static BiPredicate<Level, BlockPos> samePositionPredicate(AbstractTrainCarEntity entity){
         return (level, p) -> getRail(p, level).flatMap(pos ->
             getRail(entity.getOnPos().above(), level).map(rp -> rp.equals(pos))).orElse(false);
     }

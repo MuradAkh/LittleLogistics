@@ -6,17 +6,16 @@ package dev.murad.shipping.entity.models;// Made with Blockbench 4.1.1
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.custom.train.LocomotiveEntity;
+import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 
 
-public class EnergyLocomotiveModel extends EntityModel<LocomotiveEntity> {
+public class EnergyLocomotiveModel extends EntityModel<AbstractLocomotiveEntity> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "energylocomotivemodel"), "main");
 	private final ModelPart bone;
@@ -70,7 +69,7 @@ public class EnergyLocomotiveModel extends EntityModel<LocomotiveEntity> {
 	}
 
 	@Override
-	public void setupAnim(LocomotiveEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void setupAnim(AbstractLocomotiveEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 
 	}
 
