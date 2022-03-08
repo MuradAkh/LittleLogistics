@@ -3,6 +3,7 @@ package dev.murad.shipping.entity.custom.barge;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import dev.murad.shipping.util.FluidDisplayUtil;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -67,18 +68,10 @@ public class FluidTankBargeEntity extends AbstractBargeEntity{
         entityData.define(VOLUME, 0);
     }
 
-    private TranslatableComponent getFluidDisplay() {
-        Fluid fluid = tank.getFluid().getFluid();
-        return fluid.equals(Fluids.EMPTY) ?
-                new TranslatableComponent("entity.littlelogistics.fluid_barge.capacity_empty", tank.getCapacity()) :
-                new TranslatableComponent("entity.littlelogistics.fluid_barge.capacity", tank.getFluid().getDisplayName().getString(),
-                        tank.getFluidAmount(), tank.getCapacity());
-    }
-
     @Override
     protected void doInteract(Player player) {
         FluidUtil.interactWithFluidHandler(player, InteractionHand.MAIN_HAND, tank);
-        player.displayClientMessage(getFluidDisplay(), false);
+        player.displayClientMessage(FluidDisplayUtil.getFluidDisplay(tank), false);
     }
 
     public FluidStack getFluidStack(){

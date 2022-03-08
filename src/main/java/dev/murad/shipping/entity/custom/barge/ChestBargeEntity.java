@@ -55,7 +55,6 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
     }
 
 
-
     protected void doInteract(Player player) {
         player.openMenu(this);
     }
