@@ -229,11 +229,14 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     protected void tickYRot() {
         // direction based on velocity
-//            this.setYRot(RailUtils.directionFromVelocity(this.getDeltaMovement()).toYRot());
         double d1 = this.xo - this.getX();
         double d3 = this.zo - this.getZ();
         if (d1 * d1 + d3 * d3 > 0.001D) {
             this.setYRot((float)(Mth.atan2(d3, d1) * 180.0D / Math.PI) + 90);
+        }
+
+        if(!this.level.isClientSide){
+            this.setYRot(RailUtils.directionFromVelocity(this.getDeltaMovement()).toYRot());
         }
 
         // if the car is part of a train, enforce that direction instead
@@ -541,7 +544,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     private void doChainMath() {
         dominant.ifPresent(dom -> {
             var railDirDis = RailUtils.getRail(dom.getOnPos().above(), level).flatMap(target ->
-                    RailUtils.traverseBi(this.getOnPos().above(), level, (level, p) -> p.equals(target), 20, this));
+                    RailUtils.traverseBi(this.getOnPos().above(), level, (level, p) -> p.equals(target), 5, this));
 
             //TODO: based on "docked" instead
             var maxdist =
@@ -569,7 +572,9 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                         setDeltaMovement(dir.scale(0.05));
                     } else {
                         setDeltaMovement(dir.scale(parentVelocity.length()));
-                        setDeltaMovement(getDeltaMovement().scale(distance));
+                        if(distance > maxdist + 0.2) {
+                            setDeltaMovement(getDeltaMovement().scale(distance));
+                        }
                     }
                 } else if (distance < maxdist - 0.2){
                     setDeltaMovement(dir.scale(-0.05));
@@ -577,9 +582,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                 else
                     setDeltaMovement(Vec3.ZERO);
             } else {
+                dominant.ifPresent(LinkableEntity::removeDominated);
                 removeDominant();
-                removeDominated();
-                handleLinkableKill();
             }
         });
     }
