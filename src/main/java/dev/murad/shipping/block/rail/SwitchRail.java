@@ -126,7 +126,7 @@ public class SwitchRail extends BaseRailBlock implements MultiExitRailBlock {
         Direction turnDirection = out.getOutDirection(inDirection);
         Direction outDirection = state.getValue(POWERED) ? turnDirection : facing;
 
-        if (direction == facing) {
+        if (direction.getOpposite() == facing) {
             outDirection = facing;
         }
 
