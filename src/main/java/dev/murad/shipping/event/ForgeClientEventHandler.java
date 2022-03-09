@@ -54,7 +54,7 @@ public class ForgeClientEventHandler {
                 matrixStack.translate(node.getX() - d0, 1 - d1, node.getZ() - d2);
 
                 BeaconRenderer.renderBeaconBeam(matrixStack, renderTypeBuffer, BEAM_LOCATION, event.getPartialTick(),
-                        1F, player.level.getGameTime(), 0, 1024,
+                        1F, player.level.getGameTime(), player.level.getMinBuildHeight(), 1024,
                         DyeColor.RED.getTextureDiffuseColors(), 0.2F, 0.25F);
                 matrixStack.popPose();
                 matrixStack.pushPose();

@@ -3,6 +3,7 @@ package dev.murad.shipping.block.fluid;
 import dev.murad.shipping.block.IVesselLoader;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import dev.murad.shipping.util.FluidDisplayUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -47,17 +48,11 @@ public class FluidHopperTileEntity extends BlockEntity implements IVesselLoader 
 
     private final LazyOptional<IFluidHandler> holder = LazyOptional.of(() -> tank);
 
-    private TranslatableComponent getFluidDisplay() {
-        Fluid fluid = tank.getFluid().getFluid();
-        return fluid.equals(Fluids.EMPTY) ?
-                new TranslatableComponent("block.littlelogistics.fluid_hopper.capacity_empty", tank.getCapacity()) :
-                new TranslatableComponent("block.littlelogistics.fluid_hopper.capacity", tank.getFluid().getDisplayName().getString(),
-                        tank.getFluidAmount(), tank.getCapacity());
-    }
+
 
     public boolean use(Player player, InteractionHand hand){
         boolean result = FluidUtil.interactWithFluidHandler(player, hand, tank);
-        player.displayClientMessage(getFluidDisplay(), false);
+        player.displayClientMessage(FluidDisplayUtil.getFluidDisplay(tank), false);
         return result;
     }
 
