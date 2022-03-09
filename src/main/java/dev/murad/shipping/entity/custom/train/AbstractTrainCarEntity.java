@@ -229,15 +229,18 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     protected void tickYRot() {
         // direction based on velocity
-        double d1 = this.xo - this.getX();
-        double d3 = this.zo - this.getZ();
-        if (d1 * d1 + d3 * d3 > 0.001D) {
-            this.setYRot((float)(Mth.atan2(d3, d1) * 180.0D / Math.PI) + 90);
-        }
+        // below causes issues on switch tracks
+//        double d1 = this.xo - this.getX();
+//        double d3 = this.zo - this.getZ();
+//        if (d1 * d1 + d3 * d3 > 0.001D) {
+//            this.setYRot((float)(Mth.atan2(d3, d1) * 180.0D / Math.PI) + 90);
+//        }
 
-        if(!this.level.isClientSide){
-            this.setYRot(RailUtils.directionFromVelocity(this.getDeltaMovement()).toYRot());
-        }
+        // this works fine on switch tracks
+        this.setYRot(RailUtils.directionFromVelocity(this.getDeltaMovement()).toYRot());
+
+        //there is some weirdly non-smooth rotations on 180 degree turns, doesn't look great
+
 
         // if the car is part of a train, enforce that direction instead
         var railshape = getRailShape();
@@ -246,6 +249,12 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                     RailUtils.samePositionPredicate(dominated.get()), 5, this);
             r.flatMap(pair -> RailUtils.getOtherExit(pair.getFirst(), railshape.get()))
                     .map(rd -> rd.horizontal.toYRot()).ifPresent(this::setYRot);
+        } else if (this.dominant.isPresent() && railshape.isPresent()) {
+            Optional<Pair<Direction, Integer>> r = RailUtils.traverseBi(getOnPos().above(), this.level,
+                    RailUtils.samePositionPredicate(dominant.get()), 5, this);
+            r.map(Pair::getFirst)
+                    .map(Direction::toYRot)
+                    .ifPresent(this::setYRot);
         }
     }
 
