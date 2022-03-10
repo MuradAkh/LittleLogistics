@@ -7,6 +7,8 @@ import dev.murad.shipping.entity.custom.train.wagon.ChestCarEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.barge.*;
+import dev.murad.shipping.entity.custom.train.wagon.ChunkLoaderCarEntity;
+import dev.murad.shipping.entity.custom.train.wagon.FluidTankCarEntity;
 import dev.murad.shipping.entity.custom.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.custom.tug.SteamTugEntity;
 import net.minecraft.resources.ResourceLocation;
@@ -67,7 +69,20 @@ public class ModEntityTypes {
             Registration.ENTITIES.register("chest_car",
                     () -> EntityType.Builder.<ChestCarEntity>of(ChestCarEntity::new,
                                     MobCategory.MISC).sized(0.7f, 0.9f)
-                            .build(new ResourceLocation(ShippingMod.MOD_ID, "train_car").toString()));
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "chest_car").toString()));
+
+    public static final RegistryObject<EntityType<FluidTankCarEntity>> FLUID_CAR =
+            Registration.ENTITIES.register("fluid_car",
+                    () -> EntityType.Builder.<FluidTankCarEntity>of(FluidTankCarEntity::new,
+                                    MobCategory.MISC).sized(0.7f, 0.9f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "fluid_car").toString()));
+
+    public static final RegistryObject<EntityType<ChunkLoaderCarEntity>> CHUNK_LOADER_CAR =
+            Registration.ENTITIES.register("chunk_loader_car",
+                    () -> EntityType.Builder.<ChunkLoaderCarEntity>of(ChunkLoaderCarEntity::new,
+                                    MobCategory.MISC).sized(0.7f, 0.9f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "chunk_loader_car").toString()));
+
 
     public static final RegistryObject<EntityType<AbstractLocomotiveEntity>> STEAM_LOCOMOTIVE =
             Registration.ENTITIES.register("steam_locomotive",

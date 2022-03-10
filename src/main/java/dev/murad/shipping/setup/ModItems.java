@@ -4,6 +4,8 @@ import dev.murad.shipping.entity.custom.train.locomotive.EnergyLocomotiveEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.SteamLocomotiveEntity;
 import dev.murad.shipping.entity.custom.train.wagon.ChestCarEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
+import dev.murad.shipping.entity.custom.train.wagon.ChunkLoaderCarEntity;
+import dev.murad.shipping.entity.custom.train.wagon.FluidTankCarEntity;
 import dev.murad.shipping.item.*;
 import dev.murad.shipping.item.creative.CreativeCapacitor;
 import net.minecraft.world.item.CreativeModeTab;
@@ -40,6 +42,14 @@ public class ModItems {
 
     public static final RegistryObject<Item> CHEST_CAR = Registration.ITEMS.register("chest_car",
             () -> new TrainCarItem(ChestCarEntity::new, new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+
+    public static final RegistryObject<Item> FLUID_CAR = Registration.ITEMS.register("fluid_car",
+            () -> new TrainCarItem(FluidTankCarEntity::new, new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+
+    public static final RegistryObject<Item> CHUNK_LOADER_CAR = Registration.ITEMS.register("chunk_loader_car",
+            () -> new TrainCarItem(ChunkLoaderCarEntity::new, new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+
+
 
     public static final RegistryObject<Item> STEAM_LOCOMOTIVE = Registration.ITEMS.register("steam_locomotive",
             () -> new TrainCarItem(SteamLocomotiveEntity::new, new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
