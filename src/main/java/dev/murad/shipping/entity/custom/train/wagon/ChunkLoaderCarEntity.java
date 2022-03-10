@@ -48,11 +48,13 @@ public class ChunkLoaderCarEntity extends AbstractWagonEntity {
 
     @Override
     public void addAdditionalSaveData(CompoundTag p_213281_1_) {
+        super.addAdditionalSaveData(p_213281_1_);
         mobileChunkLoader.addAdditionalSaveData(p_213281_1_);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag p_70037_1_) {
+        super.readAdditionalSaveData(p_70037_1_);
         mobileChunkLoader.readAdditionalSaveData(p_70037_1_);
     }
 
