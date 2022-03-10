@@ -14,7 +14,7 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
     }
 
     public AbstractWagonEntity(EntityType<?> p_38087_, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
-        super(ModEntityTypes.CHEST_CAR.get(), level, aDouble, aDouble1, aDouble2);
+        super(p_38087_, level, aDouble, aDouble1, aDouble2);
 
     }
 

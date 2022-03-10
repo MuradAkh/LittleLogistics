@@ -1,4 +1,4 @@
-package dev.murad.shipping.entity.render;
+package dev.murad.shipping.entity.render.train;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -177,8 +177,13 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
         VertexConsumer vertexconsumer = buffer.getBuffer(this.entityModel.renderType(this.getTextureLocation(car)));
         this.entityModel.renderToBuffer(pose, vertexconsumer, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
         pose.popPose();
+        renderAdditional(car, yaw, partialTicks, pose, buffer, packedLight);
 
         return attach;
+    }
+
+    protected void renderAdditional(T pEntity, float pEntityYaw, float pPartialTicks, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPackedLight) {
+
     }
 
     protected Model getModel(T entity){

@@ -5,7 +5,8 @@ import dev.murad.shipping.block.fluid.render.FluidHopperTileEntityRenderer;
 import dev.murad.shipping.entity.container.AbstractTugContainer;
 import dev.murad.shipping.entity.models.*;
 import dev.murad.shipping.entity.render.*;
-import dev.murad.shipping.entity.render.TrainCarRenderer;
+import dev.murad.shipping.entity.render.train.FluidTankCarRenderer;
+import dev.murad.shipping.entity.render.train.TrainCarRenderer;
 import dev.murad.shipping.entity.render.barge.FishingBargeRenderer;
 import dev.murad.shipping.entity.render.barge.FluidTankBargeRenderer;
 import dev.murad.shipping.entity.render.barge.StaticVesselRenderer;
@@ -109,6 +110,14 @@ public class ModClientEventHandler {
                 ChestCarModel::new,
                 ChestCarModel.LAYER_LOCATION,
                 "textures/entity/chest_car.png"));
+        event.registerEntityRenderer(ModEntityTypes.FLUID_CAR.get(), ctx -> new FluidTankCarRenderer(ctx,
+                FluidTankCarModel::new,
+                FluidTankCarModel.LAYER_LOCATION,
+                "textures/entity/fluid_car.png"));
+        event.registerEntityRenderer(ModEntityTypes.CHUNK_LOADER_CAR.get(), ctx -> new TrainCarRenderer<>(ctx,
+                ChunkLoaderCarModel::new,
+                ChunkLoaderCarModel.LAYER_LOCATION,
+                "textures/entity/chunk_loader_car.png"));
     }
 
     @SubscribeEvent
@@ -127,6 +136,8 @@ public class ModClientEventHandler {
         event.registerLayerDefinition(SteamLocomotiveModel.LAYER_LOCATION, SteamLocomotiveModel::createBodyLayer);
         event.registerLayerDefinition(EnergyLocomotiveModel.LAYER_LOCATION, EnergyLocomotiveModel::createBodyLayer);
         event.registerLayerDefinition(ChestCarModel.LAYER_LOCATION, ChestCarModel::createBodyLayer);
+        event.registerLayerDefinition(FluidTankCarModel.LAYER_LOCATION, FluidTankCarModel::createBodyLayer);
+        event.registerLayerDefinition(ChunkLoaderCarModel.LAYER_LOCATION, ChunkLoaderCarModel::createBodyLayer);
 
     }
 }
