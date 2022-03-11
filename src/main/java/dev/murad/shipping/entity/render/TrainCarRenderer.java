@@ -124,8 +124,8 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
         Vec3 pos = car.getPos(d0, d1, d2);
         float pitch = Mth.lerp(partialTicks, car.xRotO, car.getXRot());
         if (pos != null) {
-            Vec3 forwardDir = car.getPosOffs(d0, d1, d2, (double)0.5F);
-            Vec3 backDir = car.getPosOffs(d0, d1, d2, (double)-0.5F);
+            Vec3 forwardDir = car.getPosOffs(d0, d1, d2, (double)0.3F);
+            Vec3 backDir = car.getPosOffs(d0, d1, d2, (double)-0.3F);
             if (forwardDir == null) {
                 forwardDir = pos;
             }
