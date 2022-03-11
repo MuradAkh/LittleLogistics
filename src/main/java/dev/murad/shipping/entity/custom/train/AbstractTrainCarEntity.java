@@ -32,6 +32,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.IMinecartCollisionHandler;
 import net.minecraftforge.common.extensions.IForgeAbstractMinecart;
 import org.jetbrains.annotations.NotNull;
 
@@ -112,11 +113,9 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
 
     public boolean canBeCollidedWith() {
+        // todo: maybe we want this
         return false;
     }
-
-
-
 
     @Override
     protected void readAdditionalSaveData(CompoundTag compound) {
@@ -228,33 +227,31 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     }
 
     protected void tickYRot() {
-        // direction based on velocity
-        // below causes issues on switch tracks
-//        double d1 = this.xo - this.getX();
-//        double d3 = this.zo - this.getZ();
-//        if (d1 * d1 + d3 * d3 > 0.001D) {
-//            this.setYRot((float)(Mth.atan2(d3, d1) * 180.0D / Math.PI) + 90);
-//        }
-
-        // this works fine on switch tracks
-        this.setYRot(RailUtils.directionFromVelocity(this.getDeltaMovement()).toYRot());
-
-        //there is some weirdly non-smooth rotations on 180 degree turns, doesn't look great
-
-
         // if the car is part of a train, enforce that direction instead
-        var railshape = getRailShape();
-        if(this.dominated.isPresent() && railshape.isPresent()) {
+        Optional<RailShape> railShape = getRailShape();
+        if(this.dominated.isPresent() && railShape.isPresent()) {
             Optional<Pair<Direction, Integer>> r = RailUtils.traverseBi(getOnPos().above(), this.level,
                     RailUtils.samePositionPredicate(dominated.get()), 5, this);
-            r.flatMap(pair -> RailUtils.getOtherExit(pair.getFirst(), railshape.get()))
-                    .map(rd -> rd.horizontal.toYRot()).ifPresent(this::setYRot);
-        } else if (this.dominant.isPresent() && railshape.isPresent()) {
+            if (r.isPresent()) {
+                Pair<Direction, Integer> pair = r.get();
+                Optional<Vec3i> directionOpt = RailUtils.getDirectionToOtherExit(pair.getFirst(), railShape.get());
+                if (directionOpt.isPresent()) {
+                    Vec3i direction = directionOpt.get();
+                    this.setYRot((float)(Mth.atan2(direction.getZ(), direction.getX()) * 180.0D / Math.PI) + 90);
+                }
+            }
+        } else if (this.dominant.isPresent() && railShape.isPresent()) {
             Optional<Pair<Direction, Integer>> r = RailUtils.traverseBi(getOnPos().above(), this.level,
                     RailUtils.samePositionPredicate(dominant.get()), 5, this);
             r.map(Pair::getFirst)
                     .map(Direction::toYRot)
                     .ifPresent(this::setYRot);
+        } else {
+            double d1 = this.xo - this.getX();
+            double d3 = this.zo - this.getZ();
+            if (d1 * d1 + d3 * d3 > 0.001D) {
+                this.setYRot((float)(Mth.atan2(d3, d1) * 180.0D / Math.PI) + 90);
+            }
         }
     }
 
@@ -417,110 +414,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         }
     }
 
-    protected void tickMinecartWithRotChanges() {
-        // STOPSHIP: 2022-03-07
-        if (this.getHurtTime() > 0) {
-            this.setHurtTime(this.getHurtTime() - 1);
-        }
-
-        if (this.getDamage() > 0.0F) {
-            this.setDamage(this.getDamage() - 1.0F);
-        }
-
-        this.checkOutOfWorld();
-        this.handleNetherPortal();
-        if (this.level.isClientSide) {
-            if (this.lSteps > 0) {
-                double d5 = this.getX() + (this.lx - this.getX()) / (double) this.lSteps;
-                double d6 = this.getY() + (this.ly - this.getY()) / (double) this.lSteps;
-                double d7 = this.getZ() + (this.lz - this.getZ()) / (double) this.lSteps;
-                double d2 = Mth.wrapDegrees(this.lyr - (double)this.getYRot());
-                this.setYRot(this.getYRot() + (float)d2 / (float)this.lSteps);
-                this.setXRot(this.getXRot() + (float) (this.lxr - (double) this.getXRot()) / (float) this.lSteps);
-                --this.lSteps;
-                this.setPos(d5, d6, d7);
-                this.setRot(this.getYRot(), this.getXRot());
-            } else {
-                this.reapplyPosition();
-                this.setRot(this.getYRot(), this.getXRot());
-            }
-        } else {
-            if (!this.isNoGravity()) {
-                double d0 = this.isInWater() ? -0.005D : -0.04D;
-                this.setDeltaMovement(this.getDeltaMovement().add(0.0D, d0, 0.0D));
-            }
-
-            int k = Mth.floor(this.getX());
-            int i = Mth.floor(this.getY());
-            int j = Mth.floor(this.getZ());
-            if (this.level.getBlockState(new BlockPos(k, i - 1, j)).is(BlockTags.RAILS)) {
-                --i;
-            }
-
-            BlockPos blockpos = new BlockPos(k, i, j);
-            BlockState blockstate = this.level.getBlockState(blockpos);
-            if (canUseRail() && BaseRailBlock.isRail(blockstate)) {
-                this.moveAlongTrack(blockpos, blockstate);
-                if (blockstate.getBlock() instanceof PoweredRailBlock && ((PoweredRailBlock) blockstate.getBlock()).isActivatorRail()) {
-                    this.activateMinecart(k, i, j, blockstate.getValue(PoweredRailBlock.POWERED));
-                }
-            } else {
-                this.comeOffTrack();
-            }
-
-            this.checkInsideBlocks();
-            this.setXRot(0.0F);
-            double d1 = this.xo - this.getX();
-            double d3 = this.zo - this.getZ();
-            if (d1 * d1 + d3 * d3 > 0.001D) {
-                this.setYRot((float)(Mth.atan2(d3, d1) * 180.0D / Math.PI) + 90);
-                if (this.flipped) {
-                    this.setYRot(this.getYRot() + 180.0F);
-                }
-            }
-
-            double d4 = Mth.wrapDegrees(this.getYRot() - this.yRotO);
-            if (d4 < -170.0D || d4 >= 170.0D) {
-                this.flipped = !this.flipped;
-            }
-
-            this.setRot(this.getYRot(), this.getXRot());
-            AABB box;
-            if (getCollisionHandler() != null) box = getCollisionHandler().getMinecartCollisionBox(this);
-            else box = this.getBoundingBox().inflate(0.2F, 0.0D, 0.2F);
-            if (canBeRidden() && this.getDeltaMovement().horizontalDistanceSqr() > 0.01D) {
-                List<Entity> list = this.level.getEntities(this, box, EntitySelector.pushableBy(this));
-                if (!list.isEmpty()) {
-                    for (int l = 0; l < list.size(); ++l) {
-                        Entity entity1 = list.get(l);
-                        if (!(entity1 instanceof Player) && !(entity1 instanceof IronGolem) && !(entity1 instanceof AbstractMinecart) && !this.isVehicle() && !entity1.isPassenger()) {
-                            entity1.startRiding(this);
-                        } else {
-                            entity1.push(this);
-                        }
-                    }
-                }
-            } else {
-                for (Entity entity : this.level.getEntities(this, box)) {
-                    if (!this.hasPassenger(entity) && entity.isPushable() && entity instanceof AbstractMinecart) {
-                        entity.push(this);
-                    }
-                }
-            }
-
-            this.updateInWaterStateAndDoFluidPushing();
-            if (this.isInLava()) {
-                this.lavaHurt();
-                this.fallDistance *= 0.5F;
-            }
-
-            this.firstTick = false;
-        }
-    }
-
     @Override
     public void lerpTo(double pX, double pY, double pZ, float pYaw, float pPitch, int pPosRotationIncrements, boolean pTeleport) {
-        System.out.println(pYaw);
         this.lx = pX;
         this.ly = pY;
         this.lz = pZ;
