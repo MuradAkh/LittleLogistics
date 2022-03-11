@@ -13,6 +13,7 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -105,6 +106,11 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
     // Override this to change anchor points for larger or smaller cars
     public Pair<Vec3, Vec3> getAttachmentPoints(Vec3 chainCentre, Vec3 trackDirection) {
         return new Pair<>(chainCentre.add(trackDirection.scale(.2)), chainCentre.add(trackDirection.scale(-.2)));
+    }
+
+    @Override
+    public boolean shouldRender(T entity, Frustum pCamera, double pCamX, double pCamY, double pCamZ) {
+        return true;
     }
 
     public Pair<Vec3, Vec3> renderCarAndGetAttachmentPoints(T car, float yaw, float partialTicks, PoseStack pose, MultiBufferSource buffer, int packedLight) {
