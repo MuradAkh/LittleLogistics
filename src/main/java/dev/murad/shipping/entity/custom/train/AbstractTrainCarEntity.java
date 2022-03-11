@@ -87,6 +87,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     public AbstractTrainCarEntity(EntityType<?> p_38087_, Level p_38088_) {
         super(p_38087_, p_38088_);
         train = new Train<>(this);
+        noCulling = true;
     }
 
     public AbstractTrainCarEntity(EntityType<?> p_38087_, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
@@ -312,6 +313,12 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         }
     }
 
+    // force render since we delegate rendering to the head of the train
+    @Override
+    public boolean shouldRender(double pX, double pY, double pZ) {
+        return true;
+    }
+
     @Override
     public Direction getMotionDirection() {
         return this.getDirection();
@@ -450,9 +457,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
             var railDirDis = RailUtils.getRail(dom.getOnPos().above(), level).flatMap(target ->
                     RailUtils.traverseBi(this.getOnPos().above(), level, (level, p) -> p.equals(target), 5, this));
 
-            //TODO: based on "docked" instead
-            var maxdist =
-                    this.getTrain().getTug().isPresent() && this.getTrain().getTug().get().getDeltaMovement().equals(Vec3.ZERO)
+            // TODO: based on "docked" instead
+            var maxdist = this.getTrain().getTug().isPresent() && this.getTrain().getTug().get().getDeltaMovement().equals(Vec3.ZERO)
                     ? 1 : 1.7;
 
             float distance = railDirDis.map(Pair::getSecond).filter(a -> a > 0).map(di -> {
