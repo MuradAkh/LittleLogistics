@@ -138,6 +138,10 @@ public class RailUtils {
 
     }
 
+    public static Optional<Vec3i> getDirectionToOtherExit(Direction direction, RailShape shape) {
+        return getOtherExit(direction, shape).map(other -> direction.getNormal().subtract(other.horizontal.getNormal()));
+    }
+
     public static Optional<Integer> traverse(BlockPos railPos, Level level, Direction prevExitTaken, BiPredicate<Level, BlockPos> predicate, int limit){
         if(predicate.test(level, railPos)){
             return Optional.of(0);
@@ -157,7 +161,4 @@ public class RailUtils {
         return (level, p) -> getRail(p, level).flatMap(pos ->
             getRail(entity.getOnPos().above(), level).map(rp -> rp.equals(pos))).orElse(false);
     }
-
-
-
 }
