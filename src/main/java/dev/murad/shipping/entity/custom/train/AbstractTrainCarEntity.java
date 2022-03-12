@@ -434,6 +434,9 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     @Override
     public void remove(RemovalReason r) {
+        if(!this.level.isClientSide){
+            this.spawnAtLocation(this.getPickResult());
+        }
         handleLinkableKill();
         super.remove(r);
     }

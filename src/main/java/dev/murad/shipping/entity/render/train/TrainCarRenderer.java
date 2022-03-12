@@ -7,6 +7,7 @@ import com.mojang.math.Vector3f;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.entity.models.ChainModel;
+import dev.murad.shipping.entity.render.RenderWithAttachmentPoints;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.Model;
@@ -176,8 +177,8 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
         this.entityModel.setupAnim(car, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
         VertexConsumer vertexconsumer = buffer.getBuffer(this.entityModel.renderType(this.getTextureLocation(car)));
         this.entityModel.renderToBuffer(pose, vertexconsumer, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-        pose.popPose();
         renderAdditional(car, yaw, partialTicks, pose, buffer, packedLight);
+        pose.popPose();
 
         return attach;
     }
