@@ -1,10 +1,15 @@
 package dev.murad.shipping.entity.custom.train.locomotive;
 
+import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+
+import java.util.Random;
 
 public class SteamLocomotiveEntity extends AbstractLocomotiveEntity {
     public SteamLocomotiveEntity(EntityType<?> type, Level p_38088_) {
@@ -24,5 +29,19 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity {
     @Override
     protected boolean checkMovementAndTickFuel() {
         return engineOn;
+    }
+
+
+    protected void doMovementEffect() {
+        Level world = this.level;
+        if (world != null) {
+            BlockPos blockpos = this.getOnPos().above().above();
+            Random random = world.random;
+            if (random.nextFloat() < ShippingConfig.Client.LOCO_SMOKE_MODIFIER.get()) {
+                for(int i = 0; i < random.nextInt(2) + 2; ++i) {
+                    AbstractTugEntity.makeParticles(world, blockpos, true, false);
+                }
+            }
+        }
     }
 }

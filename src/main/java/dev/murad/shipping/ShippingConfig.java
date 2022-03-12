@@ -8,6 +8,7 @@ public class ShippingConfig {
         public static final ForgeConfigSpec SPEC;
 
         public static final ForgeConfigSpec.ConfigValue<Double> TUG_SMOKE_MODIFIER;
+        public static final ForgeConfigSpec.ConfigValue<Double> LOCO_SMOKE_MODIFIER;
         public static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_TUG_ROUTE_BEACONS;
 
         static {
@@ -15,6 +16,11 @@ public class ShippingConfig {
             TUG_SMOKE_MODIFIER =
                     BUILDER.comment("Modify the rate of smoke produced by a tug. Min 0, Max 1, Default 0.4")
                             .defineInRange("tugSmoke", 0.4, 0, 1);
+
+            LOCO_SMOKE_MODIFIER =
+                    BUILDER.comment("Modify the rate of smoke produced by a locomotive. Min 0, Max 1, Default 0.2")
+                            .defineInRange("locomotiveSmoke", 0.2, 0, 1);
+
             DISABLE_TUG_ROUTE_BEACONS =
                     BUILDER.comment("Disable indicator beacons for tug route item. Default false.")
                             .define("disableTugRouteBeacons", false);
