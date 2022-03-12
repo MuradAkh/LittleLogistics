@@ -457,11 +457,6 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
             var railDirDis = RailUtils.getRail(parent.getOnPos().above(), level).flatMap(target ->
                     RailUtils.traverseBi(this.getOnPos().above(), level, (level, p) -> p.equals(target), 5, this));
 
-            // TODO: based on "docked" instead
-//            var maxdist = this.getTrain().getTug().isPresent() && this.getTrain().getTug().get().getDeltaMovement().equals(Vec3.ZERO)
-//                    ? 1 : 1.7;
-
-
             // this is a fix to mitigate "bouncing" when trains start moving from a stopped position
             // todo: fix based on "docked" instead.
             boolean isMoving = this.getTrain().getTug().isPresent() && this.getTrain().getTug().get().getDeltaMovement().equals(Vec3.ZERO);
