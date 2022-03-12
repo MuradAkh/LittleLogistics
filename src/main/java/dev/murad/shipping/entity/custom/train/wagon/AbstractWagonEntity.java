@@ -3,6 +3,7 @@ package dev.murad.shipping.entity.custom.train.wagon;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.util.Train;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 
@@ -14,7 +15,7 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
     }
 
     public AbstractWagonEntity(EntityType<?> p_38087_, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
-        super(ModEntityTypes.CHEST_CAR.get(), level, aDouble, aDouble1, aDouble2);
+        super(p_38087_, level, aDouble, aDouble1, aDouble2);
 
     }
 
@@ -58,5 +59,10 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
                 dominated.setTrain(train);
             }
         });
+    }
+
+    // hack to disable hoppers
+    public boolean isDockable() {
+        return this.dominant.map(dom -> this.distanceToSqr(dom) < 1.1).orElse(true);
     }
 }
