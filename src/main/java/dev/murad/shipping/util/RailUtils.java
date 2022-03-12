@@ -161,4 +161,8 @@ public class RailUtils {
         return (level, p) -> getRail(p, level).flatMap(pos ->
             getRail(entity.getOnPos().above(), level).map(rp -> rp.equals(pos))).orElse(false);
     }
+
+    public static Vec3 toVec3(Vec3i dir) {
+        return new Vec3(dir.getX(), dir.getY(), dir.getZ());
+    }
 }
