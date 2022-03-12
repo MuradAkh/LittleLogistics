@@ -32,7 +32,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.IMinecartCollisionHandler;
 import net.minecraftforge.common.extensions.IForgeAbstractMinecart;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,7 +40,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class AbstractTrainCarEntity extends AbstractMinecart implements IForgeAbstractMinecart, LinkableEntity<AbstractTrainCarEntity> {
@@ -244,9 +242,14 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         } else if (this.dominant.isPresent() && railShape.isPresent()) {
             Optional<Pair<Direction, Integer>> r = RailUtils.traverseBi(getOnPos().above(), this.level,
                     RailUtils.samePositionPredicate(dominant.get()), 5, this);
-            r.map(Pair::getFirst)
-                    .map(Direction::toYRot)
-                    .ifPresent(this::setYRot);
+            if (r.isPresent()) {
+                Pair<Direction, Integer> pair = r.get();
+                Optional<Vec3i> directionOpt = RailUtils.getDirectionToOtherExit(pair.getFirst(), railShape.get());
+                if (directionOpt.isPresent()) {
+                    Vec3i direction = directionOpt.get();
+                    this.setYRot((float)(Mth.atan2(-direction.getZ(), -direction.getX()) * 180.0D / Math.PI) + 90);
+                }
+            }
         } else {
             double d1 = this.xo - this.getX();
             double d3 = this.zo - this.getZ();
