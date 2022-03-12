@@ -3,6 +3,9 @@ package dev.murad.shipping.entity.custom.train.locomotive;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.util.LinkableEntityHead;
 import dev.murad.shipping.util.Train;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
@@ -15,8 +18,12 @@ import java.util.Optional;
 
 public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity implements LinkableEntityHead<AbstractTrainCarEntity> {
     protected boolean engineOn = false;
-
     private boolean doflip = false;
+    private boolean independentMotion = false;
+
+    private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractLocomotiveEntity.class, EntityDataSerializers.BOOLEAN);
+
+
     public AbstractLocomotiveEntity(EntityType<?> type, Level p_38088_) {
         super(type, p_38088_);
     }
@@ -42,6 +49,17 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         return InteractionResult.PASS;
     }
 
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+
+        if(level.isClientSide) {
+            if(INDEPENDENT_MOTION.equals(key)) {
+                independentMotion = entityData.get(INDEPENDENT_MOTION);
+            }
+        }
+    }
+
 
     @Override
     public void tick(){
@@ -63,14 +81,32 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             this.setYRot(getDirection().getOpposite().toYRot());
             doflip = false;
         }
+
+        if(this.level.isClientSide
+                && independentMotion){
+            doMovementEffect();
+        }
+
+    }
+
+    protected void doMovementEffect() {
+
+    }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        entityData.define(INDEPENDENT_MOTION, false);
     }
 
     abstract protected boolean checkMovementAndTickFuel();
 
     private void tickMovement() {
         if(checkMovementAndTickFuel()) {
+            entityData.set(INDEPENDENT_MOTION, true);
             accelerate();
         }else{
+            entityData.set(INDEPENDENT_MOTION, false);
             setDeltaMovement(Vec3.ZERO);
         }
     }

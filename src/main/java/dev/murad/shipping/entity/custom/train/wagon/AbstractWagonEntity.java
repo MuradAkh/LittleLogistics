@@ -3,6 +3,7 @@ package dev.murad.shipping.entity.custom.train.wagon;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.util.Train;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 
@@ -58,5 +59,10 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
                 dominated.setTrain(train);
             }
         });
+    }
+
+    // hack to disable hoppers
+    public boolean isDockable() {
+        return this.dominant.map(dom -> this.distanceToSqr(dom) < 1.1).orElse(true);
     }
 }
