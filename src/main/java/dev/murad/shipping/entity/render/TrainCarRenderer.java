@@ -44,6 +44,8 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
         //getAndRenderChain(car, pose, buffer, pPackedLight);
         if (car.getDominant().isPresent()) return;
 
+        pose.pushPose();
+
         // render
         AbstractTrainCarEntity t = car;
         Pair<Vec3, Vec3> attachmentPoints = renderCarAndGetAttachmentPoints(car, yaw, pPartialTicks, pose, buffer, pPackedLight);
@@ -76,7 +78,7 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
             t = nextT;
         }
 
-//        renderCarAndGetAttachmentPoints(car, yaw, pPartialTicks, matrixStack, buffer, pPackedLight);
+        pose.popPose();
     }
 
     private void getAndRenderChain(AbstractTrainCarEntity car, Vec3 from, Vec3 to, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
