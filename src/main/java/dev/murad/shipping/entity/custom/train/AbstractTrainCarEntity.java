@@ -453,50 +453,62 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
 
     private void doChainMath() {
-        dominant.ifPresent(dom -> {
-            var railDirDis = RailUtils.getRail(dom.getOnPos().above(), level).flatMap(target ->
+        dominant.ifPresent(parent -> {
+            var railDirDis = RailUtils.getRail(parent.getOnPos().above(), level).flatMap(target ->
                     RailUtils.traverseBi(this.getOnPos().above(), level, (level, p) -> p.equals(target), 5, this));
 
             // TODO: based on "docked" instead
-            var maxdist = this.getTrain().getTug().isPresent() && this.getTrain().getTug().get().getDeltaMovement().equals(Vec3.ZERO)
-                    ? 1 : 1.7;
+//            var maxdist = this.getTrain().getTug().isPresent() && this.getTrain().getTug().get().getDeltaMovement().equals(Vec3.ZERO)
+//                    ? 1 : 1.7;
+
+
+            // this is a fix to mitigate "bouncing" when trains start moving from a stopped position
+            // todo: fix based on "docked" instead.
+            boolean isMoving = this.getTrain().getTug().isPresent() && this.getTrain().getTug().get().getDeltaMovement().equals(Vec3.ZERO);
+            double maxDist = isMoving ? 1 : 1.2;
+            double minDist = 1.0;
 
             float distance = railDirDis.map(Pair::getSecond).filter(a -> a > 0).map(di -> {
-                var euclid = this.distanceTo(dom);
-                return euclid < maxdist ? di : euclid;
-            }).orElse(this.distanceTo(dom));
+                var euclid = this.distanceTo(parent);
+                return euclid < maxDist ? di : euclid;
+            }).orElse(this.distanceTo(parent));
 
             if (distance <= 5) {
-                Vec3 euclideanDir = dom.position().subtract(position()).normalize();
-                var dir = railDirDis
+                Vec3 euclideanDir = parent.position().subtract(position()).normalize();
+                Vec3 parentDirection = railDirDis
                         .map(Pair::getFirst)
                         .map(Direction::getNormal)
                         .map(Vec3::atLowerCornerOf)
-                        .orElse(euclideanDir);
+                        .orElse(euclideanDir)
+                        .normalize();
+                Vec3 parentVelocity = parent.getDeltaMovement();
 
-
-                if (distance > maxdist) {
-                    Vec3 parentVelocity = dom.getDeltaMovement();
-
+                if (distance > maxDist) {
                     if (parentVelocity.length() == 0) {
-                        setDeltaMovement(dir.scale(0.05));
+                        setDeltaMovement(parentDirection.scale(0.05));
                     } else {
-                        setDeltaMovement(dir.scale(parentVelocity.length()));
-                        if(distance > maxdist + 0.2) {
-                            setDeltaMovement(getDeltaMovement().scale(distance));
+                        setDeltaMovement(parentDirection.scale(parentVelocity.length()));
+                        if(distance > maxDist + 0.2) {
+                            setDeltaMovement(getDeltaMovement().scale(distance * 0.8));
                         }
                     }
-                } else if (distance < maxdist - 0.2){
-                    setDeltaMovement(dir.scale(-0.05));
+                } else if (distance < minDist - 0.02){
+                    setDeltaMovement(parentDirection.scale(-0.05));
                 }
-                else
+                else {
                     setDeltaMovement(Vec3.ZERO);
+                }
             } else {
                 dominant.ifPresent(LinkableEntity::removeDominated);
                 removeDominant();
             }
         });
     }
+
+    public void push(Vec3 force) {
+        super.push(force.x, force.y, force.z);
+    }
+
     @Override
     public Type getMinecartType() {
         // Why does this even exist
