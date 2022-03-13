@@ -185,6 +185,16 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.ENDER_EYE))
                 .save(consumer);
 
+        ShapedRecipeBuilder.shaped(ModBlocks.RAPID_HOPPER.get())
+                .define('_', Items.HOPPER)
+                .define('#', Items.REDSTONE_BLOCK)
+                .define('$', Items.GOLD_INGOT)
+                .pattern("   ")
+                .pattern("$_$")
+                .pattern(" # ")
+                .unlockedBy("has_item", has(Items.HOPPER))
+                .save(consumer);
+
     }
 
 

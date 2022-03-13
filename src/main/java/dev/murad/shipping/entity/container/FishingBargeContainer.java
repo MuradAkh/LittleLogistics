@@ -15,12 +15,14 @@ public class FishingBargeContainer extends AbstractItemHandlerContainer {
                                     Inventory playerInventory, Player player) {
         super(ModMenuTypes.FISHING_BARGE_CONTAINER.get(), windowId, playerInventory, player);
         this.fishingBargeEntity = (FishingBargeEntity) world.getEntity(entityId);
-        layoutPlayerInventorySlots(8, 49);
+        layoutPlayerInventorySlots(8, 49 + 18 * 2);
 
         if(fishingBargeEntity != null) {
             fishingBargeEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
-                for(int k = 0; k < 9; ++k) {
-                    this.addSlot(new SlotItemHandler(h, k, 8 + k * 18, 18));
+                for(int l = 0; l < 3; ++l) {
+                    for (int k = 0; k < 9; ++k) {
+                        this.addSlot(new SlotItemHandler(h, l * 9 + k, 8 + k * 18, 18 * (l + 1) ));
+                    }
                 }
             });
         }
@@ -28,7 +30,7 @@ public class FishingBargeContainer extends AbstractItemHandlerContainer {
 
     @Override
     protected int getSlotNum() {
-        return 9;
+        return 27;
     }
 
     @Override

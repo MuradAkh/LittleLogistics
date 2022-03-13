@@ -5,7 +5,7 @@
   "pages": [
     {
       "type": "patchouli:text",
-      "text": "There are two dock blogs: barge and tug. The tug block must always be present for the barge docks to work. The top texture of the tug dock must be aligned with the barge docks, forming a continuous line of docks. Powering the tug dock forces the vessels to dock. The dock line should be next to a 1 block wide canal, wider canals can prevent the vessels from docking properly."
+      "text": "There are two dock blocks: barge and tug. The tug block must always be present for the barge docks to work. The top texture of the tug dock must be aligned with the barge docks, forming a continuous line of docks. Powering the tug dock forces the vessels to dock. The dock line should be next to a 1 block wide canal, wider canals can prevent the vessels from docking properly."
     },
     {
       "type": "patchouli:crafting",

@@ -45,6 +45,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 .predicate(new ResourceLocation(ShippingMod.MOD_ID, "springstate"), 1f).end();
 
         builder(itemGenerated, "creative_capacitor");
+        builder(itemGenerated, "rapid_hopper");
     }
 
 

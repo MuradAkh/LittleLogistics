@@ -197,7 +197,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
 
 
                 double distSq = dominant.distanceToSqr(dominated);
-                double maxDstSq = ((LinkableEntity) dominant).getTrain().getTug().map(tug -> ((AbstractTugEntity) tug).isDocked() ? 1 : 1.2).orElse(1.2);
+                double maxDstSq = (dominant).getTrain().getTug().map(tug -> ((AbstractTugEntity) tug).isDocked() ? 1 : 1.2).orElse(1.2);
                 if (distSq > maxDstSq) {
                     Vec3 frontAnchor = calculateAnchorPosition(dominant, SpringSide.DOMINATED);
                     Vec3 backAnchor = calculateAnchorPosition(dominated, SpringSide.DOMINANT);

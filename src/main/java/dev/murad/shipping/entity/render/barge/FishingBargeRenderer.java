@@ -1,4 +1,4 @@
-package dev.murad.shipping.entity.render;
+package dev.murad.shipping.entity.render.barge;
 
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.barge.FishingBargeEntity;
@@ -9,7 +9,7 @@ import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
-public class FishingBargeRenderer extends VesselRenderer<FishingBargeEntity> {
+public class FishingBargeRenderer extends AbstractVesselRenderer<FishingBargeEntity> {
 
     private static final ResourceLocation BARGE_TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/fishing_barge.png");

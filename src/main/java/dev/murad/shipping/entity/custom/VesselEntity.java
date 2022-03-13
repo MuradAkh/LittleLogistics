@@ -65,11 +65,11 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
     private Boat.Status oldStatus;
     private double lastYd;
 
-    protected Optional<SpringableEntity> dominated = Optional.empty();
-    protected Optional<SpringableEntity> dominant = Optional.empty();
+    protected Optional<VesselEntity> dominated = Optional.empty();
+    protected Optional<VesselEntity> dominant = Optional.empty();
     protected Optional<SpringEntity> dominantS = Optional.empty();
     protected Optional<SpringEntity> dominatedS = Optional.empty();
-    protected Train train;
+    protected Train<VesselEntity> train;
 
     @Override
     public boolean isPickable(){
@@ -150,7 +150,7 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
     public abstract Item getDropItem();
 
     @Override
-    public Optional<LinkableEntity> getDominated() {
+    public Optional<VesselEntity> getDominated() {
         return this.dominated.map(s -> s); // Java...
     }
 
@@ -160,7 +160,7 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
     }
 
     @Override
-    public Optional<LinkableEntity> getDominant() {
+    public Optional<VesselEntity> getDominant() {
         return this.dominant.map(s -> s); // Java...
     }
 
@@ -170,7 +170,7 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
     }
 
     @Override
-    public Train getTrain() {
+    public Train<VesselEntity> getTrain() {
         return this.train;
     }
 

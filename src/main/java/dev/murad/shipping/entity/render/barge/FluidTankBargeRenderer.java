@@ -1,4 +1,4 @@
-package dev.murad.shipping.entity.render;
+package dev.murad.shipping.entity.render.barge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
@@ -13,7 +13,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
 
-public class FluidTankBargeRenderer extends VesselRenderer<FluidTankBargeEntity> {
+public class FluidTankBargeRenderer extends AbstractVesselRenderer<FluidTankBargeEntity> {
     private static final ResourceLocation BARGE_TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/fluid_barge.png");
 
