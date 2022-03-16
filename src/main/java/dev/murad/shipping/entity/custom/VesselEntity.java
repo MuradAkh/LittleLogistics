@@ -10,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
@@ -405,9 +406,9 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
         return flag ? Boat.Status.UNDER_WATER : null;
     }
     @Override
-    protected void jumpInLiquid(Tag<Fluid> p_180466_1_) {
+    protected void jumpInLiquid(TagKey<Fluid> pFluidTag) {
         if (this.getNavigation().canFloat()) {
-            super.jumpInLiquid(p_180466_1_);
+            super.jumpInLiquid(pFluidTag);
         } else {
             this.setDeltaMovement(this.getDeltaMovement().add(0.0D, 0.3D, 0.0D));
         }
@@ -444,7 +445,7 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
             d0 = gravity.getValue();
 
             FluidState fluidstate = this.level.getFluidState(this.blockPosition());
-            if (this.isInWater() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidstate.getType())) {
+            if (this.isInWater() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidstate)) {
                 double d8 = this.getY();
                 float f5 = this.isSprinting() ? 0.9F : this.getWaterSlowDown();
                 float f6 = 0.02F;
@@ -497,7 +498,7 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
                 } else {
 //                    stuckCounter = 0;
                 }
-            } else if (this.isInLava() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidstate.getType())) {
+            } else if (this.isInLava() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidstate)) {
                 double d7 = this.getY();
                 this.moveRelative(0.02F, p_213352_1_);
                 this.move(MoverType.SELF, this.getDeltaMovement());
