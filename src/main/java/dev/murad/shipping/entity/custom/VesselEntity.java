@@ -1,6 +1,7 @@
 package dev.murad.shipping.entity.custom;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.SpringableEntity;
 import dev.murad.shipping.util.Train;
@@ -148,6 +149,16 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
     }
 
     public abstract Item getDropItem();
+
+    /**
+     * Check if this vessel should pull the vessel behind
+     */
+    public boolean shouldApplySpringPhysics() {
+        if (this.train.getHead() instanceof AbstractTugEntity tug) {
+            return !tug.isFrozen();
+        }
+        return true;
+    }
 
     @Override
     public Optional<VesselEntity> getDominated() {

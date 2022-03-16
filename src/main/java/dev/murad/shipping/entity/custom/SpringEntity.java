@@ -183,7 +183,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
 
     private boolean tryLoadAndCalculate() {
         if(!this.level.isClientSide) {
-            if (dominant != null && dominated != null) {
+            if (dominant != null && dominated != null && dominant.shouldApplySpringPhysics()) {
                 if (dominated.distanceTo(dominant) > 20) {
                     dominated.removeDominant();
                     kill();
