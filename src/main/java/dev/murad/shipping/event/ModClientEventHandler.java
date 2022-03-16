@@ -121,6 +121,10 @@ public class ModClientEventHandler {
                 ChunkLoaderCarModel::new,
                 ChunkLoaderCarModel.LAYER_LOCATION,
                 "textures/entity/chunk_loader_car.png"));
+        event.registerEntityRenderer(ModEntityTypes.SEATER_CAR.get(), ctx -> new TrainCarRenderer<>(ctx,
+                SeaterCarModel::new,
+                SeaterCarModel.LAYER_LOCATION,
+                "textures/entity/chest_car.png"));
     }
 
     @SubscribeEvent
@@ -141,6 +145,7 @@ public class ModClientEventHandler {
         event.registerLayerDefinition(ChestCarModel.LAYER_LOCATION, ChestCarModel::createBodyLayer);
         event.registerLayerDefinition(FluidTankCarModel.LAYER_LOCATION, FluidTankCarModel::createBodyLayer);
         event.registerLayerDefinition(ChunkLoaderCarModel.LAYER_LOCATION, ChunkLoaderCarModel::createBodyLayer);
+        event.registerLayerDefinition(SeaterCarModel.LAYER_LOCATION, SeaterCarModel::createBodyLayer);
 
     }
 }

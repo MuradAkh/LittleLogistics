@@ -44,6 +44,7 @@ public class SeaterBargeEntity extends AbstractBargeEntity{
         this.clampRotation(p_184190_1_);
     }
 
+    @Override
     public void positionRider(Entity p_184232_1_) {
         if (this.hasPassenger(p_184232_1_)) {
             float f = -0.1F;
