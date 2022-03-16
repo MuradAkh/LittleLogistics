@@ -73,6 +73,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         tickYRot();
         if(!this.level.isClientSide){
             tickMovement();
+            enforceMaxVelocity(0.2);
         }
 
 
@@ -131,8 +132,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     private void accelerate() {
         var dir = this.getDirection();
-        var dirvel = new Vec3(Math.abs(dir.getStepX()), 0, Math.abs(dir.getStepZ()));
-        if(Math.abs(this.getDeltaMovement().dot(dirvel)) < 0.12){
+        if(Math.abs(this.getDeltaMovement().x) < 0.12 && Math.abs(this.getDeltaMovement().z) < 0.12){
             var mod = this.getSpeedModifier();
             this.push(dir.getStepX() * mod, 0, dir.getStepZ() * mod);
         }

@@ -209,7 +209,24 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         }
 
         tickMinecart();
+
+        if (!level.isClientSide) {
+            enforceMaxVelocity(0.25);
+        }
     }
+
+    protected void enforceMaxVelocity(double maxSpeed){
+        var vel = this.getDeltaMovement();
+        var normal = vel.normalize();
+        if(Math.abs(vel.x) > maxSpeed){
+            this.setDeltaMovement(normal.x * maxSpeed, vel.y, vel.z);
+            vel = this.getDeltaMovement();
+        }
+        if(Math.abs(vel.z) > maxSpeed){
+            this.setDeltaMovement(vel.x, vel.y, normal.z * maxSpeed);
+        }
+    }
+
 
     protected void tickLoad(){
         if (this.level.isClientSide) {
