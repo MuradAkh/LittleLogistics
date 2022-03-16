@@ -9,6 +9,7 @@ import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.barge.*;
 import dev.murad.shipping.entity.custom.train.wagon.ChunkLoaderCarEntity;
 import dev.murad.shipping.entity.custom.train.wagon.FluidTankCarEntity;
+import dev.murad.shipping.entity.custom.train.wagon.SeaterCarEntity;
 import dev.murad.shipping.entity.custom.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.custom.tug.SteamTugEntity;
 import net.minecraft.resources.ResourceLocation;
@@ -70,6 +71,12 @@ public class ModEntityTypes {
                     () -> EntityType.Builder.<ChestCarEntity>of(ChestCarEntity::new,
                                     MobCategory.MISC).sized(0.7f, 0.9f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "chest_car").toString()));
+
+    public static final RegistryObject<EntityType<SeaterCarEntity>> SEATER_CAR =
+            Registration.ENTITIES.register("seater_car",
+                    () -> EntityType.Builder.<SeaterCarEntity>of(SeaterCarEntity::new,
+                                    MobCategory.MISC).sized(0.7f, 0.9f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "seater_car").toString()));
 
     public static final RegistryObject<EntityType<FluidTankCarEntity>> FLUID_CAR =
             Registration.ENTITIES.register("fluid_car",
