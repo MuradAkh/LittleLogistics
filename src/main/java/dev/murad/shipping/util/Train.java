@@ -72,9 +72,4 @@ public class Train <V extends LinkableEntity<V>> {
     public void setHead(V head) {
         this.head = head;
     }
-
-    public Stream<V> asStream() {
-        //noinspection OptionalGetWithoutIsPresent
-        return Stream.iterate(head, v -> v.getDominated().isPresent(), v -> v.getDominated().get());
-    }
 }

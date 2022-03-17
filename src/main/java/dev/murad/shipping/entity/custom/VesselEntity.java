@@ -161,7 +161,7 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
      */
     public boolean shouldApplySpringPhysics() {
         if (this.train.getHead() instanceof AbstractTugEntity tug) {
-            return !tug.isFrozen();
+            return !tug.shouldFreezeTrain();
         }
         return true;
     }
