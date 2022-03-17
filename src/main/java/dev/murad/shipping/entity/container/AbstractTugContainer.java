@@ -1,15 +1,22 @@
 package dev.murad.shipping.entity.container;
 
+import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 
 public abstract class AbstractTugContainer<T extends DataAccessor> extends AbstractItemHandlerContainer {
+    public static final ResourceLocation EMPTY_TUG_ROUTE = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_tug_route");
+    public static final ResourceLocation EMPTY_ENERGY = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_energy");
+    public static final ResourceLocation EMPTY_ATLAS_LOC = InventoryMenu.BLOCK_ATLAS;
+
     protected T data;
     protected AbstractTugEntity tugEntity;
 
