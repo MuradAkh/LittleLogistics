@@ -65,8 +65,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     @Getter
     protected boolean docked = false;
     @Getter
-    protected boolean frozen = false;
-    @Getter
     protected boolean stalled = false;
 
     private int dockCheckCooldown = 0;
@@ -399,7 +397,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     private void followPath() {
         pathfindCooldown--;
-        if (!this.path.isEmpty() && !this.docked && !this.stalled && !this.frozen && tickFuel()) {
+        if (!this.path.isEmpty() && !this.docked && !this.stalled && !shouldFreezeTrain() && tickFuel()) {
             TugRouteNode stop = path.get(nextStop);
             if (navigation.getPath() == null || navigation.getPath().isDone()
             ) {
@@ -427,6 +425,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             }
         }
     }
+
+    private boolean shouldFreezeTrain() {
+        return this.train.asStream().anyMatch(VesselEntity::isFrozen);
+    }
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
@@ -610,17 +613,17 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
         @Override
         public boolean isFrozen() {
-            return frozen;
+            return AbstractTugEntity.super.isFrozen();
         }
 
         @Override
         public void freeze() {
-            frozen = true;
+            setFrozen(true);
         }
 
         @Override
         public void unfreeze() {
-            frozen = false;
+            setFrozen(false);
         }
     };
 

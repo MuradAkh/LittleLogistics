@@ -5,6 +5,8 @@ import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.SpringableEntity;
 import dev.murad.shipping.util.Train;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -50,6 +52,10 @@ import java.util.Optional;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class VesselEntity extends WaterAnimal implements SpringableEntity {
+    @Getter
+    @Setter
+    private boolean frozen = false;
+
     protected VesselEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
         stuckCounter = 0;

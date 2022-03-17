@@ -1,8 +1,10 @@
 package dev.murad.shipping.util;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class Train <V extends LinkableEntity<V>> {
@@ -69,5 +71,10 @@ public class Train <V extends LinkableEntity<V>> {
 
     public void setHead(V head) {
         this.head = head;
+    }
+
+    public Stream<V> asStream() {
+        //noinspection OptionalGetWithoutIsPresent
+        return Stream.iterate(head, v -> v.getDominated().isPresent(), v -> v.getDominated().get());
     }
 }

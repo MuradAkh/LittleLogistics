@@ -187,17 +187,17 @@ public abstract class AbstractBargeEntity extends VesselEntity {
 
         @Override
         public boolean isFrozen() {
-            return delegate().map(StallingCapability::isFrozen).orElse(false);
+            return AbstractBargeEntity.super.isFrozen();
         }
 
         @Override
         public void freeze() {
-            delegate().ifPresent(StallingCapability::freeze);
+            AbstractBargeEntity.super.setFrozen(true);
         }
 
         @Override
         public void unfreeze() {
-            delegate().ifPresent(StallingCapability::unfreeze);
+            AbstractBargeEntity.super.setFrozen(false);
         }
 
         private Optional<StallingCapability> delegate() {
