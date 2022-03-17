@@ -8,7 +8,12 @@
   "item.littlelogistics.tug_route": "Tug Route",
   "item.littlelogistics.energy_tug": "Energy Tug",
   "item.littlelogistics.fluid_barge": "Fluid Tank Barge",
-
+  "item.littlelogistics.fluid_car": "Fluid Tank Train Car",
+  "item.littlelogistics.chest_car": "Chest Train Car",
+  "item.littlelogistics.chunk_loader_car": "Chunk Loader Train Car",
+  "item.littlelogistics.seater_car": "Train Car",
+  "item.littlelogistics.steam_locomotive": "Steam Locomotive",
+  "item.littlelogistics.energy_locomotive": "Energy Locomotive",
 
   "entity.littlelogistics.tug": "Steam Tug",
   "entity.littlelogistics.barge": "Chest Barge",
@@ -18,6 +23,12 @@
   "entity.littlelogistics.energy_tug": "Energy Tug",
   "entity.littlelogistics.fluid_barge": "Fluid Tank Barge",
   "entity.littlelogistics.seater_barge": "Seater Barge",
+  "entity.littlelogistics.fluid_car": "Fluid Tank Train Car",
+  "entity.littlelogistics.chest_car": "Chest Train Car",
+  "entity.littlelogistics.chunk_loader_car": "Chunk Loader Train Car",
+  "entity.littlelogistics.seater_car": "Train Car",
+  "entity.littlelogistics.steam_locomotive": "Steam Locomotive",
+  "entity.littlelogistics.energy_locomotive": "Energy Locomotive",
 
   "block.littlelogistics.tug_dock": "Tug Dock",
   "block.littlelogistics.barge_dock": "Barge Dock",
@@ -27,6 +38,8 @@
   "block.littlelogistics.fluid_hopper": "Fluid Hopper",
   "block.littlelogistics.rapid_hopper": "Rapid Hopper",
   "block.littlelogistics.vessel_detector": "Vessel Detector",
+  "block.littlelogistics.junction_rail": "Switch Rail",
+  "block.littlelogistics.switch_rail": "Junction Rail",
 
   "screen.littlelogistics.tug": "Steam Tug",
   "screen.littlelogistics.fishing_barge": "Auto-Fishing Barge",
