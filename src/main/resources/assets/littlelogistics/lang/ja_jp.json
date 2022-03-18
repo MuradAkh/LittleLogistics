@@ -1,0 +1,71 @@
+{
+  "item.littlelogistics.tug": "蒸気曳船",
+  "item.littlelogistics.barge": "チェスト付き艀",
+  "item.littlelogistics.chunk_loader_barge": "チャンクローダー付き艀",
+  "item.littlelogistics.seater_barge": "座席付き艀",
+  "item.littlelogistics.fishing_barge": "自動釣り機付き艀",
+  "item.littlelogistics.spring": "船舶用鎖",
+  "item.littlelogistics.tug_route": "航路指定機",
+  "item.littlelogistics.energy_tug": "電気曳船",
+  "item.littlelogistics.fluid_barge": "液体タンク付き艀",
+
+
+  "entity.littlelogistics.tug": "蒸気曳船",
+  "entity.littlelogistics.barge": "チェスト付き艀",
+  "entity.littlelogistics.chunk_loader_barge": "チャンクローダー付き艀",
+  "entity.littlelogistics.fishing_barge": "自動釣り機付き艀",
+  "entity.littlelogistics.spring": "船舶用鎖",
+  "entity.littlelogistics.energy_tug": "電気曳船",
+  "entity.littlelogistics.fluid_barge": "液体タンク付き艀",
+  "entity.littlelogistics.seater_barge": "座席付き艀",
+
+  "block.littlelogistics.tug_dock": "曳船ドック",
+  "block.littlelogistics.barge_dock": "艀ドック",
+  "block.littlelogistics.guide_rail_tug": "曳船ガイドレール",
+  "block.littlelogistics.guide_rail_corner": "船舶用コーナーガイドレール",
+  "block.littlelogistics.vessel_charger": "船舶用充電器",
+  "block.littlelogistics.fluid_hopper": "液体ホッパー",
+  "block.littlelogistics.rapid_hopper": "高速ホッパー",
+  "block.littlelogistics.vessel_detector": "船舶検知器",
+
+  "screen.littlelogistics.tug": "蒸気曳船",
+  "screen.littlelogistics.fishing_barge": "自動釣り機付き艀",
+  "screen.littlelogistics.energy_tug": "電気曳船",
+  "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
+
+  "screen.littlelogistics.tug_route": "航路指定機",
+  "screen.littlelogistics.tug_route.rename_button": "ノードの名前を変更",
+  "screen.littlelogistics.tug_route.up_button": "ノードの順番を上に移動",
+  "screen.littlelogistics.tug_route.down_button": "ノードの順番を下に移動",
+  "screen.littlelogistics.tug_route.delete_button": "ノードを削除",
+
+  "screen.littlelogistics.tug_route.rename": "名前を%sに変更",
+  "screen.littlelogistics.tug_route.confirm": "保存",
+
+  "item.littlelogistics.tug_route.description": "右クリックで立っている地点にノードを追加でき、既にあるノードの地点で右クリックすることによりノードを削除できます。Shiftキーを押しながら右クリックでメニューを表示します。",
+  "item.littlelogistics.tug_route.num_nodes": "ルートノード: %s",
+  "item.littlelogistics.tug_route.added": "X:%s Z:%sにルートノードを追加",
+  "item.littlelogistics.tug_route.removed": "X:%s Z:%sのルートノードを削除",
+  "item.littlelogistics.tug_route.node": "%s.ノード",
+  "item.littlelogistics.tug_route.node_named": "%s. %s",
+  "item.littlelogistics.tug_route.node_line": "ノード %s: %s, %s",
+  "item.littlelogistics.spring.description": "船舶を連結できます",
+  "item.littlelogistics.spring.notToSelf": "船舶を自分と連結することはできません",
+  "item.littlelogistics.spring.noTwoTugs": "曳船を連結できません",
+  "item.littlelogistics.spring.tooFar": "船舶の距離が遠すぎます",
+  "item.littlelogistics.spring.noLoops": "船舶を円状に連結することはできません",
+  "item.littlelogistics.spring.badTypes": "これらの船舶は連結できません",
+  "item.littlelogistics.fishing_barge.description": "最高効率で釣りをしたい場合は広く深く水の広がっているところで利用してください",
+
+  "item.littlelogistics.creative_capacitor": "クリエイティブコンデンサ",
+
+  "block.littlelogistics.vessel_charger.capacity": "%s/%s FE",
+  "block.littlelogistics.fluid_hopper.capacity": "%s %s/%s mB",
+  "block.littlelogistics.fluid_hopper.capacity_empty": "空 0/%s mB",
+  "entity.littlelogistics.fluid_barge.capacity": "%s %s/%s mB",
+  "entity.littlelogistics.fluid_barge.capacity_empty": "空 0/%s mB",
+
+  "subtitle.littlelogistics.steam_tug_whistle": "蒸気曳船の汽笛が鳴りひびく",
+  "subtitle.littlelogistics.tug_docking": "曳船がドックに着く",
+  "subtitle.littlelogistics.tug_undocking": "曳船がドックを出発する"
+}
