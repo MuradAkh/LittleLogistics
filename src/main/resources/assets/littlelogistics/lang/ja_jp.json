@@ -21,7 +21,7 @@
 
   "block.littlelogistics.tug_dock": "曳船ドック",
   "block.littlelogistics.barge_dock": "艀ドック",
-  "block.littlelogistics.guide_rail_tug": "曳船ガイドレール",
+  "block.littlelogistics.guide_rail_tug": "曳船用ガイドレール",
   "block.littlelogistics.guide_rail_corner": "船舶用コーナーガイドレール",
   "block.littlelogistics.vessel_charger": "船舶用充電器",
   "block.littlelogistics.fluid_hopper": "液体ホッパー",
