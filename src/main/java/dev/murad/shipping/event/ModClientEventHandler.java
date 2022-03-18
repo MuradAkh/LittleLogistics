@@ -2,6 +2,7 @@ package dev.murad.shipping.event;
 
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.fluid.render.FluidHopperTileEntityRenderer;
+import dev.murad.shipping.entity.container.AbstractTugContainer;
 import dev.murad.shipping.entity.models.*;
 import dev.murad.shipping.entity.render.DummyEntityRenderer;
 import dev.murad.shipping.entity.render.barge.FishingBargeRenderer;
@@ -13,7 +14,6 @@ import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -27,15 +27,12 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
  */
 @Mod.EventBusSubscriber(modid = ShippingMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ModClientEventHandler {
-    public static final ResourceLocation EMPTY_TUG_ROUTE = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_tug_route");
-    public static final ResourceLocation EMPTY_ENERGY = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_energy");
-    public static final ResourceLocation EMPTY_ATLAS_LOC = InventoryMenu.BLOCK_ATLAS;
 
     @SubscribeEvent
     public static void onTextureStitchEventPre(TextureStitchEvent.Pre event) {
-        if (event.getAtlas().location() != EMPTY_ATLAS_LOC) return;
-        event.addSprite(EMPTY_TUG_ROUTE);
-        event.addSprite(EMPTY_ENERGY);
+        if (event.getAtlas().location() != AbstractTugContainer.EMPTY_ATLAS_LOC) return;
+        event.addSprite(AbstractTugContainer.EMPTY_TUG_ROUTE);
+        event.addSprite(AbstractTugContainer.EMPTY_ENERGY);
     }
 
     @SubscribeEvent

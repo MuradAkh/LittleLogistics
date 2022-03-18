@@ -17,9 +17,9 @@ public class EnergyTugContainer extends AbstractTugContainer<EnergyTugDataAccess
         if(tugEntity != null) {
             tugEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
                 addSlot(new SlotItemHandler(h, 0, 116, 35)
-                        .setBackground(ModClientEventHandler.EMPTY_ATLAS_LOC, ModClientEventHandler.EMPTY_TUG_ROUTE));
+                        .setBackground(EMPTY_ATLAS_LOC, EMPTY_TUG_ROUTE));
                 addSlot(new SlotItemHandler(h, 1, 32, 35)
-                        .setBackground(ModClientEventHandler.EMPTY_ATLAS_LOC, ModClientEventHandler.EMPTY_ENERGY));
+                        .setBackground(EMPTY_ATLAS_LOC, EMPTY_ENERGY));
             });
         }
     }
