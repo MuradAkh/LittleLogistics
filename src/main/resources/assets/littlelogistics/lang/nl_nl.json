@@ -8,7 +8,12 @@
   "item.littlelogistics.tug_route": "Sleepboot Route",
   "item.littlelogistics.energy_tug": "Elektrische Sleepboot",
   "item.littlelogistics.fluid_barge": "Sleepaak met Vloeistof Tank",
-
+  "item.littlelogistics.fluid_car": "Wagon met Vloeistof Tank",
+  "item.littlelogistics.chest_car": "Wagon met Kist",
+  "item.littlelogistics.chunk_loader_car": "Wagon met Chunk Lader",
+  "item.littlelogistics.seater_car": "Wagon",
+  "item.littlelogistics.steam_locomotive": "Stoomlocomotief",
+  "item.littlelogistics.energy_locomotive": "Elektrische Locomotief",
 
   "entity.littlelogistics.tug": "Stoom Sleepboot",
   "entity.littlelogistics.barge": "Sleepaak met Kist",
@@ -18,6 +23,12 @@
   "entity.littlelogistics.energy_tug": "Elektrische Sleepboot",
   "entity.littlelogistics.fluid_barge": "Sleepaak met Vloeistof Tank",
   "entity.littlelogistics.seater_barge": "Sleepaak met Zitting",
+  "entity.littlelogistics.fluid_car": "Wagon met Vloeistof Tank",
+  "entity.littlelogistics.chest_car": "Wagon met Kist",
+  "entity.littlelogistics.chunk_loader_car": "Wagon met Chunk Lader",
+  "entity.littlelogistics.seater_car": "Wagon",
+  "entity.littlelogistics.steam_locomotive": "Stoomlocomotief",
+  "entity.littlelogistics.energy_locomotive": "Elektrische Locomotief",
 
   "block.littlelogistics.tug_dock": "Dok voor Sleepbot",
   "block.littlelogistics.barge_dock": "Dok voor Sleepaak",
@@ -27,6 +38,8 @@
   "block.littlelogistics.fluid_hopper": "Vloeistof Trechter",
   "block.littlelogistics.rapid_hopper": "Snelle Trechter",
   "block.littlelogistics.vessel_detector": "Vaartuig Detector",
+  "block.littlelogistics.junction_rail": "Wissel",
+  "block.littlelogistics.switch_rail": "Spoorwegknooppunt",
 
   "screen.littlelogistics.tug": "Stoom Sleepboot",
   "screen.littlelogistics.fishing_barge": "Auto-Vis Sleepaak",
