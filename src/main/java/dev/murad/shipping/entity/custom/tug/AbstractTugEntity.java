@@ -1,6 +1,5 @@
 package dev.murad.shipping.entity.custom.tug;
 
-import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
@@ -242,7 +241,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
                             Optional.ofNullable(level.getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
                                     .filter(entity -> entity instanceof TugDockTileEntity)
                                     .map(entity -> (TugDockTileEntity) entity)
-                                    .map(dock -> dock.holdVessel(this, curr))
+                                    .map(dock -> dock.hold(this, curr))
                                     .orElse(false))
                     .reduce(false, (acc, curr) -> acc || curr);
 

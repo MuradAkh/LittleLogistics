@@ -19,8 +19,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import javax.annotation.Nullable;
 
 public class BargeDockBlock extends AbstractDockBlock {
-    public static final BooleanProperty EXTRACT_MODE = BlockStateProperties.INVERTED;
-
     public BargeDockBlock(Properties p_i48440_1_) {
         super(p_i48440_1_);
     }
@@ -29,7 +27,7 @@ public class BargeDockBlock extends AbstractDockBlock {
     @Override
     public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
         if(player.getPose().equals(Pose.CROUCHING)){
-            world.setBlockAndUpdate(pos, state.setValue(EXTRACT_MODE, !state.getValue(EXTRACT_MODE)));
+            world.setBlockAndUpdate(pos, state.setValue(DockingBlockStates.INVERTED, !state.getValue(DockingBlockStates.INVERTED)));
             fixHopperPos(state, world, pos);
             return InteractionResult.SUCCESS;
         }
@@ -46,7 +44,7 @@ public class BargeDockBlock extends AbstractDockBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(EXTRACT_MODE);
+        builder.add(DockingBlockStates.INVERTED);
     }
 
 }
