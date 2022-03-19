@@ -2,6 +2,7 @@ package dev.murad.shipping.data.client;
 
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.dock.BargeDockBlock;
+import dev.murad.shipping.block.dock.DockingBlockStates;
 import dev.murad.shipping.block.dock.TugDockBlock;
 import dev.murad.shipping.block.energy.VesselChargerBlock;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
@@ -30,8 +31,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private ModelFile getTugDockModel(BlockState state){
-        String inv = state.getValue(TugDockBlock.INVERTED) ? "_inv" : "";
-        String powered = state.getValue(TugDockBlock.POWERED) ? "_powered" : "";
+        String inv = state.getValue(DockingBlockStates.INVERTED) ? "_inv" : "";
+        String powered = state.getValue(DockingBlockStates.POWERED) ? "_powered" : "";
         return  models().orientable("tug_dock" + inv + powered,
                 getBlTx("tug_dock"),
                 getBlTx("tug_dock_front" + powered),
@@ -63,7 +64,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private ModelFile getBargeDockModel(BlockState state){
-        String inv = state.getValue(BargeDockBlock.EXTRACT_MODE) ? "_extract" : "";
+        String inv = state.getValue(DockingBlockStates.INVERTED) ? "_extract" : "";
         return  models().orientable("barge_dock" + inv,
                 getBlTx("barge_dock"),
                 getBlTx("barge_dock_front" + inv),
@@ -86,13 +87,13 @@ public class ModBlockStateProvider extends BlockStateProvider {
     protected void registerStatesAndModels() {
         getVariantBuilder(ModBlocks.TUG_DOCK.get()).forAllStates(state -> ConfiguredModel.builder()
                 .modelFile(getTugDockModel(state))
-                .rotationY((int) state.getValue(TugDockBlock.FACING).getOpposite().toYRot())
+                .rotationY((int) state.getValue(DockingBlockStates.FACING).getOpposite().toYRot())
                 .build()
         );
 
         getVariantBuilder(ModBlocks.BARGE_DOCK.get()).forAllStates(state -> ConfiguredModel.builder()
                 .modelFile(getBargeDockModel(state))
-                .rotationY((int) state.getValue(BargeDockBlock.FACING).getOpposite().toYRot())
+                .rotationY((int) state.getValue(DockingBlockStates.FACING).getOpposite().toYRot())
                 .build()
         );
 

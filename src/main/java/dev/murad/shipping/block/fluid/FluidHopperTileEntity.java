@@ -4,6 +4,7 @@ import dev.murad.shipping.block.IVesselLoader;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.FluidDisplayUtil;
+import dev.murad.shipping.util.LinkableEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -11,6 +12,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -131,8 +133,8 @@ public class FluidHopperTileEntity extends BlockEntity implements IVesselLoader 
     }
 
     @Override
-    public boolean holdVessel(VesselEntity vessel, Mode mode) {
-        return vessel.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).map(iFluidHandler -> {
+    public<T extends Entity & LinkableEntity<T>> boolean hold(T vehicle, Mode mode) {
+        return vehicle.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).map(iFluidHandler -> {
             switch (mode) {
                 case IMPORT:
                     return !FluidUtil.tryFluidTransfer(this.tank, iFluidHandler, 1, false).isEmpty();

@@ -1,26 +1,24 @@
 package dev.murad.shipping.block.dock;
 
 import dev.murad.shipping.block.IVesselLoader;
-import dev.murad.shipping.entity.custom.VesselEntity;
+import dev.murad.shipping.util.LinkableEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SpawnEggItem;
-import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 
-public abstract class AbstractDockTileEntity extends BlockEntity {
+public abstract class AbstractDockTileEntity<T extends Entity & LinkableEntity<T>> extends BlockEntity {
     public AbstractDockTileEntity(BlockEntityType<?> p_i48289_1_, BlockPos pos, BlockState s) {
         super(p_i48289_1_, pos, s);
     }
 
-    public abstract boolean holdVessel(VesselEntity vessel, Direction direction);
+    public abstract boolean hold(T vessel, Direction direction);
 
     public Optional<HopperBlockEntity> getHopper(){
         BlockEntity mayBeHopper = this.level.getBlockEntity(this.getTargetBlockPos());

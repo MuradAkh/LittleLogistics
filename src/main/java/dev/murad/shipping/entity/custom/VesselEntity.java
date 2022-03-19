@@ -84,8 +84,6 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
         return true;
     }
 
-    public abstract boolean allowDockInterface();
-
     public boolean hasWaterOnSides(){
         return this.level.getBlockState(this.getOnPos().relative(this.getDirection().getClockWise())).getBlock().equals(Blocks.WATER) &&
                 this.level.getBlockState(this.getOnPos().relative(this.getDirection().getCounterClockWise())).getBlock().equals(Blocks.WATER) &&
