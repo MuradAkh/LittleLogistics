@@ -52,7 +52,7 @@ public abstract class AbstractHeadDockTileEntity<T extends Entity & LinkableEnti
         }
 
 
-        List<Pair<T, AbstractTailDockTileEntity<T>>> barges = getBargeDockPairs(tug);
+        List<Pair<T, AbstractTailDockTileEntity<T>>> barges = getTailDockPairs(tug);
 
 
         if (barges.stream().map(pair -> pair.getSecond().hold(pair.getFirst(), direction)).reduce(false, Boolean::logicalOr)){
@@ -65,15 +65,15 @@ public abstract class AbstractHeadDockTileEntity<T extends Entity & LinkableEnti
     @Override
     protected abstract BlockPos getTargetBlockPos();
 
-    private List<Pair<T, AbstractTailDockTileEntity<T>>> getBargeDockPairs(T tug){
+    private List<Pair<T, AbstractTailDockTileEntity<T>>> getTailDockPairs(T tug){
         List<T> barges = tug.getTrain().asListOfTugged();
-        List<AbstractTailDockTileEntity<T>> docks = getBargeDocks();
+        List<AbstractTailDockTileEntity<T>> docks = getTailDocks();
         return IntStream.range(0, Math.min(barges.size(), docks.size()))
                 .mapToObj(i -> new Pair<>(barges.get(i), docks.get(i)))
                 .collect(Collectors.toList());
     }
 
-    private List<AbstractTailDockTileEntity<T>> getBargeDocks(){
+    private List<AbstractTailDockTileEntity<T>> getTailDocks(){
         Direction facing = this.getBlockState().getValue(DockingBlockStates.FACING);
         Direction rowDirection = getRowDirection(facing);
         List<AbstractTailDockTileEntity<T>> docks = new ArrayList<>();

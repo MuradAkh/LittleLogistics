@@ -1,9 +1,6 @@
 package dev.murad.shipping.block.dock;
 
 import dev.murad.shipping.block.IVesselLoader;
-import dev.murad.shipping.entity.custom.VesselEntity;
-import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
-import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.InventoryUtils;
 import dev.murad.shipping.util.LinkableEntity;
 import net.minecraft.core.BlockPos;
@@ -37,8 +34,7 @@ public abstract class AbstractTailDockTileEntity<T extends Entity & LinkableEnti
 
     @Override
     public boolean hold(T vessel, Direction direction) {
-        if (!(vessel instanceof AbstractBargeEntity)
-                || !getBlockState().getValue(DockingBlockStates.FACING).getOpposite().equals(direction))
+        if (!getBlockState().getValue(DockingBlockStates.FACING).getOpposite().equals(direction))
         {
             return false;
         }
