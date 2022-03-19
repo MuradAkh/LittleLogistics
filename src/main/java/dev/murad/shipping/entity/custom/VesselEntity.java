@@ -1,9 +1,12 @@
 package dev.murad.shipping.entity.custom;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.SpringableEntity;
 import dev.murad.shipping.util.Train;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -50,6 +53,10 @@ import java.util.Optional;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class VesselEntity extends WaterAnimal implements SpringableEntity {
+    @Getter
+    @Setter
+    private boolean frozen = false;
+
     protected VesselEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
         stuckCounter = 0;
@@ -149,6 +156,16 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
     }
 
     public abstract Item getDropItem();
+
+    /**
+     * Check if this vessel should pull the vessel behind
+     */
+    public boolean shouldApplySpringPhysics() {
+        if (this.train.getHead() instanceof AbstractTugEntity tug) {
+            return !tug.shouldFreezeTrain();
+        }
+        return true;
+    }
 
     @Override
     public Optional<VesselEntity> getDominated() {
