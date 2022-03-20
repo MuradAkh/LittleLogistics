@@ -233,17 +233,21 @@ publishing {
 
 repositories {
     maven {
+        // cofh
+        name = "Cofh"
+        url = "https://maven.covers1624.net/"
+    }
+    maven {
         // location of the maven that hosts JEI files
         name = "Progwml6 maven"
         url = "https://dvs1.progwml6.com/files/maven/"
     }
-    maven {
-        // location of a maven mirror for JEI files, as a fallback
-        name = "ModMaven"
-        url = "https://modmaven.dev"
-    }
-    maven { url 'https://maven.blamejared.com' }
 
+    maven {
+        // location of patchouli
+        name = "Jared"
+        url 'https://maven.blamejared.com'
+    }
 }
 
 minecraft {
