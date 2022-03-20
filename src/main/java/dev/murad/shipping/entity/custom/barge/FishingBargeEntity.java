@@ -95,7 +95,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
 
 
     private ItemStackHandler createHandler() {
-        return new ItemStackHandler(9);
+        return new ItemStackHandler(27);
     }
 
 
@@ -175,7 +175,11 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
 
     @Override
     public void readAdditionalSaveData(CompoundNBT compound) {
-        itemHandler.deserializeNBT(compound.getCompound("inv"));
+        //backwards compat
+        CompoundNBT inv = compound.getCompound("inv");
+        inv.remove("Size");
+
+        itemHandler.deserializeNBT(inv);
         populateOverfish(compound.getString("overfish"));
         super.readAdditionalSaveData(compound);
     }
@@ -230,7 +234,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements IInventor
 
     @Override
     public int getContainerSize() {
-        return 9;
+        return 27;
     }
 
     @Override

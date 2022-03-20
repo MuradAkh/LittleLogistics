@@ -36,7 +36,11 @@ import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.CapabilityItemHandler;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Optional;
@@ -57,7 +61,6 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
     private BoatEntity.Status status;
     private BoatEntity.Status oldStatus;
     private double lastYd;
-    private Optional<Pair<BlockPos, BlockState>> lastCornerGuideRail = Optional.empty();
 
     protected Optional<Pair<ISpringableEntity, SpringEntity>> dominated = Optional.empty();
     protected Optional<Pair<ISpringableEntity, SpringEntity>> dominant = Optional.empty();
@@ -373,6 +376,21 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
         return p_180431_1_.equals(DamageSource.IN_WALL) || super.isInvulnerableTo(p_180431_1_);
     }
 
+    @Override
+    public void checkInsideBlocks(){
+        super.checkInsideBlocks();
+    }
+
+    // Get rid of default armour/hands slots itemhandler from mobs
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return LazyOptional.empty();
+        }
+
+        return super.getCapability(cap, side);
+    }
 
     // LivingEntity override, to avoid jumping out of water
     @Override
@@ -524,13 +542,5 @@ public abstract class VesselEntity extends WaterMobEntity implements ISpringable
         }
 
         this.calculateEntityAnimation(this, false);
-    }
-
-    public Optional<Pair<BlockPos, BlockState>> getLastCornerGuideRail() {
-        return lastCornerGuideRail;
-    }
-
-    public void setLastCornerGuideRail(Pair<BlockPos, BlockState> lastCornerGuideRail) {
-        this.lastCornerGuideRail = Optional.of(lastCornerGuideRail);
     }
 }

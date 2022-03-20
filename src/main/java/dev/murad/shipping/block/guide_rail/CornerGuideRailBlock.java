@@ -86,7 +86,6 @@ public class CornerGuideRailBlock extends Block {
         }
 
         Direction arrows = getArrowsDirection(state);
-        ((VesselEntity) entity).setLastCornerGuideRail(new Pair<>(pos, state));
         double modifier = entity instanceof AbstractBargeEntity ? 0.2 : 0.1;
         entity.setDeltaMovement(entity.getDeltaMovement().add(
                 new Vector3d(

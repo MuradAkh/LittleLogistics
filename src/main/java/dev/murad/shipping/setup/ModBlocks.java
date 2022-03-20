@@ -23,6 +23,7 @@ public class ModBlocks {
             "tug_dock",
             () -> new TugDockBlock(AbstractBlock.Properties.of(Material.METAL)
                     .harvestLevel(1)
+                    .strength(0.5f)
             ),
             ItemGroup.TAB_TRANSPORTATION);
 
@@ -30,6 +31,7 @@ public class ModBlocks {
             "barge_dock",
             () -> new BargeDockBlock(AbstractBlock.Properties.of(Material.METAL)
                     .harvestLevel(1)
+                    .strength(0.5f)
             ),
             ItemGroup.TAB_TRANSPORTATION);
 
@@ -37,6 +39,7 @@ public class ModBlocks {
             "guide_rail_corner",
             () -> new CornerGuideRailBlock(AbstractBlock.Properties.of(Material.METAL)
                     .harvestLevel(1)
+                    .strength(0.5f)
             ),
             ItemGroup.TAB_TRANSPORTATION);
 
@@ -44,6 +47,7 @@ public class ModBlocks {
             "vessel_detector",
             () -> new VesselDetectorBlock(AbstractBlock.Properties.of(Material.METAL)
                     .harvestLevel(1)
+                    .strength(0.5f)
             ),
             ItemGroup.TAB_TRANSPORTATION);
 
@@ -51,6 +55,7 @@ public class ModBlocks {
             "guide_rail_tug",
             () -> new TugGuideRailBlock(AbstractBlock.Properties.of(Material.METAL)
                     .harvestLevel(1)
+                    .strength(0.5f)
             ),
             ItemGroup.TAB_TRANSPORTATION);
 
@@ -58,6 +63,7 @@ public class ModBlocks {
             "fluid_hopper",
             () -> new FluidHopperBlock(AbstractBlock.Properties.of(Material.METAL)
                     .harvestLevel(1)
+                    .strength(0.5f)
             ),
             ItemGroup.TAB_TRANSPORTATION);
 
@@ -65,6 +71,7 @@ public class ModBlocks {
             "vessel_charger",
             () -> new VesselChargerBlock(AbstractBlock.Properties.of(Material.METAL)
                     .harvestLevel(1)
+                    .strength(0.5f)
             ),
             ItemGroup.TAB_TRANSPORTATION);
 
