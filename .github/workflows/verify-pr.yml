@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish-release:
+  verify-pr:
     runs-on: ubuntu-latest
 
     steps:
