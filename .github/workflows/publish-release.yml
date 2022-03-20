@@ -28,9 +28,11 @@ jobs:
         # we can get the release name.
         run: |
           NEW_VERSION=$(echo "${GITHUB_REF}" | cut -d "/" -f3)
+          NEW_VERSION_TRUNC=$(echo "${NEW_VERSION}" | grep -oP 'mc[0-9]+\.[0-9]+(?:\.[0-9]+)?-v\K[0-9\.a-zA-Z]+')
           echo "New version: ${NEW_VERSION}"
+          echo "Truncated version: ${NEW_VERSION_TRUNC}"
           echo "Github username: ${GITHUB_ACTOR}"
           echo "maven.edtoaster.ca username: ${EDTOASTER_MAVEN_USER}"
           ./gradlew wrapper
           ./gradlew runData
-          ./gradlew -Pversion=${NEW_VERSION} publish
+          ./gradlew -Pmod_version=${NEW_VERSION_TRUNC} publish
