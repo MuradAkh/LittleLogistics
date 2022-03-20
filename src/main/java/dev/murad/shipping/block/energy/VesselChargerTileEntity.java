@@ -5,11 +5,13 @@ import dev.murad.shipping.block.IVesselLoader;
 import dev.murad.shipping.capability.ReadWriteEnergyStorage;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import dev.murad.shipping.util.LinkableEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -81,8 +83,8 @@ public class VesselChargerTileEntity extends BlockEntity implements IVesselLoade
     }
 
     @Override
-    public boolean holdVessel(VesselEntity vessel, Mode mode) {
-        return vessel.getCapability(CapabilityEnergy.ENERGY).map(energyHandler -> {
+    public<T extends Entity & LinkableEntity<T>> boolean hold(T vehicle, Mode mode) {
+        return vehicle.getCapability(CapabilityEnergy.ENERGY).map(energyHandler -> {
             switch (mode) {
                 case EXPORT:
                     return (energyHandler.getEnergyStored() < energyHandler.getMaxEnergyStored() - 50) && internalBattery.getEnergyStored() > 50;

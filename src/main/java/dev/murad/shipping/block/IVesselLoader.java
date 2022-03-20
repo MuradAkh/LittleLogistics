@@ -1,6 +1,6 @@
 package dev.murad.shipping.block;
 
-import dev.murad.shipping.entity.custom.VesselEntity;
+import dev.murad.shipping.util.LinkableEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -32,9 +32,8 @@ public interface IVesselLoader {
 
     static boolean entityPredicate(Entity entity, BlockPos pos, Capability<?> capability) {
         return entity.getCapability(capability).resolve().map(cap -> {
-            if (entity instanceof VesselEntity){
-                VesselEntity vessel = (VesselEntity) entity;
-                return vessel.allowDockInterface() && (vessel.getBlockPos().getX() == pos.getX() && vessel.getBlockPos().getZ() == pos.getZ());
+            if (entity instanceof LinkableEntity l){
+                return l.allowDockInterface() && (l.getBlockPos().getX() == pos.getX() && l.getBlockPos().getZ() == pos.getZ());
             } else {
                 return true;
             }
@@ -51,5 +50,6 @@ public interface IVesselLoader {
                 pos.getZ() + 1D);
     }
 
-    boolean holdVessel(VesselEntity vessel, Mode mode);
+    <T extends Entity & LinkableEntity<T>> boolean hold(T vehicle, Mode mode);
+
 }
