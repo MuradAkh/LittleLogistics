@@ -192,6 +192,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         if (contentsChanged) {
             ItemStack stack = itemHandler.getStackInSlot(0);
             this.setPath(TugRouteItem.getRoute(stack));
+            contentsChanged = false;
+        }
+
+        // fix for currently borked worlds
+        if (nextStop >= this.path.size()) {
+            this.nextStop = 0;
         }
     }
 
@@ -437,6 +443,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
 
     public void setPath(TugRoute path) {
+        this.nextStop = 0;
         this.path = path;
     }
 
