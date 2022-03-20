@@ -550,6 +550,17 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     }
 
     @Override
+    public BlockPos getBlockPos(){
+        return this.getOnPos();
+    }
+
+    @Override
+    public boolean allowDockInterface(){
+        // TODO
+        return true;
+    }
+
+    @Override
     public Train<AbstractTrainCarEntity> getTrain() {
         return train;
     }

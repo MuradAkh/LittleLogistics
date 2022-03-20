@@ -6,7 +6,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
-public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity{
+public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity {
     public EnergyLocomotiveEntity(EntityType<?> type, Level p_38088_) {
         super(type, p_38088_);
     }
