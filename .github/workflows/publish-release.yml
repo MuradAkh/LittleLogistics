@@ -30,4 +30,4 @@ jobs:
           echo "Github username: ${GITHUB_ACTOR}"
           ./gradlew wrapper
           ./gradlew runData
-          ./gradlew -Pversion=${NEW_VERSION} publish
+          ./gradlew -Pmod_version=${NEW_VERSION} publish
