@@ -14,7 +14,7 @@ public class FishingBargeScreen extends ContainerScreen<FishingBargeContainer> {
     public FishingBargeScreen(FishingBargeContainer p_i51095_1_, PlayerInventory p_i51095_2_, ITextComponent p_i51095_3_) {
         super(p_i51095_1_, p_i51095_2_, p_i51095_3_);
         this.passEvents = false;
-        this.containerRows = 1;
+        this.containerRows = 3;
         this.imageHeight = 114 + this.containerRows * 18;
         this.inventoryLabelY = this.imageHeight - 94;
     }
