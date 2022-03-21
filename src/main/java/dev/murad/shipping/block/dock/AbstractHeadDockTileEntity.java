@@ -33,10 +33,7 @@ public abstract class AbstractHeadDockTileEntity<T extends Entity & LinkableEnti
 
 
     public boolean hold(T tug, Direction direction){
-        if (!(tug instanceof LinkableEntityHead)
-                || !getBlockState().getValue(DockingBlockStates.FACING).getOpposite().equals(direction)
-                || tug.getDirection().equals(getRowDirection(getBlockState().getValue(DockingBlockStates.FACING)))
-        ){
+        if (!(tug instanceof LinkableEntityHead) || checkBadDirCondition(tug, direction)){
             return false;
         }
 
@@ -62,8 +59,9 @@ public abstract class AbstractHeadDockTileEntity<T extends Entity & LinkableEnti
         return false;
     }
 
-    @Override
-    protected abstract BlockPos getTargetBlockPos();
+    protected abstract boolean checkBadDirCondition(T tug, Direction direction);
+
+    protected abstract Direction getRowDirection(Direction facing);
 
     private List<Pair<T, AbstractTailDockTileEntity<T>>> getTailDockPairs(T tug){
         List<T> barges = tug.getTrain().asListOfTugged();
@@ -83,10 +81,6 @@ public abstract class AbstractHeadDockTileEntity<T extends Entity & LinkableEnti
             docks.add(dock.get());
         }
         return docks;
-    }
-
-    private Direction getRowDirection(Direction facing) {
-        return this.getBlockState().getValue(DockingBlockStates.INVERTED) ? facing.getClockWise() : facing.getCounterClockWise();
     }
 
     private Optional<AbstractTailDockTileEntity<T>> getNextBargeDock(Direction rowDirection, BlockPos pos) {

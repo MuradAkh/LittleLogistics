@@ -3,6 +3,7 @@ package dev.murad.shipping.block.dock;
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class TugDockTileEntity extends AbstractHeadDockTileEntity<VesselEntity> {
@@ -14,4 +15,17 @@ public class TugDockTileEntity extends AbstractHeadDockTileEntity<VesselEntity> 
     protected BlockPos getTargetBlockPos() {
         return this.getBlockPos().above();
     }
+
+    @Override
+    protected boolean checkBadDirCondition(VesselEntity tug, Direction direction) {
+        return !getBlockState().getValue(DockingBlockStates.FACING).getOpposite().equals(direction)
+                ||
+                tug.getDirection().equals(getRowDirection(getBlockState().getValue(DockingBlockStates.FACING)));
+    }
+
+    @Override
+    protected Direction getRowDirection(Direction facing) {
+        return this.getBlockState().getValue(DockingBlockStates.INVERTED) ? facing.getClockWise() : facing.getCounterClockWise();
+    }
+
 }
