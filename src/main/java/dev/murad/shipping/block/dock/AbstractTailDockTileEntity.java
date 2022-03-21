@@ -34,7 +34,7 @@ public abstract class AbstractTailDockTileEntity<T extends Entity & LinkableEnti
 
     @Override
     public boolean hold(T vessel, Direction direction) {
-        if (!getBlockState().getValue(DockingBlockStates.FACING).getOpposite().equals(direction))
+        if (checkBadDirCondition(direction))
         {
             return false;
         }
@@ -43,4 +43,6 @@ public abstract class AbstractTailDockTileEntity<T extends Entity & LinkableEnti
                 .orElse(getVesselLoader().map(l -> l.hold(vessel, isExtract() ? IVesselLoader.Mode.IMPORT : IVesselLoader.Mode.EXPORT))
                         .orElse(false));
     }
+
+    protected abstract boolean checkBadDirCondition(Direction direction);
 }
