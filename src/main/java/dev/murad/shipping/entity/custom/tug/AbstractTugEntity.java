@@ -443,7 +443,9 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
 
     public void setPath(TugRoute path) {
-        this.nextStop = 0;
+        if (!this.path.isEmpty()){
+            this.nextStop = 0;
+        }
         this.path = path;
     }
 
