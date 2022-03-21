@@ -425,7 +425,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements ISpringa
 
 
     public void setPath(TugRoute path) {
-        if (!this.path.isEmpty()){
+        if (!this.path.isEmpty() && !this.path.equals(path)){
             this.nextStop = 0;
         }
         this.path = path;
