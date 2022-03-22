@@ -2,6 +2,7 @@ package dev.murad.shipping.item;
 
 import com.mojang.datafixers.util.Function4;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
+import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
@@ -108,6 +109,11 @@ public class TrainCarItem extends Item {
 
                 level.addFreshEntity(abstractminecart);
                 level.gameEvent(pContext.getPlayer(), GameEvent.ENTITY_PLACE, blockpos);
+                // FIXME
+                if(pContext.getPlayer() != null && abstractminecart.getDirection().equals(pContext.getPlayer().getDirection())){
+                    if(abstractminecart instanceof AbstractLocomotiveEntity l)
+                        l.setDoflip(true);
+                }
             }
 
             itemstack.shrink(1);
