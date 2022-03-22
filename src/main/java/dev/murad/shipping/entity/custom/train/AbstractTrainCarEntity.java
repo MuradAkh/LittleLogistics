@@ -7,6 +7,8 @@ import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntit
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.RailUtils;
 import dev.murad.shipping.util.Train;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -56,6 +58,10 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     private double lz;
     private double lyr;
     private double lxr;
+
+    @Getter
+    @Setter
+    private boolean frozen = false;
 
     private static final Map<RailShape, Pair<Vec3i, Vec3i>> EXITS = Util.make(Maps.newEnumMap(RailShape.class), (p_38135_) -> {
         Vec3i west = Direction.WEST.getNormal();
@@ -552,12 +558,6 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     @Override
     public BlockPos getBlockPos(){
         return this.getOnPos();
-    }
-
-    @Override
-    public boolean allowDockInterface(){
-        // TODO
-        return true;
     }
 
     @Override

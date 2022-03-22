@@ -4,6 +4,8 @@ import dev.murad.shipping.block.dock.BargeDockTileEntity;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.energy.VesselChargerTileEntity;
 import dev.murad.shipping.block.fluid.FluidHopperTileEntity;
+import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
+import dev.murad.shipping.block.rail.blockentity.TrainCarDockTileEntity;
 import dev.murad.shipping.block.rapidhopper.RapidHopperTileEntity;
 import dev.murad.shipping.block.vessel_detector.VesselDetectorTileEntity;
 import net.minecraft.world.level.block.Block;
@@ -22,6 +24,18 @@ public class ModTileEntitiesTypes {
             "barge_dock",
             BargeDockTileEntity::new,
             ModBlocks.BARGE_DOCK
+    );
+
+    public static final RegistryObject<BlockEntityType<LocomotiveDockTileEntity>> LOCOMOTIVE_DOCK = register(
+            "locomotive_dock",
+            LocomotiveDockTileEntity::new,
+            ModBlocks.LOCOMOTIVE_DOCK_RAIL
+    );
+
+    public static final RegistryObject<BlockEntityType<TrainCarDockTileEntity>> CAR_DOCK = register(
+            "car_dock",
+            TrainCarDockTileEntity::new,
+            ModBlocks.CAR_DOCK_RAIL
     );
 
     public static final RegistryObject<BlockEntityType<VesselDetectorTileEntity>> VESSEL_DETECTOR = register(

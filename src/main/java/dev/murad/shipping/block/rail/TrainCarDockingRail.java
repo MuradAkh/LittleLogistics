@@ -1,15 +1,18 @@
 package dev.murad.shipping.block.rail;
 
 import dev.murad.shipping.block.dock.DockingBlockStates;
+import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
+import org.jetbrains.annotations.Nullable;
 
 public class TrainCarDockingRail extends AbstractDockingRail{
     public TrainCarDockingRail(Properties pProperties) {
@@ -19,6 +22,7 @@ public class TrainCarDockingRail extends AbstractDockingRail{
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
         if (pPlayer.isShiftKeyDown()) {
             pLevel.setBlockAndUpdate(pPos, pState.setValue(DockingBlockStates.INVERTED, !pState.getValue(DockingBlockStates.INVERTED)));
+            fixHopperPos(pState, pLevel, pPos);
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
@@ -28,5 +32,11 @@ public class TrainCarDockingRail extends AbstractDockingRail{
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
         super.createBlockStateDefinition(pBuilder);
         pBuilder.add(DockingBlockStates.INVERTED);
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
+        return ModTileEntitiesTypes.CAR_DOCK.get().create(pPos, pState);
     }
 }

@@ -1,16 +1,19 @@
 package dev.murad.shipping.block.rail;
 
 import dev.murad.shipping.block.dock.DockingBlockStates;
+import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import org.jetbrains.annotations.Nullable;
 
 public class LocomotiveDockingRail extends AbstractDockingRail{
     public LocomotiveDockingRail(Properties pProperties) {
@@ -47,4 +50,9 @@ public class LocomotiveDockingRail extends AbstractDockingRail{
         return true;
     }
 
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
+        return ModTileEntitiesTypes.LOCOMOTIVE_DOCK.get().create(pPos, pState);
+    }
 }
