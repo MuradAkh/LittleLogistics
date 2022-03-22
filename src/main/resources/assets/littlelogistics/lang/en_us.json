@@ -38,8 +38,8 @@
   "block.littlelogistics.fluid_hopper": "Fluid Hopper",
   "block.littlelogistics.rapid_hopper": "Rapid Hopper",
   "block.littlelogistics.vessel_detector": "Vessel Detector",
-  "block.littlelogistics.junction_rail": "Switch Rail",
-  "block.littlelogistics.switch_rail": "Junction Rail",
+  "block.littlelogistics.junction_rail": "Junction Rail",
+  "block.littlelogistics.switch_rail": "Switch Rail",
 
   "screen.littlelogistics.tug": "Steam Tug",
   "screen.littlelogistics.fishing_barge": "Auto-Fishing Barge",

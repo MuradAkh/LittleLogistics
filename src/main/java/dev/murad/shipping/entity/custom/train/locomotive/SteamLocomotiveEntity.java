@@ -4,14 +4,66 @@ import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import dev.murad.shipping.util.ItemHandlerVanillaContainerWrapper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.Containers;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Random;
 
-public class SteamLocomotiveEntity extends AbstractLocomotiveEntity {
+public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements ItemHandlerVanillaContainerWrapper {
+    private final ItemStackHandler itemHandler = createHandler();
+    private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
+
+    private ItemStackHandler createHandler() {
+        return new ItemStackHandler(1) {
+            @Override
+            public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+                return FurnaceBlockEntity.isFuel(stack);
+            }
+
+            @Nonnull
+            @Override
+            public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+                if (!isItemValid(slot, stack)) {
+                    return stack;
+                }
+
+                return super.insertItem(slot, stack, simulate);
+            }
+        };
+    }
+
+    @Override
+    public void remove(RemovalReason r) {
+        if(!this.level.isClientSide){
+            Containers.dropContents(this.level, this, this);
+        }
+        super.remove(r);
+    }
+
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return handler.cast();
+        }
+
+        return super.getCapability(cap, side);
+    }
+
     public SteamLocomotiveEntity(EntityType<?> type, Level p_38088_) {
         super(type, p_38088_);
     }
@@ -43,5 +95,22 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity {
                 }
             }
         }
+    }
+
+    @Override
+    public ItemStackHandler getRawHandler() {
+        return itemHandler;
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag compound) {
+        itemHandler.deserializeNBT(compound.getCompound("inv"));
+        super.readAdditionalSaveData(compound);
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag compound) {
+        compound.put("inv", itemHandler.serializeNBT());
+        super.addAdditionalSaveData(compound);
     }
 }

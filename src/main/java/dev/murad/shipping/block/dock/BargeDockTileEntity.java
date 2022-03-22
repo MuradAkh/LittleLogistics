@@ -6,18 +6,20 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.List;
+
 public class BargeDockTileEntity extends AbstractTailDockTileEntity<VesselEntity> {
     public BargeDockTileEntity(BlockPos pos, BlockState state) {
         super(ModTileEntitiesTypes.BARGE_DOCK.get(), pos, state);
     }
 
     @Override
-    protected BlockPos getTargetBlockPos(){
+    protected List<BlockPos> getTargetBlockPos(){
         if (isExtract()) {
-            return this.getBlockPos()
+            return List.of(this.getBlockPos()
                     .below()
-                    .relative(this.getBlockState().getValue(DockingBlockStates.FACING));
-        } else return this.getBlockPos().above();
+                    .relative(this.getBlockState().getValue(DockingBlockStates.FACING)));
+        } else return List.of(this.getBlockPos().above());
     }
 
     @Override

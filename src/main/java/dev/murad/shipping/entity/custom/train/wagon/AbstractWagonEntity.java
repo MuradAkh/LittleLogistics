@@ -1,15 +1,25 @@
 package dev.murad.shipping.entity.custom.train.wagon;
 
+import dev.murad.shipping.capability.StallingCapability;
+import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
+import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
+import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.util.Train;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 
 public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
+
     public AbstractWagonEntity(EntityType<?> p_38087_, Level p_38088_) {
         super(p_38087_, p_38088_);
     }
@@ -63,6 +73,76 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
 
     // hack to disable hoppers
     public boolean isDockable() {
-        return this.dominant.map(dom -> this.distanceToSqr(dom) < 1.1).orElse(true);
+        return this.dominant.map(dom -> this.distanceToSqr(dom) < 1.05).orElse(true);
+    }
+
+
+    public boolean allowDockInterface(){
+        return isDockable();
+    }
+
+    private final StallingCapability capability = new StallingCapability() {
+        @Override
+        public boolean isDocked() {
+            return delegate().map(StallingCapability::isDocked).orElse(false);
+        }
+
+        @Override
+        public void dock(double x, double y, double z) {
+            delegate().ifPresent(s -> s.dock(x, y, z));
+        }
+
+        @Override
+        public void undock() {
+            delegate().ifPresent(StallingCapability::undock);
+        }
+
+        @Override
+        public boolean isStalled() {
+            return delegate().map(StallingCapability::isStalled).orElse(false);
+        }
+
+        @Override
+        public void stall() {
+            delegate().ifPresent(StallingCapability::stall);
+        }
+
+        @Override
+        public void unstall() {
+            delegate().ifPresent(StallingCapability::unstall);
+        }
+
+        @Override
+        public boolean isFrozen() {
+            return AbstractWagonEntity.super.isFrozen();
+        }
+
+        @Override
+        public void freeze() {
+            AbstractWagonEntity.super.setFrozen(true);
+        }
+
+        @Override
+        public void unfreeze() {
+            AbstractWagonEntity.super.setFrozen(false);
+        }
+
+        private Optional<StallingCapability> delegate() {
+            if (train.getHead() instanceof AbstractLocomotiveEntity e) {
+                return e.getCapability(StallingCapability.STALLING_CAPABILITY).resolve();
+            }
+            return Optional.empty();
+        }
+    };
+
+    private final LazyOptional<StallingCapability> capabilityOpt = LazyOptional.of(() -> capability);
+
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+        if (cap == StallingCapability.STALLING_CAPABILITY) {
+            return capabilityOpt.cast();
+        }
+        return super.getCapability(cap);
     }
 }

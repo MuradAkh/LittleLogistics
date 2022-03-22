@@ -7,6 +7,7 @@ import dev.murad.shipping.block.dock.TugDockBlock;
 import dev.murad.shipping.block.energy.VesselChargerBlock;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
 import dev.murad.shipping.block.guide_rail.CornerGuideRailBlock;
+import dev.murad.shipping.block.rail.AbstractDockingRail;
 import dev.murad.shipping.block.rail.SwitchRail;
 import dev.murad.shipping.block.vessel_detector.VesselDetectorBlock;
 import dev.murad.shipping.setup.ModBlocks;
@@ -15,6 +16,7 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.HopperBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
@@ -150,6 +152,28 @@ public class ModBlockStateProvider extends BlockStateProvider {
                         .withExistingParent("junction_rail", mcLoc("rail_flat"))
                         .texture("rail", getBlTx("junction_rail")))
                 .build());
+
+        getVariantBuilder(ModBlocks.CAR_DOCK_RAIL.get()).forAllStates(state -> {
+            String inv = state.getValue(DockingBlockStates.INVERTED) ? "_extract" : "";
+
+            return ConfiguredModel.builder()
+                .modelFile(models()
+                        .withExistingParent("car_dock_rail" + inv, mcLoc("rail_flat"))
+                        .texture("rail", getBlTx("car_dock_rail" + inv)))
+                    .rotationY(state.getValue(AbstractDockingRail.RAIL_SHAPE).equals(RailShape.NORTH_SOUTH) ? 0 : 90)
+                .build();
+        });
+
+        getVariantBuilder(ModBlocks.LOCOMOTIVE_DOCK_RAIL.get()).forAllStates(state -> {
+            String powered = state.getValue(DockingBlockStates.POWERED) ? "_powered" : "";
+
+            return ConfiguredModel.builder()
+                    .modelFile(models()
+                            .withExistingParent("locomotive_dock_rail" + powered, mcLoc("rail_flat"))
+                            .texture("rail", getBlTx("locomotive_dock_rail" + powered)))
+                    .rotationY((int) state.getValue(DockingBlockStates.FACING).getOpposite().toYRot())
+                    .build();
+        });
 
         getVariantBuilder(ModBlocks.RAPID_HOPPER.get()).forAllStates(state -> ConfiguredModel.builder()
                 .modelFile(getRapidHopperModel(state)

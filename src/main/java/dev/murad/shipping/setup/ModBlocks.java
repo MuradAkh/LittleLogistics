@@ -8,7 +8,9 @@ import dev.murad.shipping.block.fluid.FluidHopperBlock;
 import dev.murad.shipping.block.guide_rail.CornerGuideRailBlock;
 import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
 import dev.murad.shipping.block.rail.JunctionRail;
+import dev.murad.shipping.block.rail.LocomotiveDockingRail;
 import dev.murad.shipping.block.rail.SwitchRail;
+import dev.murad.shipping.block.rail.TrainCarDockingRail;
 import dev.murad.shipping.block.rapidhopper.RapidHopperBlock;
 import dev.murad.shipping.block.vessel_detector.VesselDetectorBlock;
 import net.minecraft.world.item.BlockItem;
@@ -87,6 +89,16 @@ public class ModBlocks {
     public static final RegistryObject<Block> JUNCTION_RAIL = register(
             "junction_rail",
             () -> new JunctionRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL)),
+            CreativeModeTab.TAB_TRANSPORTATION);
+
+    public static final RegistryObject<Block> CAR_DOCK_RAIL = register(
+            "car_dock_rail",
+            () -> new TrainCarDockingRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL)),
+            CreativeModeTab.TAB_TRANSPORTATION);
+
+    public static final RegistryObject<Block> LOCOMOTIVE_DOCK_RAIL = register(
+            "locomotive_dock_rail",
+            () -> new LocomotiveDockingRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL)),
             CreativeModeTab.TAB_TRANSPORTATION);
 
     public static <T extends Block> RegistryObject<T> registerNoItem(String name, Supplier<T> block){
