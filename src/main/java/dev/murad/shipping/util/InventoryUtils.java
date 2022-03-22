@@ -6,12 +6,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import javax.annotation.Nullable;
+import java.util.*;
 
 public class InventoryUtils {
 
@@ -84,5 +86,20 @@ public class InventoryUtils {
         } else {
             return ItemStack.tagMatches(p_145894_0_, p_145894_1_);
         }
+    }
+
+    @Nullable
+    public static IEnergyStorage getEnergyCapabilityInSlot(int slot, ItemStackHandler handler) {
+        ItemStack stack = handler.getStackInSlot(slot);
+        if (!stack.isEmpty()) {
+            LazyOptional<IEnergyStorage> capabilityLazyOpt = stack.getCapability(CapabilityEnergy.ENERGY);
+            if (capabilityLazyOpt.isPresent()) {
+                Optional<IEnergyStorage> capabilityOpt = capabilityLazyOpt.resolve();
+                if (capabilityOpt.isPresent()) {
+                    return capabilityOpt.get();
+                }
+            }
+        }
+        return null;
     }
 }

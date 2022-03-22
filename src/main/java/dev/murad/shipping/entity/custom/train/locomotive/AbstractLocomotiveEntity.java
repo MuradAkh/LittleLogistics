@@ -3,15 +3,21 @@ package dev.murad.shipping.entity.custom.train.locomotive;
 import com.mojang.datafixers.types.Func;
 import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
 import dev.murad.shipping.capability.StallingCapability;
+import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.setup.ModSounds;
+import dev.murad.shipping.util.ItemHandlerVanillaContainerWrapper;
 import dev.murad.shipping.util.LinkableEntityHead;
 import dev.murad.shipping.util.Train;
+import lombok.Setter;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -19,18 +25,19 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity implements LinkableEntityHead<AbstractTrainCarEntity> {
+public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity implements LinkableEntityHead<AbstractTrainCarEntity>, ItemHandlerVanillaContainerWrapper {
     protected boolean engineOn = false;
+    @Setter
     private boolean doflip = false;
     private boolean independentMotion = false;
     private boolean docked = false;
-    private boolean stalled = false;
 
 
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractLocomotiveEntity.class, EntityDataSerializers.BOOLEAN);
@@ -57,16 +64,21 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             return InteractionResult.PASS;
         }
         if(!this.level.isClientSide){
-            if (!pPlayer.isCrouching()) {
+            if(pPlayer.isCrouching()){
                 engineOn = !engineOn;
+            }else{
+                NetworkHooks.openGui((ServerPlayer) pPlayer, createContainerProvider(), getDataAccessor()::write);
             }
         }
-        if(pPlayer.isCrouching()){
-                this.setDeltaMovement(Vec3.ZERO);
-                doflip = true;
-        }
-        return InteractionResult.PASS;
+
+        return InteractionResult.CONSUME;
     }
+
+    protected abstract MenuProvider createContainerProvider();
+
+    public abstract DataAccessor getDataAccessor();
+
+    protected abstract boolean tickFuel();
 
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
@@ -120,10 +132,8 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         entityData.define(INDEPENDENT_MOTION, false);
     }
 
-    abstract protected boolean checkMovementAndTickFuel();
-
     private void tickMovement() {
-        if(!docked && checkMovementAndTickFuel()) {
+        if(!docked && engineOn && tickFuel()) {
             entityData.set(INDEPENDENT_MOTION, true);
             accelerate();
         }else{
@@ -263,17 +273,17 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
         @Override
         public boolean isStalled() {
-            return stalled;
+            return engineOn;
         }
 
         @Override
         public void stall() {
-            stalled = true;
+            engineOn = true;
         }
 
         @Override
         public void unstall() {
-            stalled = false;
+            engineOn = false;
         }
 
         @Override
@@ -302,5 +312,19 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             return stallingOpt.cast();
         }
         return super.getCapability(cap);
+    }
+
+    @Override
+    protected void readAdditionalSaveData(CompoundTag compound) {
+        super.readAdditionalSaveData(compound);
+        if(compound.contains("eo")) {
+            engineOn = compound.getBoolean("eo");
+        }
+    }
+
+    @Override
+    protected void addAdditionalSaveData(CompoundTag compound) {
+        super.addAdditionalSaveData(compound);
+        compound.putBoolean("eo", engineOn);
     }
 }
