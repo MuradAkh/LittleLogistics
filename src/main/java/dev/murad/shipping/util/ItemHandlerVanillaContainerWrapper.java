@@ -8,8 +8,6 @@ import net.minecraftforge.items.ItemStackHandler;
 
 public interface ItemHandlerVanillaContainerWrapper extends Container {
     ItemStackHandler getRawHandler();
-    boolean isRemoved();
-    double distanceToSqr(Entity e);
 
     default int getContainerSize() {
         return getRawHandler().getSlots();
@@ -45,13 +43,6 @@ public interface ItemHandlerVanillaContainerWrapper extends Container {
     default void setChanged() {
 
     }
-
-    default boolean stillValid(Player pPlayer) {
-        if (this.isRemoved()) {
-            return false;
-        } else {
-            return !(this.distanceToSqr(pPlayer) > 64.0D);
-        }    }
 
     default void clearContent() {
         for (int i = 0; i <  getRawHandler().getSlots(); i++) {
