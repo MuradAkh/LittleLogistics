@@ -327,4 +327,13 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         super.addAdditionalSaveData(compound);
         compound.putBoolean("eo", engineOn);
     }
+
+    @Override
+    public boolean stillValid(Player pPlayer) {
+        if (this.isRemoved()) {
+            return false;
+        } else {
+            return !(this.distanceToSqr(pPlayer) > 64.0D);
+        }
+    }
 }
