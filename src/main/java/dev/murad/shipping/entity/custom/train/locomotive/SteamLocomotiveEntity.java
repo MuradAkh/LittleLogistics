@@ -4,6 +4,7 @@ import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.entity.accessor.EnergyLocomotiveDataAccessor;
 import dev.murad.shipping.entity.accessor.SteamLocomotiveDataAccessor;
 import dev.murad.shipping.entity.accessor.SteamTugDataAccessor;
+import dev.murad.shipping.entity.container.SteamLocomotiveContainer;
 import dev.murad.shipping.entity.container.SteamTugContainer;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
@@ -14,6 +15,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.EntityType;
@@ -90,7 +92,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
             burnTime--;
             return true;
         } else {
-            ItemStack stack = itemHandler.getStackInSlot(1);
+            ItemStack stack = itemHandler.getStackInSlot(0);
             if (!stack.isEmpty()) {
                 burnCapacity = (ForgeHooks.getBurnTime(stack, null) * FURNACE_FUEL_MULTIPLIER) - 1;
                 burnTime = burnCapacity - 1;
@@ -115,7 +117,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
             @Nullable
             @Override
             public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player Player) {
-                return new SteamTugContainer(i, level, getDataAccessor(), playerInventory, Player);
+                return new SteamLocomotiveContainer(i, level, getDataAccessor(), playerInventory, Player);
             }
         };
     }

@@ -1,11 +1,7 @@
 package dev.murad.shipping.setup;
 
-import dev.murad.shipping.entity.accessor.EnergyTugDataAccessor;
-import dev.murad.shipping.entity.accessor.SteamTugDataAccessor;
-import dev.murad.shipping.entity.accessor.TugRouteScreenDataAccessor;
-import dev.murad.shipping.entity.container.EnergyTugContainer;
-import dev.murad.shipping.entity.container.FishingBargeContainer;
-import dev.murad.shipping.entity.container.SteamTugContainer;
+import dev.murad.shipping.entity.accessor.*;
+import dev.murad.shipping.entity.container.*;
 import dev.murad.shipping.item.container.TugRouteContainer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.inventory.MenuType;
@@ -35,6 +31,18 @@ public class ModMenuTypes {
                     () -> IForgeMenuType.create(
                             (windowId, inv, data) ->
                                     new EnergyTugContainer(windowId, inv.player.level, new EnergyTugDataAccessor(makeIntArray(data)), inv, inv.player)));
+
+    public static final RegistryObject<MenuType<SteamLocomotiveContainer>> STEAM_LOCOMOTIVE_CONTAINER =
+            Registration.CONTAINERS.register("steam_locomotive_container",
+                    () -> IForgeMenuType.create(
+                            (windowId, inv, data) ->
+                                    new SteamLocomotiveContainer(windowId, inv.player.level, new SteamLocomotiveDataAccessor(makeIntArray(data)), inv, inv.player)));
+
+    public static final RegistryObject<MenuType<EnergyLocomotiveContainer>> ENERGY_LOCOMOTIVE_CONTAINER =
+            Registration.CONTAINERS.register("energy_locomotive_container",
+                    () -> IForgeMenuType.create(
+                            (windowId, inv, data) ->
+                                    new EnergyLocomotiveContainer(windowId, inv.player.level, new EnergyLocomotiveDataAccessor(makeIntArray(data)), inv, inv.player)));
 
     public static final RegistryObject<MenuType<FishingBargeContainer>> FISHING_BARGE_CONTAINER =
             Registration.CONTAINERS.register("fishing_barge_container",

@@ -5,6 +5,7 @@ import dev.murad.shipping.capability.ReadWriteEnergyStorage;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.accessor.EnergyLocomotiveDataAccessor;
 import dev.murad.shipping.entity.accessor.EnergyTugDataAccessor;
+import dev.murad.shipping.entity.container.EnergyLocomotiveContainer;
 import dev.murad.shipping.entity.container.EnergyTugContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
@@ -43,6 +44,16 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
 
     private final ReadWriteEnergyStorage internalBattery = new ReadWriteEnergyStorage(MAX_ENERGY, MAX_TRANSFER, Integer.MAX_VALUE);
     private final LazyOptional<IEnergyStorage> holder = LazyOptional.of(() -> internalBattery);
+
+    public EnergyLocomotiveEntity(EntityType<?> type, Level p_38088_) {
+        super(type, p_38088_);
+        internalBattery.setEnergy(0);
+    }
+
+    public EnergyLocomotiveEntity(Level level, Double aDouble, Double aDouble1, Double aDouble2) {
+        super(ModEntityTypes.ENERGY_LOCOMOTIVE.get(), level, aDouble, aDouble1, aDouble2);
+        internalBattery.setEnergy(0);
+    }
 
     private ItemStackHandler createHandler() {
         return new ItemStackHandler(1) {
@@ -83,9 +94,7 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
         super.remove(r);
     }
 
-    public EnergyLocomotiveEntity(EntityType<?> type, Level p_38088_) {
-        super(type, p_38088_);
-    }
+
 
     @Override
     protected MenuProvider createContainerProvider() {
@@ -98,7 +107,7 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
             @Nullable
             @Override
             public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player Player) {
-                return new EnergyTugContainer(i, level, getDataAccessor(), playerInventory, Player);
+                return new EnergyLocomotiveContainer(i, level, getDataAccessor(), playerInventory, Player);
             }
         };
     }
@@ -117,7 +126,7 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
     public void tick() {
         // grab energy from capacitor
         if (!level.isClientSide) {
-            IEnergyStorage capability = InventoryUtils.getEnergyCapabilityInSlot(1, itemHandler);
+            IEnergyStorage capability = InventoryUtils.getEnergyCapabilityInSlot(0, itemHandler);
             if (capability != null) {
                 // simulate first
                 int toExtract = capability.extractEnergy(MAX_TRANSFER, true);
@@ -134,9 +143,6 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
         return internalBattery.extractEnergy(ENERGY_USAGE, false) > 0;
     }
 
-    public EnergyLocomotiveEntity(Level level, Double aDouble, Double aDouble1, Double aDouble2) {
-        super(ModEntityTypes.ENERGY_LOCOMOTIVE.get(), level, aDouble, aDouble1, aDouble2);
-    }
 
     @Override
     public ItemStack getPickResult() {
