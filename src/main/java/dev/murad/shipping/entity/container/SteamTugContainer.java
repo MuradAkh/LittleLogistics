@@ -1,7 +1,6 @@
 package dev.murad.shipping.entity.container;
 
 import dev.murad.shipping.entity.accessor.SteamTugDataAccessor;
-import dev.murad.shipping.event.ModClientEventHandler;
 import dev.murad.shipping.setup.ModMenuTypes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;

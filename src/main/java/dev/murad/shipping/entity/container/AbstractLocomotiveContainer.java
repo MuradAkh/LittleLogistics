@@ -6,6 +6,7 @@ import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntit
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
 
@@ -13,6 +14,7 @@ import javax.annotation.Nullable;
 
 public class AbstractLocomotiveContainer <T extends DataAccessor> extends AbstractItemHandlerContainer{
     public static final ResourceLocation EMPTY_ENERGY = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_energy");
+    public static final ResourceLocation EMPTY_ATLAS_LOC = InventoryMenu.BLOCK_ATLAS;
     protected T data;
     protected AbstractLocomotiveEntity locomotiveEntity;
 

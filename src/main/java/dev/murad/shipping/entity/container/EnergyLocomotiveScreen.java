@@ -9,12 +9,11 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
-// Todo: consolidate tug screen code
-public class EnergyTugScreen extends AbstractVehicleScreen<EnergyTugContainer> {
-    private static final ResourceLocation GUI = new ResourceLocation(ShippingMod.MOD_ID, "textures/container/energy_tug.png");
+public class EnergyLocomotiveScreen extends AbstractVehicleScreen<EnergyLocomotiveContainer>{
+    private static final ResourceLocation GUI = new ResourceLocation(ShippingMod.MOD_ID, "textures/container/energy_locomotive.png");
 
-    public EnergyTugScreen(EnergyTugContainer menu, Inventory playerInventory, Component label) {
-        super(menu, playerInventory, label);
+    public EnergyLocomotiveScreen(EnergyLocomotiveContainer menu, Inventory inventory, Component p_i51105_3_) {
+        super(menu, inventory, p_i51105_3_);
     }
 
     @Override
