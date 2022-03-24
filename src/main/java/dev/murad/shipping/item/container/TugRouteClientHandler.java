@@ -3,7 +3,7 @@ package dev.murad.shipping.item.container;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
-import dev.murad.shipping.network.SetTag;
+import dev.murad.shipping.network.SetRouteTagPacket;
 import dev.murad.shipping.network.TugRoutePacketHandler;
 import dev.murad.shipping.util.TugRoute;
 import dev.murad.shipping.util.TugRouteNode;
@@ -186,6 +186,6 @@ public class TugRouteClientHandler {
             entry.setIndex(i++);
         }
 
-        TugRoutePacketHandler.INSTANCE.sendToServer(new SetTag(route.hashCode(), isOffHand, route.toNBT()));
+        TugRoutePacketHandler.INSTANCE.sendToServer(new SetRouteTagPacket(route.hashCode(), isOffHand, route.toNBT()));
     }
 }

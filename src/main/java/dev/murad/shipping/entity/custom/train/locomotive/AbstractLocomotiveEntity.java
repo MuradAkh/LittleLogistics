@@ -33,6 +33,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity implements LinkableEntityHead<AbstractTrainCarEntity>, ItemHandlerVanillaContainerWrapper {
+    @Setter
     protected boolean engineOn = false;
     @Setter
     private boolean doflip = false;
@@ -64,11 +65,8 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             return InteractionResult.PASS;
         }
         if(!this.level.isClientSide){
-            if(pPlayer.isCrouching()){
-                engineOn = !engineOn;
-            }else{
-                NetworkHooks.openGui((ServerPlayer) pPlayer, createContainerProvider(), getDataAccessor()::write);
-            }
+            NetworkHooks.openGui((ServerPlayer) pPlayer, createContainerProvider(), getDataAccessor()::write);
+
         }
 
         return InteractionResult.CONSUME;

@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
-public class SteamLocomotiveScreen extends AbstractVehicleScreen<SteamLocomotiveContainer> {
+public class SteamLocomotiveScreen extends AbstractLocomotiveScreen<SteamLocomotiveContainer> {
     private static final ResourceLocation GUI = new ResourceLocation(ShippingMod.MOD_ID, "textures/container/steam_locomotive.png");
 
     public SteamLocomotiveScreen(SteamLocomotiveContainer menu, Inventory inventory, Component p_i51105_3_) {
@@ -22,6 +22,7 @@ public class SteamLocomotiveScreen extends AbstractVehicleScreen<SteamLocomotive
 
     @Override
     protected void renderBg(PoseStack matrixStack, float partialTicks, int x, int y) {
+        super.renderBg(matrixStack, partialTicks, x, y);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, GUI);

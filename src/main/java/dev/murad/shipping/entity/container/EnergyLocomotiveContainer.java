@@ -41,6 +41,7 @@ public class EnergyLocomotiveContainer extends AbstractLocomotiveContainer<Energ
         return this.data.isLit();
     }
 
+    @Override
     public boolean isOn() {
         return this.data.isOn();
     }

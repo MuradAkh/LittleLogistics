@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
+import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.RailUtils;
 import dev.murad.shipping.util.Train;
@@ -462,6 +463,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     public void remove(RemovalReason r) {
         if(!this.level.isClientSide){
             this.spawnAtLocation(this.getPickResult());
+            dominant.ifPresent((d) -> spawnChain());
+            dominated.ifPresent((d) -> spawnChain());
         }
         handleLinkableKill();
         super.remove(r);
@@ -549,8 +552,16 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         return dominant;
     }
 
+    private void spawnChain(){
+        var stack = new ItemStack(ModItems.SPRING.get());
+        this.spawnAtLocation(stack);
+    }
+
     @Override
     public void handleShearsCut() {
+        if(!this.level.isClientSide && dominant.isPresent()){
+            spawnChain();
+        }
         this.dominant.ifPresent(LinkableEntity::removeDominated);
         removeDominant();
     }

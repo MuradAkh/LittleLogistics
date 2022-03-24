@@ -82,6 +82,24 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.RAIL))
                 .save(consumer);
 
+        ShapedRecipeBuilder.shaped(ModBlocks.LOCOMOTIVE_DOCK_RAIL.get(), 2)
+                .define('#', Items.RAIL)
+                .define('$', ModItems.SPRING.get())
+                .pattern(" $ ")
+                .pattern(" # ")
+                .pattern(" # ")
+                .unlockedBy("has_item", has(Items.RAIL))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModBlocks.CAR_DOCK_RAIL.get(), 3)
+                .define('#', Items.RAIL)
+                .define('$', ModItems.SPRING.get())
+                .pattern(" # ")
+                .pattern("$#$")
+                .pattern(" # ")
+                .unlockedBy("has_item", has(Items.RAIL))
+                .save(consumer);
+
         ShapedRecipeBuilder.shaped(ModBlocks.GUIDE_RAIL_TUG.get(), 8)
                 .define('#', ModItems.SPRING.get())
                 .define('_', Tags.Items.STONE)
