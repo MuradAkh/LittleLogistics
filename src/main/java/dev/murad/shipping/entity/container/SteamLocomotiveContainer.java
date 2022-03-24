@@ -28,6 +28,7 @@ public class SteamLocomotiveContainer extends AbstractLocomotiveContainer<SteamL
         return data.isLit();
     }
 
+    @Override
     public boolean isOn(){
         return data.isOn();
     }

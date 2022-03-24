@@ -9,7 +9,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
-public class EnergyLocomotiveScreen extends AbstractVehicleScreen<EnergyLocomotiveContainer>{
+public class EnergyLocomotiveScreen extends AbstractLocomotiveScreen<EnergyLocomotiveContainer>{
     private static final ResourceLocation GUI = new ResourceLocation(ShippingMod.MOD_ID, "textures/container/energy_locomotive.png");
 
     public EnergyLocomotiveScreen(EnergyLocomotiveContainer menu, Inventory inventory, Component p_i51105_3_) {
@@ -31,6 +31,7 @@ public class EnergyLocomotiveScreen extends AbstractVehicleScreen<EnergyLocomoti
 
     @Override
     protected void renderBg(PoseStack matrixStack, float partialTicks, int x, int y) {
+        super.renderBg(matrixStack, partialTicks, x, y);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, GUI);
