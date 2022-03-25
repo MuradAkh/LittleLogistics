@@ -107,13 +107,14 @@ public class TrainCarItem extends Item {
                     abstractminecart.setCustomName(itemstack.getHoverName());
                 }
 
-                level.addFreshEntity(abstractminecart);
-                level.gameEvent(pContext.getPlayer(), GameEvent.ENTITY_PLACE, blockpos);
-                // FIXME
+
                 if(pContext.getPlayer() != null && abstractminecart.getDirection().equals(pContext.getPlayer().getDirection())){
                     if(abstractminecart instanceof AbstractLocomotiveEntity l)
-                        l.setDoflip(true);
+                        l.flip();
                 }
+
+                level.addFreshEntity(abstractminecart);
+                level.gameEvent(pContext.getPlayer(), GameEvent.ENTITY_PLACE, blockpos);
             }
 
             itemstack.shrink(1);

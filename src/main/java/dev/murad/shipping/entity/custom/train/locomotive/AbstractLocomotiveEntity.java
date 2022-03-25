@@ -106,18 +106,22 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             enforceMaxVelocity(0.2);
         }
 
-
-        if(doflip && dominated.isEmpty()){
-            this.setDeltaMovement(Vec3.ZERO);
-            this.setYRot(getDirection().getOpposite().toYRot());
-            doflip = false;
-        }
+        // leaving in case we want on demand flipping later
+//        if(doflip && dominated.isEmpty()){
+//            this.setDeltaMovement(Vec3.ZERO);
+//            flip();
+//            doflip = false;
+//        }
 
         if(this.level.isClientSide
                 && independentMotion){
             doMovementEffect();
         }
 
+    }
+
+    public void flip() {
+        this.setYRot(getDirection().getOpposite().toYRot());
     }
 
     protected void doMovementEffect() {
