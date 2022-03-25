@@ -21,6 +21,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
@@ -28,6 +29,8 @@ import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.PoweredRailBlock;
@@ -43,6 +46,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class AbstractTrainCarEntity extends AbstractMinecart implements IForgeAbstractMinecart, LinkableEntity<AbstractTrainCarEntity> {
@@ -461,13 +465,21 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     @Override
     public void remove(RemovalReason r) {
-        if(!this.level.isClientSide){
-            this.spawnAtLocation(this.getPickResult());
-            dominant.ifPresent((d) -> spawnChain());
-            dominated.ifPresent((d) -> spawnChain());
-        }
         handleLinkableKill();
         super.remove(r);
+    }
+
+    @Override
+    public void destroy(DamageSource pSource) {
+        int i = (int) Stream.of(dominant, dominated).filter(Optional::isPresent).count();
+        this.remove(Entity.RemovalReason.KILLED);
+        if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+            this.spawnAtLocation(this.getPickResult());
+            for (int j = 0; j < i; j++) {
+                spawnChain();
+            }
+        }
+
     }
 
     protected void prevent180() {
