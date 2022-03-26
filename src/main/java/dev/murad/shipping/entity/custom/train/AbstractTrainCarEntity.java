@@ -24,16 +24,13 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
-import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
@@ -108,7 +105,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         if (state.getBlock() instanceof BaseRailBlock railBlock) {
             RailShape railshape = (railBlock).getRailDirection(state, this.level, pos, this);
             var exit = RailUtils.EXITS.get(railshape).getFirst();
-            this.setYRotInternal(RailUtils.directionFromVelocity(new Vec3(exit.getX(), exit.getY(), exit.getZ())).toYRot());
+            this.setYRot(RailUtils.directionFromVelocity(new Vec3(exit.getX(), exit.getY(), exit.getZ())).toYRot());
         }
         train = new Train<>(this);
     }
@@ -220,16 +217,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         tickYRot();
         if (!level.isClientSide) {
             doChainMath();
-        }
-
-
-        if (!level.isClientSide) {
             enforceMaxVelocity(TRAIN_SPEED);
         }
-    }
-
-    protected void tickMinecartV() {
-        super.tick();
     }
 
     protected void enforceMaxVelocity(double maxSpeed) {
@@ -260,6 +249,11 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     }
 
     protected void tickYRot() {
+        this.setYRot(computeYaw());
+    }
+
+    public float computeYaw() {
+        var yrot = this.getYRot();
         // if the car is part of a train, enforce that direction instead
         Optional<RailShape> railShape = getRailShape();
         if (this.dominated.isPresent() && railShape.isPresent()) {
@@ -270,7 +264,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                 Optional<Vec3i> directionOpt = RailUtils.getDirectionToOtherExit(pair.getFirst(), railShape.get());
                 if (directionOpt.isPresent()) {
                     Vec3i direction = directionOpt.get();
-                    this.setYRotInternal((float) (Mth.atan2(direction.getZ(), direction.getX()) * 180.0D / Math.PI) + 90);
+                    return ((float) (Mth.atan2(direction.getZ(), direction.getX()) * 180.0D / Math.PI) + 90);
                 }
             }
         } else if (this.dominant.isPresent() && railShape.isPresent()) {
@@ -281,16 +275,19 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                 Optional<Vec3i> directionOpt = RailUtils.getDirectionToOtherExit(pair.getFirst(), railShape.get());
                 if (directionOpt.isPresent()) {
                     Vec3i direction = directionOpt.get();
-                    this.setYRotInternal((float) (Mth.atan2(-direction.getZ(), -direction.getX()) * 180.0D / Math.PI) + 90);
+                    return ((float) (Mth.atan2(-direction.getZ(), -direction.getX()) * 180.0D / Math.PI) + 90);
                 }
             }
         } else {
             double d1 = this.xo - this.getX();
             double d3 = this.zo - this.getZ();
             if (d1 * d1 + d3 * d3 > 0.001D) {
-                this.setYRotInternal((float) (Mth.atan2(d3, d1) * 180.0D / Math.PI) + 90);
+                return ((float) (Mth.atan2(d3, d1) * 180.0D / Math.PI) + 90);
             }
         }
+
+        return yrot;
+
     }
 
     /**
@@ -358,14 +355,11 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     @Override
     public Direction getMotionDirection() {
-        return this.getDirection();
+        return Direction.fromYRot((this.getYRot()));
     }
 
     @Override
     public void setYRot(float pYRot) {
-    }
-
-    public void setYRotInternal(float pYRot) {
         super.setYRot(pYRot);
     }
 
@@ -461,10 +455,6 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                 removeDominant();
             }
         });
-    }
-
-    public void push(Vec3 force) {
-        super.push(force.x, force.y, force.z);
     }
 
     @Override
