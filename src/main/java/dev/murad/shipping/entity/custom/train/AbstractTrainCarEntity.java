@@ -360,13 +360,14 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         return Direction.fromYRot((this.getYRot()));
     }
 
-    @Override
-    public void setYRot(float pYRot) {
-        super.setYRot(pYRot);
-    }
-
     protected void tickVanilla(){
         super.tick();
+    }
+
+    @Override
+    protected void moveAlongTrack(BlockPos pPos, BlockState pState) {
+        setYRot(computeYaw());
+        super.moveAlongTrack(pPos, pState);
     }
 
     @Override
