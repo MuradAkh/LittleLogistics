@@ -39,7 +39,7 @@ import java.util.Random;
 public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements ItemHandlerVanillaContainerWrapper {
     private final ItemStackHandler itemHandler = createHandler();
     private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
-    private static final int FURNACE_FUEL_MULTIPLIER= ShippingConfig.Server.STEAM_TUG_FUEL_MULTIPLIER.get();
+    private static final int FURNACE_FUEL_MULTIPLIER= ShippingConfig.Server.STEAM_LOCO_FUEL_MULTIPLIER.get();
 
     protected int burnTime = 0;
     protected int burnCapacity = 0;

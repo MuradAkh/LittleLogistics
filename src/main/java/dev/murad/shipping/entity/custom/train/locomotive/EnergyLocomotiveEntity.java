@@ -38,9 +38,9 @@ import javax.annotation.Nullable;
 public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements ItemHandlerVanillaContainerWrapper {
     private final ItemStackHandler itemHandler = createHandler();
     private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
-    private static final int MAX_ENERGY = ShippingConfig.Server.ENERGY_TUG_BASE_CAPACITY.get();
-    private static final int MAX_TRANSFER = ShippingConfig.Server.ENERGY_TUG_BASE_MAX_CHARGE_RATE.get();
-    private static final int ENERGY_USAGE = ShippingConfig.Server.ENERGY_TUG_BASE_ENERGY_USAGE.get();
+    private static final int MAX_ENERGY = ShippingConfig.Server.ENERGY_LOCO_BASE_CAPACITY.get();
+    private static final int MAX_TRANSFER = ShippingConfig.Server.ENERGY_LOCO_BASE_MAX_CHARGE_RATE.get();
+    private static final int ENERGY_USAGE = ShippingConfig.Server.ENERGY_LOCO_BASE_ENERGY_USAGE.get();
 
     private final ReadWriteEnergyStorage internalBattery = new ReadWriteEnergyStorage(MAX_ENERGY, MAX_TRANSFER, Integer.MAX_VALUE);
     private final LazyOptional<IEnergyStorage> holder = LazyOptional.of(() -> internalBattery);
