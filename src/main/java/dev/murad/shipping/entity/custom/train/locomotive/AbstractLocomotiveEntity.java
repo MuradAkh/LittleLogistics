@@ -12,6 +12,7 @@ import dev.murad.shipping.util.ItemHandlerVanillaContainerWrapper;
 import dev.murad.shipping.util.LinkableEntityHead;
 import dev.murad.shipping.util.Train;
 import lombok.Setter;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
@@ -19,13 +20,21 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -33,6 +42,7 @@ import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -102,8 +112,10 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     @Override
     public void tick(){
         super.tickLoad();
-        tickVanilla();
         tickYRot();
+        var yrot = this.getYRot();
+        tickVanilla();
+        this.setYRot(yrot);
         if(!this.level.isClientSide){
             tickDockCheck();
             tickMovement();
@@ -117,6 +129,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
         frontHitbox.updatePosition(this);
     }
+
 
     public void flip() {
         this.setYRot(getDirection().getOpposite().toYRot());
