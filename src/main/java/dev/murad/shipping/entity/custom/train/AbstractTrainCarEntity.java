@@ -54,14 +54,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     public static final EntityDataAccessor<Integer> DOMINANT_ID = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
     public static final EntityDataAccessor<Integer> DOMINATED_ID = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
     protected Train<AbstractTrainCarEntity> train;
-    private boolean flipped = false;
-    private int lSteps;
-    private double lx;
-    private double ly;
-    private double lz;
-    private double lyr;
-    private double lxr;
-    private static double TRAIN_SPEED = ShippingConfig.Server.TRAIN_MAX_SPEED.get();
+    protected static double TRAIN_SPEED = ShippingConfig.Server.TRAIN_MAX_SPEED.get();
 
     @Getter
     @Setter
@@ -95,7 +88,6 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     public AbstractTrainCarEntity(EntityType<?> p_38087_, Level p_38088_) {
         super(p_38087_, p_38088_);
         train = new Train<>(this);
-        noCulling = true;
     }
 
     public AbstractTrainCarEntity(EntityType<?> p_38087_, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
@@ -123,7 +115,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     public boolean canBeCollidedWith() {
         // future me: we don't want to change this, because then you can't push the cart
-        return false;
+        return super.canBeCollidedWith();
     }
 
     @Override
@@ -221,6 +213,11 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
             doChainMath();
             enforceMaxVelocity(TRAIN_SPEED);
         }
+    }
+
+    @Override
+    public float getMaxCartSpeedOnRail() {
+        return (float) TRAIN_SPEED;
     }
 
     protected void enforceMaxVelocity(double maxSpeed) {
@@ -370,17 +367,6 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     }
 
     @Override
-    public void lerpTo(double pX, double pY, double pZ, float pYaw, float pPitch, int pPosRotationIncrements, boolean pTeleport) {
-        this.lx = pX;
-        this.ly = pY;
-        this.lz = pZ;
-        this.lyr = pYaw;
-        this.lxr = pPitch;
-        this.lSteps = pPosRotationIncrements + 2;
-        super.lerpTo(pX, pY, pZ, pYaw, pPitch, pPosRotationIncrements, pTeleport);
-    }
-
-    @Override
     public void remove(RemovalReason r) {
         handleLinkableKill();
         super.remove(r);
@@ -419,8 +405,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
             // this is a fix to mitigate "bouncing" when trains start moving from a stopped position
             // todo: fix based on "docked" instead.
-            boolean isMoving = this.getTrain().getTug().isPresent() && this.getTrain().getTug().get().getDeltaMovement().equals(Vec3.ZERO);
-            double maxDist = isMoving ? 1 : 1.2;
+            boolean docked = this.getTrain().getTug().isPresent() && this.getTrain().getTug().get().getDeltaMovement().equals(Vec3.ZERO);
+            double maxDist = docked ? 1 : 1.2;
             double minDist = 1.0;
 
             float distance = railDirDis.map(Pair::getSecond).filter(a -> a > 0).map(di -> {
