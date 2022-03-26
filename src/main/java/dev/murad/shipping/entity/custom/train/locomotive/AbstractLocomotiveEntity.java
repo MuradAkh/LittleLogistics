@@ -1,16 +1,20 @@
 package dev.murad.shipping.entity.custom.train.locomotive;
 
 import com.mojang.datafixers.types.Func;
+import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
+import dev.murad.shipping.entity.custom.tug.VehicleFrontPart;
 import dev.murad.shipping.setup.ModSounds;
 import dev.murad.shipping.util.ItemHandlerVanillaContainerWrapper;
 import dev.murad.shipping.util.LinkableEntityHead;
 import dev.murad.shipping.util.Train;
 import lombok.Setter;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -25,6 +29,7 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
@@ -39,6 +44,8 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     private boolean doflip = false;
     private boolean independentMotion = false;
     private boolean docked = false;
+    private static double LOCO_SPEED = ShippingConfig.Server.LOCO_BASE_SPEED.get();
+    private final VehicleFrontPart frontHitbox;
 
 
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractLocomotiveEntity.class, EntityDataSerializers.BOOLEAN);
@@ -47,10 +54,12 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     public AbstractLocomotiveEntity(EntityType<?> type, Level p_38088_) {
         super(type, p_38088_);
+        frontHitbox = new VehicleFrontPart(this);
     }
 
     public AbstractLocomotiveEntity(EntityType<?> type, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
         super(type, level, aDouble, aDouble1, aDouble2);
+        frontHitbox = new VehicleFrontPart(this);
     }
 
     @Override
@@ -93,17 +102,12 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     @Override
     public void tick(){
         super.tickLoad();
-        super.tickMinecart();
-
-        if(!this.level.isClientSide){
-            prevent180();
-
-        }
+        super.tickVanilla();
         tickYRot();
         if(!this.level.isClientSide){
             tickDockCheck();
             tickMovement();
-            enforceMaxVelocity(0.2);
+            enforceMaxVelocity(LOCO_SPEED);
         }
 
         // leaving in case we want on demand flipping later
@@ -118,6 +122,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             doMovementEffect();
         }
 
+        frontHitbox.updatePosition(this);
     }
 
     public void flip() {
@@ -140,8 +145,26 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             accelerate();
         }else{
             entityData.set(INDEPENDENT_MOTION, false);
-            setDeltaMovement(Vec3.ZERO);
         }
+    }
+
+    @Override
+    public PartEntity<?>[] getParts()
+    {
+        return new PartEntity<?>[]{frontHitbox};
+    }
+
+    @Override
+    public boolean isMultipartEntity()
+    {
+        return true;
+    }
+
+
+    @Override
+    public void recreateFromPacket(ClientboundAddEntityPacket p_149572_) {
+        super.recreateFromPacket(p_149572_);
+        frontHitbox.setId(p_149572_.getId());
     }
 
 

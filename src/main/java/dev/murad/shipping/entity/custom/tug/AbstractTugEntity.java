@@ -69,7 +69,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private int dockCheckCooldown = 0;
     private boolean independentMotion = false;
     private int pathfindCooldown = 0;
-    private TugFrontPart frontHitbox;
+    private VehicleFrontPart frontHitbox;
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.BOOLEAN);
 
 
@@ -86,7 +86,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         this.blocksBuilding = true;
         this.train = new Train(this);
         this.path = new TugRoute();
-        frontHitbox = new TugFrontPart(this);
+        frontHitbox = new VehicleFrontPart(this);
     }
 
     public AbstractTugEntity(EntityType type, Level worldIn, double x, double y, double z) {
