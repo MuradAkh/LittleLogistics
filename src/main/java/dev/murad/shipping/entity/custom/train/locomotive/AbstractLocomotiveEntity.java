@@ -102,20 +102,13 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     @Override
     public void tick(){
         super.tickLoad();
-        super.tickVanilla();
+        tickVanilla();
         tickYRot();
         if(!this.level.isClientSide){
             tickDockCheck();
             tickMovement();
             enforceMaxVelocity(LOCO_SPEED);
         }
-
-        // leaving in case we want on demand flipping later
-//        if(doflip && dominated.isEmpty()){
-//            this.setDeltaMovement(Vec3.ZERO);
-//            flip();
-//            doflip = false;
-//        }
 
         if(this.level.isClientSide
                 && independentMotion){
