@@ -1,8 +1,6 @@
 package dev.murad.shipping;
 
-import dev.murad.shipping.entity.container.EnergyTugScreen;
-import dev.murad.shipping.entity.container.FishingBargeScreen;
-import dev.murad.shipping.entity.container.SteamTugScreen;
+import dev.murad.shipping.entity.container.*;
 import dev.murad.shipping.item.container.TugRouteScreen;
 import dev.murad.shipping.setup.ModItemModelProperties;
 import dev.murad.shipping.setup.ModMenuTypes;
@@ -63,6 +61,8 @@ public class ShippingMod
         MenuScreens.register(ModMenuTypes.TUG_CONTAINER.get(), SteamTugScreen::new);
         MenuScreens.register(ModMenuTypes.ENERGY_TUG_CONTAINER.get(), EnergyTugScreen::new);
         MenuScreens.register(ModMenuTypes.FISHING_BARGE_CONTAINER.get(), FishingBargeScreen::new);
+        MenuScreens.register(ModMenuTypes.ENERGY_LOCOMOTIVE_CONTAINER.get(), EnergyLocomotiveScreen::new);
+        MenuScreens.register(ModMenuTypes.STEAM_LOCOMOTIVE_CONTAINER.get(), SteamLocomotiveScreen::new);
 
         MenuScreens.register(ModMenuTypes.TUG_ROUTE_CONTAINER.get(), TugRouteScreen::new);
 

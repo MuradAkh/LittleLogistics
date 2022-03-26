@@ -44,6 +44,14 @@ public class ShippingConfig {
         public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_ENERGY_USAGE;
         public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_MAX_CHARGE_RATE;
 
+        public static final ForgeConfigSpec.ConfigValue<Double> TRAIN_MAX_SPEED;
+        public static final ForgeConfigSpec.ConfigValue<Double> LOCO_BASE_SPEED;
+
+        public static final ForgeConfigSpec.ConfigValue<Integer> STEAM_LOCO_FUEL_MULTIPLIER;
+        public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_CAPACITY;
+        public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_ENERGY_USAGE;
+        public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_MAX_CHARGE_RATE;
+
         public static final ForgeConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_CAPACITY;
         public static final ForgeConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_MAX_TRANSFER;
 
@@ -99,6 +107,35 @@ public class ShippingConfig {
                         BUILDER.comment("Base max transfer rate of the Vessel Charger in FE/tick, must be an integer >= 1. Default 100.")
                                 .defineInRange("vesselChargerBaseMaxTransfer", 100, 1, Integer.MAX_VALUE);
                 BUILDER.pop();
+            }
+            BUILDER.pop();
+            BUILDER.push("train");
+            {
+                BUILDER.push("general");
+                TRAIN_MAX_SPEED =
+                        BUILDER.comment("Max speed that trains can be accelerated to. High speed may cause chunk loading lag or issues, not advised for servers or packs. Default 0.25, max is 1")
+                                .defineInRange("trainMaxSpeed", 0.25, 0.01, 1);
+                BUILDER.pop();
+            }
+            {
+                BUILDER.push("locomotive");
+                LOCO_BASE_SPEED =
+                        BUILDER.comment("Locomotive base speed. High speed may cause chunk loading lag or issues, not advised for servers or packs. Default 0.2, max is 0.9")
+                                .defineInRange("locoBaseSpeed", 0.2, 0.01, 0.9);
+
+                STEAM_LOCO_FUEL_MULTIPLIER =
+                        BUILDER.comment("Increases the burn duration of Steam locomotive fuel by N times when compared to furnace, must be an integer >= 1. Default 4.")
+                                .defineInRange("steamLocoFuelMultiplier", 4, 1, Integer.MAX_VALUE);
+
+                ENERGY_LOCO_BASE_CAPACITY =
+                        BUILDER.comment("Base maximum capacity of the Energy locomotive in FE, must be an integer >= 1. Default 10000.")
+                                .defineInRange("energyLocoBaseCapacity", 10000, 1, Integer.MAX_VALUE);
+                ENERGY_LOCO_BASE_ENERGY_USAGE =
+                        BUILDER.comment("Base energy usage of the Energy locomotive in FE/tick, must be an integer >= 1. Default 1.")
+                                .defineInRange("energyLocoBaseEnergyUsage", 1, 1, Integer.MAX_VALUE);
+                ENERGY_LOCO_BASE_MAX_CHARGE_RATE =
+                        BUILDER.comment("Base max charge rate of the Energy locomotive in FE/tick, must be an integer >= 1. Default 100.")
+                                .defineInRange("energyLocoBaseMaxChargeRate", 100, 1, Integer.MAX_VALUE);BUILDER.pop();
             }
             BUILDER.pop();
             SPEC = BUILDER.build();

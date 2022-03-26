@@ -3,18 +3,18 @@ package dev.murad.shipping.network;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 
-public class SetTag {
+public class SetRouteTagPacket {
     public final int routeChecksum;
     public final boolean isOffhand;
     public final CompoundTag tag;
 
-    public SetTag(FriendlyByteBuf buffer) {
+    public SetRouteTagPacket(FriendlyByteBuf buffer) {
         this.routeChecksum = buffer.readInt();
         this.isOffhand = buffer.readBoolean();
         this.tag = buffer.readNbt();
     }
 
-    public SetTag(int checksum, boolean isOffHand, CompoundTag tag) {
+    public SetRouteTagPacket(int checksum, boolean isOffHand, CompoundTag tag) {
         this.routeChecksum = checksum;
         this.isOffhand = isOffHand;
         this.tag = tag;

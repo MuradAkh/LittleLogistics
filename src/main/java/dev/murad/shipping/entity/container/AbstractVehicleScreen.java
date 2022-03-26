@@ -5,8 +5,8 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.network.chat.Component;
 
-public abstract class AbstractTugScreen<T extends AbstractItemHandlerContainer> extends AbstractContainerScreen<T> {
-    public AbstractTugScreen(T menu, Inventory inventory, Component p_i51105_3_) {
+public abstract class AbstractVehicleScreen<T extends AbstractItemHandlerContainer> extends AbstractContainerScreen<T> {
+    public AbstractVehicleScreen(T menu, Inventory inventory, Component p_i51105_3_) {
         super(menu, inventory, p_i51105_3_);
     }
 

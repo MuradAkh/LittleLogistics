@@ -73,6 +73,14 @@ public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVa
         }
     }
 
+    @Override
+    public boolean stillValid(Player pPlayer) {
+        if (this.isRemoved()) {
+            return false;
+        } else {
+            return !(this.distanceToSqr(pPlayer) > 64.0D);
+        }
+    }
 
 
     @Override

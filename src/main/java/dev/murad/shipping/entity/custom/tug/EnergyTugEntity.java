@@ -2,10 +2,12 @@ package dev.murad.shipping.entity.custom.tug;
 
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.capability.ReadWriteEnergyStorage;
+import dev.murad.shipping.entity.accessor.EnergyLocomotiveDataAccessor;
 import dev.murad.shipping.entity.accessor.EnergyTugDataAccessor;
 import dev.murad.shipping.entity.container.EnergyTugContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import dev.murad.shipping.util.InventoryUtils;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -23,6 +25,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -118,26 +121,11 @@ public class EnergyTugEntity extends AbstractTugEntity {
         super.addAdditionalSaveData(compound);
     }
 
-    @Nullable
-    private IEnergyStorage getEnergyCapabilityInSlot(int slot) {
-        ItemStack stack = itemHandler.getStackInSlot(slot);
-        if (!stack.isEmpty()) {
-            LazyOptional<IEnergyStorage> capabilityLazyOpt = stack.getCapability(CapabilityEnergy.ENERGY);
-            if (capabilityLazyOpt.isPresent()) {
-                Optional<IEnergyStorage> capabilityOpt = capabilityLazyOpt.resolve();
-                if (capabilityOpt.isPresent()) {
-                    return capabilityOpt.get();
-                }
-            }
-        }
-        return null;
-    }
-
     @Override
     public void tick() {
         // grab energy from capacitor
         if (!level.isClientSide) {
-            IEnergyStorage capability = getEnergyCapabilityInSlot(1);
+            IEnergyStorage capability = InventoryUtils.getEnergyCapabilityInSlot(1, itemHandler);
             if (capability != null) {
                 // simulate first
                 int toExtract = capability.extractEnergy(MAX_TRANSFER, true);

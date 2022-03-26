@@ -1,9 +1,11 @@
 package dev.murad.shipping.block.vessel_detector;
 
 import dev.murad.shipping.entity.custom.VesselEntity;
+import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -21,7 +23,7 @@ public class VesselDetectorTileEntity extends BlockEntity  {
     }
 
     private static boolean isValidBlock(BlockState state) {
-        return state.is(Blocks.WATER) || state.is(Blocks.AIR);
+        return state.is(Blocks.WATER) || state.is(Blocks.AIR) || state.is(BlockTags.RAILS);
     }
 
     private static int getSearchLimit(BlockPos pos, Direction direction, Level level){
@@ -35,7 +37,7 @@ public class VesselDetectorTileEntity extends BlockEntity  {
     private void checkForVessel(){
         Direction direction = this.getBlockState().getValue(VesselDetectorBlock.FACING);
         boolean found = !this.level.getEntities((Entity) null, getSearchBox(this.getBlockPos(), direction, this.level),
-                (e) -> e instanceof VesselEntity).isEmpty();
+                (e) -> e instanceof VesselEntity || e instanceof AbstractTrainCarEntity).isEmpty();
         boolean previousPowered = this.getBlockState().getValue(VesselDetectorBlock.POWERED);
 
         this.getBlockState().setValue(VesselDetectorBlock.POWERED, found);

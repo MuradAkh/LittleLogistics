@@ -2,8 +2,10 @@ package dev.murad.shipping.entity.custom.train;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
+import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
+import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.RailUtils;
 import dev.murad.shipping.util.Train;
@@ -20,16 +22,15 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
-import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
@@ -42,12 +43,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class AbstractTrainCarEntity extends AbstractMinecart implements IForgeAbstractMinecart, LinkableEntity<AbstractTrainCarEntity> {
     protected Optional<AbstractTrainCarEntity> dominant = Optional.empty();
     protected Optional<AbstractTrainCarEntity> dominated = Optional.empty();
-    private @Nullable CompoundTag dominantNBT;
+    private @Nullable
+    CompoundTag dominantNBT;
     public static final EntityDataAccessor<Integer> DOMINANT_ID = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
     public static final EntityDataAccessor<Integer> DOMINATED_ID = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
     protected Train<AbstractTrainCarEntity> train;
@@ -58,6 +61,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     private double lz;
     private double lyr;
     private double lxr;
+    private static double TRAIN_SPEED = ShippingConfig.Server.TRAIN_MAX_SPEED.get();
 
     @Getter
     @Setter
@@ -106,8 +110,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         train = new Train<>(this);
     }
 
-    protected Optional<RailShape> getRailShape(){
-        for(var pos: Arrays.asList(getOnPos().above(), getOnPos())) {
+    protected Optional<RailShape> getRailShape() {
+        for (var pos : Arrays.asList(getOnPos().above(), getOnPos())) {
             var state = level.getBlockState(pos);
             if (state.getBlock() instanceof BaseRailBlock railBlock) {
                 return Optional.of(RailUtils.getShape(pos, this.level, Optional.of(this)));
@@ -118,7 +122,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
 
     public boolean canBeCollidedWith() {
-        // todo: maybe we want this
+        // future me: we don't want to change this, because then you can't push the cart
         return false;
     }
 
@@ -131,10 +135,10 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     @Override
     protected void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
-        if(dominant.isPresent()) {
+        if (dominant.isPresent()) {
             writeNBT(dominant.get(), compound);
-        } else if(dominantNBT != null) {
-                compound.put(SpringEntity.SpringSide.DOMINANT.name(), dominantNBT);
+        } else if (dominantNBT != null) {
+            compound.put(SpringEntity.SpringSide.DOMINANT.name(), dominantNBT);
         }
     }
 
@@ -153,16 +157,16 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
             );
             List<Entity> entities = level.getEntities(this, searchBox, e -> e.getStringUUID().equals(uuid));
             return entities.stream().findFirst().map(e -> (AbstractTrainCarEntity) e);
-        } catch (Exception e){
+        } catch (Exception e) {
             return Optional.empty();
         }
     }
 
     private void writeNBT(Entity entity, CompoundTag globalCompound) {
         CompoundTag compound = new CompoundTag();
-        compound.putInt("X", (int)Math.floor(entity.getX()));
-        compound.putInt("Y", (int)Math.floor(entity.getY()));
-        compound.putInt("Z", (int)Math.floor(entity.getZ()));
+        compound.putInt("X", (int) Math.floor(entity.getX()));
+        compound.putInt("Y", (int) Math.floor(entity.getY()));
+        compound.putInt("Z", (int) Math.floor(entity.getZ()));
 
         compound.putString("UUID", entity.getUUID().toString());
 
@@ -210,36 +214,34 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     public void tick() {
         tickLoad();
         tickYRot();
+        var yrot = this.getYRot();
+        tickVanilla();
+        this.setYRot(yrot);
         if (!level.isClientSide) {
             doChainMath();
-        }
-
-        tickMinecart();
-
-        if (!level.isClientSide) {
-            enforceMaxVelocity(0.25);
+            enforceMaxVelocity(TRAIN_SPEED);
         }
     }
 
-    protected void enforceMaxVelocity(double maxSpeed){
+    protected void enforceMaxVelocity(double maxSpeed) {
         var vel = this.getDeltaMovement();
         var normal = vel.normalize();
-        if(Math.abs(vel.x) > maxSpeed){
+        if (Math.abs(vel.x) > maxSpeed) {
             this.setDeltaMovement(normal.x * maxSpeed, vel.y, vel.z);
             vel = this.getDeltaMovement();
         }
-        if(Math.abs(vel.z) > maxSpeed){
+        if (Math.abs(vel.z) > maxSpeed) {
             this.setDeltaMovement(vel.x, vel.y, normal.z * maxSpeed);
         }
     }
 
 
-    protected void tickLoad(){
+    protected void tickLoad() {
         if (this.level.isClientSide) {
             fetchDominantClient();
             fetchDominatedClient();
         } else {
-            if(dominant.isEmpty() && dominantNBT != null){
+            if (dominant.isEmpty() && dominantNBT != null) {
                 tryToLoadFromNBT(dominantNBT).ifPresent(this::setDominant);
                 dominant.ifPresent(d -> d.setDominated(this));
             }
@@ -249,9 +251,14 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     }
 
     protected void tickYRot() {
+        this.setYRot(computeYaw());
+    }
+
+    public float computeYaw() {
+        var yrot = this.getYRot();
         // if the car is part of a train, enforce that direction instead
         Optional<RailShape> railShape = getRailShape();
-        if(this.dominated.isPresent() && railShape.isPresent()) {
+        if (this.dominated.isPresent() && railShape.isPresent()) {
             Optional<Pair<Direction, Integer>> r = RailUtils.traverseBi(getOnPos().above(), this.level,
                     RailUtils.samePositionPredicate(dominated.get()), 5, this);
             if (r.isPresent()) {
@@ -259,7 +266,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                 Optional<Vec3i> directionOpt = RailUtils.getDirectionToOtherExit(pair.getFirst(), railShape.get());
                 if (directionOpt.isPresent()) {
                     Vec3i direction = directionOpt.get();
-                    this.setYRot((float)(Mth.atan2(direction.getZ(), direction.getX()) * 180.0D / Math.PI) + 90);
+                    return ((float) (Mth.atan2(direction.getZ(), direction.getX()) * 180.0D / Math.PI) + 90);
                 }
             }
         } else if (this.dominant.isPresent() && railShape.isPresent()) {
@@ -270,16 +277,19 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                 Optional<Vec3i> directionOpt = RailUtils.getDirectionToOtherExit(pair.getFirst(), railShape.get());
                 if (directionOpt.isPresent()) {
                     Vec3i direction = directionOpt.get();
-                    this.setYRot((float)(Mth.atan2(-direction.getZ(), -direction.getX()) * 180.0D / Math.PI) + 90);
+                    return ((float) (Mth.atan2(-direction.getZ(), -direction.getX()) * 180.0D / Math.PI) + 90);
                 }
             }
         } else {
             double d1 = this.xo - this.getX();
             double d3 = this.zo - this.getZ();
             if (d1 * d1 + d3 * d3 > 0.001D) {
-                this.setYRot((float)(Mth.atan2(d3, d1) * 180.0D / Math.PI) + 90);
+                return ((float) (Mth.atan2(d3, d1) * 180.0D / Math.PI) + 90);
             }
         }
+
+        return yrot;
+
     }
 
     /**
@@ -299,7 +309,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
         BlockState blockstate = this.level.getBlockState(new BlockPos(i, j, k));
         if (BaseRailBlock.isRail(blockstate)) {
-            RailShape railshape = ((BaseRailBlock)blockstate.getBlock()).getRailDirection(blockstate, this.level, new BlockPos(i, j, k), this);
+            RailShape railshape = ((BaseRailBlock) blockstate.getBlock()).getRailDirection(blockstate, this.level, new BlockPos(i, j, k), this);
             pY = j;
             if (railshape.isAscending()) {
                 pY = j + 1;
@@ -347,104 +357,16 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     @Override
     public Direction getMotionDirection() {
-        return this.getDirection();
+        return Direction.fromYRot((this.getYRot()));
     }
 
-    protected void tickMinecart() {
-        if (this.getHurtTime() > 0) {
-            this.setHurtTime(this.getHurtTime() - 1);
-        }
+    @Override
+    public void setYRot(float pYRot) {
+        super.setYRot(pYRot);
+    }
 
-        if (this.getDamage() > 0.0F) {
-            this.setDamage(this.getDamage() - 1.0F);
-        }
-
-        this.checkOutOfWorld();
-        this.handleNetherPortal();
-        if (this.level.isClientSide) {
-            if (this.lSteps > 0) {
-                double d5 = this.getX() + (this.lx - this.getX()) / (double) this.lSteps;
-                double d6 = this.getY() + (this.ly - this.getY()) / (double) this.lSteps;
-                double d7 = this.getZ() + (this.lz - this.getZ()) / (double) this.lSteps;
-                double d2 = Mth.wrapDegrees(this.lyr - (double)this.getYRot());
-                this.setXRot(this.getXRot() + (float) (this.lxr - (double) this.getXRot()) / (float) this.lSteps);
-                --this.lSteps;
-                this.setPos(d5, d6, d7);
-                this.setRot(this.getYRot(), this.getXRot());
-            } else {
-                this.reapplyPosition();
-                this.setRot(this.getYRot(), this.getXRot());
-            }
-        } else {
-            if (!this.isNoGravity()) {
-                double d0 = this.isInWater() ? -0.005D : -0.04D;
-                this.setDeltaMovement(this.getDeltaMovement().add(0.0D, d0, 0.0D));
-            }
-
-            int k = Mth.floor(this.getX());
-            int i = Mth.floor(this.getY());
-            int j = Mth.floor(this.getZ());
-            if (this.level.getBlockState(new BlockPos(k, i - 1, j)).is(BlockTags.RAILS)) {
-                --i;
-            }
-
-            BlockPos blockpos = new BlockPos(k, i, j);
-            BlockState blockstate = this.level.getBlockState(blockpos);
-            if (canUseRail() && BaseRailBlock.isRail(blockstate)) {
-                this.moveAlongTrack(blockpos, blockstate);
-                if (blockstate.getBlock() instanceof PoweredRailBlock && ((PoweredRailBlock) blockstate.getBlock()).isActivatorRail()) {
-                    this.activateMinecart(k, i, j, blockstate.getValue(PoweredRailBlock.POWERED));
-                }
-            } else {
-                this.comeOffTrack();
-            }
-
-            this.checkInsideBlocks();
-            this.setXRot(0.0F);
-
-            double d4 = Mth.wrapDegrees(this.getYRot() - this.yRotO);
-            if (d4 < -170.0D || d4 >= 170.0D) {
-                this.flipped = !this.flipped;
-            }
-
-            this.setRot(this.getYRot(), this.getXRot());
-            AABB box;
-            if (getCollisionHandler() != null) box = getCollisionHandler().getMinecartCollisionBox(this);
-            else box = this.getBoundingBox().inflate(0.2F, 0.0D, 0.2F);
-            if (canBeRidden() && this.getDeltaMovement().horizontalDistanceSqr() > 0.01D) {
-                List<Entity> list = this.level.getEntities(this, box, EntitySelector.pushableBy(this));
-                if (!list.isEmpty()) {
-                    for (int l = 0; l < list.size(); ++l) {
-                        Entity collidingEntity = list.get(l);
-                        if (!(collidingEntity instanceof Player) &&
-                                !(collidingEntity instanceof IronGolem) &&
-                                !(collidingEntity instanceof AbstractMinecart) &&
-                                !this.isVehicle() &&
-                                !collidingEntity.isPassenger()) {
-                            collidingEntity.startRiding(this);
-                        } else if (!(collidingEntity instanceof AbstractTrainCarEntity)){
-                            collidingEntity.push(this);
-                        }
-                    }
-                }
-            } else {
-                for (Entity entity : this.level.getEntities(this, box)) {
-                    if (!this.hasPassenger(entity) &&
-                            entity.isPushable() &&
-                            entity instanceof AbstractMinecart) {
-                        entity.push(this);
-                    }
-                }
-            }
-
-            this.updateInWaterStateAndDoFluidPushing();
-            if (this.isInLava()) {
-                this.lavaHurt();
-                this.fallDistance *= 0.5F;
-            }
-
-            this.firstTick = false;
-        }
+    protected void tickVanilla(){
+        super.tick();
     }
 
     @Override
@@ -460,11 +382,21 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     @Override
     public void remove(RemovalReason r) {
-        if(!this.level.isClientSide){
-            this.spawnAtLocation(this.getPickResult());
-        }
         handleLinkableKill();
         super.remove(r);
+    }
+
+    @Override
+    public void destroy(DamageSource pSource) {
+        int i = (int) Stream.of(dominant, dominated).filter(Optional::isPresent).count();
+        this.remove(Entity.RemovalReason.KILLED);
+        if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+            this.spawnAtLocation(this.getPickResult());
+            for (int j = 0; j < i; j++) {
+                spawnChain();
+            }
+        }
+
     }
 
     protected void prevent180() {
@@ -478,7 +410,6 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     private double fixUtil(double mag) {
         return mag < 0 ? 0 : 1;
     }
-
 
 
     private void doChainMath() {
@@ -512,14 +443,13 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                         setDeltaMovement(parentDirection.scale(0.05));
                     } else {
                         setDeltaMovement(parentDirection.scale(parentVelocity.length()));
-                        if(distance > maxDist + 0.2) {
+                        if (distance > maxDist + 0.2) {
                             setDeltaMovement(getDeltaMovement().scale(distance * 0.8));
                         }
                     }
-                } else if (distance < minDist - 0.02){
+                } else if (distance < minDist - 0.02) {
                     setDeltaMovement(parentDirection.scale(-0.05));
-                }
-                else {
+                } else {
                     setDeltaMovement(Vec3.ZERO);
                 }
             } else {
@@ -527,10 +457,6 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                 removeDominant();
             }
         });
-    }
-
-    public void push(Vec3 force) {
-        super.push(force.x, force.y, force.z);
     }
 
     @Override
@@ -549,14 +475,22 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         return dominant;
     }
 
+    private void spawnChain() {
+        var stack = new ItemStack(ModItems.SPRING.get());
+        this.spawnAtLocation(stack);
+    }
+
     @Override
     public void handleShearsCut() {
+        if (!this.level.isClientSide && dominant.isPresent()) {
+            spawnChain();
+        }
         this.dominant.ifPresent(LinkableEntity::removeDominated);
         removeDominant();
     }
 
     @Override
-    public BlockPos getBlockPos(){
+    public BlockPos getBlockPos() {
         return this.getOnPos();
     }
 
@@ -570,19 +504,19 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         return false;
     }
 
-    private void invertDoms(){
+    private void invertDoms() {
         var temp = dominant;
         dominant = dominated;
         dominated = temp;
     }
 
-    private static Optional<Integer> distHelper(AbstractTrainCarEntity car1, AbstractTrainCarEntity car2){
+    private static Optional<Integer> distHelper(AbstractTrainCarEntity car1, AbstractTrainCarEntity car2) {
         return RailUtils.traverseBi(car1.getOnPos().above(), car1.level,
                 (l, p) -> RailUtils.getRail(car2.getOnPos().above(), car2.level)
                         .map(rp -> rp.equals(p)).orElse(false), 5, car1).map(Pair::getSecond);
     }
 
-    private static Optional<Pair<AbstractTrainCarEntity, AbstractTrainCarEntity>> findClosestPair(Train<AbstractTrainCarEntity> train1, Train<AbstractTrainCarEntity> train2){
+    private static Optional<Pair<AbstractTrainCarEntity, AbstractTrainCarEntity>> findClosestPair(Train<AbstractTrainCarEntity> train1, Train<AbstractTrainCarEntity> train2) {
         int mindistance = Integer.MAX_VALUE;
         Optional<Pair<AbstractTrainCarEntity, AbstractTrainCarEntity>> curr = Optional.empty();
         var pairs = Arrays.asList(
@@ -590,12 +524,11 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                 Pair.of(train1.getTail(), train2.getHead()),
                 Pair.of(train1.getTail(), train2.getTail()),
                 Pair.of(train1.getHead(), train2.getHead())
-                );
-        for (var pair: pairs) {
+        );
+        for (var pair : pairs) {
 
             var d = distHelper(pair.getFirst(), pair.getSecond());
-            if(d.isPresent() && d.get() < mindistance)
-            {
+            if (d.isPresent() && d.get() < mindistance) {
                 mindistance = d.get();
                 curr = Optional.of(pair);
             }
@@ -608,13 +541,13 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     }
 
-    private static Pair<AbstractTrainCarEntity, AbstractTrainCarEntity> caseTailHead(Train <AbstractTrainCarEntity> trainTail, Train<AbstractTrainCarEntity> trainHead, Pair<AbstractTrainCarEntity, AbstractTrainCarEntity> targetPair){
+    private static Pair<AbstractTrainCarEntity, AbstractTrainCarEntity> caseTailHead(Train<AbstractTrainCarEntity> trainTail, Train<AbstractTrainCarEntity> trainHead, Pair<AbstractTrainCarEntity, AbstractTrainCarEntity> targetPair) {
 
-        if(trainHead.getTug().isPresent()){
+        if (trainHead.getTug().isPresent()) {
             invertTrain(trainHead);
             invertTrain(trainTail);
             return targetPair.swap();
-        }else{
+        } else {
             return targetPair;
         }
     }
@@ -627,22 +560,22 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         train.setTail(head);
     }
 
-    private static Optional<Pair<AbstractTrainCarEntity, AbstractTrainCarEntity>> tryFindAndPrepareClosePair(Train<AbstractTrainCarEntity> train1, Train<AbstractTrainCarEntity> train2){
+    private static Optional<Pair<AbstractTrainCarEntity, AbstractTrainCarEntity>> tryFindAndPrepareClosePair(Train<AbstractTrainCarEntity> train1, Train<AbstractTrainCarEntity> train2) {
         return findClosestPair(train1, train2).flatMap(targetPair -> {
-            if(targetPair.getFirst().equals(train1.getHead()) && targetPair.getSecond().equals(train2.getHead())){
+            if (targetPair.getFirst().equals(train1.getHead()) && targetPair.getSecond().equals(train2.getHead())) {
                 // if trying to attach to head loco then loco is solo
-                 if (train1.getTug().isPresent()){
+                if (train1.getTug().isPresent()) {
                     return Optional.of(targetPair);
                 } else {
                     invertTrain(train2);
                     return Optional.of(targetPair.swap());
                 }
-            }else if(targetPair.getFirst().equals(train1.getHead()) && targetPair.getSecond().equals(train2.getTail())){
+            } else if (targetPair.getFirst().equals(train1.getHead()) && targetPair.getSecond().equals(train2.getTail())) {
                 return Optional.of(caseTailHead(train2, train1, targetPair.swap()));
-            }else if(targetPair.getFirst().equals(train1.getTail()) && targetPair.getSecond().equals(train2.getHead())){
+            } else if (targetPair.getFirst().equals(train1.getTail()) && targetPair.getSecond().equals(train2.getHead())) {
                 return Optional.of(caseTailHead(train1, train2, targetPair));
-            }else if(targetPair.getFirst().equals(train1.getTail()) && targetPair.getSecond().equals(train2.getTail())){
-                if(train2.getTug().isPresent()){
+            } else if (targetPair.getFirst().equals(train1.getTail()) && targetPair.getSecond().equals(train2.getTail())) {
+                if (train2.getTug().isPresent()) {
                     invertTrain(train1);
                     return Optional.of(targetPair.swap());
                 } else {
@@ -654,15 +587,16 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
             return Optional.empty();
         });
     }
+
     @Override
     public boolean linkEntities(Player player, Entity target) {
         if (target instanceof AbstractTrainCarEntity t) {
             Train<AbstractTrainCarEntity> train1 = t.getTrain();
             Train<AbstractTrainCarEntity> train2 = this.getTrain();
-            if(train2.getTug().isPresent() && train1.getTug().isPresent()){
+            if (train2.getTug().isPresent() && train1.getTug().isPresent()) {
                 player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.noTwoLoco"), true);
                 return false;
-            } else if (train2.equals(train1)){
+            } else if (train2.equals(train1)) {
                 player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.noLoops"), true);
                 return false;
             } else {
