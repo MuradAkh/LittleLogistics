@@ -122,8 +122,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
 
     public boolean canBeCollidedWith() {
-        // todo: maybe we want this
-        return true;
+        // future me: we don't want to change this, because then you can't push the cart
+        return false;
     }
 
     @Override
@@ -213,8 +213,10 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     public void tick() {
         tickLoad();
-        tickVanilla();
         tickYRot();
+        var yrot = this.getYRot();
+        tickVanilla();
+        this.setYRot(yrot);
         if (!level.isClientSide) {
             doChainMath();
             enforceMaxVelocity(TRAIN_SPEED);
