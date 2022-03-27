@@ -9,6 +9,7 @@ import dev.murad.shipping.entity.container.SteamTugContainer;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import dev.murad.shipping.setup.ModSounds;
 import dev.murad.shipping.util.ItemHandlerVanillaContainerWrapper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -104,6 +105,12 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
                 return false;
             }
         }
+    }
+
+    @Override
+    protected void onUndock() {
+        super.onUndock();
+        this.playSound(ModSounds.STEAM_TUG_WHISTLE.get(), 1, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
     }
 
     @Override
