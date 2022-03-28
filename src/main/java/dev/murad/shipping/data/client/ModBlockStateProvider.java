@@ -144,6 +144,17 @@ public class ModBlockStateProvider extends BlockStateProvider {
                     .build();
         });
 
+        getVariantBuilder(ModBlocks.AUTOMATIC_SWITCH_RAIL.get()).forAllStates(state ->  {
+            String outDir = state.getValue(SwitchRail.OUT_DIRECTION).getSerializedName();
+            String powered = state.getValue(SwitchRail.POWERED) ? "on" : "off";
+            return ConfiguredModel.builder()
+                    .modelFile(models()
+                            .withExistingParent("automatic_switch_rail_" + outDir + "_" + powered, mcLoc("rail_flat"))
+                            .texture("rail", getBlTx("automatic_switch_rail_" + outDir + "_" + powered)))
+                    .rotationY((int) state.getValue(SwitchRail.FACING).getOpposite().toYRot())
+                    .build();
+        });
+
         getVariantBuilder(ModBlocks.JUNCTION_RAIL.get()).forAllStates(state -> ConfiguredModel.builder()
                 .modelFile(models()
                         .withExistingParent("junction_rail", mcLoc("rail_flat"))

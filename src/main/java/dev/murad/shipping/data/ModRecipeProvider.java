@@ -283,8 +283,24 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(ModItems.SEATER_CAR.get()))
                 .save(consumer);
 
+        ShapedRecipeBuilder.shaped(ModItems.RECEIVER_COMPONENT.get(), 4)
+                .define('o', Items.ENDER_EYE)
+                .define('#', Items.REDSTONE)
+                .define('_', Items.STONE_SLAB)
+                .pattern("o")
+                .pattern("#")
+                .pattern("_")
+                .unlockedBy("has_item", has(Items.ENDER_EYE))
+                .save(consumer);
 
+        ShapedRecipeBuilder.shaped(ModItems.TRANSMITTER_COMPONENT.get(), 4)
+                .define('o', Items.ENDER_EYE)
+                .define('#', Items.GLOWSTONE_DUST)
+                .define('_', Items.STONE_SLAB)
+                .pattern("o")
+                .pattern("#")
+                .pattern("_")
+                .unlockedBy("has_item", has(Items.ENDER_EYE))
+                .save(consumer);
     }
-
-
 }
