@@ -23,6 +23,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
+
 public class JunctionRail extends BaseRailBlock implements MultiShapeRail {
     private static final Logger log = LogManager.getLogger(JunctionRail.class);
     // for compatibilty issues
@@ -87,9 +89,24 @@ public class JunctionRail extends BaseRailBlock implements MultiShapeRail {
     }
 
     @Override
+    public boolean setRailState(BlockState state, Level world, BlockPos pos, Direction in, Direction out) {
+        return false;
+    }
+
+    @Override
+    public Set<Direction> getPossibleOutputDirections(BlockState state, Direction inputSide) {
+        return null;
+    }
+
+    @Override
     public RailShape getVanillaRailShapeFromDirection(BlockState state, BlockPos pos, Level level, Direction direction) {
         if(direction.equals(Direction.EAST) || direction.equals(Direction.WEST)){
             return RailShape.EAST_WEST;
         } else return RailShape.NORTH_SOUTH;
+    }
+
+    @Override
+    public boolean isAutomaticSwitching() {
+        return false;
     }
 }

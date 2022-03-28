@@ -7,6 +7,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 
 import java.util.List;
+import java.util.Set;
 
 public interface MultiShapeRail {
     /**
@@ -15,9 +16,9 @@ public interface MultiShapeRail {
      * @return if state was set automatically (or in the case of manual rail,
      *         if the state conforms to the inputs already)
      */
-    boolean setRailState(BlockState state, Direction in, Direction out);
+    boolean setRailState(BlockState state, Level world, BlockPos pos, Direction in, Direction out);
 
-    List<Direction> getPossibleOutputDirections(BlockState state, Direction inputSide);
+    Set<Direction> getPossibleOutputDirections(BlockState state, Direction inputSide);
 
     /**
      * @param direction Direction of travel for the train

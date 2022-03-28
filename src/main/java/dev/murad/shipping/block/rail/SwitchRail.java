@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -25,6 +26,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
     public enum OutDirection implements StringRepresentable {
@@ -146,8 +148,9 @@ public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
 
 
     @Override
-    public boolean setRailState(BlockState state, Direction in, Direction out) {
-        List<Direction> possibilities = getPossibleOutputDirections(state, in);
+    public boolean setRailState(BlockState state, Level world, BlockPos pos, Direction in, Direction out) {
+        RailConfiguration c = getRailConfiguration(state);
+        Set<Direction> possibilities = getPossibleOutputDirections(state, in);
 
         if (!automaticSwitching) {
             return possibilities.contains(out);
@@ -155,37 +158,58 @@ public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
 
         if (!possibilities.contains(out)) return false;
 
-        // we are a possibility!
+        if (in == c.getRootDirection()) {
+            if (out == c.getPoweredDirection()) {
+                world.setBlock(pos, state.setValue(POWERED, true), 2);
+                return true;
+            } else if (out == c.getUnpoweredDirection()) {
+                world.setBlock(pos, state.setValue(POWERED, false), 2);
+                return true;
+            }
+            return false;
+        }
+
+        if (in == c.getUnpoweredDirection() && out == c.getRootDirection()) {
+            world.setBlock(pos, state.setValue(POWERED, false), 2);
+            return true;
+        }
+
+        if (in == c.getPoweredDirection() && out == c.getRootDirection()) {
+            world.setBlock(pos, state.setValue(POWERED, true), 2);
+            return true;
+        }
+
+        return false;
     }
 
-    private static final List<Direction> NO_POSSIBILITIES = List.of();
+    private static final Set<Direction> NO_POSSIBILITIES = Set.of();
 
     @Override
-    public List<Direction> getPossibleOutputDirections(BlockState state, Direction inputSide) {
-        RailConfiguration configuration = getRailConfiguration(state);
+    public Set<Direction> getPossibleOutputDirections(BlockState state, Direction inputSide) {
+        RailConfiguration c = getRailConfiguration(state);
         boolean powered = state.getValue(POWERED);
 
-        if (inputSide == configuration.getRootDirection()) {
+        if (inputSide == c.getRootDirection()) {
             if (automaticSwitching) {
-                return List.of(configuration.getUnpoweredDirection(), configuration.getPoweredDirection());
+                return Set.of(c.getUnpoweredDirection(), c.getPoweredDirection());
             } else {
-                return powered ? List.of(configuration.getPoweredDirection()) : List.of(configuration.getUnpoweredDirection());
+                return powered ? Set.of(c.getPoweredDirection()) : Set.of(c.getUnpoweredDirection());
             }
         }
 
-        if (inputSide == configuration.getUnpoweredDirection()) {
+        if (inputSide == c.getUnpoweredDirection()) {
             if (automaticSwitching) {
-                return List.of(configuration.getRootDirection());
+                return Set.of(c.getRootDirection());
             } else {
-                return powered ? NO_POSSIBILITIES : List.of(configuration.getRootDirection());
+                return powered ? NO_POSSIBILITIES : Set.of(c.getRootDirection());
             }
         }
 
-        if (inputSide == configuration.getPoweredDirection()) {
+        if (inputSide == c.getPoweredDirection()) {
             if (automaticSwitching) {
-                return List.of(configuration.getRootDirection());
+                return Set.of(c.getRootDirection());
             } else {
-                return powered ? List.of(configuration.getRootDirection()) : NO_POSSIBILITIES;
+                return powered ? Set.of(c.getRootDirection()) : NO_POSSIBILITIES;
             }
         }
 
@@ -194,14 +218,14 @@ public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
 
     @Override
     public RailShape getVanillaRailShapeFromDirection(BlockState state, BlockPos pos, Level level, Direction direction) {
-        RailConfiguration configuration = getRailConfiguration(state);
-        Direction outDirection = state.getValue(POWERED) ? configuration.getPoweredDirection() : configuration.getUnpoweredDirection();
+        RailConfiguration c = getRailConfiguration(state);
+        Direction outDirection = state.getValue(POWERED) ? c.getPoweredDirection() : c.getUnpoweredDirection();
 
-        if (direction == configuration.getRootDirection()) {
-            outDirection = configuration.getUnpoweredDirection();
+        if (direction == c.getRootDirection()) {
+            outDirection = c.getUnpoweredDirection();
         }
 
-        RailShape shape = RailShapeUtil.getRailShape(configuration.getRootDirection(), outDirection);
+        RailShape shape = RailShapeUtil.getRailShape(c.getRootDirection(), outDirection);
         return shape;
     }
 
