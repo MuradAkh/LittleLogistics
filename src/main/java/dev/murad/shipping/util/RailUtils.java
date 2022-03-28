@@ -181,7 +181,7 @@ public class RailUtils {
         }
     }
 
-    private static List<RailDir> getNextNodes(BlockPos pos, Level level, Direction prevExitTaken){
+    public static List<RailDir> getNextNodes(BlockPos pos, Level level, Direction prevExitTaken){
         var entrance = prevExitTaken.getOpposite();
         var shape = getShape(pos, level, prevExitTaken);
         List<RailShape> shapes = List.of(shape);
@@ -199,13 +199,18 @@ public class RailUtils {
 
     }
 
-    public static Optional<Pair<Integer, Double>> pathfind(BlockPos railPos, Level level, Direction prevExitTaken, BiFunction<Level, BlockPos, Double> heuristic, int limit){
+    public static Optional<RailPathFindNode> pathfind(BlockPos railPos, Level level, Direction prevExitTaken, BiFunction<Level, BlockPos, Double> heuristic){
         Set<Pair<BlockPos, Direction>> visited = new HashSet<>();
         PriorityQueue<RailPathFindNode> queue = new PriorityQueue<>();
         queue.add(new RailPathFindNode(railPos, prevExitTaken, 0, heuristic.apply(level, railPos)));
 
         while(!queue.isEmpty() && visited.size() < MAX_VISITED && queue.peek().heuristicValue > 0D){
             var curr = queue.poll();
+
+            // already explored this path
+            if(visited.contains(Pair.of(curr.pos, curr.prevExitTaken)))
+                continue;
+
             visited.add(Pair.of(curr.pos, curr.prevExitTaken));
 
             getNextNodes(curr.pos, level, curr.prevExitTaken).forEach(raildir -> {
@@ -216,12 +221,26 @@ public class RailUtils {
             });
         }
 
-        return queue.isEmpty() ? Optional.empty() : Optional.of(Pair.of(queue.peek().pathLength, queue.peek().heuristicValue));
+        return queue.isEmpty() ? Optional.empty() : Optional.of(queue.peek());
     }
 
     public static BiPredicate<Level, BlockPos> samePositionPredicate(AbstractTrainCarEntity entity){
         return (level, p) -> getRail(p, level).flatMap(pos ->
             getRail(entity.getOnPos().above(), level).map(rp -> rp.equals(pos))).orElse(false);
+    }
+
+    public static Direction pickCheaperDir(Level level, Direction first, Direction second, BlockPos railPos, BiFunction<Level, BlockPos, Double> heuristic){
+        var result1 = pathfind(railPos, level, first, heuristic);
+        var result2 = pathfind(railPos, level, second, heuristic);
+        if(result2.isEmpty()){
+            return first; // default to first
+        } else if (result1.isEmpty()) {
+            return second;
+        } else {
+            if (result1.get().compareTo(result2.get()) <= 0){
+                return first;
+            } else return second;
+        }
     }
 
     public static BiFunction<Level, BlockPos, Double> samePositionHeuristic(BlockPos p){
