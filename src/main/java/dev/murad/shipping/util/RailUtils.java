@@ -13,12 +13,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class RailUtils {
@@ -42,6 +43,7 @@ public class RailUtils {
         map.put(RailShape.NORTH_WEST, Pair.of(north, west));
         map.put(RailShape.NORTH_EAST, Pair.of(north, east));
     });
+    private static final int MAX_VISITED = 200;
 
     public static class RailDir {
         public Direction horizontal;
@@ -80,8 +82,8 @@ public class RailUtils {
     @NotNull
     public static RailShape getShape(BlockPos pos, Level level, Direction direction) {
         var state = level.getBlockState(pos);
-        if(state.getBlock() instanceof MultiShapeRail multi){
-            return multi.getVanillaRailShapeFromDirection(state, pos, level, direction);
+           if(state.getBlock() instanceof MultiShapeRail){
+            return ((MultiShapeRail) state.getBlock()).getVanillaRailShapeFromDirection(state, pos, level, direction);
         } else {
             return ((BaseRailBlock) state.getBlock()).getRailDirection(state, level, pos, null);
         }
@@ -156,9 +158,78 @@ public class RailUtils {
         });
     }
 
+    private static class RailPathFindNode implements Comparable<RailPathFindNode>{
+        BlockPos pos;
+        Direction prevExitTaken;
+        int pathLength;
+        double heuristicValue;
+
+        RailPathFindNode(BlockPos pos,
+                Direction prevExitTaken,
+                int pathLength, double heuristicValue){
+            this.pos = pos;
+            this.prevExitTaken = prevExitTaken;
+            this.pathLength = pathLength;
+            this.heuristicValue = heuristicValue;
+        }
+
+        @Override
+        public int compareTo(@NotNull RailUtils.RailPathFindNode o) {
+            if(this.heuristicValue == o.heuristicValue){
+                return this.pathLength - o.pathLength;
+            } else return (int) (this.heuristicValue - o.heuristicValue);
+        }
+    }
+
+    private static List<RailDir> getNextNodes(BlockPos pos, Level level, Direction prevExitTaken){
+        var entrance = prevExitTaken.getOpposite();
+        var shape = getShape(pos, level, prevExitTaken);
+        List<RailShape> shapes = List.of(shape);
+        // TODO: add router tracks
+        return shapes.stream().map(shape1 -> {
+            var dirs = EXITS_DIRECTION.get(shape);
+            if (dirs.getFirst().horizontal.equals(entrance)) {
+                return dirs.getSecond();
+            } else if (dirs.getSecond().horizontal.equals(entrance)) {
+                return dirs.getFirst();
+            }
+            return null;
+
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+
+    }
+
+    public static Optional<Pair<Integer, Double>> pathfind(BlockPos railPos, Level level, Direction prevExitTaken, BiFunction<Level, BlockPos, Double> heuristic, int limit){
+        Set<Pair<BlockPos, Direction>> visited = new HashSet<>();
+        PriorityQueue<RailPathFindNode> queue = new PriorityQueue<>();
+        queue.add(new RailPathFindNode(railPos, prevExitTaken, 0, heuristic.apply(level, railPos)));
+
+        while(!queue.isEmpty() && visited.size() < MAX_VISITED && queue.peek().heuristicValue > 0D){
+            var curr = queue.poll();
+            visited.add(Pair.of(curr.pos, curr.prevExitTaken));
+
+            getNextNodes(curr.pos, level, curr.prevExitTaken).forEach(raildir -> {
+                var pos = raildir.above ? curr.pos.relative(raildir.horizontal).above() : curr.pos.relative(raildir.horizontal);
+                getRail(pos, level).ifPresent(nextPos -> {
+                    queue.add(new RailPathFindNode(nextPos, raildir.horizontal, curr.pathLength + 1, heuristic.apply(level, nextPos)));
+                });
+            });
+        }
+
+        return queue.isEmpty() ? Optional.empty() : Optional.of(Pair.of(queue.peek().pathLength, queue.peek().heuristicValue));
+    }
+
     public static BiPredicate<Level, BlockPos> samePositionPredicate(AbstractTrainCarEntity entity){
         return (level, p) -> getRail(p, level).flatMap(pos ->
             getRail(entity.getOnPos().above(), level).map(rp -> rp.equals(pos))).orElse(false);
+    }
+
+    public static BiFunction<Level, BlockPos, Double> samePositionHeuristic(BlockPos p){
+        return ((level, pos) -> p.distSqr(pos));
+    }
+
+    public static BiFunction<Level, BlockPos, Double> samePositionHeuristicSet(Set<BlockPos> set){
+        return ((level, pos) -> set.stream().map(p -> p.distSqr(pos)).min(Double::compareTo).orElse(0D));
     }
 
     public static Vec3 toVec3(Vec3i dir) {
