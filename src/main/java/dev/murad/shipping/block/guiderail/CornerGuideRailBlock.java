@@ -1,4 +1,4 @@
-package dev.murad.shipping.block.guide_rail;
+package dev.murad.shipping.block.guiderail;
 
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;

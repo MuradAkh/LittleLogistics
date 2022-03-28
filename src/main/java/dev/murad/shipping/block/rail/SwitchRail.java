@@ -1,6 +1,8 @@
 package dev.murad.shipping.block.rail;
 
 import dev.murad.shipping.util.RailShapeUtil;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.StringRepresentable;
@@ -22,9 +24,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-public class SwitchRail extends BaseRailBlock implements MultiExitRailBlock {
+import java.util.List;
 
-
+public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
     public enum OutDirection implements StringRepresentable {
         LEFT("left"), RIGHT("right");
 
@@ -47,16 +49,29 @@ public class SwitchRail extends BaseRailBlock implements MultiExitRailBlock {
         }
     }
 
+    @Getter
+    @RequiredArgsConstructor
+    private class RailConfiguration {
+        private final Direction rootDirection;
+        private final Direction unpoweredDirection;
+        private final Direction poweredDirection;
+    }
+
+
 
     // for compatibilty issues
     public static final EnumProperty<RailShape> RAIL_SHAPE = RailShapeUtil.RAIL_SHAPE_STRAIGHT_FLAT;
     // facing denotes direction of straight out
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<OutDirection> OUT_DIRECTION = EnumProperty.create("out_direction", OutDirection.class);
+    // is this rail track engaged?
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
+    @Getter
+    private final boolean automaticSwitching;
 
-    public SwitchRail(Properties pProperties) {
+    public SwitchRail(Properties pProperties, boolean automaticSwitching) {
         super(false, pProperties);
+        this.automaticSwitching = automaticSwitching;
     }
 
     @Override
@@ -66,7 +81,7 @@ public class SwitchRail extends BaseRailBlock implements MultiExitRailBlock {
         BlockState blockstate = super.defaultBlockState();
         return setFacing(blockstate, pContext.getHorizontalDirection())
                 .setValue(WATERLOGGED, flag)
-                .setValue(POWERED, pContext.getLevel().hasNeighborSignal(pContext.getClickedPos()))
+                .setValue(POWERED, !automaticSwitching && pContext.getLevel().hasNeighborSignal(pContext.getClickedPos()))
                 .setValue(OUT_DIRECTION, OutDirection.RIGHT);
     }
 
@@ -101,6 +116,16 @@ public class SwitchRail extends BaseRailBlock implements MultiExitRailBlock {
         return false;
     }
 
+    private RailConfiguration getRailConfiguration(BlockState state) {
+        OutDirection out = state.getValue(OUT_DIRECTION);
+
+        Direction unpoweredDirection = state.getValue(FACING);
+        Direction rootDirection = unpoweredDirection.getOpposite();
+        Direction poweredDirection = out.getOutDirection(rootDirection);
+
+        return new RailConfiguration(rootDirection, unpoweredDirection, poweredDirection);
+    }
+
     @Override
     public RailShape getRailDirection(BlockState state, BlockGetter world, BlockPos pos, @Nullable AbstractMinecart cart) {
         Direction facing = state.getValue(FACING);
@@ -117,20 +142,66 @@ public class SwitchRail extends BaseRailBlock implements MultiExitRailBlock {
         RailShape shape = RailShapeUtil.getRailShape(inDirection, outDirection);
         return shape;
     }
+
+
+
     @Override
-    public RailShape getRailShapeFromDirection(BlockState state, BlockPos pos, Level level, Direction direction) {
-        Direction facing = state.getValue(FACING);
-        OutDirection out = state.getValue(OUT_DIRECTION);
+    public boolean setRailState(BlockState state, Direction in, Direction out) {
+        List<Direction> possibilities = getPossibleOutputDirections(state, in);
 
-        Direction inDirection = facing.getOpposite();
-        Direction turnDirection = out.getOutDirection(inDirection);
-        Direction outDirection = state.getValue(POWERED) ? turnDirection : facing;
-
-        if (direction.getOpposite() == facing) {
-            outDirection = facing;
+        if (!automaticSwitching) {
+            return possibilities.contains(out);
         }
 
-        RailShape shape = RailShapeUtil.getRailShape(inDirection, outDirection);
+        if (!possibilities.contains(out)) return false;
+
+        // we are a possibility!
+    }
+
+    private static final List<Direction> NO_POSSIBILITIES = List.of();
+
+    @Override
+    public List<Direction> getPossibleOutputDirections(BlockState state, Direction inputSide) {
+        RailConfiguration configuration = getRailConfiguration(state);
+        boolean powered = state.getValue(POWERED);
+
+        if (inputSide == configuration.getRootDirection()) {
+            if (automaticSwitching) {
+                return List.of(configuration.getUnpoweredDirection(), configuration.getPoweredDirection());
+            } else {
+                return powered ? List.of(configuration.getPoweredDirection()) : List.of(configuration.getUnpoweredDirection());
+            }
+        }
+
+        if (inputSide == configuration.getUnpoweredDirection()) {
+            if (automaticSwitching) {
+                return List.of(configuration.getRootDirection());
+            } else {
+                return powered ? NO_POSSIBILITIES : List.of(configuration.getRootDirection());
+            }
+        }
+
+        if (inputSide == configuration.getPoweredDirection()) {
+            if (automaticSwitching) {
+                return List.of(configuration.getRootDirection());
+            } else {
+                return powered ? List.of(configuration.getRootDirection()) : NO_POSSIBILITIES;
+            }
+        }
+
+        return NO_POSSIBILITIES;
+    }
+
+    @Override
+    public RailShape getVanillaRailShapeFromDirection(BlockState state, BlockPos pos, Level level, Direction direction) {
+        RailConfiguration configuration = getRailConfiguration(state);
+        Direction outDirection = state.getValue(POWERED) ? configuration.getPoweredDirection() : configuration.getUnpoweredDirection();
+
+        if (direction == configuration.getRootDirection()) {
+            outDirection = configuration.getUnpoweredDirection();
+        }
+
+        RailShape shape = RailShapeUtil.getRailShape(configuration.getRootDirection(), outDirection);
         return shape;
     }
 
