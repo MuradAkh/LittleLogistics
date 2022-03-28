@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface MultiShapeRail {
+    static final Set<Direction> NO_POSSIBILITIES = Set.of();
     /**
      * Set the automatic rail state of this rail
      * @param state current blockstate of the rail

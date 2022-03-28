@@ -11,6 +11,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
@@ -181,11 +182,26 @@ public class RailUtils {
         }
     }
 
-    public static List<RailDir> getNextNodes(BlockPos pos, Level level, Direction prevExitTaken){
+    /**
+     * @param prevExitTaken the direction of travel for the train
+     */
+    private static List<RailDir> getNextNodes(BlockPos pos, Level level, Direction prevExitTaken) {
+        Direction inputSide = prevExitTaken.getOpposite();
         var entrance = prevExitTaken.getOpposite();
+
+        // todo: we need to check if blocks are actually loaded
+        BlockState state = level.getBlockState(pos);
+        if (state.getBlock() instanceof MultiShapeRail r) {
+            // if rail is a MultiShapeRail, return all possible outputs from the input side
+            // it doesn't matter if this rail is automatically switching.
+            return r.getPossibleOutputDirections(state, inputSide)
+                    .stream()
+                    .map(RailDir::new)
+                    .collect(Collectors.toList());
+        }
+
         var shape = getShape(pos, level, prevExitTaken);
         List<RailShape> shapes = List.of(shape);
-        // TODO: add router tracks
         return shapes.stream().map(shape1 -> {
             var dirs = EXITS_DIRECTION.get(shape);
             if (dirs.getFirst().horizontal.equals(entrance)) {
@@ -194,12 +210,10 @@ public class RailUtils {
                 return dirs.getFirst();
             }
             return null;
-
         }).filter(Objects::nonNull).collect(Collectors.toList());
-
     }
 
-    public static Optional<RailPathFindNode> pathfind(BlockPos railPos, Level level, Direction prevExitTaken, BiFunction<Level, BlockPos, Double> heuristic){
+    public static Optional<RailPathFindNode> pathfind(BlockPos railPos, Level level, Direction prevExitTaken, BiFunction<Level, BlockPos, Double> heuristic) {
         Set<Pair<BlockPos, Direction>> visited = new HashSet<>();
         PriorityQueue<RailPathFindNode> queue = new PriorityQueue<>();
         queue.add(new RailPathFindNode(railPos, prevExitTaken, 0, heuristic.apply(level, railPos)));
