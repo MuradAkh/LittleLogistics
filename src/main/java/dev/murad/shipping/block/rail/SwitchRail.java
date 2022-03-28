@@ -258,6 +258,8 @@ public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
     @Override
     public void neighborChanged(BlockState state, Level world, BlockPos pos, Block p_220069_4_, BlockPos p_220069_5_, boolean p_220069_6_) {
         super.neighborChanged(state, world, pos, p_220069_4_, p_220069_5_, p_220069_6_);
+        if (automaticSwitching) return;
+
         if (!world.isClientSide) {
             boolean flag = state.getValue(POWERED);
             if (flag != world.hasNeighborSignal(pos)) {
