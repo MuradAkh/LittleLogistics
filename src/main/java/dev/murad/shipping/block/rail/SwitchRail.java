@@ -182,7 +182,6 @@ public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
         return false;
     }
 
-    private static final Set<Direction> NO_POSSIBILITIES = Set.of();
 
     @Override
     public Set<Direction> getPossibleOutputDirections(BlockState state, Direction inputSide) {
