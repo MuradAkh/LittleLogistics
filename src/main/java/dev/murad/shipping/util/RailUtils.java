@@ -2,7 +2,7 @@ package dev.murad.shipping.util;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
-import dev.murad.shipping.block.rail.MultiExitRailBlock;
+import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -79,10 +79,9 @@ public class RailUtils {
 
     @NotNull
     public static RailShape getShape(BlockPos pos, Level level, Direction direction) {
-
         var state = level.getBlockState(pos);
-        if(state.getBlock() instanceof MultiExitRailBlock){
-            return ((MultiExitRailBlock) state.getBlock()).getRailShapeFromDirection(state, pos, level, direction);
+        if(state.getBlock() instanceof MultiShapeRail multi){
+            return multi.getVanillaRailShapeFromDirection(state, pos, level, direction);
         } else {
             return ((BaseRailBlock) state.getBlock()).getRailDirection(state, level, pos, null);
         }

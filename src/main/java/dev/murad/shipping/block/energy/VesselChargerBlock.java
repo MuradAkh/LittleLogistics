@@ -1,6 +1,5 @@
 package dev.murad.shipping.block.energy;
 
-import dev.murad.shipping.block.vessel_detector.VesselDetectorTileEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.TickerUtil;
 import net.minecraft.core.BlockPos;

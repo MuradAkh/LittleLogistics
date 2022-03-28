@@ -1,8 +1,10 @@
 package dev.murad.shipping.network;
 
+import lombok.RequiredArgsConstructor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 
+@RequiredArgsConstructor
 public class SetRouteTagPacket {
     public final int routeChecksum;
     public final boolean isOffhand;
@@ -12,12 +14,6 @@ public class SetRouteTagPacket {
         this.routeChecksum = buffer.readInt();
         this.isOffhand = buffer.readBoolean();
         this.tag = buffer.readNbt();
-    }
-
-    public SetRouteTagPacket(int checksum, boolean isOffHand, CompoundTag tag) {
-        this.routeChecksum = checksum;
-        this.isOffhand = isOffHand;
-        this.tag = tag;
     }
 
     public void encode(FriendlyByteBuf buf) {

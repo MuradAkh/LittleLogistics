@@ -7,7 +7,7 @@ import dev.murad.shipping.block.fluid.FluidHopperTileEntity;
 import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
 import dev.murad.shipping.block.rail.blockentity.TrainCarDockTileEntity;
 import dev.murad.shipping.block.rapidhopper.RapidHopperTileEntity;
-import dev.murad.shipping.block.vessel_detector.VesselDetectorTileEntity;
+import dev.murad.shipping.block.vesseldetector.VesselDetectorTileEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;

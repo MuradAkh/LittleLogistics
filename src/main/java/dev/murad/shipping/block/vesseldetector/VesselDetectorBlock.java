@@ -1,4 +1,4 @@
-package dev.murad.shipping.block.vessel_detector;
+package dev.murad.shipping.block.vesseldetector;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3f;

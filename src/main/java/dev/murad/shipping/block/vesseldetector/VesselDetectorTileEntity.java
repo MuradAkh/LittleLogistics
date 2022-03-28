@@ -1,4 +1,4 @@
-package dev.murad.shipping.block.vessel_detector;
+package dev.murad.shipping.block.vesseldetector;
 
 import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;

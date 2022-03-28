@@ -1,4 +1,4 @@
-package dev.murad.shipping.block.guide_rail;
+package dev.murad.shipping.block.guiderail;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

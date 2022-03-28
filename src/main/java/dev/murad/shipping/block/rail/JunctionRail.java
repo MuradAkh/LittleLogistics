@@ -1,6 +1,5 @@
 package dev.murad.shipping.block.rail;
 
-import dev.murad.shipping.recipe.TugRouteRecipe;
 import dev.murad.shipping.util.RailShapeUtil;
 import dev.murad.shipping.util.RailUtils;
 import net.minecraft.core.BlockPos;
@@ -24,9 +23,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
-
-public class JunctionRail extends BaseRailBlock implements MultiExitRailBlock {
+public class JunctionRail extends BaseRailBlock implements MultiShapeRail {
     private static final Logger log = LogManager.getLogger(JunctionRail.class);
     // for compatibilty issues
     public static final EnumProperty<RailShape> RAIL_SHAPE = RailShapeUtil.RAIL_SHAPE_STRAIGHT_FLAT;
@@ -90,7 +87,7 @@ public class JunctionRail extends BaseRailBlock implements MultiExitRailBlock {
     }
 
     @Override
-    public RailShape getRailShapeFromDirection(BlockState state, BlockPos pos, Level level, Direction direction) {
+    public RailShape getVanillaRailShapeFromDirection(BlockState state, BlockPos pos, Level level, Direction direction) {
         if(direction.equals(Direction.EAST) || direction.equals(Direction.WEST)){
             return RailShape.EAST_WEST;
         } else return RailShape.NORTH_SOUTH;

@@ -1,7 +1,9 @@
 package dev.murad.shipping.network;
 
+import lombok.RequiredArgsConstructor;
 import net.minecraft.network.FriendlyByteBuf;
 
+@RequiredArgsConstructor
 public class SetLocomotiveEnginePacket {
     public final int locoId;
     public final boolean state;
@@ -9,11 +11,6 @@ public class SetLocomotiveEnginePacket {
     public SetLocomotiveEnginePacket(FriendlyByteBuf buffer) {
         this.locoId = buffer.readInt();
         this.state = buffer.readBoolean();
-    }
-
-    public SetLocomotiveEnginePacket(int locoId, boolean state) {
-        this.locoId = locoId;
-        this.state = state;
     }
 
     public void encode(FriendlyByteBuf buf) {

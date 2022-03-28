@@ -1,15 +1,13 @@
 package dev.murad.shipping.data.client;
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.block.dock.BargeDockBlock;
 import dev.murad.shipping.block.dock.DockingBlockStates;
-import dev.murad.shipping.block.dock.TugDockBlock;
 import dev.murad.shipping.block.energy.VesselChargerBlock;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
-import dev.murad.shipping.block.guide_rail.CornerGuideRailBlock;
+import dev.murad.shipping.block.guiderail.CornerGuideRailBlock;
 import dev.murad.shipping.block.rail.AbstractDockingRail;
 import dev.murad.shipping.block.rail.SwitchRail;
-import dev.murad.shipping.block.vessel_detector.VesselDetectorBlock;
+import dev.murad.shipping.block.vesseldetector.VesselDetectorBlock;
 import dev.murad.shipping.setup.ModBlocks;
 import net.minecraft.core.Direction;
 import net.minecraft.data.DataGenerator;
@@ -21,7 +19,6 @@ import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.client.model.generators.ModelFile;
-import net.minecraftforge.client.model.generators.ModelProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 public class ModBlockStateProvider extends BlockStateProvider {
