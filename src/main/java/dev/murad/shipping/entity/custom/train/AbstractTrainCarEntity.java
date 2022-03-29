@@ -109,7 +109,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         for (var pos : Arrays.asList(getOnPos().above(), getOnPos())) {
             var state = level.getBlockState(pos);
             if (state.getBlock() instanceof BaseRailBlock railBlock) {
-                return Optional.of(railHelper.getShape(pos, this.level));
+                return Optional.of(railHelper.getShape(pos));
             }
         }
         return Optional.empty();
