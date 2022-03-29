@@ -96,14 +96,9 @@ public class TeeJunctionRail extends BaseRailBlock implements MultiShapeRail {
 
     @Override
     public RailShape getRailDirection(BlockState state, BlockGetter world, BlockPos pos, @Nullable AbstractMinecart cart) {
-        BranchingRailConfiguration configuration = getRailConfiguration(state);
-
-        Direction out = configuration.getUnpoweredDirection();
-        if (state.getValue(POWERED)) {
-            out = configuration.getPoweredDirection();
-        }
-
-        return RailShapeUtil.getRailShape(configuration.getRootDirection(), out);
+        BranchingRailConfiguration c = getRailConfiguration(state);
+        Direction outDirection = state.getValue(POWERED) ? c.getPoweredDirection() : c.getUnpoweredDirection();
+        return RailShapeUtil.getRailShape(c.getRootDirection(), outDirection);
     }
 
     @Override
@@ -150,14 +145,7 @@ public class TeeJunctionRail extends BaseRailBlock implements MultiShapeRail {
 
     @Override
     public RailShape getVanillaRailShapeFromDirection(BlockState state, BlockPos pos, Level level, Direction direction) {
-        BranchingRailConfiguration c = getRailConfiguration(state);
-        Direction outDirection = state.getValue(POWERED) ? c.getPoweredDirection() : c.getUnpoweredDirection();
-
-        if (direction == c.getRootDirection()) {
-            outDirection = c.getUnpoweredDirection();
-        }
-
-        return RailShapeUtil.getRailShape(c.getRootDirection(), outDirection);
+        return getRailDirection(state, level, pos, null);
     }
 
     public BlockState rotate(BlockState pState, Rotation pRot) {

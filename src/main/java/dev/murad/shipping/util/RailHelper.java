@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
@@ -237,7 +238,7 @@ public class RailHelper {
         queue.add(new RailPathFindNode(railPos, prevDirTaken, 0, heuristic.apply(railPos)));
 
         while(!queue.isEmpty() && visited.size() < MAX_VISITED && queue.peek().heuristicValue > 0D){
-            var curr = queue.poll();
+            RailHelper.RailPathFindNode curr = queue.poll();
             // already explored this path
             if(visited.contains(Pair.of(curr.pos, curr.prevExitTaken)))
                 continue;
@@ -245,7 +246,7 @@ public class RailHelper {
             visited.add(Pair.of(curr.pos, curr.prevExitTaken));
 
             getNextNodes(curr.pos, curr.prevExitTaken).forEach(raildir -> {
-                var pos = raildir.above ? curr.pos.relative(raildir.horizontal).above() : curr.pos.relative(raildir.horizontal);
+                BlockPos pos = raildir.above ? curr.pos.relative(raildir.horizontal).above() : curr.pos.relative(raildir.horizontal);
                 if(minecart.level.getBlockState(pos).is(Blocks.VOID_AIR)){
                     ends.add(new RailPathFindNode(pos, raildir.horizontal, curr.pathLength  + 1, heuristic.apply(pos)));
                 } else {
