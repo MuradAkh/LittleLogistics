@@ -211,7 +211,6 @@ public class RailHelper {
         if (state.getBlock() instanceof MultiShapeRail r) {
             // if rail is a MultiShapeRail, return all possible outputs from the input side
             // it doesn't matter if this rail is automatically switching.
-            System.out.println("Train is coming from " + inputSide);
             return r.getPossibleOutputDirections(state, inputSide)
                     .stream()
                     .map(RailDir::new)
@@ -239,8 +238,6 @@ public class RailHelper {
 
         while(!queue.isEmpty() && visited.size() < MAX_VISITED && queue.peek().heuristicValue > 0D){
             var curr = queue.poll();
-            System.out.println("Current direction" + curr.prevExitTaken);
-
             // already explored this path
             if(visited.contains(Pair.of(curr.pos, curr.prevExitTaken)))
                 continue;
@@ -292,7 +289,6 @@ public class RailHelper {
                 .stream()
                 .min(Comparator.comparing(Pair::getSecond))
                 .get();
-        System.out.println("Cheapest route " + best.getSecond().pos.toString());
         return best.getFirst();
     }
 

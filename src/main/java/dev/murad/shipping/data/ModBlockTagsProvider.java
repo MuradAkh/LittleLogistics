@@ -16,6 +16,8 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
     protected void addTags() {
         tag(BlockTags.RAILS).add(ModBlocks.SWITCH_RAIL.get());
         tag(BlockTags.RAILS).add(ModBlocks.AUTOMATIC_SWITCH_RAIL.get());
+        tag(BlockTags.RAILS).add(ModBlocks.TEE_JUNCTION_RAIL.get());
+        tag(BlockTags.RAILS).add(ModBlocks.AUTOMATIC_TEE_JUNCTION_RAIL.get());
         tag(BlockTags.RAILS).add(ModBlocks.JUNCTION_RAIL.get());
         tag(BlockTags.RAILS).add(ModBlocks.LOCOMOTIVE_DOCK_RAIL.get());
         tag(BlockTags.RAILS).add(ModBlocks.CAR_DOCK_RAIL.get());

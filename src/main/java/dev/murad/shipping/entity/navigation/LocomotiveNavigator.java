@@ -1,5 +1,6 @@
 package dev.murad.shipping.entity.navigation;
 
+import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.block.rail.SwitchRail;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.util.LocoRoute;
@@ -46,8 +47,6 @@ public class LocomotiveNavigator {
         RailHelper.getRail(locomotive.getOnPos().above(), locomotive.level).ifPresent(railPos ->{
             if(routeNodes.contains(railPos)){
                 visitedNodes.add(railPos);
-                System.out.println("Marking off visited node " + railPos);
-                System.out.println(visitedNodes.size());
             }
             if(visitedNodes.size() == routeNodes.size()){
                 visitedNodes.clear();
@@ -58,11 +57,11 @@ public class LocomotiveNavigator {
                 var nextRail = pair.getFirst();
                 var prevExitTaken = pair.getSecond();
                 var state = locomotive.getLevel().getBlockState(nextRail);
-                if (state.getBlock() instanceof SwitchRail s && s.isAutomaticSwitching()){
+                if (state.getBlock() instanceof MultiShapeRail s && s.isAutomaticSwitching()){
                     var choices = s.getPossibleOutputDirections(state, prevExitTaken.getOpposite()).stream().toList();
-                    if (choices.size() == 1){
+                    if (choices.size() == 1) {
                         s.setRailState(state, locomotive.level, nextRail, prevExitTaken.getOpposite(), choices.get(0));
-                    } else {
+                    } else if(choices.size() > 1) {
                         Set<BlockPos> potential = new HashSet<>(routeNodes);
                         potential.removeAll(visitedNodes);
                         if(!decisionCache.containsKey(nextRail)){
@@ -71,7 +70,6 @@ public class LocomotiveNavigator {
                                            RailHelper.samePositionHeuristicSet(potential), locomotive.getLevel());
 
                             decisionCache.put(nextRail, decision);
-                            System.out.println("Putting decision to go " + decision.toString() + " at " + nextRail.toString());
                         };
                         s.setRailState(state, locomotive.level, nextRail, prevExitTaken.getOpposite(), decisionCache.get(nextRail));
                     }
@@ -86,8 +84,6 @@ public class LocomotiveNavigator {
 
         reset();
         routeNodes.addAll(newRouteNodes);
-
-        System.out.println(routeNodes.size());
     }
 
     public void loadFromNbt(@Nullable CompoundTag tag) {
