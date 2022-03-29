@@ -1,7 +1,6 @@
 package dev.murad.shipping.util;
 
 import com.google.common.collect.Maps;
-import com.mojang.datafixers.types.Func;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
@@ -18,7 +17,6 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -250,7 +248,7 @@ public class RailHelper {
             getRail(entity.getOnPos().above(), level).map(rp -> rp.equals(pos))).orElse(false);
     }
 
-    public Direction pickCheaperDir( Direction first, Direction second, BlockPos railPos, Function<BlockPos, Double> heuristic){
+    public Direction pickCheaperDir(Direction first, Direction second, BlockPos railPos, Function<BlockPos, Double> heuristic){
         var result1 = pathfind(railPos, first, heuristic);
         var result2 = pathfind(railPos, second, heuristic);
         if(result2.isEmpty()){
