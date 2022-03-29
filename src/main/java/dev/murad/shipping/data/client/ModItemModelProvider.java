@@ -56,6 +56,11 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "junction_rail");
         builder(itemGenerated, "car_dock_rail");
         builder(itemGenerated, "locomotive_dock_rail");
+
+        builder(itemGenerated, "locomotive_route")
+                .override()
+                .model(builder(itemGenerated, "locomotive_route_empty"))
+                .predicate(new ResourceLocation(ShippingMod.MOD_ID, "locoroutestate"), 1f).end();
     }
 
 
