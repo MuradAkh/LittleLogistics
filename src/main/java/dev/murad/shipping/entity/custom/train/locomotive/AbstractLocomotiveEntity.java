@@ -6,12 +6,12 @@ import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.entity.custom.tug.VehicleFrontPart;
+import dev.murad.shipping.entity.navigation.LocomotiveNavigator;
+import dev.murad.shipping.item.LocoRouteItem;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModSounds;
-import dev.murad.shipping.util.ItemHandlerVanillaContainerWrapper;
-import dev.murad.shipping.util.LinkableEntityHead;
-import dev.murad.shipping.util.RailHelper;
-import dev.murad.shipping.util.Train;
+import dev.murad.shipping.util.*;
+import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -24,6 +24,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PoweredRailBlock;
@@ -32,6 +33,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.entity.PartEntity;
+import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
@@ -51,18 +53,25 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     private int speedRecomputeCooldown = 0;
     private double speedLimit = -1;
 
+    // item handler for loco routes
+    private static final String LOCO_ROUTE_INV_TAG = "locoRouteInv";
+    @Getter
+    protected ItemStackHandler locoRouteItemHandler = createLocoRouteItemHandler();
+
+    private static final String NAVIGATOR_TAG = "navigator";
+    protected LocomotiveNavigator navigator = new LocomotiveNavigator(this);
 
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractLocomotiveEntity.class, EntityDataSerializers.BOOLEAN);
     private int dockCheckCooldown = 0;
 
 
-    public AbstractLocomotiveEntity(EntityType<?> type, Level p_38088_) {
-        super(type, p_38088_);
+    public AbstractLocomotiveEntity(EntityType<?> type, Level world) {
+        super(type, world);
         frontHitbox = new VehicleFrontPart(this);
     }
 
-    public AbstractLocomotiveEntity(EntityType<?> type, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
-        super(type, level, aDouble, aDouble1, aDouble2);
+    public AbstractLocomotiveEntity(EntityType<?> type, Level level, Double x, Double y, Double z) {
+        super(type, level, x, y, z);
         frontHitbox = new VehicleFrontPart(this);
     }
 
@@ -83,6 +92,30 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         }
 
         return InteractionResult.CONSUME;
+    }
+
+    private ItemStackHandler createLocoRouteItemHandler() {
+        return new ItemStackHandler(1) {
+            @Override
+            protected void onContentsChanged(int slot) {
+                updateNavigatorFromItem();
+            }
+
+            @Override
+            public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+                return stack.getItem() instanceof LocoRouteItem;
+            }
+
+            @Nonnull
+            @Override
+            public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+                if (!isItemValid(slot, stack)) {
+                    return stack;
+                }
+
+                return super.insertItem(slot, stack, simulate);
+            }
+        };
     }
 
     protected abstract MenuProvider createContainerProvider();
@@ -106,6 +139,11 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     @Override
     public void tick(){
         super.tickLoad();
+
+        if (!this.level.isClientSide) {
+            navigator.serverTick();
+        }
+
         tickYRot();
         var yrot = this.getYRot();
         tickVanilla();
@@ -236,7 +274,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     }
 
-
     private double getSpeedModifier(){
         // adjust speed based on slope etc.
         var state = this.level.getBlockState(this.getOnPos().above());
@@ -311,12 +348,10 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     }
 
-
     @Override
     public void setTrain(Train train) {
         this.train = train;
     }
-
 
     private final StallingCapability stalling = new StallingCapability() {
         @Override
@@ -379,18 +414,33 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         return super.getCapability(cap);
     }
 
+    private void updateNavigatorFromItem() {
+        ItemStack stack = locoRouteItemHandler.getStackInSlot(0);
+        if (stack.getItem() instanceof LocoRouteItem) {
+            navigator.updateWithLocoRouteItem(LocoRouteItem.getRoute(stack));
+        } else {
+            navigator.updateWithLocoRouteItem(new LocoRoute());
+        }
+    }
+
     @Override
     protected void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         if(compound.contains("eo")) {
             engineOn = compound.getBoolean("eo");
         }
+        locoRouteItemHandler.deserializeNBT(compound.getCompound(LOCO_ROUTE_INV_TAG));
+        navigator.loadFromNbt(compound.getCompound(NAVIGATOR_TAG));
+
+        updateNavigatorFromItem();
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.putBoolean("eo", engineOn);
+        compound.put(LOCO_ROUTE_INV_TAG, locoRouteItemHandler.serializeNBT());
+        compound.put(NAVIGATOR_TAG, navigator.saveToNbt());
     }
 
     @Override

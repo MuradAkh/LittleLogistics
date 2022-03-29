@@ -88,4 +88,8 @@ public class LocoRouteNode {
     public static LocoRouteNode fromBlocKPos(BlockPos pos) {
         return new LocoRouteNode(null, pos.getX(), pos.getY(), pos.getZ());
     }
+
+    public BlockPos toBlockPos() {
+        return new BlockPos(x, y, z);
+    }
 }

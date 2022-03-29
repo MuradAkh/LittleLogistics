@@ -2,44 +2,53 @@ package dev.murad.shipping.entity.navigation;
 
 import dev.murad.shipping.block.rail.SwitchRail;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
+import dev.murad.shipping.util.LocoRoute;
+import dev.murad.shipping.util.LocoRouteNode;
 import dev.murad.shipping.util.RailHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.block.state.BlockState;
-import oshi.util.tuples.Pair;
+import net.minecraft.nbt.IntArrayTag;
+import net.minecraft.nbt.ListTag;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class LocomotiveNavigator {
-    private final Set<BlockPos> route;
-    private final Set<BlockPos> visited;
-    private final AbstractLocomotiveEntity locomotive;
+    private final Set<BlockPos> routeNodes;
+    private final Set<BlockPos> visitedNodes;
     private final HashMap<BlockPos, Direction> decisionCache;
 
+    private final AbstractLocomotiveEntity locomotive;
+
+    private static final String ROUTE_TAG = "route";
+    private static final String VISITED_TAG = "visited";
+
     private void reset(){
-        this.visited.clear();
-        this.route.clear();
+        this.visitedNodes.clear();
+        this.routeNodes.clear();
         this.decisionCache.clear();
     }
 
-    public LocomotiveNavigator(AbstractLocomotiveEntity locomotive){
-        reset();
+    public LocomotiveNavigator(AbstractLocomotiveEntity locomotive) {
         this.locomotive = locomotive;
         this.decisionCache = new HashMap<>();
-        this.visited = new HashSet<>();
-        this.route = new HashSet<>();
+        this.visitedNodes = new HashSet<>();
+        this.routeNodes = new HashSet<>();
+        reset();
     }
 
     public void serverTick(){
         RailHelper.getRail(locomotive.getOnPos().above(), locomotive.level).ifPresent(railPos ->{
-            if(route.contains(railPos)){
-                visited.add(railPos);
+            if(routeNodes.contains(railPos)){
+                visitedNodes.add(railPos);
             }
-            if(visited.size() == route.size()){
-                visited.clear();
+            if(visitedNodes.size() == routeNodes.size()){
+                visitedNodes.clear();
             }
             decisionCache.remove(railPos);
 
@@ -52,28 +61,64 @@ public class LocomotiveNavigator {
                    if (choices.size() == 1){
                       s.setRailState(state, locomotive.level, nextRail, prevExitTake.getOpposite(), choices.get(0));
                    } else if (choices.size() == 2){
-                       Set<BlockPos> potential = new HashSet<>(route);
-                       potential.removeAll(visited);
+                       Set<BlockPos> potential = new HashSet<>(routeNodes);
+                       potential.removeAll(visitedNodes);
                        if(!decisionCache.containsKey(nextRail)){
                            var decision = locomotive.getRailHelper().pickCheaperDir(choices.get(0), choices.get(1), nextRail, RailHelper.samePositionHeuristicSet(potential));
                            decisionCache.put(nextRail, decision);
                        };
                        s.setRailState(state, locomotive.level, nextRail, prevExitTake.getOpposite(), decisionCache.get(nextRail));
-
                    }
                 }
-
             });
         });
     }
 
-    public void loadFromNbt(CompoundTag tag){
+    public void updateWithLocoRouteItem(LocoRoute route) {
+        Set<BlockPos> newRouteNodes = route.stream().map(LocoRouteNode::toBlockPos).collect(Collectors.toSet());
+        if (newRouteNodes.equals(routeNodes)) return;
 
+        reset();
+        routeNodes.addAll(newRouteNodes);
+
+        System.out.println(routeNodes.size());
+    }
+
+    public void loadFromNbt(@Nullable CompoundTag tag) {
+        reset();
+        if (tag == null) return;
+
+        // list of lists
+        routeNodes.addAll(convertTagToSet(tag.getList(ROUTE_TAG, 9)));
+        visitedNodes.addAll(convertTagToSet(tag.getList(VISITED_TAG, 9)));
     }
 
     public CompoundTag saveToNbt(){
-        var tag = new CompoundTag();
+        CompoundTag tag = new CompoundTag();
+        tag.put(ROUTE_TAG, convertSetToTag(routeNodes));
+        tag.put(VISITED_TAG, convertSetToTag(visitedNodes));
         return tag;
     }
+
+    private static Set<BlockPos> convertTagToSet(@Nullable ListTag tag) {
+        if (tag == null) return new HashSet<>();
+        HashSet<BlockPos> set = new HashSet<>();
+
+        for (int i = 0; i < tag.size(); i++) {
+            int[] pos = tag.getIntArray(i);
+            if (pos.length != 3) continue;
+            set.add(new BlockPos(pos[0], pos[1], pos[2]));
+        }
+        return set;
+    }
+
+    private static ListTag convertSetToTag(Set<BlockPos> set) {
+        ListTag tag = new ListTag();
+        for (BlockPos pos : set) {
+            tag.add(new IntArrayTag(List.of(pos.getX(), pos.getY(), pos.getZ())));
+        }
+        return tag;
+    }
+
 
 }

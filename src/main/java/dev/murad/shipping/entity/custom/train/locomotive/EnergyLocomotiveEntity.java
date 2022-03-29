@@ -94,8 +94,6 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
         super.remove(r);
     }
 
-
-
     @Override
     protected MenuProvider createContainerProvider() {
         return new MenuProvider() {
