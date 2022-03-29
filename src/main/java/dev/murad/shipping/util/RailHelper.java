@@ -196,7 +196,7 @@ public class RailHelper {
         public int compareTo(@NotNull RailHelper.RailPathFindNode o) {
             if(this.heuristicValue == o.heuristicValue){
                 return this.pathLength - o.pathLength;
-            } else return (int) (this.heuristicValue - o.heuristicValue);
+            } else return this.heuristicValue - o.heuristicValue < 0 ? -1 : 1;
         }
     }
 
@@ -268,14 +268,6 @@ public class RailHelper {
             getRail(entity.getOnPos().above(), level).map(rp -> rp.equals(pos))).orElse(false);
     }
 
-    private int minHeuristicValue(Pair<Direction, RailHelper.RailPathFindNode> a,
-                                                                           Pair<Direction, RailHelper.RailPathFindNode> b) {
-        if (a.getSecond().heuristicValue < b.getSecond().heuristicValue)
-            return -1;
-        else
-            return 1;
-    }
-
     public Direction pickCheaperDir(List<Direction> directions, BlockPos pos, Function<BlockPos, Double> heuristic, Level level) {
         // get all directions where output has a possible rail
         List<Pair<Direction, BlockPos>> hasOutputDirections = directions.stream()
@@ -296,8 +288,12 @@ public class RailHelper {
         // fallback
         if (hasPath.isEmpty()) return hasOutputDirections.get(0).getFirst();
 
-        Pair<Direction, RailPathFindNode> scores = hasPath.stream().min(this::minHeuristicValue).get();
-        return scores.getFirst();
+        Pair<Direction, RailPathFindNode> best = hasPath
+                .stream()
+                .min(Comparator.comparing(Pair::getSecond))
+                .get();
+        System.out.println("Cheapest route " + best.getSecond().pos.toString());
+        return best.getFirst();
     }
 
     public static Function<BlockPos, Double> samePositionHeuristic(BlockPos p){

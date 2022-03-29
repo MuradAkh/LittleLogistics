@@ -51,7 +51,6 @@ public class LocomotiveNavigator {
             }
             if(visitedNodes.size() == routeNodes.size()){
                 visitedNodes.clear();
-                System.out.println("Clearing visited nodes");
             }
             decisionCache.remove(railPos);
 
