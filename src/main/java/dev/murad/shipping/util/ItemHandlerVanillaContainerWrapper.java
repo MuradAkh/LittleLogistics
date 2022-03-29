@@ -37,7 +37,7 @@ public interface ItemHandlerVanillaContainerWrapper extends Container {
     }
 
     default void setItem(int pIndex, ItemStack pStack) {
-         getRawHandler().setStackInSlot(pIndex, pStack);
+         getRawHandler().insertItem(pIndex, pStack, false);
     }
 
     default void setChanged() {

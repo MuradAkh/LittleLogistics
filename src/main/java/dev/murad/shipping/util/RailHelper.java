@@ -11,6 +11,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.Vec3;
@@ -233,6 +234,7 @@ public class RailHelper {
     public Optional<RailPathFindNode> pathfind(BlockPos railPos, Direction prevExitTaken, Function<BlockPos, Double> heuristic) {
         Set<Pair<BlockPos, Direction>> visited = new HashSet<>();
         PriorityQueue<RailPathFindNode> queue = new PriorityQueue<>();
+        PriorityQueue<RailPathFindNode> ends = new PriorityQueue<>();
         queue.add(new RailPathFindNode(railPos, prevExitTaken, 0, heuristic.apply(railPos)));
 
         while(!queue.isEmpty() && visited.size() < MAX_VISITED && queue.peek().heuristicValue > 0D){
@@ -246,12 +248,17 @@ public class RailHelper {
 
             getNextNodes(curr.pos, curr.prevExitTaken).forEach(raildir -> {
                 var pos = raildir.above ? curr.pos.relative(raildir.horizontal).above() : curr.pos.relative(raildir.horizontal);
-                getRail(pos, minecart.level).ifPresent(nextPos -> {
-                    queue.add(new RailPathFindNode(nextPos, raildir.horizontal, curr.pathLength + 1, heuristic.apply(nextPos)));
-                });
+                if(minecart.level.getBlockState(pos).is(Blocks.VOID_AIR)){
+                    ends.add(new RailPathFindNode(pos, raildir.horizontal, curr.pathLength  + 1, heuristic.apply(pos)));
+                } else {
+                    getRail(pos, minecart.level).ifPresent(nextPos -> {
+                        queue.add(new RailPathFindNode(nextPos, raildir.horizontal, curr.pathLength + 1, heuristic.apply(nextPos)));
+                    });
+                }
             });
         }
 
+        queue.addAll(ends);
         return queue.isEmpty() ? Optional.empty() : Optional.of(queue.peek());
     }
 
