@@ -53,6 +53,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "creative_capacitor");
         builder(itemGenerated, "rapid_hopper");
         builder(itemGenerated, "switch_rail");
+        builder(itemGenerated, "automatic_switch_rail");
         builder(itemGenerated, "junction_rail");
         builder(itemGenerated, "car_dock_rail");
         builder(itemGenerated, "locomotive_dock_rail");
