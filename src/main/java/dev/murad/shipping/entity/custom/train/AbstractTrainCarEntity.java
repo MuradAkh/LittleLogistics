@@ -7,7 +7,7 @@ import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
-import dev.murad.shipping.util.RailUtils;
+import dev.murad.shipping.util.RailHelper;
 import dev.murad.shipping.util.Train;
 import lombok.Getter;
 import lombok.Setter;
@@ -55,6 +55,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     public static final EntityDataAccessor<Integer> DOMINATED_ID = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
     protected Train<AbstractTrainCarEntity> train;
     protected static double TRAIN_SPEED = ShippingConfig.Server.TRAIN_MAX_SPEED.get();
+    protected final RailHelper railHelper;
 
     @Getter
     @Setter
@@ -88,6 +89,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     public AbstractTrainCarEntity(EntityType<?> p_38087_, Level p_38088_) {
         super(p_38087_, p_38088_);
         train = new Train<>(this);
+        railHelper = new RailHelper(this);
     }
 
     public AbstractTrainCarEntity(EntityType<?> p_38087_, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
@@ -96,17 +98,18 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         var state = level.getBlockState(pos);
         if (state.getBlock() instanceof BaseRailBlock railBlock) {
             RailShape railshape = (railBlock).getRailDirection(state, this.level, pos, this);
-            var exit = RailUtils.EXITS.get(railshape).getFirst();
-            this.setYRot(RailUtils.directionFromVelocity(new Vec3(exit.getX(), exit.getY(), exit.getZ())).toYRot());
+            var exit = RailHelper.EXITS.get(railshape).getFirst();
+            this.setYRot(RailHelper.directionFromVelocity(new Vec3(exit.getX(), exit.getY(), exit.getZ())).toYRot());
         }
         train = new Train<>(this);
+        railHelper = new RailHelper(this);
     }
 
     protected Optional<RailShape> getRailShape() {
         for (var pos : Arrays.asList(getOnPos().above(), getOnPos())) {
             var state = level.getBlockState(pos);
             if (state.getBlock() instanceof BaseRailBlock railBlock) {
-                return Optional.of(RailUtils.getShape(pos, this.level, Optional.of(this)));
+                return Optional.of(railHelper.getShape(pos, this.level));
             }
         }
         return Optional.empty();
@@ -256,22 +259,22 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         // if the car is part of a train, enforce that direction instead
         Optional<RailShape> railShape = getRailShape();
         if (this.dominated.isPresent() && railShape.isPresent()) {
-            Optional<Pair<Direction, Integer>> r = RailUtils.traverseBi(getOnPos().above(), this.level,
-                    RailUtils.samePositionPredicate(dominated.get()), 5, this);
+            Optional<Pair<Direction, Integer>> r = railHelper.traverseBi(getOnPos().above(),
+                    RailHelper.samePositionPredicate(dominated.get()), 5, this);
             if (r.isPresent()) {
                 Pair<Direction, Integer> pair = r.get();
-                Optional<Vec3i> directionOpt = RailUtils.getDirectionToOtherExit(pair.getFirst(), railShape.get());
+                Optional<Vec3i> directionOpt = RailHelper.getDirectionToOtherExit(pair.getFirst(), railShape.get());
                 if (directionOpt.isPresent()) {
                     Vec3i direction = directionOpt.get();
                     return ((float) (Mth.atan2(direction.getZ(), direction.getX()) * 180.0D / Math.PI) + 90);
                 }
             }
         } else if (this.dominant.isPresent() && railShape.isPresent()) {
-            Optional<Pair<Direction, Integer>> r = RailUtils.traverseBi(getOnPos().above(), this.level,
-                    RailUtils.samePositionPredicate(dominant.get()), 5, this);
+            Optional<Pair<Direction, Integer>> r = railHelper.traverseBi(getOnPos().above(),
+                    RailHelper.samePositionPredicate(dominant.get()), 5, this);
             if (r.isPresent()) {
                 Pair<Direction, Integer> pair = r.get();
-                Optional<Vec3i> directionOpt = RailUtils.getDirectionToOtherExit(pair.getFirst(), railShape.get());
+                Optional<Vec3i> directionOpt = RailHelper.getDirectionToOtherExit(pair.getFirst(), railShape.get());
                 if (directionOpt.isPresent()) {
                     Vec3i direction = directionOpt.get();
                     return ((float) (Mth.atan2(-direction.getZ(), -direction.getX()) * 180.0D / Math.PI) + 90);
@@ -400,8 +403,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     private void doChainMath() {
         dominant.ifPresent(parent -> {
-            var railDirDis = RailUtils.getRail(parent.getOnPos().above(), level).flatMap(target ->
-                    RailUtils.traverseBi(this.getOnPos().above(), level, (level, p) -> p.equals(target), 5, this));
+            var railDirDis = RailHelper.getRail(parent.getOnPos().above(), level).flatMap(target ->
+                    railHelper.traverseBi(this.getOnPos().above(), (level, p) -> p.equals(target), 5, this));
 
             // this is a fix to mitigate "bouncing" when trains start moving from a stopped position
             // todo: fix based on "docked" instead.
@@ -496,13 +499,13 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         dominated = temp;
     }
 
-    private static Optional<Integer> distHelper(AbstractTrainCarEntity car1, AbstractTrainCarEntity car2) {
-        return RailUtils.traverseBi(car1.getOnPos().above(), car1.level,
-                (l, p) -> RailUtils.getRail(car2.getOnPos().above(), car2.level)
+    private Optional<Integer> distHelper(AbstractTrainCarEntity car1, AbstractTrainCarEntity car2) {
+        return railHelper.traverseBi(car1.getOnPos().above(),
+                (l, p) -> RailHelper.getRail(car2.getOnPos().above(), car2.level)
                         .map(rp -> rp.equals(p)).orElse(false), 5, car1).map(Pair::getSecond);
     }
 
-    private static Optional<Pair<AbstractTrainCarEntity, AbstractTrainCarEntity>> findClosestPair(Train<AbstractTrainCarEntity> train1, Train<AbstractTrainCarEntity> train2) {
+    private Optional<Pair<AbstractTrainCarEntity, AbstractTrainCarEntity>> findClosestPair(Train<AbstractTrainCarEntity> train1, Train<AbstractTrainCarEntity> train2) {
         int mindistance = Integer.MAX_VALUE;
         Optional<Pair<AbstractTrainCarEntity, AbstractTrainCarEntity>> curr = Optional.empty();
         var pairs = Arrays.asList(
@@ -546,7 +549,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         train.setTail(head);
     }
 
-    private static Optional<Pair<AbstractTrainCarEntity, AbstractTrainCarEntity>> tryFindAndPrepareClosePair(Train<AbstractTrainCarEntity> train1, Train<AbstractTrainCarEntity> train2) {
+    private Optional<Pair<AbstractTrainCarEntity, AbstractTrainCarEntity>> tryFindAndPrepareClosePair(Train<AbstractTrainCarEntity> train1, Train<AbstractTrainCarEntity> train2) {
         return findClosestPair(train1, train2).flatMap(targetPair -> {
             if (targetPair.getFirst().equals(train1.getHead()) && targetPair.getSecond().equals(train2.getHead())) {
                 // if trying to attach to head loco then loco is solo

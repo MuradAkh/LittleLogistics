@@ -10,7 +10,7 @@ import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModSounds;
 import dev.murad.shipping.util.ItemHandlerVanillaContainerWrapper;
 import dev.murad.shipping.util.LinkableEntityHead;
-import dev.murad.shipping.util.RailUtils;
+import dev.murad.shipping.util.RailHelper;
 import dev.murad.shipping.util.Train;
 import lombok.Setter;
 import net.minecraft.nbt.CompoundTag;
@@ -111,7 +111,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         tickVanilla();
         this.setYRot(yrot);
         if(this.dominated.isEmpty() && this.getDeltaMovement().length() > 0.05){
-            this.setYRot(RailUtils.directionFromVelocity(getDeltaMovement()).toYRot());
+            this.setYRot(RailHelper.directionFromVelocity(getDeltaMovement()).toYRot());
         }
         if(!this.level.isClientSide){
             tickDockCheck();
@@ -256,16 +256,16 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     private void tickSpeedLimit(){
         if(speedRecomputeCooldown < 0 || speedLimit < 0 ) {
-            var dist = RailUtils.getRail(getOnPos().above(), this.level).flatMap(pos ->
-                            RailUtils.traverse(pos,
+            var dist = RailHelper.getRail(getOnPos().above(), this.level).flatMap(pos ->
+                            railHelper.traverse(pos,
                                     this.level,
                                     this.getDirection(),
                                     (level, p) -> {
-                                        var railoc = RailUtils.getRail(p, level);
+                                        var railoc = RailHelper.getRail(p, level);
                                         if (railoc.isEmpty()) {
                                             return true;
                                         }
-                                        var shape = RailUtils.getShape(railoc.get(), this.level, Optional.empty());
+                                        var shape = railHelper.getShape(railoc.get(), this.level);
                                         var block = level.getBlockState(railoc.get());
                                         return !(
                                                 shape.equals(RailShape.EAST_WEST)

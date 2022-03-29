@@ -1,6 +1,7 @@
 package dev.murad.shipping.util;
 
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.types.Func;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
@@ -14,16 +15,22 @@ import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class RailUtils {
+public class RailHelper {
+    private final AbstractMinecart minecart;
+
+    public RailHelper (AbstractMinecart minecart){
+        this.minecart = minecart;
+    }
+
     public static final Map<RailShape, Pair<Vec3i, Vec3i>> EXITS = Util.make(Maps.newEnumMap(RailShape.class), (map) -> {
         Vec3i west = Direction.WEST.getNormal();
         Vec3i east = Direction.EAST.getNormal();
@@ -75,18 +82,18 @@ public class RailUtils {
     });
 
     @NotNull
-    public static RailShape getShape(BlockPos pos, Level level, Optional<AbstractMinecart> car) {
+    public RailShape getShape(BlockPos pos, Level level) {
         var state = level.getBlockState(pos);
-        return ((BaseRailBlock) state.getBlock()).getRailDirection(state, level, pos, car.orElse(null));
+        return ((BaseRailBlock) state.getBlock()).getRailDirection(state, level, pos, minecart);
     }
 
     @NotNull
-    public static RailShape getShape(BlockPos pos, Level level, Direction direction) {
+    public RailShape getShape(BlockPos pos, Level level, Direction direction) {
         var state = level.getBlockState(pos);
            if(state.getBlock() instanceof MultiShapeRail){
             return ((MultiShapeRail) state.getBlock()).getVanillaRailShapeFromDirection(state, pos, level, direction);
         } else {
-            return ((BaseRailBlock) state.getBlock()).getRailDirection(state, level, pos, null);
+            return ((BaseRailBlock) state.getBlock()).getRailDirection(state, level, pos, minecart);
         }
     }
 
@@ -109,12 +116,12 @@ public class RailUtils {
         }
     }
 
-    public static Optional<Pair<Direction, Integer>> traverseBi(BlockPos railPos, Level level, BiPredicate<Level, BlockPos> predicate, int limit, AbstractTrainCarEntity car){
-        return getRail(railPos, level).flatMap(pos -> {
-            var shape = getShape(pos, level, car.getDirection().getOpposite());
+    public Optional<Pair<Direction, Integer>> traverseBi(BlockPos railPos, BiPredicate<Level, BlockPos> predicate, int limit, AbstractTrainCarEntity car){
+        return getRail(railPos, minecart.level).flatMap(pos -> {
+            var shape = getShape(pos, minecart.level, car.getDirection().getOpposite());
             var dirs = EXITS_DIRECTION.get(shape);
-            var first = traverse(pos, level, dirs.getSecond().horizontal.getOpposite(), predicate, limit);
-            var second = traverse(pos, level, dirs.getFirst().horizontal.getOpposite(), predicate, limit);
+            var first = traverse(pos, minecart.level, dirs.getSecond().horizontal.getOpposite(), predicate, limit);
+            var second = traverse(pos, minecart.level, dirs.getFirst().horizontal.getOpposite(), predicate, limit);
             if(second.isEmpty()){
                 return first.map(i -> Pair.of(dirs.getFirst().horizontal, i));
             } else if (first.isEmpty()){
@@ -144,7 +151,7 @@ public class RailUtils {
         return getOtherExit(direction, shape).map(other -> direction.getNormal().subtract(other.horizontal.getNormal()));
     }
 
-    public static Optional<Integer> traverse(BlockPos railPos, Level level, Direction prevExitTaken, BiPredicate<Level, BlockPos> predicate, int limit){
+    public Optional<Integer> traverse(BlockPos railPos, Level level, Direction prevExitTaken, BiPredicate<Level, BlockPos> predicate, int limit){
         if(predicate.test(level, railPos)){
             return Optional.of(0);
         } else if (limit < 1){
@@ -175,7 +182,7 @@ public class RailUtils {
         }
 
         @Override
-        public int compareTo(@NotNull RailUtils.RailPathFindNode o) {
+        public int compareTo(@NotNull RailHelper.RailPathFindNode o) {
             if(this.heuristicValue == o.heuristicValue){
                 return this.pathLength - o.pathLength;
             } else return (int) (this.heuristicValue - o.heuristicValue);
@@ -185,7 +192,7 @@ public class RailUtils {
     /**
      * @param prevExitTaken the direction of travel for the train
      */
-    private static List<RailDir> getNextNodes(BlockPos pos, Level level, Direction prevExitTaken) {
+    private List<RailDir> getNextNodes(BlockPos pos, Level level, Direction prevExitTaken) {
         Direction inputSide = prevExitTaken.getOpposite();
         var entrance = prevExitTaken.getOpposite();
 
@@ -213,10 +220,10 @@ public class RailUtils {
         }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    public static Optional<RailPathFindNode> pathfind(BlockPos railPos, Level level, Direction prevExitTaken, BiFunction<Level, BlockPos, Double> heuristic) {
+    public Optional<RailPathFindNode> pathfind(BlockPos railPos, Direction prevExitTaken, Function<BlockPos, Double> heuristic) {
         Set<Pair<BlockPos, Direction>> visited = new HashSet<>();
         PriorityQueue<RailPathFindNode> queue = new PriorityQueue<>();
-        queue.add(new RailPathFindNode(railPos, prevExitTaken, 0, heuristic.apply(level, railPos)));
+        queue.add(new RailPathFindNode(railPos, prevExitTaken, 0, heuristic.apply(railPos)));
 
         while(!queue.isEmpty() && visited.size() < MAX_VISITED && queue.peek().heuristicValue > 0D){
             var curr = queue.poll();
@@ -227,10 +234,10 @@ public class RailUtils {
 
             visited.add(Pair.of(curr.pos, curr.prevExitTaken));
 
-            getNextNodes(curr.pos, level, curr.prevExitTaken).forEach(raildir -> {
+            getNextNodes(curr.pos, minecart.level, curr.prevExitTaken).forEach(raildir -> {
                 var pos = raildir.above ? curr.pos.relative(raildir.horizontal).above() : curr.pos.relative(raildir.horizontal);
-                getRail(pos, level).ifPresent(nextPos -> {
-                    queue.add(new RailPathFindNode(nextPos, raildir.horizontal, curr.pathLength + 1, heuristic.apply(level, nextPos)));
+                getRail(pos, minecart.level).ifPresent(nextPos -> {
+                    queue.add(new RailPathFindNode(nextPos, raildir.horizontal, curr.pathLength + 1, heuristic.apply(nextPos)));
                 });
             });
         }
@@ -243,9 +250,9 @@ public class RailUtils {
             getRail(entity.getOnPos().above(), level).map(rp -> rp.equals(pos))).orElse(false);
     }
 
-    public static Direction pickCheaperDir(Level level, Direction first, Direction second, BlockPos railPos, BiFunction<Level, BlockPos, Double> heuristic){
-        var result1 = pathfind(railPos, level, first, heuristic);
-        var result2 = pathfind(railPos, level, second, heuristic);
+    public Direction pickCheaperDir( Direction first, Direction second, BlockPos railPos, Function<BlockPos, Double> heuristic){
+        var result1 = pathfind(railPos, first, heuristic);
+        var result2 = pathfind(railPos, second, heuristic);
         if(result2.isEmpty()){
             return first; // default to first
         } else if (result1.isEmpty()) {
