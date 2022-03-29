@@ -74,6 +74,9 @@ public class ModItems {
     public static final RegistryObject<Item> TRANSMITTER_COMPONENT = Registration.ITEMS.register("transmitter_component",
             () -> new Item(new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
 
+    public static final RegistryObject<Item> LOCO_ROUTE = Registration.ITEMS.register("locomotive_route",
+            () -> new LocoRouteItem(new Item.Properties().stacksTo(16).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+
     /**
      * COMMON
      */
