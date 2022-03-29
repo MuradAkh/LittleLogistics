@@ -265,7 +265,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                                         if (railoc.isEmpty()) {
                                             return true;
                                         }
-                                        var shape = railHelper.getShape(railoc.get(), this.level);
+                                        var shape = railHelper.getShape(railoc.get());
                                         var block = level.getBlockState(railoc.get());
                                         return !(
                                                 shape.equals(RailShape.EAST_WEST)
