@@ -55,6 +55,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     public static final EntityDataAccessor<Integer> DOMINATED_ID = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
     protected Train<AbstractTrainCarEntity> train;
     protected static double TRAIN_SPEED = ShippingConfig.Server.TRAIN_MAX_SPEED.get();
+    @Getter
     protected final RailHelper railHelper;
 
     @Getter
