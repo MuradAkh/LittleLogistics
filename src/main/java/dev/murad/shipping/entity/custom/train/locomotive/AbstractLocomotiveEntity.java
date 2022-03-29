@@ -25,10 +25,13 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.state.properties.RailShape;
+import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -52,6 +55,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     private final VehicleFrontPart frontHitbox;
     private int speedRecomputeCooldown = 0;
     private double speedLimit = -1;
+    private int collisionCheckCooldown = 0;
+    private int remainingStallTime = 0;
+    private boolean forceStallCheck = false;
 
     // item handler for loco routes
     private static final String LOCO_ROUTE_INV_TAG = "locoRouteInv";
@@ -161,6 +167,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             doMovementEffect();
         }
 
+
         frontHitbox.updatePosition(this);
     }
 
@@ -184,7 +191,33 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     private void tickMovement() {
-        if(!docked && engineOn && tickFuel()) {
+        if(remainingStallTime > 0){
+            this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
+            remainingStallTime--;
+            if(remainingStallTime == 0)
+                forceStallCheck = true;
+        } else{
+            if (collisionCheckCooldown <= 0 || forceStallCheck){
+               var result = railHelper.traverse(getOnPos().above(), this.level, this.getDirection(), (level, pos)
+                       -> {
+                           AABB aabb = new AABB(pos);
+                           return !this.level.getEntitiesOfClass(AbstractMinecart.class, aabb, e -> {
+                               if(e instanceof AbstractTrainCarEntity t) {
+                                   return t.getTrain().getTug().map(f -> !f.getUUID().equals(this.getUUID())).orElse(true);
+                               } else return true;
+                           }).isEmpty();
+                       },
+                       3);
+               if(result.isPresent()){
+                   remainingStallTime = 20;
+               }
+               collisionCheckCooldown = 10;
+               forceStallCheck = false;
+            }else{
+                collisionCheckCooldown--;
+            }
+        }
+        if(!docked && engineOn && tickFuel() && remainingStallTime <= 0 && !forceStallCheck) {
             tickSpeedLimit();
             entityData.set(INDEPENDENT_MOTION, true);
             accelerate();
@@ -378,12 +411,12 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
         @Override
         public void stall() {
-            engineOn = true;
+            remainingStallTime = 20;
         }
 
         @Override
         public void unstall() {
-            engineOn = false;
+            remainingStallTime = 0;
         }
 
         @Override
