@@ -7,10 +7,7 @@ import dev.murad.shipping.block.energy.VesselChargerBlock;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
 import dev.murad.shipping.block.guiderail.CornerGuideRailBlock;
 import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
-import dev.murad.shipping.block.rail.JunctionRail;
-import dev.murad.shipping.block.rail.LocomotiveDockingRail;
-import dev.murad.shipping.block.rail.SwitchRail;
-import dev.murad.shipping.block.rail.TrainCarDockingRail;
+import dev.murad.shipping.block.rail.*;
 import dev.murad.shipping.block.rapidhopper.RapidHopperBlock;
 import dev.murad.shipping.block.vesseldetector.VesselDetectorBlock;
 import net.minecraft.world.item.BlockItem;
@@ -89,6 +86,16 @@ public class ModBlocks {
     public static final RegistryObject<Block> AUTOMATIC_SWITCH_RAIL = register(
             "automatic_switch_rail",
             () -> new SwitchRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL), true),
+            CreativeModeTab.TAB_TRANSPORTATION);
+
+    public static final RegistryObject<Block> TEE_JUNCTION_RAIL = register(
+            "tee_junction_rail",
+            () -> new TeeJunctionRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL), false),
+            CreativeModeTab.TAB_TRANSPORTATION);
+
+    public static final RegistryObject<Block> AUTOMATIC_TEE_JUNCTION_RAIL = register(
+            "automatic_tee_junction_rail",
+            () -> new TeeJunctionRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL), true),
             CreativeModeTab.TAB_TRANSPORTATION);
 
     public static final RegistryObject<Block> JUNCTION_RAIL = register(

@@ -155,6 +155,26 @@ public class ModBlockStateProvider extends BlockStateProvider {
                     .build();
         });
 
+        getVariantBuilder(ModBlocks.TEE_JUNCTION_RAIL.get()).forAllStates(state ->  {
+            String powered = state.getValue(SwitchRail.POWERED) ? "on" : "off";
+            return ConfiguredModel.builder()
+                    .modelFile(models()
+                            .withExistingParent("tee_junction_rail_" + powered, mcLoc("rail_flat"))
+                            .texture("rail", getBlTx("tee_junction_rail_" + powered)))
+                    .rotationY((int) state.getValue(SwitchRail.FACING).getOpposite().toYRot())
+                    .build();
+        });
+
+        getVariantBuilder(ModBlocks.AUTOMATIC_TEE_JUNCTION_RAIL.get()).forAllStates(state ->  {
+            String powered = state.getValue(SwitchRail.POWERED) ? "on" : "off";
+            return ConfiguredModel.builder()
+                    .modelFile(models()
+                            .withExistingParent("automatic_tee_junction_rail_" + powered, mcLoc("rail_flat"))
+                            .texture("rail", getBlTx("automatic_tee_junction_rail_" + powered)))
+                    .rotationY((int) state.getValue(SwitchRail.FACING).getOpposite().toYRot())
+                    .build();
+        });
+
         getVariantBuilder(ModBlocks.JUNCTION_RAIL.get()).forAllStates(state -> ConfiguredModel.builder()
                 .modelFile(models()
                         .withExistingParent("junction_rail", mcLoc("rail_flat"))

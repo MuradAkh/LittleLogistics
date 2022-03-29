@@ -93,6 +93,8 @@ public class JunctionRail extends BaseRailBlock implements MultiShapeRail {
         return in.getAxis().isHorizontal() && in.getOpposite() == out;
     }
 
+    static final Set<Direction> NO_POSSIBILITIES = Set.of();
+
     @Override
     public Set<Direction> getPossibleOutputDirections(BlockState state, Direction inputSide) {
         if (inputSide.getAxis().isHorizontal()) {
