@@ -164,6 +164,18 @@ public class RailHelper {
         });
     }
 
+    public Optional<Pair<BlockPos, Direction>> getNext(BlockPos railpos, Direction direction){
+        var shape = getShape(railpos, direction);
+        var entrance = direction.getOpposite();
+
+        return getOtherExit(entrance, shape)
+                .flatMap(raildir ->
+                    getRail(raildir.above ? railpos.relative(raildir.horizontal).above() : railpos.relative(raildir.horizontal), minecart.level)
+                            .map(pos -> Pair.of(pos, raildir.horizontal))
+                );
+
+    }
+
     private static class RailPathFindNode implements Comparable<RailPathFindNode>{
         BlockPos pos;
         Direction prevExitTaken;
