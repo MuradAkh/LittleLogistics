@@ -1,7 +1,7 @@
 package dev.murad.shipping.block.rail;
 
 import dev.murad.shipping.util.RailShapeUtil;
-import dev.murad.shipping.util.RailUtils;
+import dev.murad.shipping.util.RailHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
@@ -71,7 +71,7 @@ public class JunctionRail extends BaseRailBlock implements MultiShapeRail {
             return state.getValue(getShapeProperty());
         }
 
-        return RailUtils.directionFromVelocity(cart.getDeltaMovement()).getAxis() == Direction.Axis.X ? RailShape.EAST_WEST : RailShape.NORTH_SOUTH;
+        return RailHelper.directionFromVelocity(cart.getDeltaMovement()).getAxis() == Direction.Axis.X ? RailShape.EAST_WEST : RailShape.NORTH_SOUTH;
     }
 
     public BlockState rotate(BlockState pState, Rotation pRot) {
