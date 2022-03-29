@@ -46,29 +46,36 @@ public class LocomotiveNavigator {
         RailHelper.getRail(locomotive.getOnPos().above(), locomotive.level).ifPresent(railPos ->{
             if(routeNodes.contains(railPos)){
                 visitedNodes.add(railPos);
+                System.out.println("Marking off visited node " + railPos);
+                System.out.println(visitedNodes.size());
             }
             if(visitedNodes.size() == routeNodes.size()){
                 visitedNodes.clear();
+                System.out.println("Clearing visited nodes");
             }
             decisionCache.remove(railPos);
 
             locomotive.getRailHelper().getNext(railPos, locomotive.getDirection()).ifPresent(pair -> {
                 var nextRail = pair.getFirst();
-                var prevExitTake = pair.getSecond();
+                var prevExitTaken = pair.getSecond();
                 var state = locomotive.getLevel().getBlockState(nextRail);
                 if (state.getBlock() instanceof SwitchRail s && s.isAutomaticSwitching()){
-                   var choices = s.getPossibleOutputDirections(state, prevExitTake.getOpposite()).stream().toList();
-                   if (choices.size() == 1){
-                      s.setRailState(state, locomotive.level, nextRail, prevExitTake.getOpposite(), choices.get(0));
-                   } else if (choices.size() == 2){
-                       Set<BlockPos> potential = new HashSet<>(routeNodes);
-                       potential.removeAll(visitedNodes);
-                       if(!decisionCache.containsKey(nextRail)){
-                           var decision = locomotive.getRailHelper().pickCheaperDir(choices.get(0), choices.get(1), nextRail, RailHelper.samePositionHeuristicSet(potential));
-                           decisionCache.put(nextRail, decision);
-                       };
-                       s.setRailState(state, locomotive.level, nextRail, prevExitTake.getOpposite(), decisionCache.get(nextRail));
-                   }
+                    var choices = s.getPossibleOutputDirections(state, prevExitTaken.getOpposite()).stream().toList();
+                    if (choices.size() == 1){
+                        s.setRailState(state, locomotive.level, nextRail, prevExitTaken.getOpposite(), choices.get(0));
+                    } else {
+                        Set<BlockPos> potential = new HashSet<>(routeNodes);
+                        potential.removeAll(visitedNodes);
+                        if(!decisionCache.containsKey(nextRail)){
+                            var decision = locomotive.getRailHelper()
+                                   .pickCheaperDir(choices, nextRail,
+                                           RailHelper.samePositionHeuristicSet(potential), locomotive.getLevel());
+
+                            decisionCache.put(nextRail, decision);
+                            System.out.println("Putting decision to go " + decision.toString() + " at " + nextRail.toString());
+                        };
+                        s.setRailState(state, locomotive.level, nextRail, prevExitTaken.getOpposite(), decisionCache.get(nextRail));
+                    }
                 }
             });
         });

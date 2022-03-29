@@ -205,13 +205,13 @@ public class RailHelper {
      */
     private List<RailDir> getNextNodes(BlockPos pos, Direction prevExitTaken) {
         Direction inputSide = prevExitTaken.getOpposite();
-        var entrance = prevExitTaken.getOpposite();
 
         // todo: we need to check if blocks are actually loaded
         BlockState state = minecart.level.getBlockState(pos);
         if (state.getBlock() instanceof MultiShapeRail r) {
             // if rail is a MultiShapeRail, return all possible outputs from the input side
             // it doesn't matter if this rail is automatically switching.
+            System.out.println("Train is coming from " + inputSide);
             return r.getPossibleOutputDirections(state, inputSide)
                     .stream()
                     .map(RailDir::new)
@@ -222,23 +222,24 @@ public class RailHelper {
         List<RailShape> shapes = List.of(shape);
         return shapes.stream().map(shape1 -> {
             var dirs = EXITS_DIRECTION.get(shape);
-            if (dirs.getFirst().horizontal.equals(entrance)) {
+            if (dirs.getFirst().horizontal.equals(inputSide)) {
                 return dirs.getSecond();
-            } else if (dirs.getSecond().horizontal.equals(entrance)) {
+            } else if (dirs.getSecond().horizontal.equals(inputSide)) {
                 return dirs.getFirst();
             }
             return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    public Optional<RailPathFindNode> pathfind(BlockPos railPos, Direction prevExitTaken, Function<BlockPos, Double> heuristic) {
+    public Optional<RailPathFindNode> pathfind(BlockPos railPos, Direction prevDirTaken, Function<BlockPos, Double> heuristic) {
         Set<Pair<BlockPos, Direction>> visited = new HashSet<>();
         PriorityQueue<RailPathFindNode> queue = new PriorityQueue<>();
         PriorityQueue<RailPathFindNode> ends = new PriorityQueue<>();
-        queue.add(new RailPathFindNode(railPos, prevExitTaken, 0, heuristic.apply(railPos)));
+        queue.add(new RailPathFindNode(railPos, prevDirTaken, 0, heuristic.apply(railPos)));
 
         while(!queue.isEmpty() && visited.size() < MAX_VISITED && queue.peek().heuristicValue > 0D){
             var curr = queue.poll();
+            System.out.println("Current direction" + curr.prevExitTaken);
 
             // already explored this path
             if(visited.contains(Pair.of(curr.pos, curr.prevExitTaken)))
@@ -267,26 +268,44 @@ public class RailHelper {
             getRail(entity.getOnPos().above(), level).map(rp -> rp.equals(pos))).orElse(false);
     }
 
-    public Direction pickCheaperDir(Direction first, Direction second, BlockPos railPos, Function<BlockPos, Double> heuristic){
-        var result1 = pathfind(railPos, first, heuristic);
-        var result2 = pathfind(railPos, second, heuristic);
-        if(result2.isEmpty()){
-            return first; // default to first
-        } else if (result1.isEmpty()) {
-            return second;
-        } else {
-            if (result1.get().compareTo(result2.get()) <= 0){
-                return first;
-            } else return second;
-        }
+    private int minHeuristicValue(Pair<Direction, RailHelper.RailPathFindNode> a,
+                                                                           Pair<Direction, RailHelper.RailPathFindNode> b) {
+        if (a.getSecond().heuristicValue < b.getSecond().heuristicValue)
+            return -1;
+        else
+            return 1;
+    }
+
+    public Direction pickCheaperDir(List<Direction> directions, BlockPos pos, Function<BlockPos, Double> heuristic, Level level) {
+        // get all directions where output has a possible rail
+        List<Pair<Direction, BlockPos>> hasOutputDirections = directions.stream()
+                .map(d -> new Pair<>(d, getRail(pos.relative(d), level)))
+                .filter(p -> p.getSecond().isPresent())
+                .map(p -> new Pair<>(p.getFirst(), p.getSecond().get()))
+                .collect(Collectors.toList());
+
+        // fallback
+        if (hasOutputDirections.isEmpty()) return directions.get(0);
+
+        List<Pair<Direction, RailHelper.RailPathFindNode>> hasPath = hasOutputDirections.stream()
+                .map(p -> new Pair<>(p.getFirst(), pathfind(p.getSecond(), p.getFirst(), heuristic)))
+                .filter(p -> p.getSecond().isPresent())
+                .map(p -> new Pair<>(p.getFirst(), p.getSecond().get()))
+                .collect(Collectors.toList());
+
+        // fallback
+        if (hasPath.isEmpty()) return hasOutputDirections.get(0).getFirst();
+
+        Pair<Direction, RailPathFindNode> scores = hasPath.stream().min(this::minHeuristicValue).get();
+        return scores.getFirst();
     }
 
     public static Function<BlockPos, Double> samePositionHeuristic(BlockPos p){
         return (p::distSqr);
     }
 
-    public static Function<BlockPos, Double> samePositionHeuristicSet(Set<BlockPos> set){
-        return ((pos) -> set.stream().map(p -> p.distSqr(pos)).min(Double::compareTo).orElse(0D));
+    public static Function<BlockPos, Double> samePositionHeuristicSet(Set<BlockPos> potentialDestinations){
+        return ((pos) -> potentialDestinations.stream().map(p -> p.distSqr(pos)).min(Double::compareTo).orElse(0D));
     }
 
     public static Vec3 toVec3(Vec3i dir) {
