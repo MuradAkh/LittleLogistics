@@ -45,9 +45,15 @@ public abstract class AbstractLocomotiveScreen<T extends AbstractLocomotiveConta
     }
 
     @Override
+    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+        super.render(matrixStack, mouseX, mouseY, partialTicks);
+        this.font.draw(matrixStack, new TranslatableComponent("screen.littlelogistics.locomotive.route"), this.getGuiLeft() + 120, this.getGuiTop() + 55, 4210752);
+        this.font.draw(matrixStack, menu.getRouteText(), this.getGuiLeft() + 120, this.getGuiTop() + 65, 4210752);
+    }
+
+    @Override
     protected void renderBg(PoseStack pPoseStack, float pPartialTick, int pMouseX, int pMouseY) {
         off.active = menu.isOn();
         on.active = !menu.isOn();
-        drawCenteredString(pPoseStack, Minecraft.getInstance().font, "10", this.getGuiLeft() + 130, this.getGuiTop() + 25, Color.BLACK.getRGB());
     }
 }

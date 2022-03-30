@@ -29,6 +29,15 @@ public class LocomotiveNavigator {
     private static final String ROUTE_TAG = "route";
     private static final String VISITED_TAG = "visited";
 
+    public int getRouteSize(){
+        return routeNodes.size();
+    }
+
+    public int getVisitedSize(){
+        return visitedNodes.size();
+    }
+
+
     private void reset(){
         this.visitedNodes.clear();
         this.routeNodes.clear();

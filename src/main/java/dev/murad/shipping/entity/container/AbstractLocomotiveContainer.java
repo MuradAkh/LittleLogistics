@@ -5,6 +5,7 @@ import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.network.LocomotivePacketHandler;
 import dev.murad.shipping.network.SetLocomotiveEnginePacket;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -43,13 +44,15 @@ public abstract class AbstractLocomotiveContainer <T extends DataAccessor> exten
     }
 
     public abstract boolean isOn();
+    public abstract int routeSize();
+    public abstract int visitedSize();
 
     public void setEngine(boolean state){
         LocomotivePacketHandler.INSTANCE.sendToServer(new SetLocomotiveEnginePacket(locomotiveEntity.getId(), state));
     }
 
     public String getRouteText(){
-        return new TranslatableComponent("screen.locomotive.route") + "0/0";
+        return  visitedSize() + "/" + routeSize();
     }
 
     @Override

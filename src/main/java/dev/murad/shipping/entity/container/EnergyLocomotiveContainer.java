@@ -47,4 +47,15 @@ public class EnergyLocomotiveContainer extends AbstractLocomotiveContainer<Energ
     public boolean isOn() {
         return this.data.isOn();
     }
+
+    @Override
+    public int routeSize() {
+        return data.routeSize();
+    }
+
+    @Override
+    public int visitedSize() {
+        return data.visitedSize();
+    }
+
 }

@@ -55,6 +55,8 @@
   "screen.littlelogistics.tug_route.rename": "Renaming %s",
   "screen.littlelogistics.tug_route.confirm": "Save",
 
+  "screen.littlelogistics.locomotive.route": "Visited:",
+
   "item.littlelogistics.tug_route.description": "Right click to add node at the end of the route, right click at the same location to remove. Shift right click to bring up menu.",
   "item.littlelogistics.tug_route.num_nodes": "Route Nodes: %s",
   "item.littlelogistics.tug_route.added": "Added Route Node X:%s Z:%s",
