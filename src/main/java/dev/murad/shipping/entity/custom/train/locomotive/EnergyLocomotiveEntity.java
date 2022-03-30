@@ -115,6 +115,8 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
     public EnergyLocomotiveDataAccessor getDataAccessor() {
         return (EnergyLocomotiveDataAccessor) new EnergyLocomotiveDataAccessor.Builder(this.getId())
                 .withOn(() -> engineOn)
+                .withRouteSize(() -> navigator.getRouteSize())
+                .withVisitedSize(() -> navigator.getVisitedSize())
                 .withEnergy(internalBattery::getEnergyStored)
                 .withCapacity(internalBattery::getMaxEnergyStored)
                 .withLit(() -> internalBattery.getEnergyStored() > 0) // has energy

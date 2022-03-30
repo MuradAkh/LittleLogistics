@@ -33,4 +33,14 @@ public class SteamLocomotiveContainer extends AbstractLocomotiveContainer<SteamL
         return data.isOn();
     }
 
+    @Override
+    public int routeSize() {
+        return data.routeSize();
+    }
+
+    @Override
+    public int visitedSize() {
+        return data.visitedSize();
+    }
+
 }
