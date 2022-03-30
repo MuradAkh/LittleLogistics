@@ -437,8 +437,9 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                             setDeltaMovement(getDeltaMovement().scale(distance * 0.8));
                         }
                     }
-                } else if (distance < minDist - 0.02) {
-                    setDeltaMovement(parentDirection.scale(-0.05));
+                } else if (parent.distanceTo(this) < minDist && parent.getDeltaMovement().length() < 0.01) {
+                    this.moveTo(Math.floor(getX()) + 0.5, getY(), Math.floor(getZ()) + 0.5);
+                    setDeltaMovement(Vec3.ZERO);
                 } else {
                     setDeltaMovement(Vec3.ZERO);
                 }
