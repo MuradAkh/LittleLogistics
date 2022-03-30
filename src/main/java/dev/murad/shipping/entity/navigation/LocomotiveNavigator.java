@@ -53,6 +53,11 @@ public class LocomotiveNavigator {
     }
 
     public void serverTick(){
+        if (routeNodes.isEmpty()) {
+            // don't make decisions if route is empty, just let it rideeeeeee
+            return;
+        }
+
         RailHelper.getRail(locomotive.getOnPos().above(), locomotive.level).ifPresent(railPos ->{
             if(routeNodes.contains(railPos)){
                 visitedNodes.add(railPos);
