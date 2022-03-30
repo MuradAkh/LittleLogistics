@@ -1,5 +1,6 @@
 package dev.murad.shipping.block.rail;
 
+import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.util.RailShapeUtil;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -120,22 +121,9 @@ public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
 
     @Override
     public RailShape getRailDirection(BlockState state, BlockGetter world, BlockPos pos, @Nullable AbstractMinecart cart) {
-        Direction facing = state.getValue(FACING);
-        OutDirection out = state.getValue(OUT_DIRECTION);
-
-        Direction inDirection = facing.getOpposite();
-        Direction turnDirection = out.getOutDirection(inDirection);
-        Direction outDirection = state.getValue(POWERED) ? turnDirection : facing;
-
-        if (cart != null && cart.getMotionDirection().getOpposite() == facing) {
-            outDirection = facing;
-        }
-
-        RailShape shape = RailShapeUtil.getRailShape(inDirection, outDirection);
-        return shape;
+        BranchingRailConfiguration c = getRailConfiguration(state);
+        return RailShapeUtil.getRailShape(c.getRootDirection(), state.getValue(POWERED) ? c.getPoweredDirection() : c.getUnpoweredDirection());
     }
-
-
 
     @Override
     public boolean setRailState(BlockState state, Level world, BlockPos pos, Direction in, Direction out) {
@@ -182,15 +170,7 @@ public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
 
     @Override
     public RailShape getVanillaRailShapeFromDirection(BlockState state, BlockPos pos, Level level, Direction direction) {
-        BranchingRailConfiguration c = getRailConfiguration(state);
-        Direction outDirection = state.getValue(POWERED) ? c.getPoweredDirection() : c.getUnpoweredDirection();
-
-        if (direction == c.getRootDirection()) {
-            outDirection = c.getUnpoweredDirection();
-        }
-
-        RailShape shape = RailShapeUtil.getRailShape(c.getRootDirection(), outDirection);
-        return shape;
+        return getRailDirection(state, level, pos, null);
     }
 
     public BlockState rotate(BlockState pState, Rotation pRot) {
