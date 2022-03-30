@@ -19,8 +19,7 @@ public class EnergyLocomotiveContainer extends AbstractLocomotiveContainer<Energ
                         .setBackground(EMPTY_ATLAS_LOC, EMPTY_ENERGY));
             });
 
-            addSlot(new SlotItemHandler(locomotiveEntity.getLocoRouteItemHandler(),
-                    0, 32, 50));
+
         }
     }
 

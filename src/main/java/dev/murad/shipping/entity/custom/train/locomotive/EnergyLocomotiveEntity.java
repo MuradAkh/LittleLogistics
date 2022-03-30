@@ -17,6 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -35,7 +36,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements ItemHandlerVanillaContainerWrapper {
+public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements ItemHandlerVanillaContainerWrapper, WorldlyContainer {
     private final ItemStackHandler itemHandler = createHandler();
     private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
     private static final int MAX_ENERGY = ShippingConfig.Server.ENERGY_LOCO_BASE_CAPACITY.get();
@@ -150,6 +151,21 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
     @Override
     public ItemStackHandler getRawHandler() {
         return itemHandler;
+    }
+
+    @Override
+    public int[] getSlotsForFace(Direction p_180463_1_) {
+        return new int[]{0};
+    }
+
+    @Override
+    public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
+        return stalling.isDocked();
+    }
+
+    @Override
+    public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack p_180461_2_, Direction p_180461_3_) {
+        return false;
     }
 
     @Override

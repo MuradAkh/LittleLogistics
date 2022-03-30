@@ -5,12 +5,15 @@ import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.network.LocomotivePacketHandler;
 import dev.murad.shipping.network.SetLocomotiveEnginePacket;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.items.SlotItemHandler;
 
 import javax.annotation.Nullable;
 
@@ -27,17 +30,26 @@ public abstract class AbstractLocomotiveContainer <T extends DataAccessor> exten
         this.data = data;
         layoutPlayerInventorySlots(8, 84);
         this.addDataSlots(data);
+
+        addSlot(new SlotItemHandler(locomotiveEntity.getLocoRouteItemHandler(),
+                0, 98, 57).setBackground(EMPTY_ATLAS_LOC, AbstractTugContainer.EMPTY_TUG_ROUTE));
     }
+
+
 
     @Override
     protected int getSlotNum() {
-        return 1;
+        return 2;
     }
 
     public abstract boolean isOn();
 
     public void setEngine(boolean state){
         LocomotivePacketHandler.INSTANCE.sendToServer(new SetLocomotiveEnginePacket(locomotiveEntity.getId(), state));
+    }
+
+    public String getRouteText(){
+        return new TranslatableComponent("screen.locomotive.route") + "0/0";
     }
 
     @Override
