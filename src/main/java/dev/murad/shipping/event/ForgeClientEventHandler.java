@@ -47,13 +47,6 @@ public class ForgeClientEventHandler {
     public static final ResourceLocation BEAM_LOCATION = new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/beacon_beam.png");
 
     @SubscribeEvent
-    public static void renderOverlay(RenderGameOverlayEvent event) {
-        Player player = Minecraft.getInstance().player;
-        ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);
-
-    }
-
-    @SubscribeEvent
     public static void onRenderWorldLast(RenderLevelLastEvent event) {
         Player player = Minecraft.getInstance().player;
         ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);
