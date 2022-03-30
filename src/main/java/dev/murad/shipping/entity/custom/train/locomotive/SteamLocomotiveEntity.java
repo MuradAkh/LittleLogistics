@@ -19,6 +19,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -36,8 +37,9 @@ import net.minecraftforge.items.ItemStackHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Random;
+import java.util.stream.IntStream;
 
-public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements ItemHandlerVanillaContainerWrapper {
+public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements ItemHandlerVanillaContainerWrapper, WorldlyContainer {
     private final ItemStackHandler itemHandler = createHandler();
     private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
     private static final int FURNACE_FUEL_MULTIPLIER= ShippingConfig.Server.STEAM_LOCO_FUEL_MULTIPLIER.get();
@@ -173,6 +175,21 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
                 }
             }
         }
+    }
+
+    @Override
+    public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack p_180461_2_, Direction p_180461_3_) {
+        return false;
+    }
+
+    @Override
+    public int[] getSlotsForFace(Direction p_180463_1_) {
+        return new int[]{0};
+    }
+
+    @Override
+    public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
+        return stalling.isDocked();
     }
 
     @Override

@@ -192,7 +192,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     private void tickMovement() {
         if(remainingStallTime > 0){
-            this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
             remainingStallTime--;
             if(remainingStallTime == 0)
                 forceStallCheck = true;
@@ -207,9 +206,14 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                                } else return true;
                            }).isEmpty();
                        },
-                       3);
+                       4);
                if(result.isPresent()){
-                   remainingStallTime = 20;
+                   remainingStallTime = 40;
+                   if(result.get() < 2){
+                       this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
+                   } else {
+                       this.setDeltaMovement(this.getDeltaMovement().x * 0.2, this.getDeltaMovement().y, this.getDeltaMovement().z * 0.2);
+                   }
                }
                collisionCheckCooldown = 10;
                forceStallCheck = false;
@@ -386,7 +390,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         this.train = train;
     }
 
-    private final StallingCapability stalling = new StallingCapability() {
+    protected final StallingCapability stalling = new StallingCapability() {
         @Override
         public boolean isDocked() {
             return docked;
@@ -481,7 +485,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         if (this.isRemoved()) {
             return false;
         } else {
-            return !(this.distanceToSqr(pPlayer) > 64.0D);
+            return !(this.distanceToSqr(pPlayer) > 25.0D);
         }
     }
 }
