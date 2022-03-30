@@ -485,7 +485,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         if (this.isRemoved()) {
             return false;
         } else {
-            return !(this.distanceToSqr(pPlayer) > 40D);
+            return !(this.distanceToSqr(pPlayer) > 64D);
         }
     }
 }

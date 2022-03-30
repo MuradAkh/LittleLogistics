@@ -15,11 +15,11 @@ public class EnergyLocomotiveDataAccessor extends EnergyTugDataAccessor {
     }
 
     public int visitedSize() {
-        return this.data.get(4);
+        return this.data.get(7);
     }
 
     public int routeSize() {
-        return this.data.get(5);
+        return this.data.get(8);
     }
 
 
