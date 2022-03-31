@@ -181,7 +181,6 @@ public class RailHelper {
                     getRail(raildir.above ? railpos.relative(raildir.horizontal).above() : railpos.relative(raildir.horizontal), minecart.level)
                             .map(pos -> Pair.of(pos, raildir.horizontal))
                 );
-
     }
 
     private static class RailPathFindNode implements Comparable<RailPathFindNode>{

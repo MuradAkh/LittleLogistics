@@ -140,7 +140,8 @@ public class TeeJunctionRail extends BaseRailBlock implements MultiShapeRail {
     public Set<Direction> getPossibleOutputDirections(BlockState state, Direction inputSide) {
         BranchingRailConfiguration c = getRailConfiguration(state);
         boolean powered = state.getValue(POWERED);
-        return c.getPossibleDirections(inputSide, automaticSwitching, powered);
+        Set<Direction> poss = c.getPossibleDirections(inputSide, automaticSwitching, powered);
+        return poss;
     }
 
     @Override
