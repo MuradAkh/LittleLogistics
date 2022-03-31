@@ -13,10 +13,7 @@ import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class LocomotiveNavigator {
@@ -52,6 +49,14 @@ public class LocomotiveNavigator {
         reset();
     }
 
+    private Optional<Direction> getDirectionFromHorizontalOffset(int x, int z) {
+        if (x > 0) return Optional.of(Direction.EAST);
+        if (x < 0) return Optional.of(Direction.WEST);
+        if (z > 0) return Optional.of(Direction.SOUTH);
+        if (z < 0) return Optional.of(Direction.NORTH);
+        return Optional.empty();
+    }
+
     public void serverTick(){
         if (routeNodes.isEmpty()) {
             // don't make decisions if route is empty, just let it rideeeeeee
@@ -67,7 +72,16 @@ public class LocomotiveNavigator {
             }
             decisionCache.remove(railPos);
 
-            locomotive.getRailHelper().getNext(railPos, locomotive.getDirection()).ifPresent(pair -> {
+            // guaranteed not null on serverside
+            BlockPos oldHorizontalBlockPos = locomotive.getOldHorizontalBlockPos();
+            BlockPos blockPos = locomotive.getBlockPos();
+
+            // figure out direction the locomotive came from.
+            BlockPos offset = blockPos.offset(oldHorizontalBlockPos.multiply(-1));
+            Optional<Direction> moveDirOpt = getDirectionFromHorizontalOffset(offset.getX(), offset.getZ());
+            Direction moveDir = moveDirOpt.orElse(locomotive.getDirection());
+
+            locomotive.getRailHelper().getNext(railPos, moveDir).ifPresent(pair -> {
                 var nextRail = pair.getFirst();
                 var prevExitTaken = pair.getSecond();
                 var state = locomotive.getLevel().getBlockState(nextRail);
@@ -82,7 +96,6 @@ public class LocomotiveNavigator {
                             var decision = locomotive.getRailHelper()
                                    .pickCheaperDir(choices, nextRail,
                                            RailHelper.samePositionHeuristicSet(potential), locomotive.getLevel());
-
                             decisionCache.put(nextRail, decision);
                         };
                         s.setRailState(state, locomotive.level, nextRail, prevExitTaken.getOpposite(), decisionCache.get(nextRail));

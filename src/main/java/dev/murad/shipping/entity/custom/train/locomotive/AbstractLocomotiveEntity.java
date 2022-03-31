@@ -14,6 +14,7 @@ import dev.murad.shipping.setup.ModSounds;
 import dev.murad.shipping.util.*;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -41,6 +42,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -59,6 +61,10 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     private int collisionCheckCooldown = 0;
     private int remainingStallTime = 0;
     private boolean forceStallCheck = false;
+
+    @Nullable
+    @Getter
+    private BlockPos oldHorizontalBlockPos;
 
     // item handler for loco routes
     private static final String LOCO_ROUTE_INV_TAG = "locoRouteInv";
@@ -148,6 +154,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         super.tickLoad();
 
         if (!this.level.isClientSide) {
+            if (oldHorizontalBlockPos == null || (oldHorizontalBlockPos.getX() != this.getBlockX() && oldHorizontalBlockPos.getZ() != this.getBlockZ())) {
+                this.oldHorizontalBlockPos = this.getBlockPos();
+            }
             navigator.serverTick();
         }
 
