@@ -3,6 +3,7 @@ package dev.murad.shipping.event;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.ShippingMod;
@@ -11,18 +12,18 @@ import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LocoRoute;
 import dev.murad.shipping.util.LocoRouteNode;
+import dev.murad.shipping.util.RailHelper;
 import dev.murad.shipping.util.TugRouteNode;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import net.minecraft.client.renderer.debug.DebugRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
@@ -38,6 +39,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.List;
+import java.util.OptionalDouble;
+import java.util.stream.Collectors;
 
 /**
  * Forge-wide event bus
@@ -45,6 +48,24 @@ import java.util.List;
 @Mod.EventBusSubscriber(modid = ShippingMod.MOD_ID, value = Dist.CLIENT)
 public class ForgeClientEventHandler {
     public static final ResourceLocation BEAM_LOCATION = new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/beacon_beam.png");
+    public static final ResourceLocation EMPTY_BEAM = new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/empty_beam.png");
+
+    public static class ModRenderType extends RenderType {
+        public static final RenderType LINES = create("lines", DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, false, false,
+                RenderType.CompositeState.builder()
+                        .setShaderState(RENDERTYPE_LINES_SHADER)
+                        .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
+                        .setLayeringState(VIEW_OFFSET_Z_LAYERING)
+                        .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
+                        .setOutputState(ITEM_ENTITY_TARGET)
+                        .setWriteMaskState(COLOR_DEPTH_WRITE)
+                        .setCullState(NO_CULL).createCompositeState(false));
+
+        public ModRenderType(String pName, VertexFormat pFormat, VertexFormat.Mode pMode, int pBufferSize, boolean pAffectsCrumbling, boolean pSortOnUpload, Runnable pSetupState, Runnable pClearState) {
+            super(pName, pFormat, pMode, pBufferSize, pAffectsCrumbling, pSortOnUpload, pSetupState, pClearState);
+        }
+    }
+
 
     @SubscribeEvent
     public static void onRenderWorldLast(RenderLevelLastEvent event) {
@@ -53,36 +74,38 @@ public class ForgeClientEventHandler {
 
 
         if (stack.getItem().equals(ModItems.LOCO_ROUTE.get())) {
-            MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
+            MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
             PoseStack pose = event.getPoseStack();
-            VertexConsumer consumer = buffer.getBuffer(RenderType.LINES);
-            Vec3 cameraOff = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().reverse();
-
-            RenderSystem.disableDepthTest();
+            Vec3 cameraOff = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+            Vec3 cameraOffRev = cameraOff.reverse();
 
             LocoRoute route = LocoRouteItem.getRoute(stack);
-            for (LocoRouteNode n : route) {
-                BlockPos block = n.toBlockPos();
-
+            var list = route.stream().map(LocoRouteNode::toBlockPos).collect(Collectors.toList());
+            for (BlockPos block : list) {
                 pose.pushPose();
-                pose.translate(cameraOff.x, cameraOff.y, cameraOff.z);
-
-//                Tesselator tesselator = Tesselator.getInstance();
-//                BufferBuilder bufferbuilder = tesselator.getBuilder();
-//                RenderSystem.setShader(GameRenderer::getPositionColorShader);
-//                bufferbuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-//
-//                LevelRenderer.addChainedFilledBoxVertices(bufferbuilder, a.minX, a.minY, a.minZ, a.maxX, a.maxY, a.maxZ, 1.0f, 1.0f, 1.0f, 1.0f);
-//                tesselator.end();
-
-                AABB a = new AABB(block.getX(), block.getY(), block.getZ(), block.getX() + 1, block.getY() + 0.2, block.getZ() + 1).deflate(0.2, 0, 0.2);
-                LevelRenderer.renderLineBox(pose, consumer, a, 1.0f, 1.0f, 1.0f, 1.0f);
+                pose.translate(block.getX() - cameraOff.x, 1 - cameraOff.y, block.getZ() - cameraOff.z);
+                BeaconRenderer.renderBeaconBeam(pose, buffer, BEAM_LOCATION, event.getPartialTick(),
+                        1F, player.level.getGameTime(), player.level.getMinBuildHeight() + 1, 1024,
+                        DyeColor.RED.getTextureDiffuseColors(), 0F, 0.25F);
 
                 pose.popPose();
             }
 
-            RenderSystem.enableDepthTest();
-            buffer.endBatch(RenderType.LINES);
+            for (BlockPos block : list) {
+                pose.pushPose();
+                var shape = RailHelper.getShape(block, player.level);
+                double baseY = block.getY() + (shape.getName().contains("ascending") ? 0.4 : 0);
+                pose.translate(cameraOffRev.x, cameraOffRev.y, cameraOffRev.z);
+                AABB a = new AABB(block.getX(), baseY, block.getZ(), block.getX() + 1, baseY + 0.2, block.getZ() + 1).deflate(0.2, 0, 0.2);
+                LevelRenderer.renderLineBox(pose, buffer.getBuffer(ModRenderType.LINES), a, 1.0f, 0.3f, 0.3f, 0.5f);
+
+                pose.popPose();
+
+            }
+
+
+
+            buffer.endBatch();
         }
 
         if (stack.getItem().equals(ModItems.TUG_ROUTE.get())){

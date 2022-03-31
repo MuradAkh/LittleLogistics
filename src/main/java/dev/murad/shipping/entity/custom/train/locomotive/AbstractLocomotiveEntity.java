@@ -1,6 +1,7 @@
 package dev.murad.shipping.entity.custom.train.locomotive;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
@@ -215,7 +216,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                        this.setDeltaMovement(this.getDeltaMovement().x * 0.2, this.getDeltaMovement().y, this.getDeltaMovement().z * 0.2);
                    }
                }
-               collisionCheckCooldown = 10;
+               collisionCheckCooldown = 5;
                forceStallCheck = false;
             }else{
                 collisionCheckCooldown--;
@@ -341,10 +342,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                                         }
                                         var shape = railHelper.getShape(railoc.get());
                                         var block = level.getBlockState(railoc.get());
-                                        return !(
-                                                shape.equals(RailShape.EAST_WEST)
-                                                        || shape.equals(RailShape.NORTH_SOUTH)
-                                        ) || block.is(ModBlocks.LOCOMOTIVE_DOCK_RAIL.get());
+                                        return !(shape.equals(RailShape.EAST_WEST) || shape.equals(RailShape.NORTH_SOUTH))
+                                                || block.is(ModBlocks.LOCOMOTIVE_DOCK_RAIL.get())
+                                                || block.getBlock() instanceof MultiShapeRail;
                                     },
                                     12))
                     .orElse(12);
