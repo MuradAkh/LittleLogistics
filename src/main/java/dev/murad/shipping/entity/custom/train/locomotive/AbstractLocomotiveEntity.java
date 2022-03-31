@@ -62,6 +62,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     private int remainingStallTime = 0;
     private boolean forceStallCheck = false;
 
+
+
+    private BlockPos currentHorizontalBlockPos;
     @Nullable
     @Getter
     private BlockPos oldHorizontalBlockPos;
@@ -154,9 +157,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         super.tickLoad();
 
         if (!this.level.isClientSide) {
-            if (oldHorizontalBlockPos == null || (oldHorizontalBlockPos.getX() != this.getBlockX() && oldHorizontalBlockPos.getZ() != this.getBlockZ())) {
-                this.oldHorizontalBlockPos = this.getBlockPos();
-            }
+            tickOldBlockPos();
             navigator.serverTick();
         }
 
@@ -179,6 +180,19 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
 
         frontHitbox.updatePosition(this);
+    }
+
+    private void tickOldBlockPos() {
+        if (oldHorizontalBlockPos == null || currentHorizontalBlockPos == null) {
+            oldHorizontalBlockPos = getBlockPos();
+            currentHorizontalBlockPos = getBlockPos();
+        } else {
+            if (currentHorizontalBlockPos.getX() != this.getBlockX() ||
+                    currentHorizontalBlockPos.getZ() != this.getBlockZ()) {
+                oldHorizontalBlockPos = currentHorizontalBlockPos;
+                currentHorizontalBlockPos = getBlockPos();
+            }
+        }
     }
 
     @Override
