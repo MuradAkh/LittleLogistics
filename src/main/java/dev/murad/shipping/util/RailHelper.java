@@ -88,6 +88,12 @@ public class RailHelper {
     }
 
     @NotNull
+    public static RailShape getShape(BlockPos pos, Level level) {
+        var state = level.getBlockState(pos);
+        return ((BaseRailBlock) state.getBlock()).getRailDirection(state, level, pos, null);
+    }
+
+    @NotNull
     public RailShape getShape(BlockPos pos, Direction direction) {
         var state = minecart.level.getBlockState(pos);
            if(state.getBlock() instanceof MultiShapeRail){
