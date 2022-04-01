@@ -16,6 +16,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
+import net.minecraft.world.level.block.Block;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,12 +25,32 @@ import java.util.List;
 
 @Log4j2
 public class LocoRouteItem extends Item {
-    private static final Logger LOGGER = LogManager.getLogger(LocoRouteItem.class);
-
     private static final String ROUTE_NBT = "route";
 
     public LocoRouteItem(Properties properties) {
         super(properties);
+    }
+
+    private boolean removeAndDisplay(@Nullable Player player, LocoRoute route, BlockPos pos) {
+        boolean removed = route.removeIf(n -> n.isAt(pos));
+        if (removed && player != null)
+            player.displayClientMessage(new TranslatableComponent("item.littlelogistics.locomotive_route.removed",
+                    pos.getX(), pos.getY(), pos.getZ()), false);
+        return removed;
+    }
+
+    private void addAndDisplay(@Nullable Player player, LocoRoute route, BlockPos pos, Level level) {
+        if (level.getBlockState(pos).getBlock() instanceof BaseRailBlock) {
+            // blockpos should be a railtype, either our custom rail or vanilla.
+            // Though for pathfinding purposes, it is not guaranteed to be a rail, as the
+            // world can change
+            if (player != null)
+                player.displayClientMessage(new TranslatableComponent("item.littlelogistics.locomotive_route.added",
+                        pos.getX(), pos.getY(), pos.getZ()), false);
+
+            // add
+            route.add(LocoRouteNode.fromBlocKPos(pos));
+        }
     }
 
     @Override
@@ -43,22 +64,12 @@ public class LocoRouteItem extends Item {
             LocoRoute route = getRoute(stack);
             Player player = pContext.getPlayer();
 
-            boolean removed = route.removeIf(n -> n.isAt(target));
-            if (removed) {
-                // removed. target block doesn't have to be a rail block for removal
-                if (player != null)
-                    player.displayClientMessage(new TranslatableComponent("item.littlelogistics.locomotive_route.removed",
-                            target.getX(), target.getY(), target.getZ()), false);
-            } else if (pContext.getLevel().getBlockState(target).getBlock() instanceof BaseRailBlock) {
-                // blockpos should be a railtype, either our custom rail or vanilla.
-                // Though for pathfinding purposes, it is not guaranteed to be a rail, as the
-                // world can change
-                if (player != null)
-                    player.displayClientMessage(new TranslatableComponent("item.littlelogistics.locomotive_route.added",
-                            target.getX(), target.getY(), target.getZ()), false);
+            // target block
+            Block targetBlock = pContext.getLevel().getBlockState(target).getBlock();
+            boolean shouldCheckAboveOnRemove = !(targetBlock instanceof BaseRailBlock);
 
-                // add
-                route.add(LocoRouteNode.fromBlocKPos(target));
+            if (!removeAndDisplay(player, route, target) && (!shouldCheckAboveOnRemove || !removeAndDisplay(player, route, target.above()))) {
+                addAndDisplay(player, route, target, pContext.getLevel());
             }
 
             // save route
