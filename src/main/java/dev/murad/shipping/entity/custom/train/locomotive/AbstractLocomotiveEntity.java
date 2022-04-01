@@ -124,6 +124,11 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     private ItemStackHandler createLocoRouteItemHandler() {
         return new ItemStackHandler(1) {
             @Override
+            protected int getStackLimit(int slot, @Nonnull ItemStack stack) {
+                return 1;
+            }
+
+            @Override
             protected void onContentsChanged(int slot) {
                 updateNavigatorFromItem();
             }

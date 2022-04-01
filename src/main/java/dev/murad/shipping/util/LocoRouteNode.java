@@ -92,4 +92,8 @@ public class LocoRouteNode {
     public BlockPos toBlockPos() {
         return new BlockPos(x, y, z);
     }
+
+    public boolean isAt(BlockPos pos) {
+        return this.x == pos.getX() && this.y == pos.getY() && this.z == pos.getZ();
+    }
 }
