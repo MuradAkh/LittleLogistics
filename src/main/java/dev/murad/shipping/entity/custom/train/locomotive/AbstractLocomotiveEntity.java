@@ -261,8 +261,15 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             entityData.set(INDEPENDENT_MOTION, true);
             accelerate();
         }else{
+            if(RailHelper.getRail(this.getOnPos().above(), this.level)
+                    .map(railHelper::getShape).map(Enum::name).map(s -> s.contains("ASCENDING")).orElse(true)){
+                this.setDeltaMovement(Vec3.ZERO);
+                this.setPos(xOld, yOld, zOld);
+            }
             entityData.set(INDEPENDENT_MOTION, false);
         }
+
+
     }
 
     @Override
