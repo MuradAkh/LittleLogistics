@@ -169,7 +169,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
         if (!this.level.isClientSide) {
             tickOldBlockPos();
-            navigator.serverTick();
+            if(remainingStallTime <= 0){
+                navigator.serverTick();
+            }
         }
 
         tickYRot();
@@ -456,7 +458,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
         @Override
         public boolean isStalled() {
-            return engineOn;
+            return remainingStallTime <=0;
         }
 
         @Override
