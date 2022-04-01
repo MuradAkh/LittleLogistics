@@ -256,17 +256,22 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                 collisionCheckCooldown--;
             }
         }
-        if(!docked && engineOn && tickFuel() && remainingStallTime <= 0 && !forceStallCheck) {
+        if(!docked && engineOn && remainingStallTime <= 0 && !forceStallCheck && tickFuel()) {
             tickSpeedLimit();
             entityData.set(INDEPENDENT_MOTION, true);
             accelerate();
         }else{
             if(RailHelper.getRail(this.getOnPos().above(), this.level)
-                    .map(railHelper::getShape).map(Enum::name).map(s -> s.contains("ASCENDING")).orElse(true)){
+                    .map(railHelper::getShape)
+                    .map(Enum::name)
+                    .map(s -> s.contains("ASCENDING"))
+                    .orElse(true) && tickFuel()){
                 this.setDeltaMovement(Vec3.ZERO);
+                entityData.set(INDEPENDENT_MOTION, true);
                 this.setPos(xOld, yOld, zOld);
+            }else{
+                entityData.set(INDEPENDENT_MOTION, false);
             }
-            entityData.set(INDEPENDENT_MOTION, false);
         }
 
 
