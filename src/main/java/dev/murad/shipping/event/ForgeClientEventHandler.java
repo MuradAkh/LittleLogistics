@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.item.LocoRouteItem;
@@ -28,6 +29,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -48,7 +50,6 @@ import java.util.stream.Collectors;
 @Mod.EventBusSubscriber(modid = ShippingMod.MOD_ID, value = Dist.CLIENT)
 public class ForgeClientEventHandler {
     public static final ResourceLocation BEAM_LOCATION = new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/beacon_beam.png");
-    public static final ResourceLocation EMPTY_BEAM = new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/empty_beam.png");
 
     public static class ModRenderType extends RenderType {
         public static final RenderType LINES = create("lines", DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, false, false,
@@ -77,7 +78,6 @@ public class ForgeClientEventHandler {
             MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
             PoseStack pose = event.getPoseStack();
             Vec3 cameraOff = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
-            Vec3 cameraOffRev = cameraOff.reverse();
 
             LocoRoute route = LocoRouteItem.getRoute(stack);
             var list = route.stream().map(LocoRouteNode::toBlockPos).collect(Collectors.toList());
@@ -93,12 +93,40 @@ public class ForgeClientEventHandler {
 
             for (BlockPos block : list) {
                 pose.pushPose();
-                var shape = RailHelper.getShape(block, player.level);
-                double baseY = block.getY() + (shape.getName().contains("ascending") ? 0.4 : 0);
-                pose.translate(cameraOffRev.x, cameraOffRev.y, cameraOffRev.z);
-                AABB a = new AABB(block.getX(), baseY, block.getZ(), block.getX() + 1, baseY + 0.2, block.getZ() + 1).deflate(0.2, 0, 0.2);
-                LevelRenderer.renderLineBox(pose, buffer.getBuffer(ModRenderType.LINES), a, 1.0f, 0.3f, 0.3f, 0.5f);
+                // handling for removed blocks and blocks out of distance
+                var shape = RailHelper.getRail(block, player.level)
+                        .map(pos -> RailHelper.getShape(pos, player.level))
+                        .orElse(RailShape.EAST_WEST);
+                double baseY = (shape.getName().contains("ascending") ? 0.1 : 0);
+                double baseX = 0;
+                double baseZ = 0;
+                Runnable mulPose = () -> {};
+                switch (shape){
+                    case ASCENDING_EAST -> {
+                        baseX = 0.2;
+                        mulPose = () -> pose.mulPose(Vector3f.ZP.rotationDegrees(45));
+                    }
+                    case ASCENDING_WEST -> {
+                        baseX = 0.1;
+                        baseY += 0.7;
+                        mulPose = (() -> pose.mulPose(Vector3f.ZP.rotationDegrees(-45)));
 
+                    }
+                    case ASCENDING_NORTH -> {
+                        baseZ = 0.1;
+                        baseY += 0.7;
+                        mulPose = () -> pose.mulPose(Vector3f.XP.rotationDegrees(45));
+                    }
+                    case ASCENDING_SOUTH -> {
+                        baseZ = 0.2;
+                        mulPose = () -> pose.mulPose(Vector3f.XP.rotationDegrees(-45));
+                    }
+                }
+
+                pose.translate(block.getX() + baseX - cameraOff.x, block.getY() + baseY - cameraOff.y, block.getZ() + baseZ - cameraOff.z);
+                AABB a = new AABB(0, 0, 0, 1, 0.2, 1).deflate(0.2, 0, 0.2);
+                mulPose.run();
+                LevelRenderer.renderLineBox(pose, buffer.getBuffer(ModRenderType.LINES), a, 1.0f, 0.3f, 0.3f, 0.5f);
                 pose.popPose();
 
             }
