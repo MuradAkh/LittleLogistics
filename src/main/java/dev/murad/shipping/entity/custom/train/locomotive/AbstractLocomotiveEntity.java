@@ -21,6 +21,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -38,7 +39,9 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.entity.PartEntity;
+import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.items.wrapper.InvWrapper;
 import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
@@ -96,6 +99,14 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         return docked;
     }
 
+
+    @Override
+    public void remove(RemovalReason r) {
+        if(!this.level.isClientSide){
+            this.spawnAtLocation(locoRouteItemHandler.getStackInSlot(0));
+        }
+        super.remove(r);
+    }
 
     @Override
     public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
