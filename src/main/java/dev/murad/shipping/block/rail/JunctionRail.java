@@ -104,6 +104,13 @@ public class JunctionRail extends BaseRailBlock implements MultiShapeRail {
     }
 
     @Override
+    public Set<Direction> getPriorityDirectionsToCheck(BlockState state, Direction entrance) {
+        if(entrance.equals(Direction.EAST) || entrance.equals(Direction.WEST)){
+            return Set.of(Direction.NORTH, Direction.SOUTH);
+        } else return Set.of();
+    }
+
+    @Override
     public RailShape getVanillaRailShapeFromDirection(BlockState state, BlockPos pos, Level level, Direction direction) {
         if(direction.equals(Direction.EAST) || direction.equals(Direction.WEST)){
             return RailShape.EAST_WEST;

@@ -20,6 +20,8 @@ public interface MultiShapeRail {
 
     Set<Direction> getPossibleOutputDirections(BlockState state, Direction inputSide);
 
+    Set<Direction> getPriorityDirectionsToCheck(BlockState state, Direction entrance);
+
     /**
      * @param direction Direction of travel for the train
      */

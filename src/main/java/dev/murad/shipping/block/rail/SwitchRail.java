@@ -169,6 +169,12 @@ public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
     }
 
     @Override
+    public Set<Direction> getPriorityDirectionsToCheck(BlockState state, Direction entrance) {
+        BranchingRailConfiguration c = getRailConfiguration(state);
+        return entrance.equals(c.getPoweredDirection()) ? Set.of(c.getUnpoweredDirection()) : Set.of();
+    }
+
+    @Override
     public RailShape getVanillaRailShapeFromDirection(BlockState state, BlockPos pos, Level level, Direction direction) {
         return getRailDirection(state, level, pos, null);
     }

@@ -81,6 +81,12 @@ public class TeeJunctionRail extends BaseRailBlock implements MultiShapeRail {
     }
 
     @Override
+    public Set<Direction> getPriorityDirectionsToCheck(BlockState state, Direction entrance) {
+        BranchingRailConfiguration c = getRailConfiguration(state);
+        return entrance.equals(c.getPoweredDirection()) ? Set.of(c.getUnpoweredDirection()) : Set.of();
+    }
+
+    @Override
     public boolean canMakeSlopes(BlockState state, BlockGetter world, BlockPos pos) {
         return false;
     }
