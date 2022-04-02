@@ -74,10 +74,11 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.RAIL))
                 .save(consumer);
 
-        ShapelessRecipeBuilder.shapeless(ModBlocks.AUTOMATIC_SWITCH_RAIL.get(), 1)
-                .requires(ModBlocks.SWITCH_RAIL.get())
-                .requires(ModItems.RECEIVER_COMPONENT.get())
-                .unlockedBy("has_item", has(ModBlocks.SWITCH_RAIL.get()))
+        ShapedRecipeBuilder.shaped(ModBlocks.TEE_JUNCTION_RAIL.get(), 4)
+                .define('#', Items.RAIL)
+                .pattern("###")
+                .pattern(" # ")
+                .unlockedBy("has_item", has(Items.RAIL))
                 .save(consumer);
 
         ShapedRecipeBuilder.shaped(ModBlocks.JUNCTION_RAIL.get(), 5)
@@ -85,6 +86,18 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern(" # ")
                 .pattern("###")
                 .pattern(" # ")
+                .unlockedBy("has_item", has(Items.RAIL))
+                .save(consumer);
+
+        ShapelessRecipeBuilder.shapeless(ModBlocks.AUTOMATIC_SWITCH_RAIL.get(), 1)
+                .requires(ModBlocks.SWITCH_RAIL.get())
+                .requires(ModItems.RECEIVER_COMPONENT.get())
+                .unlockedBy("has_item", has(Items.RAIL))
+                .save(consumer);
+
+        ShapelessRecipeBuilder.shapeless(ModBlocks.AUTOMATIC_TEE_JUNCTION_RAIL.get(), 1)
+                .requires(ModBlocks.TEE_JUNCTION_RAIL.get())
+                .requires(ModItems.RECEIVER_COMPONENT.get())
                 .unlockedBy("has_item", has(Items.RAIL))
                 .save(consumer);
 
