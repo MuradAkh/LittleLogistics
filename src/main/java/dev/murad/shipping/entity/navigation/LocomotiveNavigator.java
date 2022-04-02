@@ -58,11 +58,6 @@ public class LocomotiveNavigator {
     }
 
     public void serverTick(){
-        if (routeNodes.isEmpty()) {
-            // don't make decisions if route is empty, just let it rideeeeeee
-            return;
-        }
-
         RailHelper.getRail(locomotive.getOnPos().above(), locomotive.level).ifPresent(railPos ->{
             if(routeNodes.contains(railPos)){
                 visitedNodes.add(railPos);
@@ -89,7 +84,7 @@ public class LocomotiveNavigator {
                     var choices = s.getPossibleOutputDirections(state, prevExitTaken.getOpposite()).stream().toList();
                     if (choices.size() == 1) {
                         s.setRailState(state, locomotive.level, nextRail, prevExitTaken.getOpposite(), choices.get(0));
-                    } else if(choices.size() > 1) {
+                    } else if(choices.size() > 1 && !routeNodes.isEmpty()) {
                         Set<BlockPos> potential = new HashSet<>(routeNodes);
                         potential.removeAll(visitedNodes);
                         if(!decisionCache.containsKey(nextRail)){

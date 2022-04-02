@@ -156,9 +156,19 @@ public class ModRecipeProvider extends RecipeProvider {
                 .save(consumer);
 
         ShapedRecipeBuilder.shaped(ModItems.TUG_ROUTE.get())
-                .define('_', Items.COMPASS)
+                .define('_', ModItems.TRANSMITTER_COMPONENT.get())
                 .define('#', Items.REDSTONE)
                 .define('$', Items.IRON_NUGGET)
+                .pattern(" # ")
+                .pattern("$_$")
+                .pattern(" # ")
+                .unlockedBy("has_item", has(Items.REDSTONE))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModItems.LOCO_ROUTE.get())
+                .define('_', ModItems.TRANSMITTER_COMPONENT.get())
+                .define('#', Items.IRON_NUGGET)
+                .define('$', Items.REDSTONE)
                 .pattern(" # ")
                 .pattern("$_$")
                 .pattern(" # ")
@@ -169,6 +179,11 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.REDSTONE))
                 .requires(ModItems.TUG_ROUTE.get())
                 .save(consumer,new ResourceLocation(ShippingMod.MOD_ID, "route_reset"));
+
+        ShapelessRecipeBuilder.shapeless(ModItems.LOCO_ROUTE.get())
+                .unlockedBy("has_item", has(Items.REDSTONE))
+                .requires(ModItems.LOCO_ROUTE.get())
+                .save(consumer,new ResourceLocation(ShippingMod.MOD_ID, "loco_route_reset"));
 
         ShapedRecipeBuilder.shaped(ModItems.STEAM_TUG.get())
                 .define('_', Items.PISTON)
@@ -302,7 +317,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(ModItems.SEATER_CAR.get()))
                 .save(consumer);
 
-        ShapedRecipeBuilder.shaped(ModItems.RECEIVER_COMPONENT.get(), 4)
+        ShapedRecipeBuilder.shaped(ModItems.RECEIVER_COMPONENT.get(), 8)
                 .define('o', Items.ENDER_EYE)
                 .define('#', Items.REDSTONE)
                 .define('_', Items.STONE_SLAB)
@@ -312,7 +327,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.ENDER_EYE))
                 .save(consumer);
 
-        ShapedRecipeBuilder.shaped(ModItems.TRANSMITTER_COMPONENT.get(), 4)
+        ShapedRecipeBuilder.shaped(ModItems.TRANSMITTER_COMPONENT.get(), 8)
                 .define('o', Items.ENDER_EYE)
                 .define('#', Items.GLOWSTONE_DUST)
                 .define('_', Items.STONE_SLAB)

@@ -301,8 +301,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             } else if (e instanceof AbstractMinecart ) return true;
             else if(e instanceof VehicleFrontPart p) {
                 return !p.is(this);
-            }
-            else return true;
+            } else return false;
         }).isEmpty();
     }
 

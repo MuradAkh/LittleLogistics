@@ -202,12 +202,16 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         itemHandler.deserializeNBT(compound.getCompound("inv"));
+        burnTime = compound.contains("burn") ? compound.getInt("burn") : 0;
+        burnCapacity = compound.contains("burn_capacity") ? compound.getInt("burn_capacity") : 0;
         super.readAdditionalSaveData(compound);
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
         compound.put("inv", itemHandler.serializeNBT());
+        compound.putInt("burn", burnTime);
+        compound.putInt("burn_capacity", burnCapacity);
         super.addAdditionalSaveData(compound);
     }
 }
