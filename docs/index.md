@@ -56,7 +56,8 @@ A simple barge that seats one player.
 
 #### Auto-Fishing Barge
 
-Performs fishing passively, uses vanilla fishing rod loot table. Needs to be in open water for nets to be deployed. The barge has shallow water and "overfishing" penalties, so it's best to use this barge on long routes into oceans. Can be unloaded with hoppers and barge docks. Must be docked and part of a tug-train to interface with hoppers.
+Performs fishing passively, uses vanilla fishing rod loot table. Needs to be in open water for nets to be deployed. Can be unloaded with hoppers and barge docks. Must be docked and part of a tug-train to interface with hoppers.
+The barge has shallow water and "overfishing" penalties, so it's best to use this barge on long routes into oceans. The yield is maximised when the water is 20 or more blocks deep. Overfishing is tracked per barge and per block, routes 200 or more blocks long should be sufficient to avoid overfishing.
 
 <video src="https://user-images.githubusercontent.com/31002977/149857342-05ef5100-05de-4899-b92f-ddec2d7ccfaf.mp4" data-canonical-src="https://user-images.githubusercontent.com/31002977/149857342-05ef5100-05de-4899-b92f-ddec2d7ccfaf.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2 width-fit" style="max-height:35vh;"></video><br/>
 
