@@ -28,13 +28,13 @@ There are two types of vessels in this mod: tugs and barges. Tugs can move the b
 
 A basic tugboat that can operate on any furnace fuel. Fuel can be loaded with hoppers placed on top of tug docks.
 
-<img src="https://user-images.githubusercontent.com/31002977/161363667-f74d6fb7-8fdb-40b5-9be7-f59017e08c38.png" style="max-height:35vh;">
+<img src="https://user-images.githubusercontent.com/31002977/150037890-3bd23e8c-8aea-4910-85c3-34ba49c7504c.png" style="max-height:35vh;">
 
 #### Energy Tug
 
 A tugboat powered by Forge Energy, can be charged when docked with a Vehicle Charger. The tug has an extra slot for a capacitor, this is useful if the tug ran out of energy mid-way and needs to be recharged.
 
-<img src="https://user-images.githubusercontent.com/31002977/150037890-3bd23e8c-8aea-4910-85c3-34ba49c7504c.png" style="max-height:35vh;">
+<img src="https://user-images.githubusercontent.com/31002977/161363667-f74d6fb7-8fdb-40b5-9be7-f59017e08c38.png" style="max-height:35vh;">
 
 #### Tug route
 
