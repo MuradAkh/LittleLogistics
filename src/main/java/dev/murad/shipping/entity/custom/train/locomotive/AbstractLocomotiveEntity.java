@@ -15,6 +15,7 @@ import dev.murad.shipping.util.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -25,11 +26,13 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.state.properties.RailShape;
@@ -239,25 +242,18 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                 forceStallCheck = true;
         } else{
             if (collisionCheckCooldown <= 0 || forceStallCheck){
-               var result = railHelper.traverse(getOnPos().above(), this.level, this.getDirection(), (level, pos)
-                       -> {
-                           AABB aabb = new AABB(pos);
-                           return !this.level.getEntitiesOfClass(AbstractMinecart.class, aabb, e -> {
-                               if(e instanceof AbstractTrainCarEntity t) {
-                                   return t.getTrain().getTug().map(f -> !f.getUUID().equals(this.getUUID())).orElse(true);
-                               } else return true;
-                           }).isEmpty();
-                       },
+               var result = railHelper.traverse(getOnPos().above(), this.level, this.getDirection(), (dir, pos)
+                       -> checkCollision(pos) || checkStopSign(pos, dir),
                        4);
                if(result.isPresent()){
                    remainingStallTime = 40;
                    if(result.get() < 2){
                        this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
                    } else {
-                       this.setDeltaMovement(this.getDeltaMovement().x * 0.2, this.getDeltaMovement().y, this.getDeltaMovement().z * 0.2);
+                       this.setDeltaMovement(this.getDeltaMovement().x * 0.05, this.getDeltaMovement().y, this.getDeltaMovement().z * 0.05);
                    }
                }
-               collisionCheckCooldown = 5;
+               collisionCheckCooldown = 4;
                forceStallCheck = false;
             }else{
                 collisionCheckCooldown--;
@@ -282,6 +278,32 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         }
 
 
+    }
+
+    private boolean checkStopSign(BlockPos pos, Direction prevExitTaken){
+       return RailHelper.getRail(pos, this.level).flatMap(block -> {
+            if(level.getBlockState(block).getBlock() instanceof MultiShapeRail r){
+                return r.getPriorityDirectionsToCheck(level.getBlockState(block), prevExitTaken.getOpposite())
+                        .stream()
+                        .map(p -> railHelper.traverse(pos.relative(p), this.level, p, (dir, f) -> checkCollision(f), 2))
+                        .map(Optional::isPresent)
+                        .reduce(Boolean::logicalOr);
+            } else return Optional.of(false);
+        }).orElse(false);
+
+    }
+
+    private boolean checkCollision(BlockPos pos) {
+        AABB aabb = new AABB(pos);
+        return !this.level.getEntitiesOfClass(Entity.class, aabb, e -> {
+            if(e instanceof AbstractTrainCarEntity t) {
+                return t.getTrain().getTug().map(f -> !f.getUUID().equals(this.getUUID())).orElse(true);
+            } else if (e instanceof AbstractMinecart ) return true;
+            else if(e instanceof VehicleFrontPart p) {
+                return !p.is(this);
+            }
+            else return true;
+        }).isEmpty();
     }
 
     @Override
@@ -388,13 +410,13 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                             railHelper.traverse(pos,
                                     this.level,
                                     this.getDirection(),
-                                    (level, p) -> {
-                                        var railoc = RailHelper.getRail(p, level);
+                                    (direction, p) -> {
+                                        var railoc = RailHelper.getRail(p, this.level);
                                         if (railoc.isEmpty()) {
                                             return true;
                                         }
                                         var shape = railHelper.getShape(railoc.get());
-                                        var block = level.getBlockState(railoc.get());
+                                        var block = this.level.getBlockState(railoc.get());
                                         return !(shape.equals(RailShape.EAST_WEST) || shape.equals(RailShape.NORTH_SOUTH))
                                                 || block.is(ModBlocks.LOCOMOTIVE_DOCK_RAIL.get())
                                                 || block.getBlock() instanceof MultiShapeRail;

@@ -122,7 +122,7 @@ public class RailHelper {
         }
     }
 
-    public Optional<Pair<Direction, Integer>> traverseBi(BlockPos railPos, BiPredicate<Level, BlockPos> predicate, int limit, AbstractTrainCarEntity car){
+    public Optional<Pair<Direction, Integer>> traverseBi(BlockPos railPos, BiPredicate<Direction, BlockPos> predicate, int limit, AbstractTrainCarEntity car){
         return getRail(railPos, minecart.level).flatMap(pos -> {
             var shape = getShape(pos, car.getDirection().getOpposite());
             var dirs = EXITS_DIRECTION.get(shape);
@@ -157,8 +157,8 @@ public class RailHelper {
         return getOtherExit(direction, shape).map(other -> direction.getNormal().subtract(other.horizontal.getNormal()));
     }
 
-    public Optional<Integer> traverse(BlockPos railPos, Level level, Direction prevExitTaken, BiPredicate<Level, BlockPos> predicate, int limit){
-        if(predicate.test(level, railPos)){
+    public Optional<Integer> traverse(BlockPos railPos, Level level, Direction prevExitTaken, BiPredicate<Direction, BlockPos> predicate, int limit){
+        if(predicate.test(prevExitTaken, railPos)){
             return Optional.of(0);
         } else if (limit < 1){
             return Optional.empty();
@@ -266,9 +266,9 @@ public class RailHelper {
         return queue.isEmpty() ? Optional.empty() : Optional.of(queue.peek());
     }
 
-    public static BiPredicate<Level, BlockPos> samePositionPredicate(AbstractTrainCarEntity entity){
-        return (level, p) -> getRail(p, level).flatMap(pos ->
-            getRail(entity.getOnPos().above(), level).map(rp -> rp.equals(pos))).orElse(false);
+    public static BiPredicate<Direction, BlockPos> samePositionPredicate(AbstractTrainCarEntity entity){
+        return (direction, p) -> getRail(p, entity.level).flatMap(pos ->
+            getRail(entity.getOnPos().above(), entity.level).map(rp -> rp.equals(pos))).orElse(false);
     }
 
     public Direction pickCheaperDir(List<Direction> directions, BlockPos pos, Function<BlockPos, Double> heuristic, Level level) {
