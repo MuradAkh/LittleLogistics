@@ -68,9 +68,9 @@ public class ModRecipeProvider extends RecipeProvider {
 
         ShapedRecipeBuilder.shaped(ModBlocks.SWITCH_RAIL.get(), 4)
                 .define('#', Items.RAIL)
-                .pattern(" # ")
-                .pattern(" ##")
-                .pattern(" # ")
+                .pattern("# ")
+                .pattern("##")
+                .pattern("# ")
                 .unlockedBy("has_item", has(Items.RAIL))
                 .save(consumer);
 
