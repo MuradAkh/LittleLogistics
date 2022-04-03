@@ -38,11 +38,9 @@ A tugboat powered by Forge Energy, can be charged when docked with a Vehicle Cha
 
 #### Tug route
 
-This item stores a route for the tug. When the item is placed in the tug's route slot, the tug will follow the route in order from node 0. Right click at any coordinate to add a node to the **back** of the tug route (cannot add to the middle). Right click at the location of any existing node to remove it.
+This item stores a route for the tug. When the item is placed in the tug's route slot, the tug will follow the route in order from node 0. Right click at any coordinate to add a node to the **back** of the tug route (cannot add to the middle). Right click at the location of any existing node to remove it. Shift right click to bring up the menu that lets you modify the order of nodes or rename them. The route can be copied by placing it together with an empty one in a crafting grid. 
 
 <video src="https://user-images.githubusercontent.com/31002977/149873867-d83fec24-2a14-4774-b3f3-feaa08d27440.mp4" data-canonical-src="https://user-images.githubusercontent.com/31002977/149873867-d83fec24-2a14-4774-b3f3-feaa08d27440.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2 width-fit" style="max-height:35vh;"></video><br/>
-
-There are two types of blocks: docks and guide rails. Docks can be used to load/unload vessels; guide rails should be used around narrow waterways, to prevent the vessels from getting stuck.
 
 ### Barges
 
@@ -94,12 +92,12 @@ Assists vessels around sharp corners, should always be used on sharp corners or 
 
 ### Docking Vessels
 
-There are two dock blocks: barge and tug. The tug block must always be present for the barge docks to work. The top texture of the tug dock must be aligned with the barge docks, you can shift right-click the tug dock to flip the dock direction. The barge docks must form a straight line from the tug dock, there shouldn't be any gaps in the line. The tug dock can only insert into the tug (orange/output mode), place a hopper on top of the dock to extract. The barge docks can both insert (orange/output mode) and extract (blue/input) mode into/from the barges, shift-right click to switch the mode. Place a hopper below the waterblock next to the barge dock to extract. The dock line be next to a 1 block wide canal, wider canals can prevent the vessels from docking properly.
+There are two dock blocks: barge and tug. The tug block must always be present for the barge docks to work. The top texture of the tug dock must be aligned with the barge docks, you can shift right-click the tug dock to flip the dock direction. The barge docks must form a straight line from the tug dock, there shouldn't be any gaps in the line. The tug dock can only insert into the tug (orange/output mode), place a hopper on top of the dock to extract. The barge docks can both insert (orange/output mode) and extract (blue/input mode) into/from the barges, shift-right click to switch the mode. Place a hopper below the waterblock next to the barge dock to extract. The dock line should be next to a 1 block wide canal, wider canals can prevent the vessels from docking properly.
 
 <video src="https://user-images.githubusercontent.com/31002977/161363642-3209e435-a297-4f91-9b9c-efd76e22858b.mp4" data-canonical-src="https://user-images.githubusercontent.com/31002977/161363642-3209e435-a297-4f91-9b9c-efd76e22858b.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2 width-fit" style="max-height:35vh;"></video><br/>
 
 ## Trains (Minecraft 1.18.2+, Little Logistics 1.2+)
-Little logistics trains operate on vanilla rails, but use custom 
+Little logistics trains operate on vanilla rails, but use custom train car entities instead of minecarts.
 
 ### Locomotives
 
@@ -129,7 +127,7 @@ Same as vanilla minecarts, can seat one player or a mob
 
 #### Chunk loader train car
 
-Loads chunks on the go, speed limits are enforced to avoid server lag. 
+Loads a 3x3 chunk area on the go, speed limits are enforced to avoid server lag. 
 
 #### Chest train car
 
@@ -199,7 +197,7 @@ A hopper but for fluids, can import from the top and export from the sides. Can 
 
 ### Vehicle Detector
 
-This block emits redstone signal from the back when it detects a vehicle, will display range when right-clicked.
+This block emits a redstone signal from the back when it detects a vehicle, will display range when right-clicked.
 
 <img src="https://user-images.githubusercontent.com/31002977/161403804-471698da-1b11-42b4-a0df-49463690a4aa.png" style="max-height:35vh;">
 
