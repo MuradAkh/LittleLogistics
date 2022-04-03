@@ -15,14 +15,14 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public class TugRouteRecipe extends CustomRecipe {
-    private static final Logger LOGGER = LogManager.getLogger(TugRouteRecipe.class);
-    public TugRouteRecipe(ResourceLocation resourceLocation) {
+public class RouteCopyRecipe extends CustomRecipe {
+    private static final Logger LOGGER = LogManager.getLogger(RouteCopyRecipe.class);
+    public RouteCopyRecipe(ResourceLocation resourceLocation) {
         super(resourceLocation);
     }
 
-    private boolean isTugRouteWithTag(ItemStack stack, boolean hasTag) {
-        if (stack.getItem() == ModItems.TUG_ROUTE.get()) {
+    private boolean isRouteWithTag(ItemStack stack, boolean hasTag) {
+        if (stack.getItem() == ModItems.TUG_ROUTE.get() || stack.getItem() == ModItems.LOCO_ROUTE.get()) {
             return (stack.getTag() == null) ^ hasTag;
         }
         return false;
@@ -36,7 +36,7 @@ public class TugRouteRecipe extends CustomRecipe {
         for(int j = 0; j < inventory.getContainerSize(); ++j) {
             ItemStack stack = inventory.getItem(j);
             if (!stack.isEmpty()) {
-                if (isTugRouteWithTag(stack, true)) {
+                if (isRouteWithTag(stack, true)) {
                     if (!filledRoute.isEmpty()) {
                         // can't have 2 filled routes
                         return Optional.empty();
@@ -44,7 +44,7 @@ public class TugRouteRecipe extends CustomRecipe {
 
                     filledRoute = stack;
                 } else {
-                    if (!isTugRouteWithTag(stack, false)) {
+                    if (!isRouteWithTag(stack, false)) {
                         return Optional.empty();
                     }
 
