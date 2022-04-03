@@ -19,6 +19,7 @@ import net.minecraftforge.items.SlotItemHandler;
 import javax.annotation.Nullable;
 
 public abstract class AbstractLocomotiveContainer <T extends DataAccessor> extends AbstractItemHandlerContainer{
+    public static final ResourceLocation EMPTY_LOCO_ROUTE = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_loco_route");
     public static final ResourceLocation EMPTY_ENERGY = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_energy");
     public static final ResourceLocation EMPTY_ATLAS_LOC = InventoryMenu.BLOCK_ATLAS;
     protected T data;
@@ -33,7 +34,7 @@ public abstract class AbstractLocomotiveContainer <T extends DataAccessor> exten
         this.addDataSlots(data);
 
         addSlot(new SlotItemHandler(locomotiveEntity.getLocoRouteItemHandler(),
-                0, 98, 57).setBackground(EMPTY_ATLAS_LOC, AbstractTugContainer.EMPTY_TUG_ROUTE));
+                0, 98, 57).setBackground(EMPTY_ATLAS_LOC, EMPTY_LOCO_ROUTE));
     }
 
 
