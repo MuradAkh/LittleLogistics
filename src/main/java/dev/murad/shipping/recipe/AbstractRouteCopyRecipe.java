@@ -1,29 +1,37 @@
 package dev.murad.shipping.recipe;
 
 import com.mojang.datafixers.util.Pair;
-import dev.murad.shipping.setup.ModItems;
-import dev.murad.shipping.setup.ModRecipeSerializers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public class RouteCopyRecipe extends CustomRecipe {
-    private static final Logger LOGGER = LogManager.getLogger(RouteCopyRecipe.class);
-    public RouteCopyRecipe(ResourceLocation resourceLocation) {
+public abstract class AbstractRouteCopyRecipe extends CustomRecipe {
+    private final Item item;
+    public AbstractRouteCopyRecipe(ResourceLocation resourceLocation, Item matchingItem) {
         super(resourceLocation);
+        this.item = matchingItem;
     }
 
-    private boolean isRouteWithTag(ItemStack stack, boolean hasTag) {
-        if (stack.getItem() == ModItems.TUG_ROUTE.get() || stack.getItem() == ModItems.LOCO_ROUTE.get()) {
-            return (stack.getTag() == null) ^ hasTag;
+    public abstract boolean stackHasNodes(ItemStack stack);
+
+    @Nonnull
+    @Override
+    public abstract RecipeSerializer<?> getSerializer();
+
+    /**
+     * If hasNodes is set, return if stack has nodes,
+     * otherwise return if stack is empty.
+     */
+    private boolean isRouteWithNodes(ItemStack stack, boolean hasNodes) {
+        if (stack.getItem() == item) {
+            return !stackHasNodes(stack) ^ hasNodes;
         }
         return false;
     }
@@ -36,7 +44,7 @@ public class RouteCopyRecipe extends CustomRecipe {
         for(int j = 0; j < inventory.getContainerSize(); ++j) {
             ItemStack stack = inventory.getItem(j);
             if (!stack.isEmpty()) {
-                if (isRouteWithTag(stack, true)) {
+                if (isRouteWithNodes(stack, true)) {
                     if (!filledRoute.isEmpty()) {
                         // can't have 2 filled routes
                         return Optional.empty();
@@ -44,7 +52,7 @@ public class RouteCopyRecipe extends CustomRecipe {
 
                     filledRoute = stack;
                 } else {
-                    if (!isRouteWithTag(stack, false)) {
+                    if (!isRouteWithNodes(stack, false)) {
                         return Optional.empty();
                     }
 
@@ -53,8 +61,8 @@ public class RouteCopyRecipe extends CustomRecipe {
             }
         }
 
-        // if we have a filled route, and 1 unfilled route
-        if (!filledRoute.isEmpty() && i >= 1 && i <= filledRoute.getMaxStackSize() - 1) {
+        // if we have a filled route
+        if (!filledRoute.isEmpty() && i <= filledRoute.getMaxStackSize() - 1) {
             return Optional.of(new Pair<>(filledRoute, i));
         }
 
@@ -76,9 +84,15 @@ public class RouteCopyRecipe extends CustomRecipe {
         ItemStack filled = match.getFirst();
         int num = match.getSecond();
 
-        ItemStack output = filled.copy();
-        output.setCount(num + 1);
-        return output;
+        if (num == 0) {
+            // clear!
+            return new ItemStack(item, 1);
+        } else {
+            // copy
+            ItemStack output = filled.copy();
+            output.setCount(num + 1);
+            return output;
+        }
     }
 
     @Override
@@ -86,9 +100,4 @@ public class RouteCopyRecipe extends CustomRecipe {
         return x * y >= 2;
     }
 
-    @Nonnull
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-        return ModRecipeSerializers.TUG_ROUTE_COPY.get();
-    }
 }

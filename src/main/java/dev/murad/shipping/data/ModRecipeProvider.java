@@ -175,16 +175,6 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.REDSTONE))
                 .save(consumer);
 
-        ShapelessRecipeBuilder.shapeless(ModItems.TUG_ROUTE.get())
-                .unlockedBy("has_item", has(Items.REDSTONE))
-                .requires(ModItems.TUG_ROUTE.get())
-                .save(consumer,new ResourceLocation(ShippingMod.MOD_ID, "route_reset"));
-
-        ShapelessRecipeBuilder.shapeless(ModItems.LOCO_ROUTE.get())
-                .unlockedBy("has_item", has(Items.REDSTONE))
-                .requires(ModItems.LOCO_ROUTE.get())
-                .save(consumer,new ResourceLocation(ShippingMod.MOD_ID, "loco_route_reset"));
-
         ShapedRecipeBuilder.shaped(ModItems.STEAM_TUG.get())
                 .define('_', Items.PISTON)
                 .define('#', Items.FURNACE)
