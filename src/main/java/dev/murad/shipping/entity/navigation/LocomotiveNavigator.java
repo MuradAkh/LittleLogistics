@@ -11,6 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -113,8 +114,8 @@ public class LocomotiveNavigator {
         if (tag == null) return;
 
         // list of intarrays (type 11)
-        routeNodes.addAll(convertTagToSet(tag.getList(ROUTE_TAG, 11)));
-        visitedNodes.addAll(convertTagToSet(tag.getList(VISITED_TAG, 11)));
+        routeNodes.addAll(convertTagToSet(tag.getList(ROUTE_TAG, Tag.TAG_INT_ARRAY)));
+        visitedNodes.addAll(convertTagToSet(tag.getList(VISITED_TAG, Tag.TAG_INT_ARRAY)));
     }
 
     public CompoundTag saveToNbt(){
