@@ -112,9 +112,9 @@ public class LocomotiveNavigator {
         reset();
         if (tag == null) return;
 
-        // list of lists
-        routeNodes.addAll(convertTagToSet(tag.getList(ROUTE_TAG, 9)));
-        visitedNodes.addAll(convertTagToSet(tag.getList(VISITED_TAG, 9)));
+        // list of intarrays (type 11)
+        routeNodes.addAll(convertTagToSet(tag.getList(ROUTE_TAG, 11)));
+        visitedNodes.addAll(convertTagToSet(tag.getList(VISITED_TAG, 11)));
     }
 
     public CompoundTag saveToNbt(){
