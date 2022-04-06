@@ -281,11 +281,13 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     private boolean checkStopSign(BlockPos pos, Direction prevExitTaken){
+        if(frontHitbox.getPos().above().equals(pos))
+            return false;
        return RailHelper.getRail(pos, this.level).flatMap(block -> {
             if(level.getBlockState(block).getBlock() instanceof MultiShapeRail r){
                 return r.getPriorityDirectionsToCheck(level.getBlockState(block), prevExitTaken.getOpposite())
                         .stream()
-                        .map(p -> railHelper.traverse(pos.relative(p), this.level, p, (dir, f) -> checkCollision(f), 2))
+                        .map(p -> railHelper.traverse(pos.relative(p), this.level, p, (dir, f) -> checkLocoCollision(f), 2))
                         .map(Optional::isPresent)
                         .reduce(Boolean::logicalOr);
             } else return Optional.of(false);
@@ -300,6 +302,18 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                 return t.getTrain().getTug().map(f -> !f.getUUID().equals(this.getUUID())).orElse(true);
             } else if (e instanceof AbstractMinecart ) return true;
             else if(e instanceof VehicleFrontPart p) {
+                return !p.is(this);
+            } else return false;
+        }).isEmpty();
+    }
+
+    // to avoid deadlock for stopsign, you only care about incoming "heads"
+    private boolean checkLocoCollision(BlockPos pos) {
+        AABB aabb = new AABB(pos);
+        return !this.level.getEntitiesOfClass(Entity.class, aabb, e -> {
+            if(e instanceof AbstractLocomotiveEntity t) {
+                return t.getTrain().getTug().map(f -> !f.getUUID().equals(this.getUUID())).orElse(true);
+            } else if(e instanceof VehicleFrontPart p) {
                 return !p.is(this);
             } else return false;
         }).isEmpty();

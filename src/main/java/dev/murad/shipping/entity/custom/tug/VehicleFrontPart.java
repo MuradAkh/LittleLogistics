@@ -1,5 +1,6 @@
 package dev.murad.shipping.entity.custom.tug;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.InteractionHand;
@@ -65,6 +66,10 @@ public class VehicleFrontPart extends PartEntity<Entity> {
 
     public boolean isPickable() {
         return !this.isRemoved();
+    }
+
+    public BlockPos getPos(){
+        return getOnPos();
     }
 
     @Override
