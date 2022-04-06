@@ -1,5 +1,6 @@
 package dev.murad.shipping.block.dock;
 
+import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -66,6 +67,16 @@ public class TugDockBlock extends AbstractDockBlock {
             if (flag != world.hasNeighborSignal(pos)) {
                 world.setBlock(pos, state.cycle(DockingBlockStates.POWERED), 2);
             }
+            adjustInverted(state, world, pos);
+        }
+    }
+
+    private void adjustInverted(BlockState state, Level level, BlockPos pos){
+        Direction facing = state.getValue(DockingBlockStates.FACING);
+        Direction dockdir = state.getValue(DockingBlockStates.INVERTED) ? facing.getCounterClockWise() : facing.getClockWise();
+        var tarpos = pos.relative(dockdir);
+        if (level.getBlockState(tarpos).is(ModBlocks.BARGE_DOCK.get())){
+           level.setBlock(pos, state.setValue(DockingBlockStates.INVERTED, !state.getValue(DockingBlockStates.INVERTED)), 2);
         }
     }
 
