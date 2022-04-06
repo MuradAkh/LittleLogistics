@@ -33,7 +33,9 @@ public class DockingBlockStates {
                 .filter(DockingBlockStates::isImport)
                 .flatMap(dock -> dock.getHopper(p_220069_3_.relative(targetLoc)))
                 .ifPresent(te -> {
-                    world.setBlockAndUpdate(te.getBlockPos(), te.getBlockState().setValue(HopperBlock.FACING, targetDir));
+                    if(te.getBlockState().getValue(HopperBlock.FACING).equals(Direction.DOWN)) {
+                        world.setBlock(te.getBlockPos(), te.getBlockState().setValue(HopperBlock.FACING, targetDir), 2);
+                    }
         });
     }
 
