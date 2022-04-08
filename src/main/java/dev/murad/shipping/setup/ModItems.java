@@ -3,7 +3,6 @@ package dev.murad.shipping.setup;
 import dev.murad.shipping.entity.custom.train.locomotive.EnergyLocomotiveEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.SteamLocomotiveEntity;
 import dev.murad.shipping.entity.custom.train.wagon.ChestCarEntity;
-import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.entity.custom.train.wagon.ChunkLoaderCarEntity;
 import dev.murad.shipping.entity.custom.train.wagon.FluidTankCarEntity;
 import dev.murad.shipping.entity.custom.train.wagon.SeaterCarEntity;
@@ -14,6 +13,12 @@ import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.RegistryObject;
 
 public class ModItems {
+
+    /**
+     * COMMON
+     */
+    public static final RegistryObject<Item> CONDUCTORS_WRENCH = Registration.ITEMS.register("conductors_wrench",
+            () -> new Item(new Item.Properties().tab(CreativeModeTab.TAB_TRANSPORTATION)));
 
     /**
      * TUGS

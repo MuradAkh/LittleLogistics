@@ -1,5 +1,6 @@
 package dev.murad.shipping.block.guiderail;
 
+import dev.murad.shipping.util.InteractionUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -28,7 +29,7 @@ public class TugGuideRailBlock extends Block {
 
     @Override
     public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
-        if(player.getPose().equals(Pose.CROUCHING)){
+        if(InteractionUtil.doConfigure(player, hand)){
             world.setBlockAndUpdate(pos, state.setValue(FACING, state.getValue(FACING).getClockWise()));
             return InteractionResult.SUCCESS;
         }

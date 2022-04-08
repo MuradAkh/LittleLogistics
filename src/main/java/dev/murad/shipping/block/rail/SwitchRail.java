@@ -1,6 +1,7 @@
 package dev.murad.shipping.block.rail;
 
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
+import dev.murad.shipping.util.InteractionUtil;
 import dev.murad.shipping.util.RailShapeUtil;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -193,7 +194,7 @@ public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
 
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
-        if (pPlayer.isShiftKeyDown()) {
+        if (InteractionUtil.doConfigure(pPlayer, pHand)) {
             pLevel.setBlockAndUpdate(pPos, this.mirror(pState, Mirror.LEFT_RIGHT));
             return InteractionResult.SUCCESS;
         }

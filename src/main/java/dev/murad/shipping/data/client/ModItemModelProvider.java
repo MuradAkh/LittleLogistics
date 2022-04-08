@@ -50,6 +50,7 @@ public class ModItemModelProvider extends ItemModelProvider {
                 .model(builder(itemGenerated, "spring_dominant_selected"))
                 .predicate(new ResourceLocation(ShippingMod.MOD_ID, "springstate"), 1f).end();
 
+        builder(itemGenerated, "conductors_wrench");
         builder(itemGenerated, "creative_capacitor");
         builder(itemGenerated, "rapid_hopper");
         builder(itemGenerated, "switch_rail");

@@ -2,6 +2,7 @@ package dev.murad.shipping.block.rail;
 
 import dev.murad.shipping.block.dock.DockingBlockStates;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import dev.murad.shipping.util.InteractionUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -20,7 +21,7 @@ public class TrainCarDockingRail extends AbstractDockingRail{
     }
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
-        if (pPlayer.isShiftKeyDown()) {
+        if (InteractionUtil.doConfigure(pPlayer, pHand)) {
             pLevel.setBlockAndUpdate(pPos, pState.setValue(DockingBlockStates.INVERTED, !pState.getValue(DockingBlockStates.INVERTED)));
             fixHopperPos(pState, pLevel, pPos);
             return InteractionResult.SUCCESS;

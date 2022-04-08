@@ -19,6 +19,8 @@
   "item.littlelogistics.receiver_component": "Wireless Receiver Component",
   "item.littlelogistics.transmitter_component": "Wireless Transmitter Component",
 
+  "item.littlelogistics.conductors_wrench": "Conductor's Wrench",
+
   "entity.littlelogistics.tug": "Steam Tug",
   "entity.littlelogistics.barge": "Chest Barge",
   "entity.littlelogistics.chunk_loader_barge": "Chunk Loader Barge",

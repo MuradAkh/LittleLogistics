@@ -18,6 +18,6 @@ public class ModItemTagsProvider extends ItemTagsProvider {
     }
 
     protected void addTags() {
-
+        tag(ModTags.Items.WRENCHES).add(ModItems.CONDUCTORS_WRENCH.get());
     }
 }
