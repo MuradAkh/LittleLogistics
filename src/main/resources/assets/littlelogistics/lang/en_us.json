@@ -48,6 +48,8 @@
   "block.littlelogistics.automatic_switch_rail": "Automatic Switch Rail",
   "block.littlelogistics.tee_junction_rail": "T-Junction Rail",
   "block.littlelogistics.automatic_tee_junction_rail": "Automatic T-Junction Rail",
+  "block.littlelogistics.locomotive_dock_rail": "Locomotive Docking Rail",
+  "block.littlelogistics.car_dock_rail": "Train Car Docking Rail",
 
   "screen.littlelogistics.tug": "Steam Tug",
   "screen.littlelogistics.fishing_barge": "Auto-Fishing Barge",
