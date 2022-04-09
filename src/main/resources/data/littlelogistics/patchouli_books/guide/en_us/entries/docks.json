@@ -1,17 +1,17 @@
 {
-  "name": "Docks",
+  "name": "Vessel Docks",
   "icon": "littlelogistics:tug_dock",
   "category": "littlelogistics:blocks",
   "pages": [
     {
       "type": "patchouli:text",
-      "text": "There are two dock blocks: barge and tug. The tug block must always be present for the barge docks to work. The top texture of the tug dock must be aligned with the barge docks, forming a continuous line of docks. Powering the tug dock forces the vessels to dock. The dock line should be next to a 1 block wide canal, wider canals can prevent the vessels from docking properly."
+      "text": "There are two dock blocks: barge and tug. The tug block must always be present for the barge docks to work. The top texture of the tug dock must be aligned with the barge docks, forming a continuous line of docks. The docks do not transfer things themselves but communicate to the tug when whether there is stuff to transfer and it needs to wait. Alternatively, the tug can be forced to wait by applying a redstone signal."
     },
     {
       "type": "patchouli:crafting",
       "title": "Tug Dock",
       "recipe": "littlelogistics:tug_dock",
-      "text": "The tug dock can only insert into the tug (orange/output mode), place a hopper on top of the dock to extract. Shift right-click the tug dock to flip the dock direction. See the next page for barge dock >>>"
+      "text": "The tug dock can only insert into the tug (orange/output mode), place a hopper on top of the dock to insert. Shift right-click the tug dock to flip the dock direction. See the next page for barge dock >>>"
     },
     {
       "type": "patchouli:crafting",

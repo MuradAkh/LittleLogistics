@@ -43,7 +43,7 @@ public class ForgeEventHandler {
             }
 
             if(item instanceof ShearsItem) {
-                if(target instanceof SpringableEntity v) {
+                if(target instanceof LinkableEntity v) {
                     v.handleShearsCut();
                     event.setCanceled(true);
                     event.setCancellationResult(InteractionResult.SUCCESS);

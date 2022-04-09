@@ -26,7 +26,7 @@ SOFTWARE.
 
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
-import dev.murad.shipping.entity.custom.tug.TugFrontPart;
+import dev.murad.shipping.entity.custom.tug.VehicleFrontPart;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
@@ -57,7 +57,7 @@ public class EntitySpringAPI {
     }
 
     public static boolean isValidTarget(Entity target) {
-        return target instanceof LinkableEntity || target instanceof TugFrontPart;
+        return target instanceof LinkableEntity || target instanceof VehicleFrontPart;
     }
 
     public static void addGenericAnchorMapping(Class<? extends Entity> entity, BiFunction<Entity, SpringEntity.SpringSide, Vec3> function) {

@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -20,22 +21,22 @@ public abstract class AbstractDockTileEntity<T extends Entity & LinkableEntity<T
 
     public abstract boolean hold(T vessel, Direction direction);
 
-    public Optional<HopperBlockEntity> getHopper(){
-        BlockEntity mayBeHopper = this.level.getBlockEntity(this.getTargetBlockPos());
+    public Optional<HopperBlockEntity> getHopper(BlockPos p){
+        BlockEntity mayBeHopper = this.level.getBlockEntity(p);
         if (mayBeHopper instanceof HopperBlockEntity h) {
             return Optional.of(h);
         }
         else return Optional.empty();
     }
 
-    public Optional<IVesselLoader> getVesselLoader(){
-        BlockEntity mayBeHopper = this.level.getBlockEntity(this.getTargetBlockPos());
+    public Optional<IVesselLoader> getVesselLoader(BlockPos p){
+        BlockEntity mayBeHopper = this.level.getBlockEntity(p);
         if (mayBeHopper instanceof IVesselLoader l) {
             return Optional.of(l);
         }
         else return Optional.empty();
     }
 
-    protected abstract BlockPos getTargetBlockPos();
+    protected abstract List<BlockPos> getTargetBlockPos();
 
 }

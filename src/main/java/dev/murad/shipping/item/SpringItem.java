@@ -25,7 +25,7 @@ SOFTWARE.
  */
 
 
-import dev.murad.shipping.entity.custom.tug.TugFrontPart;
+import dev.murad.shipping.entity.custom.tug.VehicleFrontPart;
 import dev.murad.shipping.util.LinkableEntity;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.nbt.CompoundTag;
@@ -56,8 +56,8 @@ public class SpringItem extends Item {
 
     // because 'itemInteractionForEntity' is only for Living entities
     public void onUsedOnEntity(ItemStack stack, Player player, Level world, Entity target) {
-        if(target instanceof TugFrontPart){
-            target = ((TugFrontPart) target).getParent();
+        if(target instanceof VehicleFrontPart){
+            target = ((VehicleFrontPart) target).getParent();
         }
         if(world.isClientSide)
             return;

@@ -10,13 +10,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractTailDockTileEntity<T extends Entity & LinkableEntity<T>> extends AbstractDockTileEntity<T> {
     public AbstractTailDockTileEntity(BlockEntityType<?> t, BlockPos pos, BlockState state) {
         super(t, pos, state);
     }
 
-    private boolean handleItemHopper(T bargeEntity, HopperBlockEntity hopper){
+    protected boolean handleItemHopper(T bargeEntity, HopperBlockEntity hopper){
         if(!(bargeEntity instanceof Container)){
             return false;
         }
@@ -39,8 +40,18 @@ public abstract class AbstractTailDockTileEntity<T extends Entity & LinkableEnti
             return false;
         }
 
-        return getHopper().map(h -> handleItemHopper(vessel, h))
-                .orElse(getVesselLoader().map(l -> l.hold(vessel, isExtract() ? IVesselLoader.Mode.IMPORT : IVesselLoader.Mode.EXPORT))
+        for (BlockPos p : getTargetBlockPos()) {
+            if (checkInterface(vessel, p)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @NotNull
+    private Boolean checkInterface(T vessel, BlockPos p) {
+        return getHopper(p).map(h -> handleItemHopper(vessel, h))
+                .orElse(getVesselLoader(p).map(l -> l.hold(vessel, isExtract() ? IVesselLoader.Mode.IMPORT : IVesselLoader.Mode.EXPORT))
                         .orElse(false));
     }
 

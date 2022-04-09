@@ -24,7 +24,7 @@ public abstract class AbstractHeadDockTileEntity<T extends Entity & LinkableEnti
         super(t, pos, state);
     }
 
-    private boolean handleItemHopper(T tugEntity, HopperBlockEntity hopper){
+    protected boolean handleItemHopper(T tugEntity, HopperBlockEntity hopper){
         if(!(tugEntity instanceof Container)){
             return false;
         }
@@ -43,9 +43,11 @@ public abstract class AbstractHeadDockTileEntity<T extends Entity & LinkableEnti
             return true;
         }
 
-        if(getHopper().map(hopper -> handleItemHopper(tug, hopper))
-                .orElse(getVesselLoader().map(l -> l.hold(tug, IVesselLoader.Mode.EXPORT)).orElse(false))){
-            return true;
+        for (BlockPos p : getTargetBlockPos()) {
+            if (getHopper(p).map(hopper -> handleItemHopper(tug, hopper))
+                    .orElse(getVesselLoader(p).map(l -> l.hold(tug, IVesselLoader.Mode.EXPORT)).orElse(false))) {
+                return true;
+            }
         }
 
 

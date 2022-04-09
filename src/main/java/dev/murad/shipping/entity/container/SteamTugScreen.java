@@ -8,7 +8,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 
-public class SteamTugScreen extends AbstractTugScreen<SteamTugContainer> {
+public class SteamTugScreen extends AbstractVehicleScreen<SteamTugContainer> {
     private static final ResourceLocation GUI = new ResourceLocation(ShippingMod.MOD_ID, "textures/container/steam_tug.png");
 
     public SteamTugScreen(SteamTugContainer menu, Inventory inventory, Component label) {
