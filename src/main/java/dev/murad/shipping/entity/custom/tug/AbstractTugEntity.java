@@ -2,7 +2,7 @@ package dev.murad.shipping.entity.custom.tug;
 
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
-import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
+import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.util.*;
@@ -69,7 +69,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private int dockCheckCooldown = 0;
     private boolean independentMotion = false;
     private int pathfindCooldown = 0;
-    private TugFrontPart frontHitbox;
+    private VehicleFrontPart frontHitbox;
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.BOOLEAN);
 
 
@@ -86,7 +86,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         this.blocksBuilding = true;
         this.train = new Train(this);
         this.path = new TugRoute();
-        frontHitbox = new TugFrontPart(this);
+        frontHitbox = new VehicleFrontPart(this);
     }
 
     public AbstractTugEntity(EntityType type, Level worldIn, double x, double y, double z) {
@@ -380,6 +380,14 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     private void followGuideRail(){
+        // do not follow guide rail if stalled
+        var dockcap = getCapability(StallingCapability.STALLING_CAPABILITY);
+        if(dockcap.isPresent() && dockcap.resolve().isPresent()){
+            var cap = dockcap.resolve().get();
+            if(cap.isDocked() || cap.isFrozen() || cap.isStalled())
+                return;
+        }
+
         List<BlockState> belowList = Arrays.asList(this.level.getBlockState(getOnPos().below()),
                 this.level.getBlockState(getOnPos().below().below()));
         BlockState water = this.level.getBlockState(getOnPos());

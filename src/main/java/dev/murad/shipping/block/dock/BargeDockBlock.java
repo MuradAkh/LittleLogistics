@@ -1,7 +1,9 @@
 package dev.murad.shipping.block.dock;
 
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import dev.murad.shipping.util.InteractionUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Pose;
@@ -26,9 +28,9 @@ public class BargeDockBlock extends AbstractDockBlock {
     @SuppressWarnings("deprecation")
     @Override
     public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
-        if(player.getPose().equals(Pose.CROUCHING)){
+        if(InteractionUtil.doConfigure(player, hand)){
             world.setBlockAndUpdate(pos, state.setValue(DockingBlockStates.INVERTED, !state.getValue(DockingBlockStates.INVERTED)));
-            fixHopperPos(state, world, pos);
+            DockingBlockStates.fixHopperPos(state, world, pos, Direction.UP, state.getValue(DockingBlockStates.FACING));
             return InteractionResult.SUCCESS;
         }
 

@@ -2,6 +2,7 @@ package dev.murad.shipping.data;
 
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.setup.ModBlocks;
+import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
@@ -11,6 +12,7 @@ import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.Tags;
 
 import java.util.function.Consumer;
@@ -64,6 +66,59 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.POWERED_RAIL))
                 .save(consumer);
 
+        ShapedRecipeBuilder.shaped(ModBlocks.SWITCH_RAIL.get(), 4)
+                .define('#', Items.RAIL)
+                .pattern("# ")
+                .pattern("##")
+                .pattern("# ")
+                .unlockedBy("has_item", has(Items.RAIL))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModBlocks.TEE_JUNCTION_RAIL.get(), 4)
+                .define('#', Items.RAIL)
+                .pattern("###")
+                .pattern(" # ")
+                .unlockedBy("has_item", has(Items.RAIL))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModBlocks.JUNCTION_RAIL.get(), 5)
+                .define('#', Items.RAIL)
+                .pattern(" # ")
+                .pattern("###")
+                .pattern(" # ")
+                .unlockedBy("has_item", has(Items.RAIL))
+                .save(consumer);
+
+        ShapelessRecipeBuilder.shapeless(ModBlocks.AUTOMATIC_SWITCH_RAIL.get(), 1)
+                .requires(ModBlocks.SWITCH_RAIL.get())
+                .requires(ModItems.RECEIVER_COMPONENT.get())
+                .unlockedBy("has_item", has(Items.RAIL))
+                .save(consumer);
+
+        ShapelessRecipeBuilder.shapeless(ModBlocks.AUTOMATIC_TEE_JUNCTION_RAIL.get(), 1)
+                .requires(ModBlocks.TEE_JUNCTION_RAIL.get())
+                .requires(ModItems.RECEIVER_COMPONENT.get())
+                .unlockedBy("has_item", has(Items.RAIL))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModBlocks.LOCOMOTIVE_DOCK_RAIL.get(), 2)
+                .define('#', Items.RAIL)
+                .define('$', ModItems.SPRING.get())
+                .pattern(" $ ")
+                .pattern(" # ")
+                .pattern(" # ")
+                .unlockedBy("has_item", has(Items.RAIL))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModBlocks.CAR_DOCK_RAIL.get(), 3)
+                .define('#', Items.RAIL)
+                .define('$', ModItems.SPRING.get())
+                .pattern(" # ")
+                .pattern("$#$")
+                .pattern(" # ")
+                .unlockedBy("has_item", has(Items.RAIL))
+                .save(consumer);
+
         ShapedRecipeBuilder.shaped(ModBlocks.GUIDE_RAIL_TUG.get(), 8)
                 .define('#', ModItems.SPRING.get())
                 .define('_', Tags.Items.STONE)
@@ -101,7 +156,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .save(consumer);
 
         ShapedRecipeBuilder.shaped(ModItems.TUG_ROUTE.get())
-                .define('_', Items.COMPASS)
+                .define('_', ModItems.TRANSMITTER_COMPONENT.get())
                 .define('#', Items.REDSTONE)
                 .define('$', Items.IRON_NUGGET)
                 .pattern(" # ")
@@ -110,10 +165,15 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.REDSTONE))
                 .save(consumer);
 
-        ShapelessRecipeBuilder.shapeless(ModItems.TUG_ROUTE.get())
+        ShapedRecipeBuilder.shaped(ModItems.LOCO_ROUTE.get())
+                .define('_', ModItems.TRANSMITTER_COMPONENT.get())
+                .define('#', Items.IRON_NUGGET)
+                .define('$', Items.REDSTONE)
+                .pattern(" # ")
+                .pattern("$_$")
+                .pattern(" # ")
                 .unlockedBy("has_item", has(Items.REDSTONE))
-                .requires(ModItems.TUG_ROUTE.get())
-                .save(consumer,new ResourceLocation(ShippingMod.MOD_ID, "route_reset"));
+                .save(consumer);
 
         ShapedRecipeBuilder.shaped(ModItems.STEAM_TUG.get())
                 .define('_', Items.PISTON)
@@ -188,7 +248,93 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.HOPPER))
                 .save(consumer);
 
+        ShapedRecipeBuilder.shaped(ModItems.SEATER_CAR.get())
+                .define('#', ItemTags.PLANKS)
+                .define('$', Items.IRON_INGOT)
+                .pattern("   ")
+                .pattern("###")
+                .pattern("$ $")
+                .unlockedBy("has_item", has(Items.IRON_INGOT))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModItems.CHEST_CAR.get())
+                .define('#', Items.CHEST)
+                .define('$', ModItems.SEATER_CAR.get())
+                .pattern("   ")
+                .pattern(" # ")
+                .pattern(" $ ")
+                .unlockedBy("has_item", has(ModItems.SEATER_CAR.get()))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModItems.CHUNK_LOADER_CAR.get())
+                .define('#', Items.ENDER_EYE)
+                .define('_', Items.OBSIDIAN)
+                .define('$', ModItems.SEATER_CAR.get())
+                .pattern("   ")
+                .pattern("_#_")
+                .pattern(" $ ")
+                .unlockedBy("has_item", has(ModItems.SEATER_CAR.get()))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModItems.FLUID_CAR.get())
+                .define('#', Items.GLASS)
+                .define('$', ModItems.SEATER_CAR.get())
+                .pattern("# #")
+                .pattern(" # ")
+                .pattern(" $ ")
+                .unlockedBy("has_item", has(ModItems.SEATER_CAR.get()))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModItems.ENERGY_LOCOMOTIVE.get())
+                .define('#', Items.IRON_INGOT)
+                .define('.', ModBlocks.VESSEL_CHARGER.get())
+                .define('_', Blocks.PISTON)
+                .define('$', ModItems.SEATER_CAR.get())
+                .pattern(" # ")
+                .pattern("_._")
+                .pattern("#$#")
+                .unlockedBy("has_item", has(ModItems.SEATER_CAR.get()))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModItems.STEAM_LOCOMOTIVE.get())
+                .define('#', Items.IRON_INGOT)
+                .define('.', Items.FURNACE)
+                .define('_', Blocks.PISTON)
+                .define('$', ModItems.SEATER_CAR.get())
+                .pattern(" # ")
+                .pattern("_._")
+                .pattern("#$#")
+                .unlockedBy("has_item", has(ModItems.SEATER_CAR.get()))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModItems.RECEIVER_COMPONENT.get(), 8)
+                .define('o', Items.ENDER_EYE)
+                .define('#', Items.REDSTONE)
+                .define('_', Items.STONE_SLAB)
+                .pattern("o")
+                .pattern("#")
+                .pattern("_")
+                .unlockedBy("has_item", has(Items.ENDER_EYE))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModItems.TRANSMITTER_COMPONENT.get(), 8)
+                .define('o', Items.ENDER_EYE)
+                .define('#', Items.GLOWSTONE_DUST)
+                .define('_', Items.STONE_SLAB)
+                .pattern("o")
+                .pattern("#")
+                .pattern("_")
+                .unlockedBy("has_item", has(Items.ENDER_EYE))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(ModItems.CONDUCTORS_WRENCH.get(), 1)
+                .define('-', Items.IRON_INGOT)
+                .define('^', ModItems.SPRING.get())
+                .define('r', Items.RED_DYE)
+                .pattern("  ^")
+                .pattern(" -r")
+                .pattern("-  ")
+                .unlockedBy("has_item", has(ModItems.SPRING.get()))
+                .save(consumer);
     }
-
-
 }

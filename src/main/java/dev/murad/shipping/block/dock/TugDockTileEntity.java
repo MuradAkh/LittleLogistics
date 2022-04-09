@@ -6,14 +6,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.List;
+
 public class TugDockTileEntity extends AbstractHeadDockTileEntity<VesselEntity> {
     public TugDockTileEntity(BlockPos pos, BlockState state) {
         super(ModTileEntitiesTypes.TUG_DOCK.get(), pos, state);
     }
 
     @Override
-    protected BlockPos getTargetBlockPos() {
-        return this.getBlockPos().above();
+    protected List<BlockPos> getTargetBlockPos() {
+        return List.of(this.getBlockPos().above());
     }
 
     @Override

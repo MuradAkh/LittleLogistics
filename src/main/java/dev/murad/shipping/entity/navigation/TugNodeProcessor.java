@@ -1,6 +1,6 @@
 package dev.murad.shipping.entity.navigation;
 
-import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
+import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.setup.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
