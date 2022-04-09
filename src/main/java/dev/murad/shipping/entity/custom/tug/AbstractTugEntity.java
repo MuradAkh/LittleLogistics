@@ -380,6 +380,14 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     private void followGuideRail(){
+        // do not follow guide rail if stalled
+        var dockcap = getCapability(StallingCapability.STALLING_CAPABILITY);
+        if(dockcap.isPresent() && dockcap.resolve().isPresent()){
+            var cap = dockcap.resolve().get();
+            if(cap.isDocked() || cap.isFrozen() || cap.isStalled())
+                return;
+        }
+
         List<BlockState> belowList = Arrays.asList(this.level.getBlockState(getOnPos().below()),
                 this.level.getBlockState(getOnPos().below().below()));
         BlockState water = this.level.getBlockState(getOnPos());
