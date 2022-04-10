@@ -236,6 +236,69 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         }
     }
 
+    @Override
+    public void push(Entity pEntity) {
+        if (!this.level.isClientSide) {
+            if (!pEntity.noPhysics && !this.noPhysics) {
+                // fix carts with passengers falling behind
+                if (!this.hasPassenger(pEntity) || this.getDominant().isPresent()) {
+                    double d0 = pEntity.getX() - this.getX();
+                    double d1 = pEntity.getZ() - this.getZ();
+                    double d2 = d0 * d0 + d1 * d1;
+                    if (d2 >= (double)1.0E-4F) {
+                        d2 = Math.sqrt(d2);
+                        d0 /= d2;
+                        d1 /= d2;
+                        double d3 = 1.0D / d2;
+                        if (d3 > 1.0D) {
+                            d3 = 1.0D;
+                        }
+
+                        d0 *= d3;
+                        d1 *= d3;
+                        d0 *= (double)0.1F;
+                        d1 *= (double)0.1F;
+                        d0 *= 0.5D;
+                        d1 *= 0.5D;
+                        if (pEntity instanceof AbstractMinecart) {
+                            double d4 = pEntity.getX() - this.getX();
+                            double d5 = pEntity.getZ() - this.getZ();
+                            Vec3 vec3 = (new Vec3(d4, 0.0D, d5)).normalize();
+                            Vec3 vec31 = (new Vec3((double)Mth.cos(this.getYRot() * ((float)Math.PI / 180F)), 0.0D, (double)Mth.sin(this.getYRot() * ((float)Math.PI / 180F)))).normalize();
+                            double d6 = Math.abs(vec3.dot(vec31));
+                            if (d6 < (double)0.8F) {
+                                return;
+                            }
+
+                            Vec3 vec32 = this.getDeltaMovement();
+                            Vec3 vec33 = pEntity.getDeltaMovement();
+                            if (((AbstractMinecart)pEntity).isPoweredCart() && !this.isPoweredCart()) {
+                                this.setDeltaMovement(vec32.multiply(0.2D, 1.0D, 0.2D));
+                                this.push(vec33.x - d0, 0.0D, vec33.z - d1);
+                                pEntity.setDeltaMovement(vec33.multiply(0.95D, 1.0D, 0.95D));
+                            } else if (!((AbstractMinecart)pEntity).isPoweredCart() && this.isPoweredCart()) {
+                                pEntity.setDeltaMovement(vec33.multiply(0.2D, 1.0D, 0.2D));
+                                pEntity.push(vec32.x + d0, 0.0D, vec32.z + d1);
+                                this.setDeltaMovement(vec32.multiply(0.95D, 1.0D, 0.95D));
+                            } else {
+                                double d7 = (vec33.x + vec32.x) / 2.0D;
+                                double d8 = (vec33.z + vec32.z) / 2.0D;
+                                this.setDeltaMovement(vec32.multiply(0.2D, 1.0D, 0.2D));
+                                this.push(d7 - d0, 0.0D, d8 - d1);
+                                pEntity.setDeltaMovement(vec33.multiply(0.2D, 1.0D, 0.2D));
+                                pEntity.push(d7 + d0, 0.0D, d8 + d1);
+                            }
+                        } else {
+                            this.push(-d0, 0.0D, -d1);
+                            pEntity.push(d0 / 4.0D, 0.0D, d1 / 4.0D);
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
 
     protected void tickLoad() {
         if (this.level.isClientSide) {
