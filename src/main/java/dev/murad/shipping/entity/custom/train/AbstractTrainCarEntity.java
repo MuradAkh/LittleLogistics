@@ -299,6 +299,25 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         }
     }
 
+    // avoid inheriting mixins
+    @Override
+    public BlockPos getOnPos() {
+        var position = position();
+        int i = Mth.floor(position.x);
+        int j = Mth.floor(position.y - (double)0.2F);
+        int k = Mth.floor(position.z);
+        BlockPos blockpos = new BlockPos(i, j, k);
+        if (this.level.isEmptyBlock(blockpos)) {
+            BlockPos blockpos1 = blockpos.below();
+            BlockState blockstate = this.level.getBlockState(blockpos1);
+            if (blockstate.collisionExtendsVertically(this.level, blockpos1, this)) {
+                return blockpos1;
+            }
+        }
+
+        return blockpos;
+    }
+
 
     protected void tickLoad() {
         if (this.level.isClientSide) {
