@@ -18,7 +18,7 @@ public class ModItems {
      * COMMON
      */
     public static final RegistryObject<Item> CONDUCTORS_WRENCH = Registration.ITEMS.register("conductors_wrench",
-            () -> new Item(new Item.Properties().tab(CreativeModeTab.TAB_TRANSPORTATION).stacksTo(1)));
+            () -> new WrenchItem(new Item.Properties().tab(CreativeModeTab.TAB_TRANSPORTATION).stacksTo(1)));
 
     /**
      * TUGS
