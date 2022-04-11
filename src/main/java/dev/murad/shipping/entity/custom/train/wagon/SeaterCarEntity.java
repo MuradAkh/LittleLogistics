@@ -1,5 +1,7 @@
 package dev.murad.shipping.entity.custom.train.wagon;
 
+import dev.murad.shipping.compatability.create.CapabilityInjector;
+import dev.murad.shipping.compatability.create.CreateCompatability;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import net.minecraft.util.Mth;
@@ -7,21 +9,35 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import javax.annotation.Nonnull;
 
 public class SeaterCarEntity extends AbstractWagonEntity {
+    @Nullable
+    private LazyOptional<?> createCompatMinecartControllerCapability = null;
+
     public SeaterCarEntity(EntityType<SeaterCarEntity> p_38087_, Level p_38088_) {
         super(p_38087_, p_38088_);
+        initCompat();
     }
 
     public SeaterCarEntity(Level level, Double aDouble, Double aDouble1, Double aDouble2) {
         super(ModEntityTypes.SEATER_CAR.get(), level, aDouble, aDouble1, aDouble2);
+        initCompat();
+    }
 
+    private void initCompat() {
+        if (CreateCompatability.enabled()) {
+            createCompatMinecartControllerCapability = CapabilityInjector.constructMinecartControllerCapability(this);
+        }
     }
 
     @Override
@@ -91,5 +107,16 @@ public class SeaterCarEntity extends AbstractWagonEntity {
 
     public AbstractMinecart.Type getMinecartType() {
         return AbstractMinecart.Type.RIDEABLE;
+    }
+
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+        if (CreateCompatability.enabled() &&
+                createCompatMinecartControllerCapability != null &&
+                CapabilityInjector.isMinecartControllerCapability(cap)) {
+            return createCompatMinecartControllerCapability.cast();
+        }
+        return super.getCapability(cap);
     }
 }

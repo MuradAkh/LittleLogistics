@@ -5,6 +5,7 @@ import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
+import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.entity.custom.tug.VehicleFrontPart;
 import dev.murad.shipping.entity.navigation.LocomotiveNavigator;
@@ -259,7 +260,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                 collisionCheckCooldown--;
             }
         }
-        if(!docked && engineOn && remainingStallTime <= 0 && !forceStallCheck && tickFuel()) {
+        if(!docked && engineOn && remainingStallTime <= 0 && !forceStallCheck && !shouldFreezeTrain() && tickFuel()) {
             tickSpeedLimit();
             entityData.set(INDEPENDENT_MOTION, true);
             accelerate();
@@ -277,7 +278,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             }
         }
 
-
+        if (shouldFreezeTrain()) {
+            this.train.asList().forEach(t -> t.setDeltaMovement(0, 0, 0));
+        }
     }
 
     private boolean checkStopSign(BlockPos pos, Direction prevExitTaken){
@@ -443,6 +446,10 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         } else {
             speedRecomputeCooldown--;
         }
+    }
+
+    public boolean shouldFreezeTrain() {
+        return this.train.asList().stream().anyMatch(AbstractTrainCarEntity::isFrozen);
     }
 
     private void accelerate() {
