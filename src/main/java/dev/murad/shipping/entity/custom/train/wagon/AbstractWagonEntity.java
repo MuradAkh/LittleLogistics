@@ -1,15 +1,9 @@
 package dev.murad.shipping.entity.custom.train.wagon;
 
 import dev.murad.shipping.capability.StallingCapability;
-import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
-import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
-import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.util.Train;
-import lombok.Getter;
-import lombok.Setter;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.Capability;
@@ -26,7 +20,6 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
 
     public AbstractWagonEntity(EntityType<?> p_38087_, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
         super(p_38087_, level, aDouble, aDouble1, aDouble2);
-
     }
 
     @Override

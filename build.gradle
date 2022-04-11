@@ -167,6 +167,12 @@ dependencies {
 //    runtimeOnly fg.deobf("com.teamcofh:cofh_core:1.16.5-1.4.2.9")
 //    runtimeOnly fg.deobf("com.teamcofh:thermal_foundation:1.16.5-1.4.3.10")
 //    runtimeOnly fg.deobf("com.teamcofh:thermal_expansion:1.16.5-1.4.2.4")
+
+    // create
+    compileOnly fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:${rootProject.flywheel_version}")
+    compileOnly fg.deobf("com.simibubi.create:Create:${rootProject.create_version}")
+//    runtimeOnly fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:${rootProject.flywheel_version}")
+//    runtimeOnly fg.deobf("com.simibubi.create:Create:${rootProject.create_version}")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
@@ -248,14 +254,20 @@ publishing {
 
 repositories {
     maven {
-        // location of the maven that hosts JEI files
+        // JEI
         name = "Progwml6 maven"
         url = "https://dvs1.progwml6.com/files/maven/"
     }
 
     maven {
-        // location of patchouli
+        // Patchouli
         name = "Jared"
         url 'https://maven.blamejared.com'
+    }
+
+    maven {
+        // Create and Flywheel
+        name 'tterrag maven'
+        url 'https://maven.tterrag.com'
     }
 }
