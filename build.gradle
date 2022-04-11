@@ -169,8 +169,8 @@ dependencies {
 //    runtimeOnly fg.deobf("com.teamcofh:thermal_expansion:1.16.5-1.4.2.4")
 
     // create
-//    compileOnly fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:${rootProject.flywheel_version}")
-//    compileOnly fg.deobf("com.simibubi.create:Create:${rootProject.create_version}")
+    compileOnly fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:${rootProject.flywheel_version}")
+    compileOnly fg.deobf("com.simibubi.create:Create:${rootProject.create_version}")
 //    runtimeOnly fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:${rootProject.flywheel_version}")
 //    runtimeOnly fg.deobf("com.simibubi.create:Create:${rootProject.create_version}")
 }
