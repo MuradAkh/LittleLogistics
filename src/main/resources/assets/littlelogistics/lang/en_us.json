@@ -16,12 +16,9 @@
   "item.littlelogistics.steam_locomotive": "Steam Locomotive",
   "item.littlelogistics.energy_locomotive": "Energy Locomotive",
 
-
   "item.littlelogistics.receiver_component": "Wireless Receiver Component",
   "item.littlelogistics.transmitter_component": "Wireless Transmitter Component",
-
   "item.littlelogistics.conductors_wrench": "Conductor's Wrench",
-
 
   "entity.littlelogistics.tug": "Steam Tug",
   "entity.littlelogistics.barge": "Chest Barge",
