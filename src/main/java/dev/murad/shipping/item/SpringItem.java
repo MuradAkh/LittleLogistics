@@ -25,8 +25,9 @@ SOFTWARE.
  */
 
 
-import dev.murad.shipping.entity.custom.tug.TugFrontPart;
+import dev.murad.shipping.entity.custom.tug.VehicleFrontPart;
 import dev.murad.shipping.util.LinkableEntity;
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -42,6 +43,7 @@ import net.minecraft.world.level.Level;
 import javax.annotation.Nullable;
 import java.util.List;
 
+@Log4j2
 public class SpringItem extends Item {
 
     private TranslatableComponent springInfo = new TranslatableComponent("item.littlelogistics.spring.description");
@@ -54,8 +56,8 @@ public class SpringItem extends Item {
 
     // because 'itemInteractionForEntity' is only for Living entities
     public void onUsedOnEntity(ItemStack stack, Player player, Level world, Entity target) {
-        if(target instanceof TugFrontPart){
-            target = ((TugFrontPart) target).getParent();
+        if(target instanceof VehicleFrontPart){
+            target = ((VehicleFrontPart) target).getParent();
         }
         if(world.isClientSide)
             return;
@@ -92,23 +94,21 @@ public class SpringItem extends Item {
     }
 
     private void setDominant(Level worldIn, ItemStack stack, Entity entity) {
-        nbt(stack).putInt("linked", entity.getId());
+        stack.getOrCreateTag().putInt("linked", entity.getId());
     }
 
+    @Nullable
     private Entity getDominant(Level worldIn, ItemStack stack) {
-        int id = nbt(stack).getInt("linked");
-        return worldIn.getEntity(id);
-    }
-
-    private static CompoundTag nbt(ItemStack stack)  {
-        if(stack.getTag() == null) {
-            stack.setTag(new CompoundTag());
+        if (stack.getTag() != null && stack.getTag().contains("linked")) {
+            int id = stack.getTag().getInt("linked");
+            return worldIn.getEntity(id);
         }
-        return stack.getTag();
+        resetLinked(stack);
+        return null;
     }
 
     private void resetLinked(ItemStack itemstack) {
-        nbt(itemstack).remove("linked");
+        itemstack.removeTagKey("linked");
     }
 
     @Override
@@ -118,7 +118,7 @@ public class SpringItem extends Item {
     }
 
     public static State getState(ItemStack stack) {
-        if(nbt(stack).contains("linked"))
+        if(stack.getTag() != null && stack.getTag().contains("linked"))
             return State.WAITING_NEXT;
         return State.READY;
     }

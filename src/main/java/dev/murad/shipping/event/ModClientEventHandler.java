@@ -2,9 +2,12 @@ package dev.murad.shipping.event;
 
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.fluid.render.FluidHopperTileEntityRenderer;
+import dev.murad.shipping.entity.container.AbstractLocomotiveContainer;
 import dev.murad.shipping.entity.container.AbstractTugContainer;
 import dev.murad.shipping.entity.models.*;
-import dev.murad.shipping.entity.render.DummyEntityRenderer;
+import dev.murad.shipping.entity.render.*;
+import dev.murad.shipping.entity.render.train.FluidTankCarRenderer;
+import dev.murad.shipping.entity.render.train.TrainCarRenderer;
 import dev.murad.shipping.entity.render.barge.FishingBargeRenderer;
 import dev.murad.shipping.entity.render.barge.FluidTankBargeRenderer;
 import dev.murad.shipping.entity.render.barge.StaticVesselRenderer;
@@ -33,6 +36,7 @@ public class ModClientEventHandler {
         if (event.getAtlas().location() != AbstractTugContainer.EMPTY_ATLAS_LOC) return;
         event.addSprite(AbstractTugContainer.EMPTY_TUG_ROUTE);
         event.addSprite(AbstractTugContainer.EMPTY_ENERGY);
+        event.addSprite(AbstractLocomotiveContainer.EMPTY_LOCO_ROUTE);
     }
 
     @SubscribeEvent
@@ -40,6 +44,13 @@ public class ModClientEventHandler {
         event.enqueueWork(() -> {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.FLUID_HOPPER.get(), RenderType.cutoutMipped());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.VESSEL_CHARGER.get(), RenderType.cutoutMipped());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.JUNCTION_RAIL.get(), RenderType.cutoutMipped());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.SWITCH_RAIL.get(), RenderType.cutoutMipped());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.AUTOMATIC_SWITCH_RAIL.get(), RenderType.cutoutMipped());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.TEE_JUNCTION_RAIL.get(), RenderType.cutoutMipped());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.AUTOMATIC_TEE_JUNCTION_RAIL.get(), RenderType.cutoutMipped());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.CAR_DOCK_RAIL.get(), RenderType.cutoutMipped());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.LOCOMOTIVE_DOCK_RAIL.get(), RenderType.cutoutMipped());
         });
     }
 
@@ -93,8 +104,31 @@ public class ModClientEventHandler {
                 });
 
         event.registerEntityRenderer(ModEntityTypes.SPRING.get(), DummyEntityRenderer::new);
-
         event.registerBlockEntityRenderer(ModTileEntitiesTypes.FLUID_HOPPER.get(), FluidHopperTileEntityRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.STEAM_LOCOMOTIVE.get(), ctx -> new TrainCarRenderer<>(ctx,
+                SteamLocomotiveModel::new,
+                SteamLocomotiveModel.LAYER_LOCATION,
+                "textures/entity/steam_locomotive.png"));
+        event.registerEntityRenderer(ModEntityTypes.ENERGY_LOCOMOTIVE.get(), ctx -> new TrainCarRenderer<>(ctx,
+                EnergyLocomotiveModel::new,
+                EnergyLocomotiveModel.LAYER_LOCATION,
+                "textures/entity/energy_locomotive.png"));
+        event.registerEntityRenderer(ModEntityTypes.CHEST_CAR.get(), ctx -> new TrainCarRenderer<>(ctx,
+                ChestCarModel::new,
+                ChestCarModel.LAYER_LOCATION,
+                "textures/entity/chest_car.png"));
+        event.registerEntityRenderer(ModEntityTypes.FLUID_CAR.get(), ctx -> new FluidTankCarRenderer(ctx,
+                FluidTankCarModel::new,
+                FluidTankCarModel.LAYER_LOCATION,
+                "textures/entity/fluid_car.png"));
+        event.registerEntityRenderer(ModEntityTypes.CHUNK_LOADER_CAR.get(), ctx -> new TrainCarRenderer<>(ctx,
+                ChunkLoaderCarModel::new,
+                ChunkLoaderCarModel.LAYER_LOCATION,
+                "textures/entity/chunk_loader_car.png"));
+        event.registerEntityRenderer(ModEntityTypes.SEATER_CAR.get(), ctx -> new TrainCarRenderer<>(ctx,
+                SeaterCarModel::new,
+                SeaterCarModel.LAYER_LOCATION,
+                "textures/entity/chest_car.png"));
     }
 
     @SubscribeEvent
@@ -110,5 +144,12 @@ public class ModClientEventHandler {
         event.registerLayerDefinition(FluidTankBargeModel.LAYER_LOCATION, FluidTankBargeModel::createBodyLayer);
         event.registerLayerDefinition(SeaterBargeModel.LAYER_LOCATION, SeaterBargeModel::createBodyLayer);
         event.registerLayerDefinition(SteamTugModel.LAYER_LOCATION, SteamTugModel::createBodyLayer);
+        event.registerLayerDefinition(SteamLocomotiveModel.LAYER_LOCATION, SteamLocomotiveModel::createBodyLayer);
+        event.registerLayerDefinition(EnergyLocomotiveModel.LAYER_LOCATION, EnergyLocomotiveModel::createBodyLayer);
+        event.registerLayerDefinition(ChestCarModel.LAYER_LOCATION, ChestCarModel::createBodyLayer);
+        event.registerLayerDefinition(FluidTankCarModel.LAYER_LOCATION, FluidTankCarModel::createBodyLayer);
+        event.registerLayerDefinition(ChunkLoaderCarModel.LAYER_LOCATION, ChunkLoaderCarModel::createBodyLayer);
+        event.registerLayerDefinition(SeaterCarModel.LAYER_LOCATION, SeaterCarModel::createBodyLayer);
+
     }
 }

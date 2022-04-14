@@ -31,11 +31,11 @@ public final class TugRoutePacketHandler {
     private static int id = 0;
     public static void register() {
         // int index, Class<MSG> messageType, BiConsumer<MSG, PacketBuffer> encoder, Function<PacketBuffer, MSG> decoder, BiConsumer<MSG, Supplier<NetworkEvent.Context>> messageConsumer
-        INSTANCE.registerMessage(id++, SetTag.class, SetTag::encode, SetTag::new, TugRoutePacketHandler::handleSetTag);
+        INSTANCE.registerMessage(id++, SetRouteTagPacket.class, SetRouteTagPacket::encode, SetRouteTagPacket::new, TugRoutePacketHandler::handleSetTag);
     }
 
 
-    public static void handleSetTag(SetTag operation, Supplier<NetworkEvent.Context> ctx) {
+    public static void handleSetTag(SetRouteTagPacket operation, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
             if (player == null) {

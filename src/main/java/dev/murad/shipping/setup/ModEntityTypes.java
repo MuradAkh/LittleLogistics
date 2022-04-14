@@ -1,8 +1,15 @@
 package dev.murad.shipping.setup;
 
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.entity.custom.train.locomotive.EnergyLocomotiveEntity;
+import dev.murad.shipping.entity.custom.train.locomotive.SteamLocomotiveEntity;
+import dev.murad.shipping.entity.custom.train.wagon.ChestCarEntity;
+import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.barge.*;
+import dev.murad.shipping.entity.custom.train.wagon.ChunkLoaderCarEntity;
+import dev.murad.shipping.entity.custom.train.wagon.FluidTankCarEntity;
+import dev.murad.shipping.entity.custom.train.wagon.SeaterCarEntity;
 import dev.murad.shipping.entity.custom.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.custom.tug.SteamTugEntity;
 import net.minecraft.resources.ResourceLocation;
@@ -59,7 +66,42 @@ public class ModEntityTypes {
                                     MobCategory.MISC).sized(0.05f, 0.2f)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "spring").toString()));
 
+    public static final RegistryObject<EntityType<ChestCarEntity>> CHEST_CAR =
+            Registration.ENTITIES.register("chest_car",
+                    () -> EntityType.Builder.<ChestCarEntity>of(ChestCarEntity::new,
+                                    MobCategory.MISC).sized(0.7f, 0.9f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "chest_car").toString()));
 
+    public static final RegistryObject<EntityType<SeaterCarEntity>> SEATER_CAR =
+            Registration.ENTITIES.register("seater_car",
+                    () -> EntityType.Builder.<SeaterCarEntity>of(SeaterCarEntity::new,
+                                    MobCategory.MISC).sized(0.7f, 0.9f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "seater_car").toString()));
+
+    public static final RegistryObject<EntityType<FluidTankCarEntity>> FLUID_CAR =
+            Registration.ENTITIES.register("fluid_car",
+                    () -> EntityType.Builder.<FluidTankCarEntity>of(FluidTankCarEntity::new,
+                                    MobCategory.MISC).sized(0.7f, 0.9f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "fluid_car").toString()));
+
+    public static final RegistryObject<EntityType<ChunkLoaderCarEntity>> CHUNK_LOADER_CAR =
+            Registration.ENTITIES.register("chunk_loader_car",
+                    () -> EntityType.Builder.<ChunkLoaderCarEntity>of(ChunkLoaderCarEntity::new,
+                                    MobCategory.MISC).sized(0.7f, 0.9f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "chunk_loader_car").toString()));
+
+
+    public static final RegistryObject<EntityType<AbstractLocomotiveEntity>> STEAM_LOCOMOTIVE =
+            Registration.ENTITIES.register("steam_locomotive",
+                    () -> EntityType.Builder.<AbstractLocomotiveEntity>of(SteamLocomotiveEntity::new,
+                                    MobCategory.MISC).sized(0.7f, 0.9f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "steam_locomotive").toString()));
+
+    public static final RegistryObject<EntityType<AbstractLocomotiveEntity>> ENERGY_LOCOMOTIVE =
+            Registration.ENTITIES.register("energy_locomotive",
+                    () -> EntityType.Builder.<AbstractLocomotiveEntity>of(EnergyLocomotiveEntity::new,
+                                    MobCategory.MISC).sized(0.7f, 0.9f)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "energy_locomotive").toString()));
 
 
     public static void register () {

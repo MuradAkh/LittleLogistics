@@ -1,7 +1,6 @@
 package dev.murad.shipping.util;
 
-import com.mojang.datafixers.util.Pair;
-import dev.murad.shipping.entity.custom.SpringEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
@@ -68,4 +67,8 @@ public interface LinkableEntity<V extends LinkableEntity<V>> {
         ).orElse(ofThis);
 
     }
+
+    boolean allowDockInterface();
+
+    BlockPos getBlockPos();
 }

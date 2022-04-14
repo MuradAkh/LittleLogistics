@@ -183,7 +183,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
 
     private boolean tryLoadAndCalculate() {
         if(!this.level.isClientSide) {
-            if (dominant != null && dominated != null) {
+            if (dominant != null && dominated != null && dominant.shouldApplySpringPhysics()) {
                 if (dominated.distanceTo(dominant) > 20) {
                     dominated.removeDominant();
                     kill();
@@ -198,23 +198,22 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
 
                 double distSq = dominant.distanceToSqr(dominated);
                 double maxDstSq = (dominant).getTrain().getTug().map(tug -> ((AbstractTugEntity) tug).isDocked() ? 1 : 1.2).orElse(1.2);
-                if (distSq > maxDstSq) {
-                    Vec3 frontAnchor = calculateAnchorPosition(dominant, SpringSide.DOMINATED);
-                    Vec3 backAnchor = calculateAnchorPosition(dominated, SpringSide.DOMINANT);
-                    double dist = Math.sqrt(distSq);
-                    double dx = (frontAnchor.x - backAnchor.x) / dist;
-                    double dy = (frontAnchor.y - backAnchor.y) / dist;
-                    double dz = (frontAnchor.z - backAnchor.z) / dist;
-                    final double alpha = 0.5;
 
-                    float targetYaw = computeTargetYaw(dominated.getYRot(), frontAnchor, backAnchor);
-                    dominated.setYRot((float) ((alpha * dominated.getYRot() + targetYaw * (1f - alpha)) % 360));
-                    setYRot(dominated.getYRot());
-                    double k = dominant instanceof AbstractTugEntity ? 0.2 : 0.13;
-                    double l0 = maxDstSq;
-                    dominated.setDeltaMovement(k * (dist - l0) * dx, k * (dist - l0) * dy, k * (dist - l0) * dz);
-                    dominated.checkInsideBlocks();
-                }
+                Vec3 frontAnchor = calculateAnchorPosition(dominant, SpringSide.DOMINATED);
+                Vec3 backAnchor = calculateAnchorPosition(dominated, SpringSide.DOMINANT);
+                double dist = Math.sqrt(distSq);
+                double dx = (frontAnchor.x - backAnchor.x) / dist;
+                double dy = (frontAnchor.y - backAnchor.y) / dist;
+                double dz = (frontAnchor.z - backAnchor.z) / dist;
+                final double alpha = 0.5;
+
+                float targetYaw = computeTargetYaw(dominated.getYRot(), frontAnchor, backAnchor);
+                dominated.setYRot((float) ((alpha * dominated.getYRot() + targetYaw * (1f - alpha)) % 360));
+                setYRot(dominated.getYRot());
+                double k = dominant instanceof AbstractTugEntity ? 0.2 : 0.13;
+                double l0 = maxDstSq;
+                dominated.setDeltaMovement(k * (dist - l0) * dx, k * (dist - l0) * dy, k * (dist - l0) * dz);
+                dominated.checkInsideBlocks();
             } else { // front and back entities have not been loaded yet
                 if (dominantNBT != null && dominatedNBT != null) {
                     tryToLoadFromNBT(dominantNBT).ifPresent(e -> {

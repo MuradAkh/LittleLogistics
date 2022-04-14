@@ -13,12 +13,12 @@ import net.minecraftforge.items.wrapper.InvWrapper;
 import javax.annotation.Nullable;
 
 public abstract class AbstractItemHandlerContainer extends AbstractContainerMenu {
-    private final Player Player;
+    protected final Player player;
     private final IItemHandler playerInventory;
 
     protected AbstractItemHandlerContainer(@Nullable MenuType<?> p_i50105_1_, int p_i50105_2_, Inventory playerInventory, Player player) {
         super(p_i50105_1_, p_i50105_2_);
-        Player = player;
+        this.player = player;
         this.playerInventory = new InvWrapper(playerInventory);
     }
 
@@ -85,7 +85,6 @@ public abstract class AbstractItemHandlerContainer extends AbstractContainerMenu
                 return ItemStack.EMPTY;
             }
         } else {
-            System.out.println("Invalid slotIndex:" + index);
             return ItemStack.EMPTY;
         }
         // If stack size == 0 (the entire stack was moved) set slot contents to null
@@ -94,7 +93,7 @@ public abstract class AbstractItemHandlerContainer extends AbstractContainerMenu
         } else {
             sourceSlot.setChanged();
         }
-        sourceSlot.onTake(Player, sourceStack);
+        sourceSlot.onTake(player, sourceStack);
         return copyOfSourceStack;
     }
 }

@@ -1,9 +1,9 @@
 package dev.murad.shipping.entity.custom.tug;
 
-import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
-import dev.murad.shipping.block.guide_rail.TugGuideRailBlock;
+import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
+import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.util.*;
 import dev.murad.shipping.entity.custom.SpringEntity;
@@ -13,6 +13,7 @@ import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModSounds;
+import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -60,12 +61,18 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     protected final ItemStackHandler itemHandler = createHandler();
     protected final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
     protected boolean contentsChanged = false;
+    @Getter
     protected boolean docked = false;
+    @Getter
+    protected boolean stalled = false;
+
     private int dockCheckCooldown = 0;
     private boolean independentMotion = false;
     private int pathfindCooldown = 0;
-    private TugFrontPart frontHitbox;
+    private VehicleFrontPart frontHitbox;
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.BOOLEAN);
+
+
 
     public boolean allowDockInterface(){
         return isDocked();
@@ -74,13 +81,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private TugRoute path;
     private int nextStop;
 
-
     public AbstractTugEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
         this.blocksBuilding = true;
         this.train = new Train(this);
         this.path = new TugRoute();
-        frontHitbox = new TugFrontPart(this);
+        frontHitbox = new VehicleFrontPart(this);
     }
 
     public AbstractTugEntity(EntityType type, Level worldIn, double x, double y, double z) {
@@ -186,6 +192,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         if (contentsChanged) {
             ItemStack stack = itemHandler.getStackInSlot(0);
             this.setPath(TugRouteItem.getRoute(stack));
+            contentsChanged = false;
+        }
+
+        // fix for currently borked worlds
+        if (nextStop >= this.path.size()) {
+            this.nextStop = 0;
         }
     }
 
@@ -214,43 +226,45 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
 
     private void tickCheckDock() {
-        int x = (int) Math.floor(this.getX());
-        int y = (int) Math.floor(this.getY());
-        int z = (int) Math.floor(this.getZ());
+        getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(cap -> {
+            int x = (int) Math.floor(this.getX());
+            int y = (int) Math.floor(this.getY());
+            int z = (int) Math.floor(this.getZ());
 
-        if (this.docked && dockCheckCooldown > 0){
-            dockCheckCooldown--;
-            this.setDeltaMovement(Vec3.ZERO);
-            this.moveTo(x + 0.5 ,getY(),z + 0.5);
-            return;
-        }
+            boolean docked = cap.isDocked();
 
-        // Check docks
-        boolean shouldDock = this.getSideDirections()
-                .stream()
-                .map((curr) ->
-                    Optional.ofNullable(level.getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
-                            .filter(entity -> entity instanceof TugDockTileEntity)
-                            .map(entity -> (TugDockTileEntity) entity)
-                            .map(dock -> dock.holdVessel(this, curr))
-                            .orElse(false))
-                .reduce(false, (acc, curr) -> acc || curr);
+            if (docked && dockCheckCooldown > 0){
+                dockCheckCooldown--;
+                this.setDeltaMovement(Vec3.ZERO);
+                this.moveTo(x + 0.5 ,getY(),z + 0.5);
+                return;
+            }
 
-         boolean changedDock = !this.docked && shouldDock;
-         boolean changedUndock = this.docked && !shouldDock;
+            // Check docks
+            boolean shouldDock = this.getSideDirections()
+                    .stream()
+                    .map((curr) ->
+                            Optional.ofNullable(level.getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
+                                    .filter(entity -> entity instanceof TugDockTileEntity)
+                                    .map(entity -> (TugDockTileEntity) entity)
+                                    .map(dock -> dock.hold(this, curr))
+                                    .orElse(false))
+                    .reduce(false, (acc, curr) -> acc || curr);
 
-        this.docked = shouldDock;
+            boolean changedDock = !docked && shouldDock;
+            boolean changedUndock = docked && !shouldDock;
 
-        if(this.docked) {
-            dockCheckCooldown = 20; // todo: magic number
-            this.setDeltaMovement(Vec3.ZERO);
-            this.moveTo(x + 0.5 ,getY(),z + 0.5);
-        } else {
-            dockCheckCooldown = 0;
-        }
+            if(shouldDock) {
+                dockCheckCooldown = 20; // todo: magic number
+                cap.dock(x + 0.5 ,getY(),z + 0.5);
+            } else {
+                dockCheckCooldown = 0;
+                cap.undock();
+            }
 
-        if (changedDock) onDock();
-        if (changedUndock) onUndock();
+            if (changedDock) onDock();
+            if (changedUndock) onUndock();
+        });
     }
 
     @Override
@@ -366,6 +380,14 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     private void followGuideRail(){
+        // do not follow guide rail if stalled
+        var dockcap = getCapability(StallingCapability.STALLING_CAPABILITY);
+        if(dockcap.isPresent() && dockcap.resolve().isPresent()){
+            var cap = dockcap.resolve().get();
+            if(cap.isDocked() || cap.isFrozen() || cap.isStalled())
+                return;
+        }
+
         List<BlockState> belowList = Arrays.asList(this.level.getBlockState(getOnPos().below()),
                 this.level.getBlockState(getOnPos().below().below()));
         BlockState water = this.level.getBlockState(getOnPos());
@@ -388,7 +410,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     private void followPath() {
         pathfindCooldown--;
-        if (!this.path.isEmpty() && !this.docked && tickFuel()) {
+        if (!this.path.isEmpty() && !this.docked && !this.stalled && !shouldFreezeTrain() && tickFuel()) {
             TugRouteNode stop = path.get(nextStop);
             if (navigation.getPath() == null || navigation.getPath().isDone()
             ) {
@@ -416,6 +438,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             }
         }
     }
+
+    public boolean shouldFreezeTrain() {
+        return this.train.asList().stream().anyMatch(VesselEntity::isFrozen);
+    }
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
@@ -424,6 +451,9 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
 
     public void setPath(TugRoute path) {
+        if (!this.path.isEmpty() && !this.path.equals(path)){
+            this.nextStop = 0;
+        }
         this.path = path;
     }
 
@@ -556,14 +586,72 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         return 1 + getNonRouteItemSlots();
     }
 
-    public boolean isDocked(){
-        return docked;
-    }
-
     @Override
     public boolean canBeLeashed(Player p_184652_1_) {
         return true;
     }
 
+    /*
+            Stalling Capability
+     */
+    private final StallingCapability stalling = new StallingCapability() {
+        @Override
+        public boolean isDocked() {
+            return docked;
+        }
 
+        @Override
+        public void dock(double x, double y, double z) {
+            docked = true;
+            setDeltaMovement(Vec3.ZERO);
+            moveTo(x, y, z);
+        }
+
+        @Override
+        public void undock() {
+            docked = false;
+        }
+
+        @Override
+        public boolean isStalled() {
+            return stalled;
+        }
+
+        @Override
+        public void stall() {
+            stalled = true;
+        }
+
+        @Override
+        public void unstall() {
+            stalled = false;
+        }
+
+        @Override
+        public boolean isFrozen() {
+            return AbstractTugEntity.super.isFrozen();
+        }
+
+        @Override
+        public void freeze() {
+            setFrozen(true);
+        }
+
+        @Override
+        public void unfreeze() {
+            setFrozen(false);
+        }
+    };
+
+    // cache for best performance
+    private final LazyOptional<StallingCapability> stallingOpt = LazyOptional.of(() -> stalling);
+
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+        if (cap == StallingCapability.STALLING_CAPABILITY) {
+            return stallingOpt.cast();
+        }
+        return super.getCapability(cap);
+    }
 }

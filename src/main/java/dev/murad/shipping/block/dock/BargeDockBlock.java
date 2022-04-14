@@ -1,7 +1,9 @@
 package dev.murad.shipping.block.dock;
 
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import dev.murad.shipping.util.InteractionUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Pose;
@@ -19,8 +21,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import javax.annotation.Nullable;
 
 public class BargeDockBlock extends AbstractDockBlock {
-    public static final BooleanProperty EXTRACT_MODE = BlockStateProperties.INVERTED;
-
     public BargeDockBlock(Properties p_i48440_1_) {
         super(p_i48440_1_);
     }
@@ -28,9 +28,9 @@ public class BargeDockBlock extends AbstractDockBlock {
     @SuppressWarnings("deprecation")
     @Override
     public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
-        if(player.getPose().equals(Pose.CROUCHING)){
-            world.setBlockAndUpdate(pos, state.setValue(EXTRACT_MODE, !state.getValue(EXTRACT_MODE)));
-            fixHopperPos(state, world, pos);
+        if(InteractionUtil.doConfigure(player, hand)){
+            world.setBlockAndUpdate(pos, state.setValue(DockingBlockStates.INVERTED, !state.getValue(DockingBlockStates.INVERTED)));
+            DockingBlockStates.fixHopperPos(state, world, pos, Direction.UP, state.getValue(DockingBlockStates.FACING));
             return InteractionResult.SUCCESS;
         }
 
@@ -46,7 +46,7 @@ public class BargeDockBlock extends AbstractDockBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(EXTRACT_MODE);
+        builder.add(DockingBlockStates.INVERTED);
     }
 
 }

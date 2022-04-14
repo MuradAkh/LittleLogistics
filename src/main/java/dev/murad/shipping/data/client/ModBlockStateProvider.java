@@ -1,18 +1,20 @@
 package dev.murad.shipping.data.client;
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.block.dock.BargeDockBlock;
-import dev.murad.shipping.block.dock.TugDockBlock;
+import dev.murad.shipping.block.dock.DockingBlockStates;
 import dev.murad.shipping.block.energy.VesselChargerBlock;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
-import dev.murad.shipping.block.guide_rail.CornerGuideRailBlock;
-import dev.murad.shipping.block.vessel_detector.VesselDetectorBlock;
+import dev.murad.shipping.block.guiderail.CornerGuideRailBlock;
+import dev.murad.shipping.block.rail.AbstractDockingRail;
+import dev.murad.shipping.block.rail.SwitchRail;
+import dev.murad.shipping.block.vesseldetector.VesselDetectorBlock;
 import dev.murad.shipping.setup.ModBlocks;
 import net.minecraft.core.Direction;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.HopperBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
@@ -30,8 +32,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private ModelFile getTugDockModel(BlockState state){
-        String inv = state.getValue(TugDockBlock.INVERTED) ? "_inv" : "";
-        String powered = state.getValue(TugDockBlock.POWERED) ? "_powered" : "";
+        String inv = state.getValue(DockingBlockStates.INVERTED) ? "_inv" : "";
+        String powered = state.getValue(DockingBlockStates.POWERED) ? "_powered" : "";
         return  models().orientable("tug_dock" + inv + powered,
                 getBlTx("tug_dock"),
                 getBlTx("tug_dock_front" + powered),
@@ -63,7 +65,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private ModelFile getBargeDockModel(BlockState state){
-        String inv = state.getValue(BargeDockBlock.EXTRACT_MODE) ? "_extract" : "";
+        String inv = state.getValue(DockingBlockStates.INVERTED) ? "_extract" : "";
         return  models().orientable("barge_dock" + inv,
                 getBlTx("barge_dock"),
                 getBlTx("barge_dock_front" + inv),
@@ -86,13 +88,13 @@ public class ModBlockStateProvider extends BlockStateProvider {
     protected void registerStatesAndModels() {
         getVariantBuilder(ModBlocks.TUG_DOCK.get()).forAllStates(state -> ConfiguredModel.builder()
                 .modelFile(getTugDockModel(state))
-                .rotationY((int) state.getValue(TugDockBlock.FACING).getOpposite().toYRot())
+                .rotationY((int) state.getValue(DockingBlockStates.FACING).getOpposite().toYRot())
                 .build()
         );
 
         getVariantBuilder(ModBlocks.BARGE_DOCK.get()).forAllStates(state -> ConfiguredModel.builder()
                 .modelFile(getBargeDockModel(state))
-                .rotationY((int) state.getValue(BargeDockBlock.FACING).getOpposite().toYRot())
+                .rotationY((int) state.getValue(DockingBlockStates.FACING).getOpposite().toYRot())
                 .build()
         );
 
@@ -130,6 +132,76 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .rotationY((int) state.getValue(VesselChargerBlock.FACING).getOpposite().toYRot())
                 .build()
         );
+
+        getVariantBuilder(ModBlocks.SWITCH_RAIL.get()).forAllStates(state ->  {
+            String outDir = state.getValue(SwitchRail.OUT_DIRECTION).getSerializedName();
+            String powered = state.getValue(SwitchRail.POWERED) ? "on" : "off";
+            return ConfiguredModel.builder()
+                    .modelFile(models()
+                            .withExistingParent("switch_rail_" + outDir + "_" + powered, mcLoc("rail_flat"))
+                            .texture("rail", getBlTx("switch_rail_" + outDir + "_" + powered)))
+                    .rotationY((int) state.getValue(SwitchRail.FACING).getOpposite().toYRot())
+                    .build();
+        });
+
+        getVariantBuilder(ModBlocks.AUTOMATIC_SWITCH_RAIL.get()).forAllStates(state ->  {
+            String outDir = state.getValue(SwitchRail.OUT_DIRECTION).getSerializedName();
+            String powered = state.getValue(SwitchRail.POWERED) ? "on" : "off";
+            return ConfiguredModel.builder()
+                    .modelFile(models()
+                            .withExistingParent("automatic_switch_rail_" + outDir + "_" + powered, mcLoc("rail_flat"))
+                            .texture("rail", getBlTx("automatic_switch_rail_" + outDir + "_" + powered)))
+                    .rotationY((int) state.getValue(SwitchRail.FACING).getOpposite().toYRot())
+                    .build();
+        });
+
+        getVariantBuilder(ModBlocks.TEE_JUNCTION_RAIL.get()).forAllStates(state ->  {
+            String powered = state.getValue(SwitchRail.POWERED) ? "on" : "off";
+            return ConfiguredModel.builder()
+                    .modelFile(models()
+                            .withExistingParent("tee_junction_rail_" + powered, mcLoc("rail_flat"))
+                            .texture("rail", getBlTx("tee_junction_rail_" + powered)))
+                    .rotationY((int) state.getValue(SwitchRail.FACING).getOpposite().toYRot())
+                    .build();
+        });
+
+        getVariantBuilder(ModBlocks.AUTOMATIC_TEE_JUNCTION_RAIL.get()).forAllStates(state ->  {
+            String powered = state.getValue(SwitchRail.POWERED) ? "on" : "off";
+            return ConfiguredModel.builder()
+                    .modelFile(models()
+                            .withExistingParent("automatic_tee_junction_rail_" + powered, mcLoc("rail_flat"))
+                            .texture("rail", getBlTx("automatic_tee_junction_rail_" + powered)))
+                    .rotationY((int) state.getValue(SwitchRail.FACING).getOpposite().toYRot())
+                    .build();
+        });
+
+        getVariantBuilder(ModBlocks.JUNCTION_RAIL.get()).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(models()
+                        .withExistingParent("junction_rail", mcLoc("rail_flat"))
+                        .texture("rail", getBlTx("junction_rail")))
+                .build());
+
+        getVariantBuilder(ModBlocks.CAR_DOCK_RAIL.get()).forAllStates(state -> {
+            String inv = state.getValue(DockingBlockStates.INVERTED) ? "_extract" : "";
+
+            return ConfiguredModel.builder()
+                .modelFile(models()
+                        .withExistingParent("car_dock_rail" + inv, mcLoc("rail_flat"))
+                        .texture("rail", getBlTx("car_dock_rail" + inv)))
+                    .rotationY(state.getValue(AbstractDockingRail.RAIL_SHAPE).equals(RailShape.NORTH_SOUTH) ? 0 : 90)
+                .build();
+        });
+
+        getVariantBuilder(ModBlocks.LOCOMOTIVE_DOCK_RAIL.get()).forAllStates(state -> {
+            String powered = state.getValue(DockingBlockStates.POWERED) ? "_powered" : "";
+
+            return ConfiguredModel.builder()
+                    .modelFile(models()
+                            .withExistingParent("locomotive_dock_rail" + powered, mcLoc("rail_flat"))
+                            .texture("rail", getBlTx("locomotive_dock_rail" + powered)))
+                    .rotationY((int) state.getValue(DockingBlockStates.FACING).getOpposite().toYRot())
+                    .build();
+        });
 
         getVariantBuilder(ModBlocks.RAPID_HOPPER.get()).forAllStates(state -> ConfiguredModel.builder()
                 .modelFile(getRapidHopperModel(state)
