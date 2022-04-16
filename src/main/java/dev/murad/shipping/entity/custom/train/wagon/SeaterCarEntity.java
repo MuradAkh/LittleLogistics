@@ -79,6 +79,14 @@ public class SeaterCarEntity extends AbstractWagonEntity {
     }
 
     @Override
+    public void remove(RemovalReason r) {
+        if(createCompatMinecartControllerCapability != null && CreateCompatability.enabled()){
+            createCompatMinecartControllerCapability.invalidate();
+        }
+        super.remove(r);
+    }
+
+    @Override
     public void positionRider(Entity entity) {
         if (this.hasPassenger(entity)) {
             if(entity instanceof Player) {
