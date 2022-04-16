@@ -76,7 +76,7 @@ public class ModBlocks {
             () -> new RapidHopperBlock(Block.Properties.of(Material.METAL)
                     .destroyTime(0.5f)
             ),
-            CreativeModeTab.TAB_TRANSPORTATION);
+            CreativeModeTab.TAB_REDSTONE);
 
     public static final RegistryObject<Block> SWITCH_RAIL = register(
             "switch_rail",
