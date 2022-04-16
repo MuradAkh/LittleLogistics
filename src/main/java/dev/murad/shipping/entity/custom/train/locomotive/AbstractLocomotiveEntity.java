@@ -284,10 +284,11 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     private boolean checkStopSign(BlockPos pos, Direction prevExitTaken){
-        if(frontHitbox.getPos().above().equals(pos) || this.getOnPos().above().equals(pos))
-            return false;
+
         return RailHelper.getRail(pos, this.level).flatMap(block -> {
             if(level.getBlockState(block).getBlock() instanceof MultiShapeRail r){
+                if(!this.level.getEntitiesOfClass(Entity.class, new AABB(pos), e -> e.equals(this) || e.equals(frontHitbox)).isEmpty())
+                    return Optional.empty();
                 return r.getPriorityDirectionsToCheck(level.getBlockState(block), prevExitTaken.getOpposite())
                         .stream()
                         .map(p -> railHelper.traverse(pos.relative(p), this.level, p, (dir, f) -> checkLocoCollision(f), 2))
