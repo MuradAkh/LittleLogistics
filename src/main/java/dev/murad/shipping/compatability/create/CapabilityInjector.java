@@ -21,55 +21,10 @@ public class CapabilityInjector {
         private final LazyOptional<StallingCapability> stallingCapability;
 
         public TrainCarController(SeaterCarEntity entity) {
-            super(null);
+            super(entity);
             weakRef = new WeakReference<>(entity);
             stallingCapability = entity == null ? LazyOptional.empty() : entity.getCapability(StallingCapability.STALLING_CAPABILITY);
         }
-
-        public void tick() {
-        }
-
-        public boolean isFullyCoupled() {
-            return false;
-        }
-
-        public boolean isLeadingCoupling() {
-            return false;
-        }
-
-        public boolean isConnectedToCoupling() {
-            return false;
-        }
-
-        public boolean isCoupledThroughContraption() {
-            return false;
-        }
-
-        public boolean hasContraptionCoupling(boolean current) {
-            return false;
-        }
-
-        public float getCouplingLength(boolean leading) {
-            return 0;
-        }
-
-        public void decouple() {
-        }
-
-        public void removeConnection(boolean main) {
-        }
-
-        public void prepareForCoupling(boolean isLeading) {
-        }
-
-        public void coupleWith(boolean isLeading, UUID coupled, float length, boolean contraption) {
-        }
-
-        @Nullable
-        public UUID getCoupledCart(boolean asMain) {
-            return null;
-        }
-
         public boolean isStalled() {
             return stallingCapability.map(StallingCapability::isFrozen).orElse(false);
         }
@@ -82,18 +37,6 @@ public class CapabilityInjector {
                     cap.unfreeze();
                 }
             });
-        }
-
-        public void sendData() {
-        }
-
-        @Override
-        public CompoundTag serializeNBT() {
-            return new CompoundTag();
-        }
-
-        @Override
-        public void deserializeNBT(CompoundTag nbt) {
         }
 
         public boolean isPresent() {
