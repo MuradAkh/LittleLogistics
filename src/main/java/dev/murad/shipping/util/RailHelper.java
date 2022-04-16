@@ -267,8 +267,10 @@ public class RailHelper {
     }
 
     public static BiPredicate<Direction, BlockPos> samePositionPredicate(AbstractTrainCarEntity entity){
-        return (direction, p) -> getRail(p, entity.level).flatMap(pos ->
-            getRail(entity.getOnPos().above(), entity.level).map(rp -> rp.equals(pos))).orElse(false);
+        var targetRail = getRail(entity.getOnPos().above(), entity.level);
+        return (direction, p) -> getRail(p, entity.level)
+                .flatMap(pos -> targetRail.map(rp -> rp.equals(pos)))
+                .orElse(false);
     }
 
     public Direction pickCheaperDir(List<Direction> directions, BlockPos pos, Function<BlockPos, Double> heuristic, Level level) {

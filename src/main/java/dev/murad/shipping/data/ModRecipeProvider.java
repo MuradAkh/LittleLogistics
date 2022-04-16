@@ -317,8 +317,8 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.ENDER_EYE))
                 .save(consumer);
 
-        ShapedRecipeBuilder.shaped(ModItems.TRANSMITTER_COMPONENT.get(), 8)
-                .define('o', Items.ENDER_EYE)
+        ShapedRecipeBuilder.shaped(ModItems.TRANSMITTER_COMPONENT.get(), 4)
+                .define('o', Items.ENDER_PEARL)
                 .define('#', Items.GLOWSTONE_DUST)
                 .define('_', Items.STONE_SLAB)
                 .pattern("o")

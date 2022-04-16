@@ -486,8 +486,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     private void doChainMath() {
         dominant.ifPresent(parent -> {
-            var railDirDis = RailHelper.getRail(parent.getOnPos().above(), level).flatMap(target ->
-                    railHelper.traverseBi(this.getOnPos().above(), (level, p) -> p.equals(target), 5, this));
+            var railDirDis =
+                    railHelper.traverseBi(this.getOnPos().above(), RailHelper.samePositionPredicate(parent), 5, this);
 
             // this is a fix to mitigate "bouncing" when trains start moving from a stopped position
             // todo: fix based on "docked" instead.
