@@ -3,6 +3,8 @@ package dev.murad.shipping.entity.custom.train;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.compatability.create.CreateCompatability;
+import dev.murad.shipping.compatability.create.CreateDamageSourceAllowlist;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.setup.ModItems;
@@ -234,6 +236,14 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         if (Math.abs(vel.z) > maxSpeed) {
             this.setDeltaMovement(vel.x, vel.y, normal.z * maxSpeed);
         }
+    }
+
+    @Override
+    public boolean isInvulnerableTo(DamageSource pSource) {
+        if (CreateCompatability.enabled() && CreateDamageSourceAllowlist.isAllowListed(pSource)){
+            return true;
+        }
+        return super.isInvulnerableTo(pSource);
     }
 
     @Override
