@@ -345,8 +345,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
             Optional<Pair<Direction, Integer>> r = railHelper.traverseBi(getOnPos().above(),
                     RailHelper.samePositionPredicate(dominated.get()), 5, this);
             if (r.isPresent()) {
-                Pair<Direction, Integer> pair = r.get();
-                Optional<Vec3i> directionOpt = RailHelper.getDirectionToOtherExit(pair.getFirst(), railShape.get());
+                Direction hordir = yawHelper(r, dominated.get());
+                Optional<Vec3i> directionOpt = RailHelper.getDirectionToOtherExit(hordir, railShape.get());
                 if (directionOpt.isPresent()) {
                     Vec3i direction = directionOpt.get();
                     return ((float) (Mth.atan2(direction.getZ(), direction.getX()) * 180.0D / Math.PI) + 90);
@@ -356,8 +356,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
             Optional<Pair<Direction, Integer>> r = railHelper.traverseBi(getOnPos().above(),
                     RailHelper.samePositionPredicate(dominant.get()), 5, this);
             if (r.isPresent()) {
-                Pair<Direction, Integer> pair = r.get();
-                Optional<Vec3i> directionOpt = RailHelper.getDirectionToOtherExit(pair.getFirst(), railShape.get());
+                Direction hordir = yawHelper(r, dominant.get());
+                Optional<Vec3i> directionOpt = RailHelper.getDirectionToOtherExit(hordir, railShape.get());
                 if (directionOpt.isPresent()) {
                     Vec3i direction = directionOpt.get();
                     return ((float) (Mth.atan2(-direction.getZ(), -direction.getX()) * 180.0D / Math.PI) + 90);
@@ -373,6 +373,19 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
         return yrot;
 
+    }
+
+    private Direction yawHelper(Optional<Pair<Direction, Integer>> r, Entity e) {
+        Direction hordir = null;
+        if(r.get().getSecond() == 0) {
+            Vec3 dirvec = new Vec3(e.xo - this.xo,0, e.zo - this.zo);
+            hordir = Direction.fromNormal((int) dirvec.normalize().x, 0, (int) dirvec.normalize().z); // may fail
+        }
+        // if still null
+        if (hordir == null){
+            hordir = r.get().getFirst();
+        }
+        return hordir;
     }
 
     /**
