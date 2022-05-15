@@ -9,6 +9,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.*;
 
 import java.util.Arrays;
@@ -73,7 +74,7 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
             )
             ){
                 // if the point's neighbour has land, penalty is 5 unless there is a dock
-                if(!level.getBlockState(surr).is(Blocks.WATER)){
+                if(!level.getFluidState(surr).is(Fluids.WATER)){
                     penalty = 5f;
                 }
                 if(

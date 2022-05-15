@@ -2,6 +2,8 @@ package dev.murad.shipping;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 
+import java.util.List;
+
 public class ShippingConfig {
     public static class Client {
         public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
@@ -34,6 +36,7 @@ public class ShippingConfig {
         public static final ForgeConfigSpec SPEC;
         public static final ForgeConfigSpec.ConfigValue<Double> FISHING_TREASURE_CHANCE_MODIFIER;
         public static final ForgeConfigSpec.ConfigValue<String> FISHING_LOOT_TABLE;
+        public static final ForgeConfigSpec.ConfigValue<Integer> FISHING_COOLDOWN;
 
         public static final ForgeConfigSpec.ConfigValue<Double> TUG_BASE_SPEED;
 
@@ -55,6 +58,9 @@ public class ShippingConfig {
         public static final ForgeConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_CAPACITY;
         public static final ForgeConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_MAX_TRANSFER;
 
+        public static final ForgeConfigSpec.ConfigValue<List<String>> TRAIN_EXEMPT_DAMAGE_SOURCES;
+
+
 
 
         static {
@@ -64,10 +70,14 @@ public class ShippingConfig {
                 FISHING_TREASURE_CHANCE_MODIFIER =
                         BUILDER.comment("Modify the chance of using the treasure loot table with the auto fishing barge, other factors such as depth and overfishing still play a role. " +
                                         "Default 0.02.")
-                                .define("fishingTreasureChance", 0.02);
+                                .define("fishingTreasureChance", 0.04);
                 FISHING_LOOT_TABLE =
                         BUILDER.comment("Loot table to use when fishing barge catches a fish. Change to 'minecraft:gameplay/fishing' if some modded fish aren't being caught. Defaults to 'minecraft:gameplay/fishing/fish'.")
                                 .define("fishingLootTable", "minecraft:gameplay/fishing/fish");
+
+                FISHING_COOLDOWN =
+                        BUILDER.comment("Cooldown before each fishing attempt")
+                                .defineInRange("fishingCooldown", 40, 0, 200000);
 
                 BUILDER.pop();
             }
@@ -115,6 +125,12 @@ public class ShippingConfig {
                 TRAIN_MAX_SPEED =
                         BUILDER.comment("Max speed that trains can be accelerated to. High speed may cause chunk loading lag or issues, not advised for servers or packs. Default 0.25, max is 1")
                                 .defineInRange("trainMaxSpeed", 0.25, 0.01, 1);
+
+                TRAIN_EXEMPT_DAMAGE_SOURCES = BUILDER.comment("Damage sources that trains are invulnerable to")
+                                .define("trainInvuln", List.of("create.mechanical_saw", "create.mechanical_drill"));
+
+
+
                 BUILDER.pop();
             }
             {

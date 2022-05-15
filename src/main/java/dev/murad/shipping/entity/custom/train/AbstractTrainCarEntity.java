@@ -388,6 +388,15 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         return hordir;
     }
 
+
+    @Override
+    public boolean isInvulnerableTo(DamageSource pSource) {
+        if (ShippingConfig.Server.TRAIN_EXEMPT_DAMAGE_SOURCES.get().contains(pSource.msgId)){
+            return true;
+        }
+        return super.isInvulnerableTo(pSource);
+    }
+
     /**
      * This method returns the specific position on the track at
      * pOffset blocks from the current position. This overridden

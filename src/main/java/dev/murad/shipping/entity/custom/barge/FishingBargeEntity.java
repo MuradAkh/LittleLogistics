@@ -54,8 +54,14 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
     private final Set<Pair<Integer, Integer>> overFishedCoords = new HashSet<>();
     private final Queue<Pair<Integer, Integer>> overFishedQueue = new LinkedList<>();
 
-    private static final ResourceLocation fishingLootTable =
+    private static final ResourceLocation FISHING_LOOT_TABLE =
             new ResourceLocation(ShippingConfig.Server.FISHING_LOOT_TABLE.get());
+
+    private static final int FISHING_COOLDOWN =
+            ShippingConfig.Server.FISHING_COOLDOWN.get();
+
+    private static final double FISHING_TREASURE_CHANCE =
+            ShippingConfig.Server.FISHING_TREASURE_CHANCE_MODIFIER.get();
 
 
     public FishingBargeEntity(EntityType<? extends FishingBargeEntity> type, Level world) {
@@ -108,7 +114,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
         if(!this.level.isClientSide && this.getStatus() == Status.DEPLOYED){
             if(fishCooldown < 0) {
                 tickFish();
-                fishCooldown = 20;
+                fishCooldown = FISHING_COOLDOWN;
             }  else {
                 fishCooldown--;
             }
@@ -138,7 +144,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
         double shallowPenalty = computeDepthPenalty();
         double chance = 0.25 * overFishPenalty * shallowPenalty;
         double treasure_chance = shallowPenalty > 0.4 ? chance * (shallowPenalty / 2)
-                * ShippingConfig.Server.FISHING_TREASURE_CHANCE_MODIFIER.get() : 0;
+                *  FISHING_TREASURE_CHANCE : 0;
         double r = Math.random();
         if(r < chance){
             LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerLevel) this.level))
@@ -148,7 +154,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
                     .withRandom(this.random);
 
             lootcontext$builder.withParameter(LootContextParams.KILLER_ENTITY, this).withParameter(LootContextParams.THIS_ENTITY, this);
-            LootTable loottable = this.level.getServer().getLootTables().get(r < treasure_chance ? BuiltInLootTables.FISHING_TREASURE : fishingLootTable);
+            LootTable loottable = this.level.getServer().getLootTables().get(r < treasure_chance ? BuiltInLootTables.FISHING_TREASURE : FISHING_LOOT_TABLE);
             List<ItemStack> list = loottable.getRandomItems(lootcontext$builder.create(LootContextParamSets.FISHING));
             for (ItemStack stack : list) {
                 int slot = InventoryUtils.findSlotFotItem(this, stack);

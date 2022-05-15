@@ -36,6 +36,7 @@ import net.minecraft.world.level.block.WaterlilyBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
@@ -85,8 +86,8 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
     }
 
     public boolean hasWaterOnSides(){
-        return this.level.getBlockState(this.getOnPos().relative(this.getDirection().getClockWise())).getBlock().equals(Blocks.WATER) &&
-                this.level.getBlockState(this.getOnPos().relative(this.getDirection().getCounterClockWise())).getBlock().equals(Blocks.WATER) &&
+        return this.level.getFluidState(this.getOnPos().relative(this.getDirection().getClockWise())).is(Fluids.WATER) &&
+                this.level.getFluidState(this.getOnPos().relative(this.getDirection().getCounterClockWise())).is(Fluids.WATER) &&
                 this.level.getBlockState(this.getOnPos().above().relative(this.getDirection().getClockWise())).getBlock().equals(Blocks.AIR) &&
                 this.level.getBlockState(this.getOnPos().above().relative(this.getDirection().getCounterClockWise())).getBlock().equals(Blocks.AIR);
     }
