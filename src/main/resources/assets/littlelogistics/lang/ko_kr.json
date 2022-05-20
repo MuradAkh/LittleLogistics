@@ -40,9 +40,10 @@
     "block.littlelogistics.guide_rail_tug": "예인선 가이드 레일",
     "block.littlelogistics.guide_rail_corner": "선박 코너 가이드 레일",
     "block.littlelogistics.vessel_charger": "탈것 충전기",
-    "block.littlelogistics.fluid_hopper": "유체 깔때기",
-    "block.littlelogistics.rapid_hopper": "빠른 깔때기",
-    "block.littlelogistics.vessel_detector": "",
+    "block.littlelogistics.fluid_hopper": "유체 호퍼",
+    "block.littlelogistics.rapid_hopper": "빠른 호퍼",
+    "block.littlelogistics.vessel_detector": "선박 감지기",
+
   
     "block.littlelogistics.junction_rail": "분기점 레일",
     "block.littlelogistics.switch_rail": "스위치 레일",
