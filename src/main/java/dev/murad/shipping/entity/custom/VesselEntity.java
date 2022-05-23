@@ -16,6 +16,7 @@ import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -100,6 +101,9 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
     public void tick() {
         if(this.isAlive()) {
             tickSpringAliveCheck();
+            if(this.tickCount % 10 == 0){
+                this.heal(1f);
+            }
         }
 
         if(!this.level.isClientSide) {
@@ -122,7 +126,7 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
 
     public static AttributeSupplier.Builder setCustomAttributes() {
         return Mob.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, 1.0D)
+                .add(Attributes.MAX_HEALTH, 20.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.0D)
                 .add(ForgeMod.SWIM_SPEED.get(), 0.0D);
     }
@@ -431,8 +435,12 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
 
     }
 
-    public boolean isInvulnerableTo(DamageSource p_180431_1_) {
-        return p_180431_1_.equals(DamageSource.IN_WALL) || super.isInvulnerableTo(p_180431_1_);
+    public boolean isInvulnerableTo(DamageSource pSource) {
+        if (ShippingConfig.Server.VESSEL_EXEMPT_DAMAGE_SOURCES.get().contains(pSource.msgId)){
+            return true;
+        }
+
+        return pSource.equals(DamageSource.IN_WALL) || super.isInvulnerableTo(pSource);
     }
 
     @Override
@@ -449,6 +457,19 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
         }
 
         return super.getCapability(cap, side);
+    }
+
+    @Override
+    public boolean hurt(DamageSource damageSource, float p_70097_2_) {
+        if (this.isInvulnerableTo(damageSource)) {
+            return false;
+        } else if (!this.level.isClientSide && !this.isRemoved() &&
+                damageSource instanceof EntityDamageSource e && e.getEntity() instanceof Player) {
+            this.remove(RemovalReason.KILLED);
+            return true;
+        } else {
+            return super.hurt(damageSource, p_70097_2_);
+        }
     }
 
     // LivingEntity override, to avoid jumping out of water

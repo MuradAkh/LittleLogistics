@@ -7,6 +7,7 @@ import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.util.Train;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -65,19 +66,6 @@ public abstract class AbstractBargeEntity extends VesselEntity {
     }
 
     abstract protected void doInteract(Player player);
-
-    @Override
-    public boolean hurt(DamageSource p_70097_1_, float p_70097_2_) {
-        if (this.isInvulnerableTo(p_70097_1_)) {
-            return false;
-        } else if (!this.level.isClientSide && !this.dead) {
-            this.spawnAtLocation(this.getDropItem());
-            this.remove(RemovalReason.KILLED);
-            return true;
-        } else {
-            return true;
-        }
-    }
 
     public boolean hasWaterOnSides(){
         return super.hasWaterOnSides();
@@ -138,6 +126,9 @@ public abstract class AbstractBargeEntity extends VesselEntity {
 
     @Override
     public void remove(RemovalReason r){
+        if (!this.level.isClientSide) {
+            this.spawnAtLocation(this.getDropItem());
+        }
         handleLinkableKill();
         super.remove(r);
     }

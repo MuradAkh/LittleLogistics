@@ -15,12 +15,14 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 
@@ -55,7 +57,9 @@ public abstract class AbstractVesselRenderer<T extends VesselEntity> extends Ent
 
     private void renderModel(T vesselEntity, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
         VertexConsumer ivertexbuilder = buffer.getBuffer(getModel(vesselEntity).renderType(this.getTextureLocation(vesselEntity)));
-        getModel(vesselEntity).renderToBuffer(matrixStack, ivertexbuilder, p_225623_6_, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        int overlay = LivingEntityRenderer.getOverlayCoords(vesselEntity, 0);
+
+        getModel(vesselEntity).renderToBuffer(matrixStack, ivertexbuilder, p_225623_6_, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     protected double getModelYoffset() {

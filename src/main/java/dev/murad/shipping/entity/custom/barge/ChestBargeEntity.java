@@ -35,18 +35,13 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
     }
 
     @Override
-    public boolean hurt(DamageSource p_70097_1_, float p_70097_2_) {
-        if (this.isInvulnerableTo(p_70097_1_)) {
-            return false;
-        } else if (!this.level.isClientSide && !this.isRemoved()) {
-            this.spawnAtLocation(this.getDropItem());
+    public void remove(RemovalReason r) {
+        if (!this.level.isClientSide) {
             Containers.dropContents(this.level, this, this);
-            this.remove(RemovalReason.KILLED);
-            return true;
-        } else {
-            return true;
         }
+        super.remove(r);
     }
+
 
 
     @Override

@@ -59,12 +59,27 @@ public class ShippingConfig {
         public static final ForgeConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_MAX_TRANSFER;
 
         public static final ForgeConfigSpec.ConfigValue<List<String>> TRAIN_EXEMPT_DAMAGE_SOURCES;
+        public static final ForgeConfigSpec.ConfigValue<List<String>> VESSEL_EXEMPT_DAMAGE_SOURCES;
 
-
+        public static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_CHUNKLOADERS;
 
 
         static {
+            BUILDER.push("general");
+
+            DISABLE_CHUNKLOADERS =
+                    BUILDER.comment("Automatically kill chunkloader vehicles, this is intended for servers that regulate chunkloading using different mods. Please consider adding a datapack to disable the recipe if using this option.")
+                            .define("disableChunkLoading", false);
+
+            BUILDER.pop();
             BUILDER.push("vessel");
+            {
+                BUILDER.push("general");
+                VESSEL_EXEMPT_DAMAGE_SOURCES = BUILDER.comment("Damage sources that vessels are invulnerable to")
+                        .define("vesselInvuln", List.of("create.mechanical_saw", "create.mechanical_drill"));
+
+                BUILDER.pop();
+            }
             {
                 BUILDER.push("barge");
                 FISHING_TREASURE_CHANCE_MODIFIER =
