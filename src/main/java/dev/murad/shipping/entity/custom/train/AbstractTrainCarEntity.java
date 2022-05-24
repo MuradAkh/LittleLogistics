@@ -3,6 +3,7 @@ package dev.murad.shipping.entity.custom.train;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.custom.SpringEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.setup.ModItems;
@@ -20,6 +21,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -61,6 +63,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     @Getter
     @Setter
     private boolean frozen = false;
+
+    private boolean waitForDominatedLoad = false;
 
     private static final Map<RailShape, Pair<Vec3i, Vec3i>> EXITS = Util.make(Maps.newEnumMap(RailShape.class), (p_38135_) -> {
         Vec3i west = Direction.WEST.getNormal();
@@ -126,6 +130,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     protected void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         dominantNBT = compound.getCompound("dominant");
+        waitForDominatedLoad = compound.getBoolean("hasDominated");
     }
 
     @Override
@@ -136,6 +141,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         } else if (dominantNBT != null) {
             compound.put(SpringEntity.SpringSide.DOMINANT.name(), dominantNBT);
         }
+        compound.putBoolean("hasDominated", this.dominated.isPresent());
     }
 
     private Optional<AbstractTrainCarEntity> tryToLoadFromNBT(CompoundTag compound) {
@@ -326,7 +332,20 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         } else {
             if (dominant.isEmpty() && dominantNBT != null) {
                 tryToLoadFromNBT(dominantNBT).ifPresent(this::setDominant);
-                dominant.ifPresent(d -> d.setDominated(this));
+                dominant.ifPresent(d -> {
+                    d.setDominated(this);
+                    dominantNBT = null; // done loading
+                });
+            }
+            if (waitForDominatedLoad && dominated.isEmpty()){
+               this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
+            } else if (dominated.isPresent()){
+                waitForDominatedLoad = false;
+                if(!((ServerLevel) this.level).isPositionEntityTicking(dominated.get().blockPosition())){
+                    this.getTrain().getTug().ifPresent(loco -> loco.setDeltaMovement(Vec3.ZERO));
+
+                    this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
+                }
             }
             entityData.set(DOMINANT_ID, dominant.map(Entity::getId).orElse(-1));
             entityData.set(DOMINATED_ID, dominated.map(Entity::getId).orElse(-1));
