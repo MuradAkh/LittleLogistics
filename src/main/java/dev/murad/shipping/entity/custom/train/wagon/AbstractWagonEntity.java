@@ -6,6 +6,8 @@ import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntit
 import dev.murad.shipping.util.Train;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.properties.RailShape;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 
@@ -32,6 +34,15 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
     public void setDominant(AbstractTrainCarEntity entity) {
         this.setTrain(entity.getTrain());
         this.dominant = Optional.of(entity);
+    }
+
+    @Override
+    public void tick() {
+        if(isFrozen() || (getRailShape().map(RailShape::isAscending).orElse(false) && capability.isStalled())){
+            this.setDeltaMovement(Vec3.ZERO);
+        } else {
+            super.tick();
+        }
     }
 
     @Override

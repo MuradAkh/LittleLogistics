@@ -506,7 +506,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
         @Override
         public boolean isStalled() {
-            return remainingStallTime <=0;
+            return remainingStallTime > 0;
         }
 
         @Override
