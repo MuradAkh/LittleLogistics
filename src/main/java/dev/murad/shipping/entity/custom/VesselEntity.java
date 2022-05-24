@@ -1,6 +1,7 @@
 package dev.murad.shipping.entity.custom;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.SpringableEntity;
@@ -11,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagKey;
@@ -112,6 +114,13 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
 
             this.floatBoat();
             this.unDrown();
+        }
+
+        if (!this.level.isClientSide && dominated.isPresent()){
+            if(!((ServerLevel) this.level).isPositionEntityTicking(dominated.get().blockPosition())){
+                this.getTrain().getTug().ifPresent(tug -> tug.setDeltaMovement(Vec3.ZERO));
+                this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
+            }
         }
 
         super.tick();

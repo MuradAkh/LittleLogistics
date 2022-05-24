@@ -64,7 +64,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     @Getter
     protected boolean docked = false;
     @Getter
-    protected boolean stalled = false;
+    protected int remainingStallTime = 0;
 
     private int dockCheckCooldown = 0;
     private boolean independentMotion = false;
@@ -334,8 +334,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             if(!AbstractTugEntity.this.level.isClientSide) {
                 tickRouteCheck();
                 tickCheckDock();
-                followPath();
-                followGuideRail();
+                if (remainingStallTime <= 0) {
+                    followPath();
+                    followGuideRail();
+                } else {
+                    remainingStallTime--;
+                }
             }
 
         }
@@ -410,7 +414,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     private void followPath() {
         pathfindCooldown--;
-        if (!this.path.isEmpty() && !this.docked && !this.stalled && !shouldFreezeTrain() && tickFuel()) {
+        if (!this.path.isEmpty() && !this.docked && !shouldFreezeTrain() && tickFuel()) {
             TugRouteNode stop = path.get(nextStop);
             if (navigation.getPath() == null || navigation.getPath().isDone()
             ) {
@@ -601,17 +605,17 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
         @Override
         public boolean isStalled() {
-            return stalled;
+            return remainingStallTime > 0;
         }
 
         @Override
         public void stall() {
-            stalled = true;
+            remainingStallTime = 20;
         }
 
         @Override
         public void unstall() {
-            stalled = false;
+            remainingStallTime = 0;
         }
 
         @Override

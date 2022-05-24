@@ -64,8 +64,6 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     @Setter
     private boolean frozen = false;
 
-    private boolean waitForDominatedLoad = false;
-
     private static final Map<RailShape, Pair<Vec3i, Vec3i>> EXITS = Util.make(Maps.newEnumMap(RailShape.class), (p_38135_) -> {
         Vec3i west = Direction.WEST.getNormal();
         Vec3i east = Direction.EAST.getNormal();
@@ -130,7 +128,6 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     protected void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         dominantNBT = compound.getCompound("dominant");
-        waitForDominatedLoad = compound.getBoolean("hasDominated");
     }
 
     @Override
@@ -141,7 +138,6 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         } else if (dominantNBT != null) {
             compound.put(SpringEntity.SpringSide.DOMINANT.name(), dominantNBT);
         }
-        compound.putBoolean("hasDominated", this.dominated.isPresent());
     }
 
     private Optional<AbstractTrainCarEntity> tryToLoadFromNBT(CompoundTag compound) {
@@ -337,10 +333,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                     dominantNBT = null; // done loading
                 });
             }
-            if (waitForDominatedLoad && dominated.isEmpty()){
-               this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
-            } else if (dominated.isPresent()){
-                waitForDominatedLoad = false;
+            if (dominated.isPresent()){
                 if(!((ServerLevel) this.level).isPositionEntityTicking(dominated.get().blockPosition())){
                     this.getTrain().getTug().ifPresent(loco -> loco.setDeltaMovement(Vec3.ZERO));
 
@@ -541,7 +534,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                 return euclid < maxDist ? di : euclid;
             }).orElse(this.distanceTo(parent));
 
-            if (distance <= 5) {
+            if (distance <= 6) {
                 Vec3 euclideanDir = parent.position().subtract(position()).normalize();
                 Vec3 parentDirection = railDirDis
                         .map(Pair::getFirst)
