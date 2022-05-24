@@ -1,8 +1,13 @@
 package dev.murad.shipping.block.energy;
 
+import dev.murad.shipping.block.dock.AbstractDockBlock;
+import dev.murad.shipping.block.dock.DockingBlockStates;
+import dev.murad.shipping.block.dock.TugDockBlock;
+import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.TickerUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -23,6 +28,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class VesselChargerBlock extends Block implements EntityBlock {
@@ -114,11 +121,31 @@ public class VesselChargerBlock extends Block implements EntityBlock {
         }
     }
 
+    public Optional<Direction> getPlaceDir(BlockPos pos, Level level){
+        var below = level.getBlockState(pos.below());
+
+        if (below.getBlock() instanceof AbstractDockBlock){
+            return Optional.of(below.getValue(DockingBlockStates.FACING));
+        }
+        for(var dir : List.of(Direction.EAST, Direction.WEST, Direction.SOUTH, Direction.NORTH)){
+            var blockState =level.getBlockState(pos.relative(dir));
+            if (blockState.is(ModBlocks.LOCOMOTIVE_DOCK_RAIL.get()) ||
+                    (blockState.is(ModBlocks.CAR_DOCK_RAIL.get()) && !blockState.getValue(DockingBlockStates.INVERTED))
+            ){
+               return Optional.of(dir);
+            }
+
+        }
+        return Optional.empty();
+    }
+
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context){
+
         return this.defaultBlockState()
-                .setValue(FACING, context.getHorizontalDirection().getOpposite());
+                .setValue(FACING, getPlaceDir(context.getClickedPos(), context.getLevel())
+                        .orElse(context.getHorizontalDirection().getOpposite()));
 
     }
 
