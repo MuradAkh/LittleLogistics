@@ -1,11 +1,12 @@
-package dev.murad.shipping.entity.custom.tug;
+package dev.murad.shipping.entity.custom.vessel.tug;
 
 import dev.murad.shipping.ShippingConfig;
-import dev.murad.shipping.entity.accessor.SteamTugDataAccessor;
+import dev.murad.shipping.entity.accessor.SteamHeadVehicleDataAccessor;
 import dev.murad.shipping.entity.container.SteamTugContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModSounds;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -20,13 +21,19 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class SteamTugEntity extends AbstractTugEntity {
     private static final int FURNACE_FUEL_MULTIPLIER= ShippingConfig.Server.STEAM_TUG_FUEL_MULTIPLIER.get();
-
+    private final ItemStackHandler itemHandler = createHandler();
+    private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
     protected int burnTime = 0;
     protected int burnCapacity = 0;
 
@@ -38,9 +45,23 @@ public class SteamTugEntity extends AbstractTugEntity {
         super(ModEntityTypes.STEAM_TUG.get(), worldIn, x, y, z);
     }
 
-    @Override
-    protected int getNonRouteItemSlots() {
-        return 1; // 1 extra slot for fuel
+    private ItemStackHandler createHandler() {
+        return new ItemStackHandler(1) {
+            @Override
+            public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+                return FurnaceBlockEntity.isFuel(stack);
+            }
+
+            @Nonnull
+            @Override
+            public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+                if (!isItemValid(slot, stack)) {
+                    return stack;
+                }
+
+                return super.insertItem(slot, stack, simulate);
+            }
+        };
     }
 
     @Override
@@ -74,21 +95,24 @@ public class SteamTugEntity extends AbstractTugEntity {
     }
 
     @Override
-    public SteamTugDataAccessor getDataAccessor() {
-        return new SteamTugDataAccessor.Builder(this.getId())
+    public SteamHeadVehicleDataAccessor getDataAccessor() {
+        return new SteamHeadVehicleDataAccessor.Builder(this.getId())
                 .withBurnProgress(this::getBurnProgress)
                 .withLit(this::isLit)
+                .withVisitedSize(() -> nextStop)
+                .withOn(() -> engineOn)
+                .withRouteSize(() -> path != null ? path.size() : 0)
                 .build();
     }
 
+    @Nonnull
     @Override
-    protected boolean isTugSlotItemValid(int slot, @Nonnull ItemStack stack){
-        return slot == 1 && FurnaceBlockEntity.isFuel(stack);
-    }
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return handler.cast();
+        }
 
-    @Override
-    protected int getTugSlotLimit(int slot){
-        return slot == 1 ? 64 : 0;
+        return super.getCapability(cap, side);
     }
 
     @Override
@@ -97,7 +121,7 @@ public class SteamTugEntity extends AbstractTugEntity {
             burnTime--;
             return true;
         } else {
-            ItemStack stack = itemHandler.getStackInSlot(1);
+            ItemStack stack = itemHandler.getStackInSlot(0);
             if (!stack.isEmpty()) {
                 burnCapacity = (ForgeHooks.getBurnTime(stack, null) * FURNACE_FUEL_MULTIPLIER) - 1;
                 burnTime = burnCapacity - 1;
@@ -120,6 +144,13 @@ public class SteamTugEntity extends AbstractTugEntity {
     public void readAdditionalSaveData(CompoundTag compound) {
         burnTime = compound.contains("burn") ? compound.getInt("burn") : 0;
         burnCapacity = compound.contains("burn_capacity") ? compound.getInt("burn_capacity") : 0;
+        if(compound.contains("inv")){
+            ItemStackHandler old = new ItemStackHandler();
+            old.deserializeNBT(compound.getCompound("inv"));
+            itemHandler.setStackInSlot(0, old.getStackInSlot(1));
+        }else{
+            itemHandler.deserializeNBT(compound.getCompound("tugItemHandler"));
+        }
         super.readAdditionalSaveData(compound);
     }
 
@@ -127,6 +158,7 @@ public class SteamTugEntity extends AbstractTugEntity {
     public void addAdditionalSaveData(CompoundTag compound) {
         compound.putInt("burn", burnTime);
         compound.putInt("burn_capacity", burnCapacity);
+        compound.put("tugItemHandler", itemHandler.serializeNBT());
         super.addAdditionalSaveData(compound);
     }
 
@@ -139,15 +171,20 @@ public class SteamTugEntity extends AbstractTugEntity {
     // Have to implement IInventory to work with hoppers
     @Override
     public boolean isEmpty() {
-        return itemHandler.getStackInSlot(1).isEmpty();
+        return itemHandler.getStackInSlot(0).isEmpty();
+    }
+
+    @Override
+    public ItemStack getItem(int p_70301_1_) {
+        return itemHandler.getStackInSlot(p_70301_1_);
     }
 
     @Override
     public void setItem(int p_70299_1_, ItemStack p_70299_2_) {
-        if (!this.itemHandler.isItemValid(1, p_70299_2_)){
+        if (!this.itemHandler.isItemValid(p_70299_1_, p_70299_2_)){
             return;
         }
-        this.itemHandler.insertItem(1, p_70299_2_, false);
+        this.itemHandler.insertItem(p_70299_1_, p_70299_2_, false);
         if (!p_70299_2_.isEmpty() && p_70299_2_.getCount() > this.getMaxStackSize()) {
             p_70299_2_.setCount(this.getMaxStackSize());
         }

@@ -3,7 +3,7 @@ package dev.murad.shipping.entity.render.barge;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.custom.barge.FluidTankBargeEntity;
+import dev.murad.shipping.entity.custom.vessel.barge.FluidTankBargeEntity;
 import dev.murad.shipping.entity.models.FluidTankBargeModel;
 import dev.murad.shipping.util.FluidRenderUtil;
 import net.minecraft.client.renderer.MultiBufferSource;

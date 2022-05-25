@@ -1,16 +1,18 @@
 package dev.murad.shipping.entity.container;
 
-import dev.murad.shipping.entity.accessor.EnergyLocomotiveDataAccessor;
+import dev.murad.shipping.entity.accessor.EnergyHeadVehicleDataAccessor;
+import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.setup.ModMenuTypes;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
-public class EnergyLocomotiveContainer extends AbstractLocomotiveContainer<EnergyLocomotiveDataAccessor> {
-    public EnergyLocomotiveContainer(int windowId, Level world, EnergyLocomotiveDataAccessor data,
-                              Inventory playerInventory, Player player) {
+public class EnergyHeadVehicleContainer<T extends Entity & HeadVehicle> extends AbstractHeadVehicleContainer<EnergyHeadVehicleDataAccessor, T> {
+    public EnergyHeadVehicleContainer(int windowId, Level world, EnergyHeadVehicleDataAccessor data,
+                                      Inventory playerInventory, Player player) {
         super(ModMenuTypes.ENERGY_LOCOMOTIVE_CONTAINER.get(), windowId, world, data, playerInventory, player);
 
         if(locomotiveEntity != null) {
@@ -18,8 +20,6 @@ public class EnergyLocomotiveContainer extends AbstractLocomotiveContainer<Energ
                 addSlot(new SlotItemHandler(h, 0, 32, 35)
                         .setBackground(EMPTY_ATLAS_LOC, EMPTY_ENERGY));
             });
-
-
         }
     }
 

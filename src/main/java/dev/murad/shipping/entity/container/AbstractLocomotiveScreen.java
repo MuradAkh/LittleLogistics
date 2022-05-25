@@ -1,20 +1,15 @@
 package dev.murad.shipping.entity.container;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
+import dev.murad.shipping.entity.custom.HeadVehicle;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.level.ColorResolver;
-import net.minecraftforge.client.event.RenderTooltipEvent;
 
-import java.awt.*;
-
-public abstract class AbstractLocomotiveScreen<T extends AbstractLocomotiveContainer<?>> extends AbstractVehicleScreen<T>{
+public abstract class AbstractLocomotiveScreen<U extends Entity & HeadVehicle, T extends AbstractHeadVehicleContainer<?, U>> extends AbstractVehicleScreen<T>{
     private Button on;
     private Button off;
     public AbstractLocomotiveScreen(T menu, Inventory inventory, Component p_i51105_3_) {

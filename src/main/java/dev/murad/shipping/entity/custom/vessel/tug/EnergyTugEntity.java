@@ -1,9 +1,8 @@
-package dev.murad.shipping.entity.custom.tug;
+package dev.murad.shipping.entity.custom.vessel.tug;
 
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.capability.ReadWriteEnergyStorage;
-import dev.murad.shipping.entity.accessor.EnergyLocomotiveDataAccessor;
-import dev.murad.shipping.entity.accessor.EnergyTugDataAccessor;
+import dev.murad.shipping.entity.accessor.EnergyHeadVehicleDataAccessor;
 import dev.murad.shipping.entity.container.EnergyTugContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
@@ -25,13 +24,16 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Optional;
 
 public class EnergyTugEntity extends AbstractTugEntity {
+    private final ItemStackHandler itemHandler = createHandler();
+    private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
     private static final int MAX_ENERGY = ShippingConfig.Server.ENERGY_TUG_BASE_CAPACITY.get();
     private static final int MAX_TRANSFER = ShippingConfig.Server.ENERGY_TUG_BASE_MAX_CHARGE_RATE.get();
     private static final int ENERGY_USAGE = ShippingConfig.Server.ENERGY_TUG_BASE_ENERGY_USAGE.get();
@@ -56,21 +58,6 @@ public class EnergyTugEntity extends AbstractTugEntity {
     }
 
     @Override
-    protected int getNonRouteItemSlots() {
-        return 1; // for capacitor
-    }
-
-    @Override
-    protected boolean isTugSlotItemValid(int slot, @Nonnull ItemStack stack){
-        return slot == 1 && stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
-    }
-
-    @Override
-    protected int getTugSlotLimit(int slot){
-        return 1; // only one capacitor
-    }
-
-    @Override
     protected MenuProvider createContainerProvider() {
         return new MenuProvider() {
             @Override
@@ -82,6 +69,25 @@ public class EnergyTugEntity extends AbstractTugEntity {
             @Override
             public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player Player) {
                 return new EnergyTugContainer(i, level, getDataAccessor(), playerInventory, Player);
+            }
+        };
+    }
+
+    private ItemStackHandler createHandler() {
+        return new ItemStackHandler(1) {
+            @Override
+            public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+                return stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
+            }
+
+            @Nonnull
+            @Override
+            public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+                if (!isItemValid(slot, stack)) {
+                    return stack;
+                }
+
+                return super.insertItem(slot, stack, simulate);
             }
         };
     }
@@ -99,17 +105,27 @@ public class EnergyTugEntity extends AbstractTugEntity {
     }
 
     @Override
-    public EnergyTugDataAccessor getDataAccessor() {
-        return new EnergyTugDataAccessor.Builder(this.getId())
+    public EnergyHeadVehicleDataAccessor getDataAccessor() {
+        return new EnergyHeadVehicleDataAccessor.Builder(this.getId())
                 .withEnergy(internalBattery::getEnergyStored)
                 .withCapacity(internalBattery::getMaxEnergyStored)
                 .withLit(() -> internalBattery.getEnergyStored() > 0) // has energy
+                .withVisitedSize(() -> nextStop)
+                .withOn(() -> engineOn)
+                .withRouteSize(() -> path != null ? path.size() : 0)
                 .build();
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         internalBattery.readAdditionalSaveData(compound.getCompound("energy_storage"));
+        if(compound.contains("inv")){
+            ItemStackHandler old = new ItemStackHandler();
+            old.deserializeNBT(compound.getCompound("inv"));
+            itemHandler.setStackInSlot(0, old.getStackInSlot(1));
+        }else{
+            itemHandler.deserializeNBT(compound.getCompound("tugItemHandler"));
+        }
         super.readAdditionalSaveData(compound);
     }
 
@@ -118,6 +134,7 @@ public class EnergyTugEntity extends AbstractTugEntity {
         CompoundTag energyNBT = new CompoundTag();
         internalBattery.addAdditionalSaveData(energyNBT);
         compound.put("energy_storage", energyNBT);
+        compound.put("tugItemHandler", itemHandler.serializeNBT());
         super.addAdditionalSaveData(compound);
     }
 
@@ -125,7 +142,7 @@ public class EnergyTugEntity extends AbstractTugEntity {
     public void tick() {
         // grab energy from capacitor
         if (!level.isClientSide) {
-            IEnergyStorage capability = InventoryUtils.getEnergyCapabilityInSlot(1, itemHandler);
+            IEnergyStorage capability = InventoryUtils.getEnergyCapabilityInSlot(0, itemHandler);
             if (capability != null) {
                 // simulate first
                 int toExtract = capability.extractEnergy(MAX_TRANSFER, true);
@@ -144,15 +161,21 @@ public class EnergyTugEntity extends AbstractTugEntity {
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return itemHandler.getStackInSlot(0).isEmpty();
     }
 
     @Override
+    public ItemStack getItem(int p_70301_1_) {
+        return itemHandler.getStackInSlot(p_70301_1_);
+    }
+
+
+    @Override
     public void setItem(int p_70299_1_, ItemStack p_70299_2_) {
-        if (!this.itemHandler.isItemValid(1, p_70299_2_)){
+        if (!this.itemHandler.isItemValid(p_70299_1_, p_70299_2_)){
             return;
         }
-        this.itemHandler.insertItem(1, p_70299_2_, false);
+        this.itemHandler.insertItem(p_70299_1_, p_70299_2_, false);
         if (!p_70299_2_.isEmpty() && p_70299_2_.getCount() > this.getMaxStackSize()) {
             p_70299_2_.setCount(this.getMaxStackSize());
         }
@@ -163,6 +186,10 @@ public class EnergyTugEntity extends AbstractTugEntity {
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
         if (cap == CapabilityEnergy.ENERGY) {
             return holder.cast();
+        }
+
+        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return handler.cast();
         }
 
         return super.getCapability(cap, side);

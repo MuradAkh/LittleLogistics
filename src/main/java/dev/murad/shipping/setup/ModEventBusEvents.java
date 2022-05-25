@@ -1,9 +1,9 @@
 package dev.murad.shipping.setup;
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.custom.VesselEntity;
-import dev.murad.shipping.entity.custom.tug.EnergyTugEntity;
-import dev.murad.shipping.entity.custom.tug.SteamTugEntity;
+import dev.murad.shipping.entity.custom.vessel.VesselEntity;
+import dev.murad.shipping.entity.custom.vessel.tug.EnergyTugEntity;
+import dev.murad.shipping.entity.custom.vessel.tug.SteamTugEntity;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;

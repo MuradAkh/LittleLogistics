@@ -1,15 +1,17 @@
 package dev.murad.shipping.entity.container;
 
-import dev.murad.shipping.entity.accessor.SteamLocomotiveDataAccessor;
+import dev.murad.shipping.entity.accessor.SteamHeadVehicleDataAccessor;
+import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.setup.ModMenuTypes;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
-public class SteamLocomotiveContainer extends AbstractLocomotiveContainer<SteamLocomotiveDataAccessor> {
-    public SteamLocomotiveContainer(int windowId, Level world, SteamLocomotiveDataAccessor data,
-                             Inventory playerInventory, net.minecraft.world.entity.player.Player player) {
+public class SteamHeadVehicleContainer<T extends Entity & HeadVehicle> extends AbstractHeadVehicleContainer<SteamHeadVehicleDataAccessor, T> {
+    public SteamHeadVehicleContainer(int windowId, Level world, SteamHeadVehicleDataAccessor data,
+                                     Inventory playerInventory, net.minecraft.world.entity.player.Player player) {
         super(ModMenuTypes.STEAM_LOCOMOTIVE_CONTAINER.get(), windowId, world, data, playerInventory, player);
 
         if(locomotiveEntity != null) {

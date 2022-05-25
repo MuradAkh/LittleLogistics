@@ -1,22 +1,19 @@
-package dev.murad.shipping.entity.custom.barge;
+package dev.murad.shipping.entity.custom.vessel.barge;
 
 
 import dev.murad.shipping.capability.StallingCapability;
-import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.entity.custom.VesselEntity;
-import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
+import dev.murad.shipping.entity.custom.vessel.SpringEntity;
+import dev.murad.shipping.entity.custom.vessel.VesselEntity;
+import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.util.Train;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;

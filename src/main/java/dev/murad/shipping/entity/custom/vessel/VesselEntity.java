@@ -1,8 +1,8 @@
-package dev.murad.shipping.entity.custom;
+package dev.murad.shipping.entity.custom.vessel;
 
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.capability.StallingCapability;
-import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
+import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.SpringableEntity;
 import dev.murad.shipping.util.Train;
@@ -14,7 +14,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;

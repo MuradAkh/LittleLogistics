@@ -1,4 +1,4 @@
-package dev.murad.shipping.entity.custom;
+package dev.murad.shipping.entity.custom.vessel;
 
 /*
 MIT License
@@ -24,11 +24,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
+import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.EntitySpringAPI;
-import dev.murad.shipping.util.LinkableEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;

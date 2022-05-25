@@ -1,19 +1,22 @@
-package dev.murad.shipping.entity.custom.tug;
+package dev.murad.shipping.entity.custom.vessel.tug;
 
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
+import dev.murad.shipping.entity.custom.HeadVehicle;
+import dev.murad.shipping.item.LocoRouteItem;
 import dev.murad.shipping.util.*;
-import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.entity.custom.VesselEntity;
+import dev.murad.shipping.entity.custom.vessel.SpringEntity;
+import dev.murad.shipping.entity.custom.vessel.VesselEntity;
 import dev.murad.shipping.entity.navigation.TugPathNavigator;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModSounds;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -25,7 +28,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.*;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -55,16 +57,19 @@ import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-public abstract class AbstractTugEntity extends VesselEntity implements LinkableEntityHead<VesselEntity>, SpringableEntity, Container, WorldlyContainer {
+public abstract class AbstractTugEntity extends VesselEntity implements LinkableEntityHead<VesselEntity>, SpringableEntity, Container, WorldlyContainer, HeadVehicle {
 
     // CONTAINER STUFF
-    protected final ItemStackHandler itemHandler = createHandler();
-    protected final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
+    @Getter
+    protected final ItemStackHandler routeItemHandler = createRouteItemHandler();
     protected boolean contentsChanged = false;
     @Getter
     protected boolean docked = false;
     @Getter
     protected int remainingStallTime = 0;
+
+    @Setter
+    protected boolean engineOn = true;
 
     private int dockCheckCooldown = 0;
     private boolean independentMotion = false;
@@ -78,8 +83,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         return isDocked();
     }
 
-    private TugRoute path;
-    private int nextStop;
+    protected TugRoute path;
+    protected int nextStop;
 
     public AbstractTugEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
@@ -107,23 +112,13 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     public abstract DataAccessor getDataAccessor();
 
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-            return handler.cast();
-        }
+    private ItemStackHandler createRouteItemHandler() {
+        return new ItemStackHandler(1) {
+            @Override
+            protected int getStackLimit(int slot, @Nonnull ItemStack stack) {
+                return 1;
+            }
 
-        return super.getCapability(cap, side);
-    }
-
-    @Override
-    public boolean isPushedByFluid() {
-        return true;
-    }
-
-    private ItemStackHandler createHandler() {
-        return new ItemStackHandler(1 + getNonRouteItemSlots()) {
             @Override
             protected void onContentsChanged(int slot) {
                 contentsChanged = true;
@@ -131,22 +126,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
             @Override
             public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-                switch (slot) {
-                    case 0: // route
-                        return stack.getItem() == ModItems.TUG_ROUTE.get();
-                    default: // up to childrenge
-                        return isTugSlotItemValid(slot, stack);
-                }
-            }
-
-            @Override
-            public int getSlotLimit(int slot) {
-                switch (slot) {
-                    case 0: // route
-                        return 1;
-                    default: // up to children
-                        return getTugSlotLimit(slot);
-                }
+                return stack.getItem() instanceof TugRouteItem;
             }
 
             @Nonnull
@@ -161,36 +141,39 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         };
     }
 
-    protected abstract int getNonRouteItemSlots();
-
-    protected boolean isTugSlotItemValid(int slot, @Nonnull ItemStack stack){
-        return false;
-    }
-
-    protected int getTugSlotLimit(int slot){
-        return 0;
+    @Override
+    public boolean isPushedByFluid() {
+        return true;
     }
 
     protected abstract MenuProvider createContainerProvider();
 
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
-        itemHandler.deserializeNBT(compound.getCompound("inv"));
+        if(compound.contains("inv")){
+            ItemStackHandler old = new ItemStackHandler();
+            old.deserializeNBT(compound.getCompound("inv"));
+            routeItemHandler.setStackInSlot(0, old.getStackInSlot(0));
+        }else{
+            routeItemHandler.deserializeNBT(compound.getCompound("routeHandler"));
+        }
         nextStop = compound.contains("next_stop") ? compound.getInt("next_stop") : 0;
+        engineOn = !compound.contains("engineOn") || compound.getBoolean("engineOn");
         contentsChanged = true;
         super.readAdditionalSaveData(compound);
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
-        compound.put("inv", itemHandler.serializeNBT());
         compound.putInt("next_stop", nextStop);
+        compound.putBoolean("engineOn", engineOn);
+        compound.put("routeHandler", routeItemHandler.serializeNBT());
         super.addAdditionalSaveData(compound);
     }
 
     private void tickRouteCheck() {
         if (contentsChanged) {
-            ItemStack stack = itemHandler.getStackInSlot(0);
+            ItemStack stack = routeItemHandler.getStackInSlot(0);
             this.setPath(TugRouteItem.getRoute(stack));
             contentsChanged = false;
         }
@@ -414,7 +397,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     private void followPath() {
         pathfindCooldown--;
-        if (!this.path.isEmpty() && !this.docked && !shouldFreezeTrain() && tickFuel()) {
+        if (!this.path.isEmpty() && !this.docked && engineOn && !shouldFreezeTrain() && tickFuel()) {
             TugRouteNode stop = path.get(nextStop);
             if (navigation.getPath() == null || navigation.getPath().isDone()
             ) {
@@ -510,6 +493,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         if (!this.level.isClientSide) {
             this.spawnAtLocation(this.getDropItem());
             Containers.dropContents(this.level, this, this);
+            this.spawnAtLocation(routeItemHandler.getStackInSlot(0));
         }
         handleLinkableKill();
         super.remove(r);
@@ -519,10 +503,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     // Have to implement IInventory to work with hoppers
 
 
-    @Override
-    public ItemStack getItem(int p_70301_1_) {
-        return itemHandler.getStackInSlot(p_70301_1_);
-    }
 
     @Override
     public ItemStack removeItem(int p_70298_1_, int p_70298_2_) {
@@ -574,7 +554,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
     @Override
     public int getContainerSize() {
-        return 1 + getNonRouteItemSlots();
+        return 1;
     }
 
     @Override

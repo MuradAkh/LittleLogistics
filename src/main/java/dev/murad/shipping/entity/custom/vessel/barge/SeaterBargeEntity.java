@@ -1,4 +1,4 @@
-package dev.murad.shipping.entity.custom.barge;
+package dev.murad.shipping.entity.custom.vessel.barge;
 
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;

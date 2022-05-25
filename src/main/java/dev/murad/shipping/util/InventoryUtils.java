@@ -1,6 +1,6 @@
 package dev.murad.shipping.util;
 
-import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
+import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
@@ -24,8 +24,7 @@ public class InventoryUtils {
 
         HashMap<Item, List<ItemStack>> map = new HashMap<>();
         List<Integer> airList = new ArrayList<>();
-        int init = target instanceof AbstractTugEntity ? 1 : 0;
-        for (int i = init; i < target.getContainerSize(); i++) {
+        for (int i = 0; i < target.getContainerSize(); i++) {
             ItemStack stack = target.getItem(i);
             if((stack.isEmpty() || stack.getItem().equals(Items.AIR)) && target.canPlaceItem(i, stack)){
                 airList.add(i);

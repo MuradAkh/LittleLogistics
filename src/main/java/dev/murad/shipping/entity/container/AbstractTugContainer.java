@@ -2,7 +2,7 @@ package dev.murad.shipping.entity.container;
 
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.accessor.DataAccessor;
-import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
+import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;

@@ -1,4 +1,4 @@
-package dev.murad.shipping.entity.custom.barge;
+package dev.murad.shipping.entity.custom.vessel.barge;
 
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;

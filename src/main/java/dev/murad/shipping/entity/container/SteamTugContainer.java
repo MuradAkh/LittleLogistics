@@ -1,6 +1,6 @@
 package dev.murad.shipping.entity.container;
 
-import dev.murad.shipping.entity.accessor.SteamTugDataAccessor;
+import dev.murad.shipping.entity.accessor.SteamHeadVehicleDataAccessor;
 import dev.murad.shipping.setup.ModMenuTypes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -9,17 +9,17 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
 
-public class SteamTugContainer extends AbstractTugContainer<SteamTugDataAccessor> {
-    public SteamTugContainer(int windowId, Level world, SteamTugDataAccessor data,
+public class SteamTugContainer extends AbstractTugContainer<SteamHeadVehicleDataAccessor> {
+    public SteamTugContainer(int windowId, Level world, SteamHeadVehicleDataAccessor data,
                              Inventory playerInventory, Player player) {
         super(ModMenuTypes.TUG_CONTAINER.get(), windowId, world, data, playerInventory, player);
 
         if(tugEntity != null) {
             tugEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
-                addSlot(new SlotItemHandler(h, 0, 116, 35)
-                        .setBackground(EMPTY_ATLAS_LOC, EMPTY_TUG_ROUTE));
-                addSlot(new SlotItemHandler(h, 1, 42, 40));
+                addSlot(new SlotItemHandler(h, 0, 42, 40));
             });
+            addSlot(new SlotItemHandler(tugEntity.getRouteItemHandler(), 0, 116, 35)
+                    .setBackground(EMPTY_ATLAS_LOC, EMPTY_TUG_ROUTE));
         }
         this.addDataSlots(data.getRawData());
     }

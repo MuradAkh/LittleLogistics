@@ -1,7 +1,7 @@
 package dev.murad.shipping.setup;
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.network.LocomotivePacketHandler;
+import dev.murad.shipping.network.VehiclePacketHandler;
 import dev.murad.shipping.network.TugRoutePacketHandler;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.entity.EntityType;
@@ -48,7 +48,7 @@ public class Registration  {
         ModMenuTypes.register();
         ModEntityTypes.register();
         TugRoutePacketHandler.register();
-        LocomotivePacketHandler.register();
+        VehiclePacketHandler.register();
         ModSounds.register();
     }
 }

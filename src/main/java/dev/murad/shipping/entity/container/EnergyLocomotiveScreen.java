@@ -3,16 +3,17 @@ package dev.murad.shipping.entity.container;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.entity.custom.train.locomotive.EnergyLocomotiveEntity;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
-public class EnergyLocomotiveScreen extends AbstractLocomotiveScreen<EnergyLocomotiveContainer>{
+public class EnergyLocomotiveScreen extends AbstractLocomotiveScreen<EnergyLocomotiveEntity, EnergyHeadVehicleContainer<EnergyLocomotiveEntity>>{
     private static final ResourceLocation GUI = new ResourceLocation(ShippingMod.MOD_ID, "textures/container/energy_locomotive.png");
 
-    public EnergyLocomotiveScreen(EnergyLocomotiveContainer menu, Inventory inventory, Component p_i51105_3_) {
+    public EnergyLocomotiveScreen(EnergyHeadVehicleContainer menu, Inventory inventory, Component p_i51105_3_) {
         super(menu, inventory, p_i51105_3_);
     }
 

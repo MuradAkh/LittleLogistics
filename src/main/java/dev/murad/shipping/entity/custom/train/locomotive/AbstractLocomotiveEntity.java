@@ -5,9 +5,9 @@ import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
-import dev.murad.shipping.entity.custom.VesselEntity;
+import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
-import dev.murad.shipping.entity.custom.tug.VehicleFrontPart;
+import dev.murad.shipping.entity.custom.vessel.tug.VehicleFrontPart;
 import dev.murad.shipping.entity.navigation.LocomotiveNavigator;
 import dev.murad.shipping.item.LocoRouteItem;
 import dev.murad.shipping.setup.ModBlocks;
@@ -23,7 +23,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -33,19 +32,15 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.state.properties.RailShape;
-import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.entity.PartEntity;
-import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.wrapper.InvWrapper;
 import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
@@ -54,9 +49,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity implements LinkableEntityHead<AbstractTrainCarEntity>, ItemHandlerVanillaContainerWrapper {
+public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity implements LinkableEntityHead<AbstractTrainCarEntity>, ItemHandlerVanillaContainerWrapper, HeadVehicle {
     @Setter
     protected boolean engineOn = false;
+
     @Setter
     private boolean doflip = false;
     private boolean independentMotion = false;
@@ -69,8 +65,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     private int remainingStallTime = 0;
     private boolean forceStallCheck = false;
 
-
-
     private BlockPos currentHorizontalBlockPos;
     @Nullable
     @Getter
@@ -79,7 +73,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     // item handler for loco routes
     private static final String LOCO_ROUTE_INV_TAG = "locoRouteInv";
     @Getter
-    protected ItemStackHandler locoRouteItemHandler = createLocoRouteItemHandler();
+    protected ItemStackHandler routeItemHandler = createLocoRouteItemHandler();
 
     private static final String NAVIGATOR_TAG = "navigator";
     protected LocomotiveNavigator navigator = new LocomotiveNavigator(this);
@@ -107,7 +101,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     @Override
     public void remove(RemovalReason r) {
         if(!this.level.isClientSide){
-            this.spawnAtLocation(locoRouteItemHandler.getStackInSlot(0));
+            this.spawnAtLocation(routeItemHandler.getStackInSlot(0));
         }
         super.remove(r);
     }
@@ -548,7 +542,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     private void updateNavigatorFromItem() {
-        ItemStack stack = locoRouteItemHandler.getStackInSlot(0);
+        ItemStack stack = routeItemHandler.getStackInSlot(0);
         if (stack.getItem() instanceof LocoRouteItem) {
             navigator.updateWithLocoRouteItem(LocoRouteItem.getRoute(stack));
         } else {
@@ -562,7 +556,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         if(compound.contains("eo")) {
             engineOn = compound.getBoolean("eo");
         }
-        locoRouteItemHandler.deserializeNBT(compound.getCompound(LOCO_ROUTE_INV_TAG));
+        routeItemHandler.deserializeNBT(compound.getCompound(LOCO_ROUTE_INV_TAG));
         navigator.loadFromNbt(compound.getCompound(NAVIGATOR_TAG));
 
         updateNavigatorFromItem();
@@ -572,7 +566,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     protected void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.putBoolean("eo", engineOn);
-        compound.put(LOCO_ROUTE_INV_TAG, locoRouteItemHandler.serializeNBT());
+        compound.put(LOCO_ROUTE_INV_TAG, routeItemHandler.serializeNBT());
         compound.put(NAVIGATOR_TAG, navigator.saveToNbt());
     }
 

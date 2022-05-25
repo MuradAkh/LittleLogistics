@@ -5,10 +5,10 @@ import net.minecraft.world.inventory.ContainerData;
 import java.util.function.BooleanSupplier;
 import java.util.function.IntSupplier;
 
-public class EnergyTugDataAccessor extends DataAccessor {
+public class EnergyHeadVehicleDataAccessor extends DataAccessor {
     private static final int SHORT_MASK = 0xFFFF;
     
-    public EnergyTugDataAccessor(ContainerData data) {
+    public EnergyHeadVehicleDataAccessor(ContainerData data) {
         super(data);
     }
 
@@ -32,11 +32,23 @@ public class EnergyTugDataAccessor extends DataAccessor {
         return this.data.get(5) == 1;
     }
 
+    public boolean isOn() {
+        return this.data.get(6) == 1;
+    }
+
+    public int visitedSize() {
+        return this.data.get(7);
+    }
+
+    public int routeSize() {
+        return this.data.get(8);
+    }
+
     public static class Builder {
         SupplierIntArray arr;
 
         public Builder(int uuid) {
-            this.arr = new SupplierIntArray(6);
+            this.arr = new SupplierIntArray(9);
             this.arr.set(0, uuid);
         }
 
@@ -57,8 +69,22 @@ public class EnergyTugDataAccessor extends DataAccessor {
             return this;
         }
 
-        public EnergyTugDataAccessor build() {
-            return new EnergyTugDataAccessor(this.arr);
+        public Builder withOn(BooleanSupplier lit) {
+            this.arr.setSupplier(6, () -> lit.getAsBoolean() ? 1 : -1);
+            return this;
+        }
+
+        public Builder withVisitedSize(IntSupplier s) {
+            this.arr.setSupplier(7, s);
+            return this;
+        }
+        public Builder withRouteSize(IntSupplier s) {
+            this.arr.setSupplier(8, s);
+            return this;
+        }
+
+        public EnergyHeadVehicleDataAccessor build() {
+            return new EnergyHeadVehicleDataAccessor(this.arr);
         }
     }
 }

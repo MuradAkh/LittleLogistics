@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.capability.StallingCapability;
-import dev.murad.shipping.entity.custom.SpringEntity;
+import dev.murad.shipping.entity.custom.vessel.SpringEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;

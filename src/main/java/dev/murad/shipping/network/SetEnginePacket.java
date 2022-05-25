@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import net.minecraft.network.FriendlyByteBuf;
 
 @RequiredArgsConstructor
-public class SetLocomotiveEnginePacket {
+public class SetEnginePacket {
     public final int locoId;
     public final boolean state;
 
-    public SetLocomotiveEnginePacket(FriendlyByteBuf buffer) {
+    public SetEnginePacket(FriendlyByteBuf buffer) {
         this.locoId = buffer.readInt();
         this.state = buffer.readBoolean();
     }

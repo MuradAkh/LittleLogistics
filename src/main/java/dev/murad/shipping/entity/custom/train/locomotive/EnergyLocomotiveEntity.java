@@ -2,11 +2,8 @@ package dev.murad.shipping.entity.custom.train.locomotive;
 
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.capability.ReadWriteEnergyStorage;
-import dev.murad.shipping.entity.accessor.DataAccessor;
-import dev.murad.shipping.entity.accessor.EnergyLocomotiveDataAccessor;
-import dev.murad.shipping.entity.accessor.EnergyTugDataAccessor;
-import dev.murad.shipping.entity.container.EnergyLocomotiveContainer;
-import dev.murad.shipping.entity.container.EnergyTugContainer;
+import dev.murad.shipping.entity.accessor.EnergyHeadVehicleDataAccessor;
+import dev.murad.shipping.entity.container.EnergyHeadVehicleContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.InventoryUtils;
@@ -24,7 +21,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -106,14 +102,14 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
             @Nullable
             @Override
             public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player Player) {
-                return new EnergyLocomotiveContainer(i, level, getDataAccessor(), playerInventory, Player);
+                return new EnergyHeadVehicleContainer(i, level, getDataAccessor(), playerInventory, Player);
             }
         };
     }
 
     @Override
-    public EnergyLocomotiveDataAccessor getDataAccessor() {
-        return (EnergyLocomotiveDataAccessor) new EnergyLocomotiveDataAccessor.Builder(this.getId())
+    public EnergyHeadVehicleDataAccessor getDataAccessor() {
+        return new EnergyHeadVehicleDataAccessor.Builder(this.getId())
                 .withOn(() -> engineOn)
                 .withRouteSize(() -> navigator.getRouteSize())
                 .withVisitedSize(() -> navigator.getVisitedSize())

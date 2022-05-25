@@ -24,9 +24,9 @@ SOFTWARE.
  */
 
 
-import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
-import dev.murad.shipping.entity.custom.tug.VehicleFrontPart;
+import dev.murad.shipping.entity.custom.vessel.SpringEntity;
+import dev.murad.shipping.entity.custom.vessel.barge.AbstractBargeEntity;
+import dev.murad.shipping.entity.custom.vessel.tug.VehicleFrontPart;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
