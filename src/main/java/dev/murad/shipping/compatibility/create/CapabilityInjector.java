@@ -1,4 +1,4 @@
-package dev.murad.shipping.compatability.create;
+package dev.murad.shipping.compatibility.create;
 
 import com.simibubi.create.content.contraptions.components.structureMovement.train.capability.CapabilityMinecartController;
 import com.simibubi.create.content.contraptions.components.structureMovement.train.capability.MinecartController;

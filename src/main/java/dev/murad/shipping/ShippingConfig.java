@@ -5,6 +5,22 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import java.util.List;
 
 public class ShippingConfig {
+    public static class Common {
+        public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+        public static final ForgeConfigSpec SPEC;
+
+        public static final ForgeConfigSpec.ConfigValue<Boolean> CREATE_COMPAT;
+
+        static {
+            BUILDER.push("compat").comment("Additional compatibility features for third-party mods, disable if broken by a third-party mod update.");
+            CREATE_COMPAT = BUILDER.define("create", true);
+            BUILDER.pop();
+            SPEC = BUILDER.build();
+        }
+
+
+    }
+
     public static class Client {
         public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
         public static final ForgeConfigSpec SPEC;
@@ -12,6 +28,8 @@ public class ShippingConfig {
         public static final ForgeConfigSpec.ConfigValue<Double> TUG_SMOKE_MODIFIER;
         public static final ForgeConfigSpec.ConfigValue<Double> LOCO_SMOKE_MODIFIER;
         public static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_TUG_ROUTE_BEACONS;
+
+
 
         static {
             BUILDER.push("general");
@@ -27,6 +45,7 @@ public class ShippingConfig {
                     BUILDER.comment("Disable indicator beacons for tug route item. Default false.")
                             .define("disableTugRouteBeacons", false);
             BUILDER.pop();
+
             SPEC = BUILDER.build();
         }
     }
