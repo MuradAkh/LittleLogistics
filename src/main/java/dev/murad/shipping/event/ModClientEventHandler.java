@@ -3,7 +3,8 @@ package dev.murad.shipping.event;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.fluid.render.FluidHopperTileEntityRenderer;
 import dev.murad.shipping.entity.container.AbstractHeadVehicleContainer;
-import dev.murad.shipping.entity.container.AbstractTugContainer;
+import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
+import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.entity.models.*;
 import dev.murad.shipping.entity.render.*;
 import dev.murad.shipping.entity.render.train.FluidTankCarRenderer;
@@ -33,10 +34,10 @@ public class ModClientEventHandler {
 
     @SubscribeEvent
     public static void onTextureStitchEventPre(TextureStitchEvent.Pre event) {
-        if (event.getAtlas().location() != AbstractTugContainer.EMPTY_ATLAS_LOC) return;
-        event.addSprite(AbstractTugContainer.EMPTY_TUG_ROUTE);
-        event.addSprite(AbstractTugContainer.EMPTY_ENERGY);
-        event.addSprite(AbstractHeadVehicleContainer.EMPTY_LOCO_ROUTE);
+        if (event.getAtlas().location() != AbstractHeadVehicleContainer.EMPTY_ATLAS_LOC) return;
+        event.addSprite(AbstractTugEntity.ROUTE_ICON);
+        event.addSprite(AbstractLocomotiveEntity.ROUTE_ICON);
+        event.addSprite(AbstractHeadVehicleContainer.EMPTY_ENERGY);
     }
 
     @SubscribeEvent

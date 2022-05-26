@@ -1,6 +1,7 @@
 package dev.murad.shipping.entity.custom.vessel.tug;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.capability.StallingCapability;
@@ -26,6 +27,7 @@ import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.EntityType;
@@ -77,6 +79,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private VehicleFrontPart frontHitbox;
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.BOOLEAN);
 
+    public static final ResourceLocation ROUTE_ICON = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_tug_route");
 
 
     public boolean allowDockInterface(){
@@ -101,6 +104,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         this.yo = y;
         this.zo = z;
     }
+
+    @Override
+    public ResourceLocation getRouteIcon() {
+        return ROUTE_ICON;
+    }
+
 
     // CONTAINER STUFF
     @Override

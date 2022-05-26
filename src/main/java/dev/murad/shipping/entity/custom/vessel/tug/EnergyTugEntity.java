@@ -3,7 +3,7 @@ package dev.murad.shipping.entity.custom.vessel.tug;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.capability.ReadWriteEnergyStorage;
 import dev.murad.shipping.entity.accessor.EnergyHeadVehicleDataAccessor;
-import dev.murad.shipping.entity.container.EnergyTugContainer;
+import dev.murad.shipping.entity.container.EnergyHeadVehicleContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.InventoryUtils;
@@ -68,7 +68,7 @@ public class EnergyTugEntity extends AbstractTugEntity {
             @Nullable
             @Override
             public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player Player) {
-                return new EnergyTugContainer(i, level, getDataAccessor(), playerInventory, Player);
+                return new EnergyHeadVehicleContainer<EnergyTugEntity>(i, level, getDataAccessor(), playerInventory, Player);
             }
         };
     }

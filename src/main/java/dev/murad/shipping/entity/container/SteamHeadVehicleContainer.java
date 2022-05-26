@@ -14,8 +14,8 @@ public class SteamHeadVehicleContainer<T extends Entity & HeadVehicle> extends A
                                      Inventory playerInventory, net.minecraft.world.entity.player.Player player) {
         super(ModMenuTypes.STEAM_LOCOMOTIVE_CONTAINER.get(), windowId, world, data, playerInventory, player);
 
-        if(locomotiveEntity != null) {
-            locomotiveEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
+        if(entity != null) {
+            entity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
                 addSlot(new SlotItemHandler(h, 0, 42, 40));
             });
         }

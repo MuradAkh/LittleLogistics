@@ -2,7 +2,7 @@ package dev.murad.shipping.entity.custom.vessel.tug;
 
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.entity.accessor.SteamHeadVehicleDataAccessor;
-import dev.murad.shipping.entity.container.SteamTugContainer;
+import dev.murad.shipping.entity.container.SteamHeadVehicleContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModSounds;
@@ -75,7 +75,7 @@ public class SteamTugEntity extends AbstractTugEntity {
             @Nullable
             @Override
             public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player Player) {
-                return new SteamTugContainer(i, level, getDataAccessor(), playerInventory, Player);
+                return new SteamHeadVehicleContainer<SteamTugEntity>(i, level, getDataAccessor(), playerInventory, Player);
             }
         };
     }

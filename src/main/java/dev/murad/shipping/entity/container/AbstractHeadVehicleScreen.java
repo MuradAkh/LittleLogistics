@@ -9,10 +9,10 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 
-public abstract class AbstractLocomotiveScreen<U extends Entity & HeadVehicle, T extends AbstractHeadVehicleContainer<?, U>> extends AbstractVehicleScreen<T>{
+public abstract class AbstractHeadVehicleScreen<U extends Entity & HeadVehicle, T extends AbstractHeadVehicleContainer<?, U>> extends AbstractVehicleScreen<T>{
     private Button on;
     private Button off;
-    public AbstractLocomotiveScreen(T menu, Inventory inventory, Component p_i51105_3_) {
+    public AbstractHeadVehicleScreen(T menu, Inventory inventory, Component p_i51105_3_) {
         super(menu, inventory, p_i51105_3_);
     }
 

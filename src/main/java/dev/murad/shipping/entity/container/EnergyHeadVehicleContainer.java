@@ -15,8 +15,8 @@ public class EnergyHeadVehicleContainer<T extends Entity & HeadVehicle> extends 
                                       Inventory playerInventory, Player player) {
         super(ModMenuTypes.ENERGY_LOCOMOTIVE_CONTAINER.get(), windowId, world, data, playerInventory, player);
 
-        if(locomotiveEntity != null) {
-            locomotiveEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
+        if(entity != null) {
+            entity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
                 addSlot(new SlotItemHandler(h, 0, 32, 35)
                         .setBackground(EMPTY_ATLAS_LOC, EMPTY_ENERGY));
             });

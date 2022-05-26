@@ -1,6 +1,7 @@
 package dev.murad.shipping.entity.custom.train.locomotive;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
 import dev.murad.shipping.capability.StallingCapability;
@@ -22,6 +23,7 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -72,6 +74,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     // item handler for loco routes
     private static final String LOCO_ROUTE_INV_TAG = "locoRouteInv";
+
+    public static final ResourceLocation ROUTE_ICON = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_loco_route");
+
     @Getter
     protected ItemStackHandler routeItemHandler = createLocoRouteItemHandler();
 
@@ -97,6 +102,10 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         return docked;
     }
 
+    @Override
+    public ResourceLocation getRouteIcon() {
+        return ROUTE_ICON;
+    }
 
     @Override
     public void remove(RemovalReason r) {
