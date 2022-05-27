@@ -326,12 +326,10 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             if(!AbstractTugEntity.this.level.isClientSide) {
                 tickRouteCheck();
                 tickCheckDock();
-                if (remainingStallTime <= 0) {
+
                     followPath();
                     followGuideRail();
-                } else {
-                    remainingStallTime--;
-                }
+
             }
 
         }
@@ -428,6 +426,9 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         } else{
             entityData.set(INDEPENDENT_MOTION, false);
             this.navigation.stop();
+            if (remainingStallTime > 0){
+                remainingStallTime--;
+            }
 
             if (this.path.isEmpty()){
                 this.nextStop = 0;

@@ -59,6 +59,7 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
     @Getter
     @Setter
     private boolean frozen = false;
+    private boolean waitForDominated = false;
 
     protected VesselEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
@@ -116,8 +117,11 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
         }
 
         if (!this.level.isClientSide && dominated.isPresent()){
+            waitForDominated = false;
             if(!((ServerLevel) this.level).isPositionEntityTicking(dominated.get().blockPosition())){
                 this.getTrain().getTug().ifPresent(tug -> tug.setDeltaMovement(Vec3.ZERO));
+                this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
+            } else if (waitForDominated) {
                 this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
             }
         }
@@ -144,6 +148,13 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
         super.readAdditionalSaveData(nbt);
         // override speed attributes on load from previous versions
         resetSpeedAttributes();
+        waitForDominated = nbt.getBoolean("hasChild");
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putBoolean("hasChild", getDominated().isPresent());
     }
 
     // reset speed to 1

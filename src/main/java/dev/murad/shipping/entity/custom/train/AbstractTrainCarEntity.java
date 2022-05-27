@@ -27,6 +27,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.ItemStack;
@@ -59,6 +60,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     protected static double TRAIN_SPEED = ShippingConfig.Server.TRAIN_MAX_SPEED.get();
     @Getter
     protected final RailHelper railHelper;
+    private boolean waitForDominated;
 
     @Getter
     @Setter
@@ -128,6 +130,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     protected void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         dominantNBT = compound.getCompound("dominant");
+        waitForDominated = compound.getBoolean("hasChild");
     }
 
     @Override
@@ -138,6 +141,9 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         } else if (dominantNBT != null) {
             compound.put(SpringEntity.SpringSide.DOMINANT.name(), dominantNBT);
         }
+
+        compound.putBoolean("hasChild", dominated.isPresent());
+
     }
 
     private Optional<AbstractTrainCarEntity> tryToLoadFromNBT(CompoundTag compound) {
@@ -334,11 +340,12 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                 });
             }
             if (dominated.isPresent()){
+                waitForDominated = false;
                 if(!((ServerLevel) this.level).isPositionEntityTicking(dominated.get().blockPosition())){
-                    this.getTrain().getTug().ifPresent(loco -> loco.setDeltaMovement(Vec3.ZERO));
-
                     this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
                 }
+            } else if (waitForDominated) {
+                this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
             }
             entityData.set(DOMINANT_ID, dominant.map(Entity::getId).orElse(-1));
             entityData.set(DOMINATED_ID, dominated.map(Entity::getId).orElse(-1));
