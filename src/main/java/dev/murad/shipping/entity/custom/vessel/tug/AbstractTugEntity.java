@@ -436,7 +436,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     public boolean shouldFreezeTrain() {
-        return this.train.asList().stream().anyMatch(VesselEntity::isFrozen);
+        return (stalling.isStalled() && !docked) || this.train.asList().stream().anyMatch(VesselEntity::isFrozen);
     }
 
     @Override

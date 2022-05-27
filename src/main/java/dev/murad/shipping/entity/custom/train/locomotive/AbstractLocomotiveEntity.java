@@ -251,11 +251,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                        4);
                if(result.isPresent()){
                    remainingStallTime = 40;
-                   if(result.get() < 2){
-                       this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
-                   } else {
-                       this.setDeltaMovement(this.getDeltaMovement().x * 0.05, this.getDeltaMovement().y, this.getDeltaMovement().z * 0.05);
-                   }
                }
                collisionCheckCooldown = 4;
                forceStallCheck = false;
@@ -453,7 +448,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     public boolean shouldFreezeTrain() {
-        return this.train.asList().stream().anyMatch(AbstractTrainCarEntity::isFrozen);
+        return (stalling.isStalled() && !docked) || this.train.asList().stream().anyMatch(AbstractTrainCarEntity::isFrozen);
     }
 
     private void accelerate() {

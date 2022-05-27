@@ -38,7 +38,7 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
 
     @Override
     public void tick() {
-        if(isFrozen() || (getRailShape().map(RailShape::isAscending).orElse(false) && capability.isStalled())){
+        if(capability.isFrozen() || this.train.getTug().map(s -> (AbstractLocomotiveEntity) s).map(AbstractLocomotiveEntity::shouldFreezeTrain).orElse(false)){
             this.setDeltaMovement(Vec3.ZERO);
         } else {
             super.tick();
