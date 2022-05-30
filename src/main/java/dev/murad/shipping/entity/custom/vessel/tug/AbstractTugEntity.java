@@ -535,6 +535,15 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Override
+    public boolean isValid(Player p_70300_1_) {
+        if (this.isRemoved()) {
+            return false;
+        } else {
+            return !(p_70300_1_.distanceToSqr(this) > 64.0D);
+        }
+    }
+
+    @Override
     public boolean stillValid(Player p_70300_1_) {
         if (this.isRemoved()) {
             return false;

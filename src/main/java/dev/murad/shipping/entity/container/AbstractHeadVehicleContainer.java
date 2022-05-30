@@ -53,6 +53,6 @@ public abstract class AbstractHeadVehicleContainer<T extends DataAccessor, U ext
 
     @Override
     public boolean stillValid(Player p_75145_1_) {
-        return entity.stillValid(p_75145_1_);
+        return entity.isValid(p_75145_1_);
     }
 }

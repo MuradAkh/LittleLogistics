@@ -574,6 +574,17 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         compound.put(NAVIGATOR_TAG, navigator.saveToNbt());
     }
 
+    // duplicate due to linking issues
+
+    @Override
+    public boolean isValid(Player pPlayer) {
+        if (this.isRemoved()) {
+            return false;
+        } else {
+            return !(this.distanceToSqr(pPlayer) > 64D);
+        }
+    }
+
     @Override
     public boolean stillValid(Player pPlayer) {
         if (this.isRemoved()) {

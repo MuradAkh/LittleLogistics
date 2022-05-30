@@ -10,7 +10,7 @@ public interface HeadVehicle  {
 
     ItemStackHandler getRouteItemHandler();
 
-    boolean stillValid(Player pPlayer);
+    boolean isValid(Player pPlayer);
 
     ResourceLocation getRouteIcon();
 }
