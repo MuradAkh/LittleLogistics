@@ -1,7 +1,7 @@
 package dev.murad.shipping.entity.custom.train.wagon;
 
-import dev.murad.shipping.compatability.create.CapabilityInjector;
-import dev.murad.shipping.compatability.create.CreateCompatability;
+import dev.murad.shipping.compatibility.create.CapabilityInjector;
+import dev.murad.shipping.compatibility.create.CreateCompatibility;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import net.minecraft.util.Mth;
@@ -35,7 +35,7 @@ public class SeaterCarEntity extends AbstractWagonEntity {
     }
 
     private void initCompat() {
-        if (CreateCompatability.enabled()) {
+        if (CreateCompatibility.enabled()) {
             createCompatMinecartControllerCapability = CapabilityInjector.constructMinecartControllerCapability(this);
         }
     }
@@ -80,7 +80,7 @@ public class SeaterCarEntity extends AbstractWagonEntity {
 
     @Override
     public void remove(RemovalReason r) {
-        if(createCompatMinecartControllerCapability != null && CreateCompatability.enabled()){
+        if(createCompatMinecartControllerCapability != null && CreateCompatibility.enabled()){
             createCompatMinecartControllerCapability.invalidate();
         }
         super.remove(r);
@@ -120,7 +120,7 @@ public class SeaterCarEntity extends AbstractWagonEntity {
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
-        if (CreateCompatability.enabled() &&
+        if (CreateCompatibility.enabled() &&
                 createCompatMinecartControllerCapability != null &&
                 CapabilityInjector.isMinecartControllerCapability(cap)) {
             return createCompatMinecartControllerCapability.cast();

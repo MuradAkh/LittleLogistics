@@ -1,7 +1,7 @@
 package dev.murad.shipping.entity.render.barge;
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.custom.barge.FishingBargeEntity;
+import dev.murad.shipping.entity.custom.vessel.barge.FishingBargeEntity;
 import dev.murad.shipping.entity.models.FishingBargeDeployedModel;
 import dev.murad.shipping.entity.models.FishingBargeModel;
 import dev.murad.shipping.entity.models.FishingBargeTransitionModel;

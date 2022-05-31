@@ -1,12 +1,9 @@
 package dev.murad.shipping.entity.custom.train.locomotive;
 
 import dev.murad.shipping.ShippingConfig;
-import dev.murad.shipping.entity.accessor.EnergyLocomotiveDataAccessor;
-import dev.murad.shipping.entity.accessor.SteamLocomotiveDataAccessor;
-import dev.murad.shipping.entity.accessor.SteamTugDataAccessor;
-import dev.murad.shipping.entity.container.SteamLocomotiveContainer;
-import dev.murad.shipping.entity.container.SteamTugContainer;
-import dev.murad.shipping.entity.custom.tug.AbstractTugEntity;
+import dev.murad.shipping.entity.accessor.SteamHeadVehicleDataAccessor;
+import dev.murad.shipping.entity.container.SteamHeadVehicleContainer;
+import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModSounds;
@@ -16,7 +13,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.WorldlyContainer;
@@ -37,7 +33,6 @@ import net.minecraftforge.items.ItemStackHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Random;
-import java.util.stream.IntStream;
 
 public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements ItemHandlerVanillaContainerWrapper, WorldlyContainer {
     private final ItemStackHandler itemHandler = createHandler();
@@ -81,8 +76,8 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
 
 
     @Override
-    public SteamLocomotiveDataAccessor getDataAccessor() {
-        return (SteamLocomotiveDataAccessor) new SteamLocomotiveDataAccessor.Builder(this.getId())
+    public SteamHeadVehicleDataAccessor getDataAccessor() {
+        return new SteamHeadVehicleDataAccessor.Builder(this.getId())
                 .withOn(() -> engineOn)
                 .withRouteSize(() -> navigator.getRouteSize())
                 .withVisitedSize(() -> navigator.getVisitedSize())
@@ -128,7 +123,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
             @Nullable
             @Override
             public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player Player) {
-                return new SteamLocomotiveContainer(i, level, getDataAccessor(), playerInventory, Player);
+                return new SteamHeadVehicleContainer(i, level, getDataAccessor(), playerInventory, Player);
             }
         };
     }

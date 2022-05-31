@@ -3,7 +3,8 @@ package dev.murad.shipping.entity.custom.train;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
-import dev.murad.shipping.entity.custom.SpringEntity;
+import dev.murad.shipping.capability.StallingCapability;
+import dev.murad.shipping.entity.custom.vessel.SpringEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
@@ -20,11 +21,13 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.ItemStack;
@@ -57,6 +60,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     protected static double TRAIN_SPEED = ShippingConfig.Server.TRAIN_MAX_SPEED.get();
     @Getter
     protected final RailHelper railHelper;
+    private boolean waitForDominated;
 
     @Getter
     @Setter
@@ -126,6 +130,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     protected void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         dominantNBT = compound.getCompound("dominant");
+        waitForDominated = compound.getBoolean("hasChild");
     }
 
     @Override
@@ -136,6 +141,9 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         } else if (dominantNBT != null) {
             compound.put(SpringEntity.SpringSide.DOMINANT.name(), dominantNBT);
         }
+
+        compound.putBoolean("hasChild", dominated.isPresent());
+
     }
 
     private Optional<AbstractTrainCarEntity> tryToLoadFromNBT(CompoundTag compound) {
@@ -239,6 +247,10 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     @Override
     public void push(Entity pEntity) {
         if (!this.level.isClientSide) {
+            // not perfect, doesn't work when a mob stand in the way without moving, but works well enough underwater to keep this
+            if (pEntity instanceof LivingEntity l && l.getVehicle() == null){
+                this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
+            }
             if (!pEntity.noPhysics && !this.noPhysics) {
                 // fix carts with passengers falling behind
                 if (!this.hasPassenger(pEntity) || this.getDominant().isPresent()) {
@@ -326,7 +338,18 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         } else {
             if (dominant.isEmpty() && dominantNBT != null) {
                 tryToLoadFromNBT(dominantNBT).ifPresent(this::setDominant);
-                dominant.ifPresent(d -> d.setDominated(this));
+                dominant.ifPresent(d -> {
+                    d.setDominated(this);
+                    dominantNBT = null; // done loading
+                });
+            }
+            if (dominated.isPresent()){
+                waitForDominated = false;
+                if(!((ServerLevel) this.level).isPositionEntityTicking(dominated.get().blockPosition())){
+                    this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
+                }
+            } else if (waitForDominated) {
+                this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
             }
             entityData.set(DOMINANT_ID, dominant.map(Entity::getId).orElse(-1));
             entityData.set(DOMINATED_ID, dominated.map(Entity::getId).orElse(-1));
@@ -345,8 +368,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
             Optional<Pair<Direction, Integer>> r = railHelper.traverseBi(getOnPos().above(),
                     RailHelper.samePositionPredicate(dominated.get()), 5, this);
             if (r.isPresent()) {
-                Pair<Direction, Integer> pair = r.get();
-                Optional<Vec3i> directionOpt = RailHelper.getDirectionToOtherExit(pair.getFirst(), railShape.get());
+                Direction hordir = yawHelper(r, dominated.get());
+                Optional<Vec3i> directionOpt = RailHelper.getDirectionToOtherExit(hordir, railShape.get());
                 if (directionOpt.isPresent()) {
                     Vec3i direction = directionOpt.get();
                     return ((float) (Mth.atan2(direction.getZ(), direction.getX()) * 180.0D / Math.PI) + 90);
@@ -356,8 +379,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
             Optional<Pair<Direction, Integer>> r = railHelper.traverseBi(getOnPos().above(),
                     RailHelper.samePositionPredicate(dominant.get()), 5, this);
             if (r.isPresent()) {
-                Pair<Direction, Integer> pair = r.get();
-                Optional<Vec3i> directionOpt = RailHelper.getDirectionToOtherExit(pair.getFirst(), railShape.get());
+                Direction hordir = yawHelper(r, dominant.get());
+                Optional<Vec3i> directionOpt = RailHelper.getDirectionToOtherExit(hordir, railShape.get());
                 if (directionOpt.isPresent()) {
                     Vec3i direction = directionOpt.get();
                     return ((float) (Mth.atan2(-direction.getZ(), -direction.getX()) * 180.0D / Math.PI) + 90);
@@ -373,6 +396,28 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
         return yrot;
 
+    }
+
+    private Direction yawHelper(Optional<Pair<Direction, Integer>> r, Entity e) {
+        Direction hordir = null;
+        if(r.get().getSecond() == 0) {
+            Vec3 dirvec = new Vec3(e.xo - this.xo,0, e.zo - this.zo);
+            hordir = Direction.fromNormal((int) dirvec.normalize().x, 0, (int) dirvec.normalize().z); // may fail
+        }
+        // if still null
+        if (hordir == null){
+            hordir = r.get().getFirst();
+        }
+        return hordir;
+    }
+
+
+    @Override
+    public boolean isInvulnerableTo(DamageSource pSource) {
+        if (ShippingConfig.Server.TRAIN_EXEMPT_DAMAGE_SOURCES.get().contains(pSource.msgId)){
+            return true;
+        }
+        return super.isInvulnerableTo(pSource);
     }
 
     /**
@@ -500,7 +545,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                 return euclid < maxDist ? di : euclid;
             }).orElse(this.distanceTo(parent));
 
-            if (distance <= 5) {
+            if (distance <= 6) {
                 Vec3 euclideanDir = parent.position().subtract(position()).normalize();
                 Vec3 parentDirection = railDirDis
                         .map(Pair::getFirst)

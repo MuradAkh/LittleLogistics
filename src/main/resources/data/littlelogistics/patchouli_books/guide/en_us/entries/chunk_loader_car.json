@@ -13,7 +13,7 @@
     {
       "type": "patchouli:crafting",
       "recipe": "littlelogistics:chunk_loader_car",
-      "text": "Recommended for long-distance routes."
+      "text": "Recommended for long-distance routes, may need multiple. Vehicles will try to stop of partially loaded."
     }
   ]
 }

@@ -77,12 +77,14 @@
   "item.littlelogistics.tug_route.node_named": "%s. %s",
   "item.littlelogistics.tug_route.node_line": "Node %s: %s, %s",
 
+  "item.littlelogistics.conductors_wrench.description": "Can be used to rotate vanilla rails and configure Little Logistics blocks.",
+
   "item.littlelogistics.locomotive_route.description": "Right click on a rail to add or remove it from the route.",
   "item.littlelogistics.locomotive_route.num_nodes": "Route Nodes: %s",
   "item.littlelogistics.locomotive_route.added": "Added Route Node X:%s Y:%s Z:%s",
   "item.littlelogistics.locomotive_route.removed": "Removed Route Node X:%s Y:%s Z:%s",
 
-  "item.littlelogistics.spring.description": "Used to link vehicles",
+  "item.littlelogistics.spring.description": "Used to link vehicles. Linked vehicles will try to wait if the train is not fully chunkloaded to avoid breaking the chain.",
   "item.littlelogistics.spring.notToSelf": "Can't link vehicles to self",
   "item.littlelogistics.spring.noTwoTugs": "Can't link two tugs",
   "item.littlelogistics.spring.noTwoLoco": "Can't link two locomotives",

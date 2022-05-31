@@ -1,8 +1,8 @@
 package dev.murad.shipping.util;
 
 
-import dev.murad.shipping.entity.custom.SpringEntity;
-import dev.murad.shipping.entity.custom.VesselEntity;
+import dev.murad.shipping.entity.custom.vessel.SpringEntity;
+import dev.murad.shipping.entity.custom.vessel.VesselEntity;
 import net.minecraft.world.entity.Entity;
 
 import java.util.Optional;
