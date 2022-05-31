@@ -2,7 +2,7 @@ package dev.murad.shipping.entity.render.train;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
-import dev.murad.shipping.entity.custom.barge.FluidTankBargeEntity;
+import dev.murad.shipping.entity.custom.vessel.barge.FluidTankBargeEntity;
 import dev.murad.shipping.entity.custom.train.wagon.FluidTankCarEntity;
 import dev.murad.shipping.util.FluidRenderUtil;
 import net.minecraft.client.model.EntityModel;

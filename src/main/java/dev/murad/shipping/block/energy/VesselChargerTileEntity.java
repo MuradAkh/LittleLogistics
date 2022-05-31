@@ -3,7 +3,6 @@ package dev.murad.shipping.block.energy;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.IVesselLoader;
 import dev.murad.shipping.capability.ReadWriteEnergyStorage;
-import dev.murad.shipping.entity.custom.VesselEntity;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.LinkableEntity;
 import net.minecraft.core.BlockPos;

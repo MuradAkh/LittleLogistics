@@ -1,14 +1,13 @@
 package dev.murad.shipping.block.guiderail;
 
-import dev.murad.shipping.entity.custom.VesselEntity;
-import dev.murad.shipping.entity.custom.barge.AbstractBargeEntity;
+import dev.murad.shipping.entity.custom.vessel.VesselEntity;
+import dev.murad.shipping.entity.custom.vessel.barge.AbstractBargeEntity;
 import dev.murad.shipping.util.InteractionUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;

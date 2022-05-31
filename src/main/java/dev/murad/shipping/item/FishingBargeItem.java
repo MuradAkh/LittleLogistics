@@ -1,6 +1,6 @@
 package dev.murad.shipping.item;
 
-import dev.murad.shipping.entity.custom.barge.FishingBargeEntity;
+import dev.murad.shipping.entity.custom.vessel.barge.FishingBargeEntity;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.Entity;

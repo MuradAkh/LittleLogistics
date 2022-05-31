@@ -1,6 +1,7 @@
 package dev.murad.shipping.util;
 
 import com.mojang.datafixers.util.Pair;
+import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.ShippingMod;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -34,6 +35,12 @@ public class MobileChunkLoader {
     }
 
     public void serverTick(){
+        if(ShippingConfig.Server.DISABLE_CHUNKLOADERS.get()){
+            // Not the best UX, but if server owners want better UX they should use a datapack to disable the recipe
+            entity.remove(Entity.RemovalReason.DISCARDED);
+            return;
+        }
+
         Pair<Integer, Integer> currChunk = new Pair<>(entity.chunkPosition().x, entity.chunkPosition().z);
         if (loadedChunk.isEmpty()){
             getSurroundingChunks(currChunk).forEach(c -> setChunkLoad(true, c));

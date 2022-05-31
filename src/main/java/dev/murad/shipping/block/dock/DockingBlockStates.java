@@ -1,6 +1,5 @@
 package dev.murad.shipping.block.dock;
 
-import dev.murad.shipping.entity.custom.VesselEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;

@@ -25,10 +25,9 @@ SOFTWARE.
  */
 
 
-import dev.murad.shipping.entity.custom.tug.VehicleFrontPart;
+import dev.murad.shipping.entity.custom.vessel.tug.VehicleFrontPart;
 import dev.murad.shipping.util.LinkableEntity;
 import lombok.extern.log4j.Log4j2;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;

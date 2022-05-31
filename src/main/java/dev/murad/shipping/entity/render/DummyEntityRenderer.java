@@ -2,7 +2,7 @@ package dev.murad.shipping.entity.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.custom.SpringEntity;
+import dev.murad.shipping.entity.custom.vessel.SpringEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;

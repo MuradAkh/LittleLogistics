@@ -3,10 +3,9 @@ package dev.murad.shipping.entity.render.barge;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3d;
 import com.mojang.math.Vector3f;
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.custom.VesselEntity;
+import dev.murad.shipping.entity.custom.vessel.VesselEntity;
 import dev.murad.shipping.entity.models.ChainModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.LightTexture;
@@ -15,7 +14,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -55,7 +54,9 @@ public abstract class AbstractVesselRenderer<T extends VesselEntity> extends Ent
 
     private void renderModel(T vesselEntity, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
         VertexConsumer ivertexbuilder = buffer.getBuffer(getModel(vesselEntity).renderType(this.getTextureLocation(vesselEntity)));
-        getModel(vesselEntity).renderToBuffer(matrixStack, ivertexbuilder, p_225623_6_, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        int overlay = LivingEntityRenderer.getOverlayCoords(vesselEntity, 0);
+
+        getModel(vesselEntity).renderToBuffer(matrixStack, ivertexbuilder, p_225623_6_, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     protected double getModelYoffset() {

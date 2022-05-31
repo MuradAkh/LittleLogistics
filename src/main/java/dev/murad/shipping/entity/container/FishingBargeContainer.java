@@ -1,6 +1,6 @@
 package dev.murad.shipping.entity.container;
 
-import dev.murad.shipping.entity.custom.barge.FishingBargeEntity;
+import dev.murad.shipping.entity.custom.vessel.barge.FishingBargeEntity;
 import dev.murad.shipping.setup.ModMenuTypes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
