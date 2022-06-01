@@ -1,3 +1,7 @@
+![Little Logistics](https://user-images.githubusercontent.com/31002977/162084973-b37fd259-e3c5-4c91-81e5-193f32e1ef91.png)
+###### banner by naj77
+
+
 # Little Logistics Mod for Minecraft Forge
 
 <video src="https://user-images.githubusercontent.com/31002977/150042817-908a75b5-2802-4c83-a13d-0fbecc0ec94c.mp4"></video>
@@ -8,12 +12,33 @@ https://www.curseforge.com/minecraft/mc-mods/little-logistics
 
 ### Features
 
-Water logistics: Tugs and barges. 
+- Trains with train cars 
+  - transport entities, items, fluids
+  - routing AI
+  - collision avoidance AI
+- Tugs with barges
+  - transport players, items, fluids
+  - routing AI
+  - fish automatically
 
-Tugs need fuel and a "Tug Route" item (see item description for usage instructions). 
-Vessels can be linked with a "vessel chain". 
+### License 
 
-Tug will stop when next to a "Tug Dock", please make a straight canal at least as long as your tug-train for the dock, and place a barge dock for each barge in the train next to the tug dock. Tug Dock can be flipped by shift right clicking, make sure the top aligns with the direction of the barge docks. Barge docks can be set to extract mode by shift right clicking. To insert into tugs/barges, place a hopper on top of a dock, to extract from a barge place a hopper under corresponding water block next to the barge dock. 
+#### Source Code / java files
+
+LGPLv3 
+https://www.gnu.org/licenses/lgpl-3.0.en.html
+
+#### Artwork, textures, and models
+
+All right reserved, availiable in the repository linked below
+
+https://github.com/MuradAkh/LittleLogisticsBlockBench
+
+You may use this to create a texture pack for Little Logistics without further permission
+
+#### "Little Logistics" name
+
+All right reserved, if you would like to port this mod to another version or loader, please reach out on discord.
 
 ### Contributors
 

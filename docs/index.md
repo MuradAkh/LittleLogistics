@@ -200,19 +200,3 @@ A hopper but for fluids, can import from the top and export from the sides. Can 
 This block emits a redstone signal from the back when it detects a vehicle, will display range when right-clicked.
 
 <img src="https://user-images.githubusercontent.com/31002977/161403804-471698da-1b11-42b4-a0df-49463690a4aa.png" style="max-height:35vh;">
-
-## License
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
