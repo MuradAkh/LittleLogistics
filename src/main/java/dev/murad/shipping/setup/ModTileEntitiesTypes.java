@@ -4,6 +4,7 @@ import dev.murad.shipping.block.dock.BargeDockTileEntity;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.energy.VesselChargerTileEntity;
 import dev.murad.shipping.block.fluid.FluidHopperTileEntity;
+import dev.murad.shipping.block.portal.NetherTrainPortalTileEntity;
 import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
 import dev.murad.shipping.block.rail.blockentity.TrainCarDockTileEntity;
 import dev.murad.shipping.block.rapidhopper.RapidHopperTileEntity;
@@ -60,6 +61,12 @@ public class ModTileEntitiesTypes {
             "rapid_hopper",
             RapidHopperTileEntity::new,
             ModBlocks.RAPID_HOPPER
+    );
+
+    public static final RegistryObject<BlockEntityType<NetherTrainPortalTileEntity>> NETHER_TRAIN_SENDER = register(
+            "nether_train_portal",
+            NetherTrainPortalTileEntity::new,
+            ModBlocks.NETHER_TRAIN_PORTAL
     );
 
     private static <T extends BlockEntity> RegistryObject<BlockEntityType<T>> register(

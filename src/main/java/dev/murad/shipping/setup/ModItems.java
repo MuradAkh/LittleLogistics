@@ -89,6 +89,9 @@ public class ModItems {
     public static final RegistryObject<Item> CREATIVE_CAPACITOR = Registration.ITEMS.register("creative_capacitor",
             () -> new CreativeCapacitor(new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION)));
 
+    public static final RegistryObject<Item> TRAIN_PORTAL_LINKER = Registration.ITEMS.register("portal_linker",
+            () -> new PortalLinkerItem(new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+
     public static void register () {
 
     }

@@ -7,6 +7,7 @@ import dev.murad.shipping.block.energy.VesselChargerBlock;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
 import dev.murad.shipping.block.guiderail.CornerGuideRailBlock;
 import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
+import dev.murad.shipping.block.portal.NetherTrainPortalBlock;
 import dev.murad.shipping.block.rail.*;
 import dev.murad.shipping.block.rapidhopper.RapidHopperBlock;
 import dev.murad.shipping.block.vesseldetector.VesselDetectorBlock;
@@ -112,6 +113,19 @@ public class ModBlocks {
             "locomotive_dock_rail",
             () -> new LocomotiveDockingRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL)),
             CreativeModeTab.TAB_TRANSPORTATION);
+
+    public static final RegistryObject<Block> NETHER_TRAIN_PORTAL = register(
+            "nether_train_portal",
+            () -> new NetherTrainPortalBlock(BlockBehaviour.Properties.of(Material.METAL)),
+            CreativeModeTab.TAB_TRANSPORTATION);
+
+    public static final RegistryObject<Block> OBSIDIAN_RAIL = register(
+            "obsidian_rail",
+            () -> new ObsidianRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL)),
+            CreativeModeTab.TAB_TRANSPORTATION);
+
+
+
 
     public static <T extends Block> RegistryObject<T> registerNoItem(String name, Supplier<T> block){
         return Registration.BLOCKS.register(name, block);
