@@ -10,9 +10,13 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.dimension.DimensionType;
 
+import java.util.Set;
+
 public interface IPortalBlock {
     DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     EnumProperty<PortalMode> PORTAL_MODE = EnumProperty.create("train_portal_mode", PortalMode.class);
+
+    Set<ResourceKey<Level>> validDims();
 
     enum PortalMode implements StringRepresentable {
         UNLINKED("unlinked"),
@@ -30,7 +34,7 @@ public interface IPortalBlock {
         }
     }
 
-    boolean checkValidLinkPair(Level level, ItemStack stack, BlockPos pos, ResourceKey<Level> dimension);
+    boolean checkValidLinkPair(Level level,  BlockPos savedPos, BlockPos clickedPo, ResourceKey<Level> dimension, double dimensionScale);
 
     boolean checkValidDimension(Level level);
 

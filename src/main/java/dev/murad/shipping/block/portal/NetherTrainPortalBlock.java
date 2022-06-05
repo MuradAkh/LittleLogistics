@@ -1,9 +1,11 @@
 package dev.murad.shipping.block.portal;
 
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import dev.murad.shipping.util.CrossDimensionalUtil;
 import dev.murad.shipping.util.TickerUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -17,12 +19,15 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class NetherTrainPortalBlock extends Block implements EntityBlock, IPortalBlock {
@@ -74,11 +79,23 @@ public class NetherTrainPortalBlock extends Block implements EntityBlock, IPorta
     }
 
     @Override
-    public boolean checkValidLinkPair(Level destinationLevel, ItemStack stack, BlockPos pos, ResourceKey<Level> dimension){
+    public boolean checkValidLinkPair(Level destinationLevel, BlockPos savedPos, BlockPos clickedPos, ResourceKey<Level> dimension, double scale){
         // TODO: check range
-        return (dimension.equals(Level.NETHER) && destinationLevel.dimension().equals(Level.OVERWORLD))
+        boolean valid_dims = (dimension.equals(Level.NETHER) && destinationLevel.dimension().equals(Level.OVERWORLD))
                 || (dimension.equals(Level.OVERWORLD) && destinationLevel.dimension().equals(Level.NETHER));
 
+        if(!valid_dims){
+            return false;
+        }
+
+        Vec3 diff = CrossDimensionalUtil.horizontalOverworldDistance(destinationLevel.dimensionType().coordinateScale(),
+                scale, clickedPos, savedPos);
+        return Math.abs(diff.x) <= linkRadius() && Math.abs(diff.z) <= linkRadius();
+    }
+
+    @Override
+    public Set<ResourceKey<Level>> validDims(){
+        return Set.of(Level.OVERWORLD, Level.NETHER);
     }
 
     @SuppressWarnings("deprecation")

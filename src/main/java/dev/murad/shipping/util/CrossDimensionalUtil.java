@@ -5,16 +5,16 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 
 public class CrossDimensionalUtil {
-    public static Vec3 horizontalOverworldDistance(DimensionType dimension1, DimensionType dimension2, BlockPos blockPos1, BlockPos blockPos2) {
-        Vec3 pos1 = Vec3.atCenterOf(blockPos1).multiply(dimension1.coordinateScale(), 0, dimension1.coordinateScale());
-        Vec3 pos2 = Vec3.atCenterOf(blockPos2).multiply(dimension2.coordinateScale(), 0, dimension2.coordinateScale());
+    public static Vec3 horizontalOverworldDistance(double originDimScale, double targetDimScale, BlockPos blockPos1, BlockPos blockPos2) {
+        Vec3 pos1 = Vec3.atCenterOf(blockPos1).multiply(originDimScale, 0, originDimScale);
+        Vec3 pos2 = Vec3.atCenterOf(blockPos2).multiply(targetDimScale, 0, targetDimScale);
 
         return pos2.subtract(pos1);
     }
 
-    public static BlockPos getPosInDimension(DimensionType originDim, DimensionType targetDim, BlockPos originPos) {
-        Vec3 inUnit = Vec3.atLowerCornerOf(originPos).multiply(originDim.coordinateScale(), 1, originDim.coordinateScale());
-        Vec3 target = inUnit.multiply(1 / targetDim.coordinateScale(), 1, 1 / targetDim.coordinateScale());
+    public static BlockPos getPosInDimension(double originDimScale, double targetDimScale, BlockPos originPos) {
+        Vec3 inUnit = Vec3.atLowerCornerOf(originPos).multiply(originDimScale, 1, originDimScale);
+        Vec3 target = inUnit.multiply(1 / targetDimScale, 1, 1 / targetDimScale);
 
         return new BlockPos(target);
     }

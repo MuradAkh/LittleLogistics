@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -29,6 +30,7 @@ public class PortalLinkerItem extends Item {
     public static final String X_TAG = "x";
     public static final String Y_TAG = "y";
     public static final String Z_TAG = "z";
+    public static final String SCALE_TAG = "scale";
 
     public PortalLinkerItem(Properties pProperties) {
         super(pProperties);
@@ -37,7 +39,6 @@ public class PortalLinkerItem extends Item {
     @Override
     public InteractionResult useOn(UseOnContext pContext) {
         Level level = pContext.getLevel();
-        if (level.isClientSide) return InteractionResult.SUCCESS;
 
         BlockState state = level.getBlockState(pContext.getClickedPos());
         if(state.getBlock() instanceof IPortalBlock){
@@ -76,7 +77,12 @@ public class PortalLinkerItem extends Item {
         IPortalBlock portal = (IPortalBlock) state.getBlock();
         ResourceKey<Level> targetDimension = getDimension(stack);
 
-        if(!portal.checkValidLinkPair(level, stack, pos, getDimension(stack))){
+        if(!state.is(getType(stack))){
+            // TODO msg user
+
+            return InteractionResult.PASS;        }
+
+        if(!portal.checkValidLinkPair(level, getTargetPos(stack), pos, getDimension(stack), stack.getOrCreateTag().getDouble(SCALE_TAG))){
             // TODO msg user
 
             return InteractionResult.PASS;
@@ -93,7 +99,7 @@ public class PortalLinkerItem extends Item {
     }
 
     @Nullable
-    public BlockPos getTargetPos(ItemStack stack){
+    public static BlockPos getTargetPos(ItemStack stack){
         var nbt = stack.getTag();
         if (nbt == null ||
                 !nbt.contains(X_TAG, Tag.TAG_INT) ||
@@ -106,9 +112,23 @@ public class PortalLinkerItem extends Item {
                 nbt.getInt(Y_TAG), nbt.getInt(Z_TAG));
     }
 
+    public static double getTargetScale(ItemStack stack){
+        return stack.getOrCreateTag().getDouble(SCALE_TAG);
+    }
+
+    @Nullable
+    public static Block getType(ItemStack stack){
+        if(!stack.getOrCreateTag().contains(TYPE_TAG)){
+            return null;
+        } else {
+            return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(stack.getOrCreateTag().getString(TYPE_TAG)));
+        }
+    }
+
     private void setTarget(Level level, BlockPos pos, ItemStack stack, String type){
         var nbt = stack.getOrCreateTag();
         nbt.putString(DIMENSION_TAG, level.dimension().location().toString());
+        nbt.putDouble(SCALE_TAG, level.dimensionType().coordinateScale());
         nbt.putString(TYPE_TAG, type);
         nbt.putInt(X_TAG, pos.getX());
         nbt.putInt(Y_TAG, pos.getY());
@@ -120,7 +140,7 @@ public class PortalLinkerItem extends Item {
         stack.setTag(null);
     }
 
-    private ResourceKey<Level> getDimension(ItemStack stack){
+    public static ResourceKey<Level> getDimension(ItemStack stack){
         return ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(stack.getOrCreateTag().getString(DIMENSION_TAG)));
     }
 
