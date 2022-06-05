@@ -2,6 +2,7 @@ package dev.murad.shipping.block.portal;
 
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
@@ -12,14 +13,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.*;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalTileEntity{
+public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalTileEntity {
     private final Queue<Runnable> taskQueue = new LinkedList<>();
-    private Optional<PairPortal> pair = Optional.empty();
 
-    private static record PairPortal(BlockPos pos, List<BlockPos> rails){}
+    // todo: serialize and save
+    private Optional<PortalLocation> otherPortal = Optional.empty();
+
+    public record PortalLocation(Level level, BlockPos pos) {}
 
     public NetherTrainPortalTileEntity(BlockPos pWorldPosition, BlockState pBlockState) {
-        super(ModTileEntitiesTypes.NETHER_TRAIN_SENDER.get(), pWorldPosition, pBlockState);
+        super(ModTileEntitiesTypes.NETHER_TRAIN_PORTAL.get(), pWorldPosition, pBlockState);
     }
 
     public void tick(){
@@ -28,22 +31,13 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
         }
     }
 
-    public void linkPortals(BlockPos pos){
+    public void linkPortals(ResourceKey<Level> targetLevel, BlockPos pos){
         if (this.level != null && level instanceof ServerLevel serverLevel) {
-            var target = Level.OVERWORLD;
-            if (this.level.dimension().equals(Level.OVERWORLD)){
-                target = Level.NETHER;
-            } else if(!this.level.dimension().equals(Level.NETHER)) return;
-
-            setUpLinkingTasks(
-                    serverLevel.getServer().getLevel(target),
-                    pos
-            );
+            enqueueLinkTasks(serverLevel.getServer().getLevel(targetLevel), pos);
         }
     }
 
-    private void setUpLinkingTasks(ServerLevel targetLevel, BlockPos pos){
-
+    private void enqueueLinkTasks(ServerLevel targetLevel, BlockPos pos){
         taskQueue.add(() -> {
                 chunkLoad(targetLevel, pos, new ChunkPos(pos));
         });
@@ -53,16 +47,12 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
                    .flatMap(b -> b instanceof NetherTrainPortalTileEntity t ? Optional.of(t) : Optional.empty())
                    .filter(f -> f.getBlockState().getValue(NetherTrainPortalBlock.PORTAL_MODE) == NetherTrainPortalBlock.PortalMode.UNLINKED)
                    .ifPresent(found -> {
-                       targetLevel.setBlockAndUpdate(pos, found.getBlockState().setValue(NetherTrainPortalBlock.PORTAL_MODE, NetherTrainPortalBlock.PortalMode.RECEIVER));
-                       this.level.setBlockAndUpdate(getBlockPos(), this.getBlockState().setValue(NetherTrainPortalBlock.PORTAL_MODE, NetherTrainPortalBlock.PortalMode.SENDER));
-                       found.pair = Optional.of(new PairPortal(this.getBlockPos(), getRails()));
-                       this.pair = Optional.of(new PairPortal(pos, found.getRails()));
+                       targetLevel.setBlockAndUpdate(pos, found.getBlockState().setValue(NetherTrainPortalBlock.PORTAL_MODE, NetherTrainPortalBlock.PortalMode.LINKED));
+                       this.level.setBlockAndUpdate(getBlockPos(), this.getBlockState().setValue(NetherTrainPortalBlock.PORTAL_MODE, NetherTrainPortalBlock.PortalMode.LINKED));
+                       found.otherPortal = Optional.of(new PortalLocation(this.level, this.getBlockPos()));
+                       this.otherPortal = Optional.of(new PortalLocation(targetLevel, pos));
                    });
         });
-    }
-
-    private List<BlockPos> getRails(){
-        return new ArrayList<>();
     }
 
     private static void chunkLoad(ServerLevel targetLevel, BlockPos pos, ChunkPos chunk) {
@@ -76,14 +66,6 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
 //        e.restoreFrom(e);
 //        car.getServer().getLevel(Level.NETHER);
 //        ((ServerLevel) level).getChunkSource().addRegionTicket(TicketType.PORTAL);
-    }
-
-    private static BlockPos getNetherCoords(BlockPos overworldCoords){
-        return new BlockPos(Math.floor(overworldCoords.getX() / 8f), overworldCoords.getY(), Math.floor(overworldCoords.getZ() / 8f));
-    }
-
-    private static BlockPos getOverworldCoords(BlockPos netherCoords){
-        return new BlockPos(netherCoords.getX() * 8, netherCoords.getY(), netherCoords.getZ() * 8);
     }
 
     public static void serverTick(Level level, BlockPos blockPos, BlockState blockState, NetherTrainPortalTileEntity e) {

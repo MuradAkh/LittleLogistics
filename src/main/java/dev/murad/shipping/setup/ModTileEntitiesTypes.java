@@ -63,7 +63,7 @@ public class ModTileEntitiesTypes {
             ModBlocks.RAPID_HOPPER
     );
 
-    public static final RegistryObject<BlockEntityType<NetherTrainPortalTileEntity>> NETHER_TRAIN_SENDER = register(
+    public static final RegistryObject<BlockEntityType<NetherTrainPortalTileEntity>> NETHER_TRAIN_PORTAL = register(
             "nether_train_portal",
             NetherTrainPortalTileEntity::new,
             ModBlocks.NETHER_TRAIN_PORTAL

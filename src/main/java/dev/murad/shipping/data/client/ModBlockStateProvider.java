@@ -5,6 +5,7 @@ import dev.murad.shipping.block.dock.DockingBlockStates;
 import dev.murad.shipping.block.energy.VesselChargerBlock;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
 import dev.murad.shipping.block.guiderail.CornerGuideRailBlock;
+import dev.murad.shipping.block.portal.NetherTrainPortalBlock;
 import dev.murad.shipping.block.rail.AbstractDockingRail;
 import dev.murad.shipping.block.rail.SwitchRail;
 import dev.murad.shipping.block.vesseldetector.VesselDetectorBlock;
@@ -207,6 +208,15 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .modelFile(getRapidHopperModel(state)
                 )
                 .rotationY((int) state.getValue(HopperBlock.FACING).getOpposite().toYRot())
+                .build()
+        );
+
+        // todo: create unlit variant
+        getVariantBuilder(ModBlocks.NETHER_TRAIN_PORTAL.get()).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(models()
+                        .withExistingParent("nether_train_portal", modLoc("nether_train_portal_parent_model"))
+                )
+                .rotationY((int) state.getValue(NetherTrainPortalBlock.FACING).getCounterClockWise().toYRot())
                 .build()
         );
     }
