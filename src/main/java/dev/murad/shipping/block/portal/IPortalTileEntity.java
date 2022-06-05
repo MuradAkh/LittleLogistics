@@ -6,4 +6,5 @@ import net.minecraft.world.level.Level;
 
 public interface IPortalTileEntity {
     void linkPortals(ResourceKey<Level> targetLevel, BlockPos savedPos);
+    void unlinkPortals();
 }

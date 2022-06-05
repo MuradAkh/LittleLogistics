@@ -67,7 +67,6 @@ public class ForgeClientEventHandler {
         }
     }
 
-
     @SubscribeEvent
     public static void onRenderWorldLast(RenderLevelLastEvent event) {
         Player player = Minecraft.getInstance().player;
