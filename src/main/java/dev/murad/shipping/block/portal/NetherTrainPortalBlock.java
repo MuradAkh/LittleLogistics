@@ -69,6 +69,11 @@ public class NetherTrainPortalBlock extends Block implements EntityBlock, IPorta
     }
 
     @Override
+    public int linkRadius() {
+        return 24;
+    }
+
+    @Override
     public boolean checkValidLinkPair(Level destinationLevel, ItemStack stack, BlockPos pos, ResourceKey<Level> dimension){
         // TODO: check range
         return (dimension.equals(Level.NETHER) && destinationLevel.dimension().equals(Level.OVERWORLD))

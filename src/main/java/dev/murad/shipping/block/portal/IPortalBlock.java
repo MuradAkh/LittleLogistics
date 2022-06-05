@@ -8,6 +8,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.dimension.DimensionType;
 
 public interface IPortalBlock {
     DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
@@ -32,5 +33,11 @@ public interface IPortalBlock {
     boolean checkValidLinkPair(Level level, ItemStack stack, BlockPos pos, ResourceKey<Level> dimension);
 
     boolean checkValidDimension(Level level);
+
+    int linkRadius();
+
+    default int linkRadius(DimensionType dimensionType){
+        return (int) (linkRadius() / dimensionType.coordinateScale());
+    }
 
 }

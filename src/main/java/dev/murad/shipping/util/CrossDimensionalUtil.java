@@ -11,4 +11,11 @@ public class CrossDimensionalUtil {
 
         return pos2.subtract(pos1);
     }
+
+    public static BlockPos getPosInDimension(DimensionType originDim, DimensionType targetDim, BlockPos originPos) {
+        Vec3 inUnit = Vec3.atLowerCornerOf(originPos).multiply(originDim.coordinateScale(), 1, originDim.coordinateScale());
+        Vec3 target = inUnit.multiply(1 / targetDim.coordinateScale(), 1, 1 / targetDim.coordinateScale());
+
+        return new BlockPos(target);
+    }
 }
