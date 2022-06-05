@@ -223,6 +223,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
                             .build();
             }
         );
+
+        getVariantBuilder(ModBlocks.OBSIDIAN_RAIL.get()).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(models()
+                        .withExistingParent("obsidian_rail", mcLoc("rail_flat"))
+                        .texture("rail", getBlTx("obsidian_rail")))
+                .build());
     }
 
     private BlockModelBuilder getRapidHopperModel(BlockState state) {
