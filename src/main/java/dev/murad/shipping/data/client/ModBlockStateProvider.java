@@ -205,19 +205,23 @@ public class ModBlockStateProvider extends BlockStateProvider {
         });
 
         getVariantBuilder(ModBlocks.RAPID_HOPPER.get()).forAllStates(state -> ConfiguredModel.builder()
-                .modelFile(getRapidHopperModel(state)
-                )
+                .modelFile(getRapidHopperModel(state))
                 .rotationY((int) state.getValue(HopperBlock.FACING).getOpposite().toYRot())
                 .build()
         );
 
         // todo: create unlit variant
-        getVariantBuilder(ModBlocks.NETHER_TRAIN_PORTAL.get()).forAllStates(state -> ConfiguredModel.builder()
-                .modelFile(models()
-                        .withExistingParent("nether_train_portal", modLoc("nether_train_portal_parent_model"))
-                )
-                .rotationY((int) state.getValue(NetherTrainPortalBlock.FACING).getCounterClockWise().toYRot())
-                .build()
+        getVariantBuilder(ModBlocks.NETHER_TRAIN_PORTAL.get()).forAllStates(state -> {
+                int rot = (int) state.getValue(NetherTrainPortalBlock.FACING).getCounterClockWise().toYRot();
+                String linked = state.getValue(NetherTrainPortalBlock.PORTAL_MODE).getSerializedName();
+                return ConfiguredModel.builder()
+                            .modelFile(models()
+                                    .withExistingParent("nether_train_portal_" + linked,
+                                            modLoc("nether_train_portal_parent_model_" + linked))
+                            )
+                            .rotationY(rot)
+                            .build();
+            }
         );
     }
 
