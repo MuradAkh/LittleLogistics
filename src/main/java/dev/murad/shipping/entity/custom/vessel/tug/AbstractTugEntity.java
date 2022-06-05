@@ -564,7 +564,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Override
     public int[] getSlotsForFace(Direction p_180463_1_) {
-        return IntStream.range(1, getContainerSize()).toArray();
+        return IntStream.range(0, getContainerSize()).toArray();
     }
 
     @Override
