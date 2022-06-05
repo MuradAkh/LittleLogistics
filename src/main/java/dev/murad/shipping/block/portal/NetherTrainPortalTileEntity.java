@@ -39,6 +39,7 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
     }
 
     public void unsetLink() {
+        System.out.println("Unsetting");
         level.setBlockAndUpdate(getBlockPos(),
                 getBlockState().setValue(NetherTrainPortalBlock.PORTAL_MODE, NetherTrainPortalBlock.PortalMode.UNLINKED));
         this.otherPortal = Optional.empty();
@@ -62,6 +63,8 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
 
     public void linkPortals(ResourceKey<Level> targetLevelKey, BlockPos targetPos){
         if (this.level != null && level instanceof ServerLevel sourceLevel) {
+            if (!workQueue.isEmpty()) return;
+
             BlockPos sourcePos = this.getBlockPos();
             ServerLevel targetLevel = sourceLevel.getServer().getLevel(targetLevelKey);
             ChunkPos targetChunk = new ChunkPos(targetPos);
@@ -82,10 +85,8 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
                     if ((b instanceof NetherTrainPortalTileEntity targetBE) && !targetBE.isLinked()) {
                         targetBE.setLink(sourceLevel, sourcePos);
                         setLink(targetLevel, targetPos);
-                        return false;
-                    } else {
-                        return true;
                     }
+                    return true;
                 } else {
                     return remainingTicks.decrementAndGet() < 0;
                 }
@@ -94,40 +95,40 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
     }
 
     public void unlinkPortals() {
-        if (!isLinked() || otherPortal.isEmpty()) return;
+        if (this.level != null && level instanceof ServerLevel) {
+            if (!workQueue.isEmpty() || !isLinked() || otherPortal.isEmpty()) return;
 
-        PortalLocation portalLocation = otherPortal.get();
-        ServerLevel targetLevel = portalLocation.level;
-        BlockPos targetPos = portalLocation.pos;
-        ChunkPos targetChunk = new ChunkPos(targetPos);
+            System.out.println("Unlinking portals");
 
-        enqueue(() -> {
-            chunkLoad(targetLevel, targetPos, targetChunk);
-            return true;
-        });
+            PortalLocation portalLocation = otherPortal.get();
+            ServerLevel targetLevel = portalLocation.level;
+            BlockPos targetPos = portalLocation.pos;
+            ChunkPos targetChunk = new ChunkPos(targetPos);
 
-        // wait for 2 seconds for the level to load
-        AtomicInteger remainingTicks = new AtomicInteger(40);
+            enqueue(() -> {
+                chunkLoad(targetLevel, targetPos, targetChunk);
+                return true;
+            });
 
-        enqueue(() -> {
-            // check if the destination chunk is loaded
-            if (targetLevel.isLoaded(targetPos)) {
-                BlockEntity b = targetLevel.getBlockEntity(targetPos);
-                if ((b instanceof NetherTrainPortalTileEntity targetBE) &&
-                        !targetBE.isLinked()) {
-                    if (isAt(targetBE.otherPortal.get())) {
-                        targetBE.unsetLink();
+            // wait for 2 seconds for the level to load
+            AtomicInteger remainingTicks = new AtomicInteger(40);
+
+            enqueue(() -> {
+                // check if the destination chunk is loaded
+                if (targetLevel.isLoaded(targetPos)) {
+                    BlockEntity b = targetLevel.getBlockEntity(targetPos);
+                    if ((b instanceof NetherTrainPortalTileEntity targetBE)) {
+                        if (targetBE.isLinked() && isAt(targetBE.otherPortal.get())) {
+                            targetBE.unsetLink();
+                        }
+                        unsetLink();
                     }
-                    unsetLink();
-                    return false;
-                } else {
                     return true;
+                } else {
+                    return remainingTicks.decrementAndGet() < 0;
                 }
-            } else {
-                return remainingTicks.decrementAndGet() < 0;
-            }
-        });
-
+            });
+        }
     }
 
     private static void chunkLoad(ServerLevel targetLevel, BlockPos pos, ChunkPos chunk) {

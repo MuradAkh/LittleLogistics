@@ -1,6 +1,7 @@
 package dev.murad.shipping.event;
 
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.block.portal.NetherTrainPortalTileEntity;
 import dev.murad.shipping.item.SpringItem;
 import dev.murad.shipping.util.EntitySpringAPI;
 import dev.murad.shipping.util.LinkableEntity;
@@ -8,7 +9,11 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -47,6 +52,15 @@ public class ForgeEventHandler {
                     event.setCancellationResult(InteractionResult.SUCCESS);
                 }
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void breakBlock(BlockEvent.BreakEvent event) {
+        BlockEntity be = event.getWorld().getBlockEntity(event.getPos());
+        if (be instanceof NetherTrainPortalTileEntity netherPortalBE && netherPortalBE.isLinked()) {
+            netherPortalBE.unlinkPortals();
+            event.setCanceled(true);
         }
     }
 }
