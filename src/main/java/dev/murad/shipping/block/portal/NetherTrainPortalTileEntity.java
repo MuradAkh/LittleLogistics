@@ -15,6 +15,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -25,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalTileEntity {
-    private static final DustParticleOptions PARTICLE = new DustParticleOptions(new Vector3f(0.9f, 0.65f, 0.2f), 1.0f);
+    private static final DustParticleOptions PARTICLE = new DustParticleOptions(new Vector3f(0.788f, 0.2f, 0.901f), 1.0f);
 
     // only execute work tasks if the BE isn't removed
     private final Queue<Task> workQueue = new LinkedList<>();
@@ -78,7 +79,6 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
     }
 
     public void linkPortals(ResourceKey<Level> targetLevelKey, BlockPos targetPos){
-        showParticles();
         if (this.level != null && level instanceof ServerLevel sourceLevel) {
             if (!workQueue.isEmpty()) return;
 
@@ -108,17 +108,26 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
                     return remainingTicks.decrementAndGet() < 0;
                 }
             });
+        } else if (level != null) {
+            showParticles(level, getBlockState(), getBlockPos());
         }
     }
 
-    private void showParticles() {
-        if(this.level != null && this.level.isClientSide) {
-            Direction facing = this.getBlockState().getValue(IPortalBlock.FACING);
+    static void showParticles(LevelAccessor level, BlockState state, BlockPos pos) {
+        if(level != null) {
+            Direction facing = state.getValue(IPortalBlock.FACING);
+            if(facing.getAxis().equals(Direction.Axis.Z)){
+                facing = facing.getOpposite();
+            }
             for (double i = 0; i < 1; i += 0.1) {
                 for (double j = 0; j < 1; j += 0.1) {
-                    Vec3 vec = Vec3.atLowerCornerOf(getBlockPos());
-                    Vec3 pPos = vec.add(new Vec3(i, j, 0).yRot((float) Math.toRadians(facing.toYRot())));
-                    level.addParticle(PARTICLE, pPos.x, pPos.y, pPos.z, 0, 0, 0);
+                    Vec3 vec = Vec3.atLowerCornerOf(pos);
+                    Vec3 point = new Vec3(i, j, 0)
+                            .add(-0.5, 0, -0.5)
+                            .yRot((float) Math.toRadians(facing.toYRot()))
+                            .subtract(-0.5, 0, -0.5);
+                    Vec3 pPos = vec.add(point);
+                    level.addParticle(new DustParticleOptions(new Vector3f(0.788f, 0.2f, 0.901f), 2.0f), pPos.x, pPos.y, pPos.z, 0, 0, 0);
                 }
             }
         }

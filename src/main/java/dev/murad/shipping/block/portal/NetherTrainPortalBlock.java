@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Mirror;
@@ -71,6 +72,14 @@ public class NetherTrainPortalBlock extends Block implements EntityBlock, IPorta
     @Override
     public boolean checkValidDimension(Level level) {
         return level.dimension().equals(Level.NETHER) || level.dimension().equals(Level.OVERWORLD);
+    }
+
+    @Override
+    public void destroy(LevelAccessor pLevel, BlockPos pPos, BlockState pState) {
+        if(pState.getValue(IPortalBlock.PORTAL_MODE).equals(PortalMode.LINKED) && pLevel.isClientSide()){
+            NetherTrainPortalTileEntity.showParticles(pLevel, pState, pPos);
+        }
+        super.destroy(pLevel, pPos, pState);
     }
 
     @Override
