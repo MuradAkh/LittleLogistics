@@ -7,6 +7,7 @@ import dev.murad.shipping.block.fluid.FluidHopperBlock;
 import dev.murad.shipping.block.guiderail.CornerGuideRailBlock;
 import dev.murad.shipping.block.portal.NetherTrainPortalBlock;
 import dev.murad.shipping.block.rail.AbstractDockingRail;
+import dev.murad.shipping.block.rail.ObsidianRail;
 import dev.murad.shipping.block.rail.SwitchRail;
 import dev.murad.shipping.block.vesseldetector.VesselDetectorBlock;
 import dev.murad.shipping.setup.ModBlocks;
@@ -228,6 +229,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .modelFile(models()
                         .withExistingParent("obsidian_rail", mcLoc("rail_flat"))
                         .texture("rail", getBlTx("obsidian_rail")))
+                .rotationY(state.getValue(ObsidianRail.RAIL_SHAPE).equals(RailShape.NORTH_SOUTH) ? 0 : 90)
                 .build());
     }
 

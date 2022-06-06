@@ -2,6 +2,8 @@ package dev.murad.shipping.block.rail;
 
 import dev.murad.shipping.util.RailShapeUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
@@ -10,6 +12,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.properties.RailShape;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -40,7 +44,4 @@ public class ObsidianRail extends BaseRailBlock {
         super.createBlockStateDefinition(pBuilder);
         pBuilder.add(WATERLOGGED, RAIL_SHAPE);
     }
-
-
-
 }

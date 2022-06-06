@@ -25,6 +25,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         withExistingParent("fluid_hopper", modLoc("block/fluid_hopper"));
         withExistingParent("vessel_detector", modLoc("block/vessel_detector"));
         withExistingParent("vessel_charger", modLoc("block/vessel_charger"));
+        withExistingParent("nether_train_portal", modLoc("block/nether_train_portal_linked"));
 
         builder(itemGenerated, "barge");
         builder(itemGenerated, "chunk_loader_barge");
@@ -60,6 +61,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "junction_rail");
         builder(itemGenerated, "car_dock_rail");
         builder(itemGenerated, "locomotive_dock_rail");
+        builder(itemGenerated, "obsidian_rail");
 
         builder(itemGenerated, "receiver_component");
         builder(itemGenerated, "transmitter_component");
