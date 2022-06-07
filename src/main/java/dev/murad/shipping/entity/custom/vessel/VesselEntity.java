@@ -305,6 +305,11 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
         }
     }
 
+    @Override
+    public boolean fireImmune() {
+        return true;
+    }
+
     public float getWaterLevelAbove() {
         AABB aabb = this.getBoundingBox();
         int i = Mth.floor(aabb.minX);
@@ -323,7 +328,7 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
                 for(int i2 = i1; i2 < j1; ++i2) {
                     blockpos$mutableblockpos.set(l1, k1, i2);
                     FluidState fluidstate = this.level.getFluidState(blockpos$mutableblockpos);
-                    if (fluidstate.is(FluidTags.WATER)) {
+                    if (!fluidstate.isEmpty()) {
                         f = Math.max(f, fluidstate.getHeight(this.level, blockpos$mutableblockpos));
                     }
 
@@ -398,7 +403,7 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
                 for(int i2 = i1; i2 < j1; ++i2) {
                     blockpos$mutableblockpos.set(k1, l1, i2);
                     FluidState fluidstate = this.level.getFluidState(blockpos$mutableblockpos);
-                    if (fluidstate.is(FluidTags.WATER)) {
+                    if (!fluidstate.isEmpty()) {
                         float f = (float)l1 + fluidstate.getHeight(this.level, blockpos$mutableblockpos);
                         this.waterLevel = Math.max((double)f, this.waterLevel);
                         flag |= aabb.minY < (double)f;
@@ -459,7 +464,11 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
             return true;
         }
 
-        return pSource.equals(DamageSource.IN_WALL) || super.isInvulnerableTo(pSource);
+        return pSource.equals(DamageSource.IN_WALL)
+                || pSource.equals(DamageSource.LAVA)
+                || pSource.equals(DamageSource.IN_FIRE)
+                || pSource.equals(DamageSource.ON_FIRE)
+                || super.isInvulnerableTo(pSource);
     }
 
     @Override
@@ -501,7 +510,7 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
             d0 = gravity.getValue();
 
             FluidState fluidstate = this.level.getFluidState(this.blockPosition());
-            if (this.isInWater() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidstate)) {
+            if ((this.isInWater() || this.isInLava()) && this.isAffectedByFluids() && !this.canStandOnFluid(fluidstate)) {
                 double d8 = this.getY();
                 float f5 = this.isSprinting() ? 0.9F : this.getWaterSlowDown();
                 float f6 = 0.02F;

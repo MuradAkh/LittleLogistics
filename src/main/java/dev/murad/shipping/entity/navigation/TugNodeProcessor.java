@@ -6,6 +6,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
@@ -74,7 +76,7 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
             )
             ){
                 // if the point's neighbour has land, penalty is 5 unless there is a dock
-                if(!level.getFluidState(surr).is(Fluids.WATER)){
+                if(level.getFluidState(surr).isEmpty()){
                     penalty = 5f;
                 }
                 if(
@@ -95,8 +97,8 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
     }
 
     private Node getWaterNode(int p_186328_1_, int p_186328_2_, int p_186328_3_) {
-        BlockPathTypes BlockPathTypes = this.isFree(p_186328_1_, p_186328_2_, p_186328_3_);
-        return  BlockPathTypes != BlockPathTypes.WATER ? null : this.getNode(p_186328_1_, p_186328_2_, p_186328_3_);
+        BlockPathTypes types = this.getCachedBlockType(p_186328_1_, p_186328_2_, p_186328_3_);
+        return  (types != BlockPathTypes.WATER && types != BlockPathTypes.LAVA) ? null : this.getNode(p_186328_1_, p_186328_2_, p_186328_3_);
     }
 
     private BlockPathTypes isFree(int p_186327_1_, int p_186327_2_, int p_186327_3_) {
@@ -111,7 +113,7 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
                         return BlockPathTypes.BREACH;
                     }
 
-                    if (!fluidstate.is(FluidTags.WATER)) {
+                    if (fluidstate.isEmpty()) {
                         return BlockPathTypes.BLOCKED;
                     }
                 }
@@ -119,7 +121,37 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
         }
 
         BlockState blockstate1 = this.level.getBlockState(blockpos$mutable);
-        return blockstate1.isPathfindable(this.level, blockpos$mutable, PathComputationType.WATER) ? BlockPathTypes.WATER : BlockPathTypes.BLOCKED;
+        if(blockstate1.isPathfindable(this.level, blockpos$mutable, PathComputationType.WATER))
+            return BlockPathTypes.WATER;
+        else if(blockstate1.is(Blocks.LAVA))
+            return BlockPathTypes.WATER;
+        else return BlockPathTypes.BLOCKED;
+    }
+
+    public BlockPathTypes getBlockPathType(BlockGetter pBlockaccess, int pX, int pY, int pZ, Mob pEntityliving, int pXSize, int pYSize, int pZSize, boolean pCanBreakDoors, boolean pCanEnterDoors) {
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+
+        for(int i = pX; i < pX + pXSize; ++i) {
+            for(int j = pY; j < pY + pYSize; ++j) {
+                for(int k = pZ; k < pZ + pZSize; ++k) {
+                    FluidState fluidstate = pBlockaccess.getFluidState(blockpos$mutableblockpos.set(i, j, k));
+                    BlockState blockstate = pBlockaccess.getBlockState(blockpos$mutableblockpos.set(i, j, k));
+                    if (fluidstate.isEmpty() && blockstate.isPathfindable(pBlockaccess, blockpos$mutableblockpos.below(), PathComputationType.WATER) && blockstate.isAir()) {
+                        return BlockPathTypes.BREACH;
+                    }
+
+                    if (fluidstate.isEmpty()) {
+                        return BlockPathTypes.BLOCKED;
+                    }
+                }
+            }
+        }
+
+        FluidState state = this.level.getFluidState(blockpos$mutableblockpos);
+        if(!state.isEmpty())
+            return BlockPathTypes.WATER;
+        else return BlockPathTypes.BLOCKED;
+
     }
 
 }

@@ -41,6 +41,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -384,9 +385,9 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
         List<BlockState> belowList = Arrays.asList(this.level.getBlockState(getOnPos().below()),
                 this.level.getBlockState(getOnPos().below().below()));
-        BlockState water = this.level.getBlockState(getOnPos());
+        FluidState water = this.level.getFluidState(getOnPos());
         for (BlockState below : belowList) {
-            if (below.is(ModBlocks.GUIDE_RAIL_TUG.get()) && water.is(Blocks.WATER)) {
+            if (below.is(ModBlocks.GUIDE_RAIL_TUG.get()) && !water.isEmpty()) {
                 Direction arrows = TugGuideRailBlock.getArrowsDirection(below);
                 this.setYRot(arrows.toYRot());
                 double modifier = 0.03;
