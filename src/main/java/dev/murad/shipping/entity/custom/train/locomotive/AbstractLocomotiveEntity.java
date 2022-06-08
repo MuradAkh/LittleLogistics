@@ -468,6 +468,8 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     public void setDominant(AbstractTrainCarEntity entity) {
     }
 
+
+
     @Override
     public void removeDominated() {
         dominated = Optional.empty();

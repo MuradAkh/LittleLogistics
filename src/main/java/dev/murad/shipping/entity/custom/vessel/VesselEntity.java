@@ -11,7 +11,7 @@ import lombok.Setter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
@@ -221,17 +221,17 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
 
     public boolean linkEntities(Player player, Entity target) {
         if(!(target instanceof VesselEntity)){
-            player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.badTypes"), true);
+            player.displayClientMessage(Component.translatable("item.littlelogistics.spring.badTypes"), true);
             return false;
         }
         Train firstTrain =  this.getTrain();
         Train secondTrain = ((LinkableEntity) target).getTrain();
         if (this.distanceTo(target) > 15){
-            player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.tooFar"), true);
+            player.displayClientMessage(Component.translatable("item.littlelogistics.spring.tooFar"), true);
         } else if (firstTrain.getTug().isPresent() && secondTrain.getTug().isPresent()) {
-            player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.noTwoTugs"), true);
+            player.displayClientMessage(Component.translatable("item.littlelogistics.spring.noTwoTugs"), true);
         } else if (secondTrain.equals(firstTrain)){
-            player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.noLoops"), true);
+            player.displayClientMessage(Component.translatable("item.littlelogistics.spring.noLoops"), true);
         } else if (firstTrain.getTug().isPresent()) {
             SpringEntity.createSpring((VesselEntity) firstTrain.getTail(), (VesselEntity) secondTrain.getHead());
             return true;

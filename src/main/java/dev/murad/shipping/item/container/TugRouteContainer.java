@@ -34,6 +34,11 @@ public class TugRouteContainer extends AbstractContainerMenu {
     }
 
     @Override
+    public ItemStack quickMoveStack(Player p_38941_, int p_38942_) {
+        return null;
+    }
+
+    @Override
     public boolean stillValid(Player player) {
         return true;
     }

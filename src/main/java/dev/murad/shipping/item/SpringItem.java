@@ -29,7 +29,7 @@ import dev.murad.shipping.entity.custom.vessel.tug.VehicleFrontPart;
 import dev.murad.shipping.util.LinkableEntity;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
@@ -45,7 +45,7 @@ import java.util.List;
 @Log4j2
 public class SpringItem extends Item {
 
-    private TranslatableComponent springInfo = new TranslatableComponent("item.littlelogistics.spring.description");
+    private Component springInfo = Component.translatable("item.littlelogistics.spring.description");
 
     public SpringItem(Properties properties) {
         super(properties);
@@ -78,7 +78,7 @@ public class SpringItem extends Item {
         if(dominant == null)
             return;
         if(dominant == target) {
-            player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.notToSelf"), true);
+            player.displayClientMessage(Component.translatable("item.littlelogistics.spring.notToSelf"), true);
         } else if(dominant instanceof LinkableEntity d) {
             if(d.linkEntities(player, target) && !player.isCreative())
                 stack.shrink(1);

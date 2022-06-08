@@ -8,7 +8,7 @@ import dev.murad.shipping.util.LinkableEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -94,7 +94,7 @@ public class VesselChargerTileEntity extends BlockEntity implements IVesselLoade
     }
 
     public void use(Player player, InteractionHand hand) {
-        player.displayClientMessage(new TranslatableComponent("block.littlelogistics.vessel_charger.capacity",
+        player.displayClientMessage(Component.translatable("block.littlelogistics.vessel_charger.capacity",
                 internalBattery.getEnergyStored(), internalBattery.getMaxEnergyStored()), false);
     }
 }

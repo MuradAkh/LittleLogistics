@@ -6,7 +6,7 @@ import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.HeadVehicle;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
@@ -24,7 +24,7 @@ public class EnergyHeadVehicleScreen<T extends Entity & HeadVehicle> extends Abs
 
         if (inBounds(mouseX - leftPos, mouseY - topPos, 56, 17, 68, 67)) {
             this.renderTooltip(matrixStack,
-                    new TranslatableComponent("screen.littlelogistics.energy_tug.energy",
+                    Component.translatable("screen.littlelogistics.energy_tug.energy",
                             getMenu().getEnergy(),
                             getMenu().getCapacity()),
                     mouseX, mouseY);

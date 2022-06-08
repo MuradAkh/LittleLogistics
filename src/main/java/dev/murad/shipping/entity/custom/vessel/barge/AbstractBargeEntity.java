@@ -44,12 +44,6 @@ public abstract class AbstractBargeEntity extends VesselEntity {
     }
 
 
-    @Nonnull
-    @Override
-    public Packet<?> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
-
     public abstract Item getDropItem();
 
 

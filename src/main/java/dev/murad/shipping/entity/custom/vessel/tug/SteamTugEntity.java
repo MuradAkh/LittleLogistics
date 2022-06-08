@@ -9,7 +9,7 @@ import dev.murad.shipping.setup.ModSounds;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.WaterAnimal;
@@ -69,7 +69,7 @@ public class SteamTugEntity extends AbstractTugEntity {
         return new MenuProvider() {
             @Override
             public Component getDisplayName() {
-                return new TranslatableComponent("screen.littlelogistics.tug");
+                return Component.translatable("screen.littlelogistics.tug");
             }
 
             @Nullable

@@ -23,12 +23,13 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -268,7 +269,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         Level world = this.level;
         if (world != null) {
             BlockPos blockpos = this.getOnPos().above().above();
-            Random random = world.random;
+            RandomSource random = world.random;
             if (random.nextFloat() < ShippingConfig.Client.TUG_SMOKE_MODIFIER.get()) {
                 for(int i = 0; i < random.nextInt(2) + 2; ++i) {
                     makeParticles(world, blockpos, true, false);
@@ -278,7 +279,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     public static void makeParticles(Level p_220098_0_, BlockPos p_220098_1_, boolean p_220098_2_, boolean p_220098_3_) {
-        Random random = p_220098_0_.getRandom();
+        RandomSource random = p_220098_0_.getRandom();
         Supplier<Boolean> h = () -> random.nextDouble() < 0.5;
         SimpleParticleType basicparticletype = p_220098_2_ ? ParticleTypes.CAMPFIRE_SIGNAL_SMOKE : ParticleTypes.CAMPFIRE_COSY_SMOKE;
         double xdrift = (h.get() ? 1 : -1) * random.nextDouble() * 2;
@@ -356,7 +357,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Override
-    public void recreateFromPacket(ClientboundAddMobPacket p_149572_) {
+    public void recreateFromPacket(ClientboundAddEntityPacket p_149572_) {
         super.recreateFromPacket(p_149572_);
         frontHitbox.setId(p_149572_.getId());
     }

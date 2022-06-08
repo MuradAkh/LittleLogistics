@@ -17,7 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -30,6 +30,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -131,6 +132,11 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         super.readAdditionalSaveData(compound);
         dominantNBT = compound.getCompound("dominant");
         waitForDominated = compound.getBoolean("hasChild");
+    }
+
+    @Override
+    public Item getDropItem(){
+        return getPickResult().getItem();
     }
 
     @Override
@@ -712,22 +718,22 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
             Train<AbstractTrainCarEntity> train1 = t.getTrain();
             Train<AbstractTrainCarEntity> train2 = this.getTrain();
             if (train2.getTug().isPresent() && train1.getTug().isPresent()) {
-                player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.noTwoLoco"), true);
+                player.displayClientMessage(Component.translatable("item.littlelogistics.spring.noTwoLoco"), true);
                 return false;
             } else if (train2.equals(train1)) {
-                player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.noLoops"), true);
+                player.displayClientMessage(Component.translatable("item.littlelogistics.spring.noLoops"), true);
                 return false;
             } else {
                 tryFindAndPrepareClosePair(train1, train2)
                         .ifPresentOrElse(pair -> createLinks(pair.getFirst(), pair.getSecond()), () -> {
-                            player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.tooFar"), true);
+                            player.displayClientMessage(Component.translatable("item.littlelogistics.spring.tooFar"), true);
 
                         });
             }
 
             return true;
         } else {
-            player.displayClientMessage(new TranslatableComponent("item.littlelogistics.spring.badTypes"), true);
+            player.displayClientMessage(Component.translatable("item.littlelogistics.spring.badTypes"), true);
             return false;
         }
     }

@@ -3,7 +3,7 @@ package dev.murad.shipping.item;
 import dev.murad.shipping.util.LocoRoute;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -31,7 +31,7 @@ public class WrenchItem extends Item {
             Map.entry(RailShape.SOUTH_EAST, RailShape.EAST_WEST)
     );
 
-    private TranslatableComponent wrenchInfo = new TranslatableComponent("item.littlelogistics.conductors_wrench.description");
+    private Component wrenchInfo = Component.translatable("item.littlelogistics.conductors_wrench.description");
 
     public WrenchItem(Properties pProperties) {
         super(pProperties);

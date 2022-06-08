@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TranslatableComponent;
+
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -34,7 +34,7 @@ public class LocoRouteItem extends Item {
     private boolean removeAndDisplay(@Nullable Player player, LocoRoute route, BlockPos pos) {
         boolean removed = route.removeIf(n -> n.isAt(pos));
         if (removed && player != null)
-            player.displayClientMessage(new TranslatableComponent("item.littlelogistics.locomotive_route.removed",
+            player.displayClientMessage(Component.translatable("item.littlelogistics.locomotive_route.removed",
                     pos.getX(), pos.getY(), pos.getZ()), false);
         return removed;
     }
@@ -45,7 +45,7 @@ public class LocoRouteItem extends Item {
             // Though for pathfinding purposes, it is not guaranteed to be a rail, as the
             // world can change
             if (player != null)
-                player.displayClientMessage(new TranslatableComponent("item.littlelogistics.locomotive_route.added",
+                player.displayClientMessage(Component.translatable("item.littlelogistics.locomotive_route.added",
                         pos.getX(), pos.getY(), pos.getZ()), false);
 
             // add
@@ -102,9 +102,9 @@ public class LocoRouteItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
         super.appendHoverText(stack, worldIn, tooltip, flagIn);
-        tooltip.add(new TranslatableComponent("item.littlelogistics.locomotive_route.description"));
+        tooltip.add(Component.translatable("item.littlelogistics.locomotive_route.description"));
         tooltip.add(
-                new TranslatableComponent("item.littlelogistics.locomotive_route.num_nodes", getRoute(stack).size())
+                Component.translatable("item.littlelogistics.locomotive_route.num_nodes", getRoute(stack).size())
                         .setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW)));
     }
 }

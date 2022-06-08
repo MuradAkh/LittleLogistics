@@ -36,7 +36,7 @@ public class SeaterCarEntity extends AbstractWagonEntity {
 
     private void initCompat() {
         if (CreateCompatibility.enabled()) {
-            createCompatMinecartControllerCapability = CapabilityInjector.constructMinecartControllerCapability(this);
+//            createCompatMinecartControllerCapability = CapabilityInjector.constructMinecartControllerCapability(this);
         }
     }
 
@@ -121,8 +121,9 @@ public class SeaterCarEntity extends AbstractWagonEntity {
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
         if (CreateCompatibility.enabled() &&
-                createCompatMinecartControllerCapability != null &&
-                CapabilityInjector.isMinecartControllerCapability(cap)) {
+                createCompatMinecartControllerCapability != null
+//                && CapabilityInjector.isMinecartControllerCapability(cap)
+        ) {
             return createCompatMinecartControllerCapability.cast();
         }
         return super.getCapability(cap);

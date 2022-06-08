@@ -12,8 +12,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -51,7 +50,7 @@ public class TugRouteScreen extends AbstractContainerScreen<TugRouteContainer> {
     // https://github.com/ChAoSUnItY/EkiLib/blob/9b63591608cefafce32113a68bc8fd4b71972ece/src/main/java/com/chaos/eki_lib/utils/network/PacketInitStationHandler.java
     // https://github.com/ChAoSUnItY/EkiLib/blob/9b63591608cefafce32113a68bc8fd4b71972ece/src/main/java/com/chaos/eki_lib/utils/handlers/PacketHandler.java
 
-    private Button.OnTooltip getTooltip(TranslatableComponent tooltip) {
+    private Button.OnTooltip getTooltip(Component tooltip) {
         return (button, stack, x, y) -> renderTooltip(stack, tooltip, x, y);
     }
 
@@ -65,7 +64,7 @@ public class TugRouteScreen extends AbstractContainerScreen<TugRouteContainer> {
                 topPos + 40, topPos + TugRouteScreen.this.imageHeight - 45, 20));
 
         this.addRenderableWidget(new Button(getRight() - 92, getBot() - 24, 20, 20,
-                new TextComponent("..\uA56F").withStyle(ChatFormatting.BOLD),
+                Component.literal("..\uA56F").withStyle(ChatFormatting.BOLD),
                 button -> {
                     Optional<Pair<Integer, TugRouteNode>> selectedOpt = route.getSelected();
                     if (selectedOpt.isPresent()) {
@@ -73,22 +72,22 @@ public class TugRouteScreen extends AbstractContainerScreen<TugRouteContainer> {
                         this.minecraft.pushGuiLayer(new StringInputScreen(selected.getSecond(), selected.getFirst(), this.route::renameSelected));
                     }
                 },
-                getTooltip(new TranslatableComponent("screen.littlelogistics.tug_route.rename_button"))));
+                getTooltip(Component.translatable("screen.littlelogistics.tug_route.rename_button"))));
 
         this.addRenderableWidget(new Button(getRight() - 70, getBot() - 24, 20, 20,
-                new TextComponent("\u25B2"),
+                Component.literal("\u25B2"),
                 button -> route.moveSelectedUp(),
-                getTooltip(new TranslatableComponent("screen.littlelogistics.tug_route.up_button"))));
+                getTooltip(Component.translatable("screen.littlelogistics.tug_route.up_button"))));
 
         this.addRenderableWidget(new Button(getRight() - 47, getBot() - 24, 20, 20,
-                new TextComponent("\u25BC"),
+                Component.literal("\u25BC"),
                 button -> route.moveSelectedDown(),
-                getTooltip(new TranslatableComponent("screen.littlelogistics.tug_route.down_button"))));
+                getTooltip(Component.translatable("screen.littlelogistics.tug_route.down_button"))));
 
         this.addRenderableWidget(new Button(getRight() - 24, getBot() - 24, 20, 20,
-                new TextComponent("\u2718"),
+                Component.literal("\u2718"),
                 button -> route.deleteSelected(),
-                getTooltip(new TranslatableComponent("screen.littlelogistics.tug_route.delete_button"))));
+                getTooltip(Component.translatable("screen.littlelogistics.tug_route.delete_button"))));
     }
 
     @Override

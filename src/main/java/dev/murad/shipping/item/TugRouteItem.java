@@ -9,7 +9,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TranslatableComponent;
+
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -42,7 +42,7 @@ public class TugRouteItem extends Item {
         return new MenuProvider() {
             @Override
             public Component getDisplayName() {
-                return new TranslatableComponent("screen.littlelogistics.tug_route");
+                return Component.translatable("screen.littlelogistics.tug_route");
             }
 
             @Nullable
@@ -68,10 +68,10 @@ public class TugRouteItem extends Item {
                 int x = (int) Math.floor(player.getX());
                 int z = (int) Math.floor(player.getZ());
                 if (!tryRemoveSpecific(itemstack, x, z)) {
-                    player.displayClientMessage(new TranslatableComponent("item.littlelogistics.tug_route.added", x, z), false);
+                    player.displayClientMessage(Component.translatable("item.littlelogistics.tug_route.added", x, z), false);
                     pushRoute(itemstack, x, z);
                 } else {
-                    player.displayClientMessage(new TranslatableComponent("item.littlelogistics.tug_route.removed", x, z), false);
+                    player.displayClientMessage(Component.translatable("item.littlelogistics.tug_route.removed", x, z), false);
                 }
             }
         }
@@ -97,9 +97,9 @@ public class TugRouteItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
         super.appendHoverText(stack, worldIn, tooltip, flagIn);
-        tooltip.add(new TranslatableComponent("item.littlelogistics.tug_route.description"));
+        tooltip.add(Component.translatable("item.littlelogistics.tug_route.description"));
         tooltip.add(
-                new TranslatableComponent("item.littlelogistics.tug_route.num_nodes", getRoute(stack).size())
+                Component.translatable("item.littlelogistics.tug_route.num_nodes", getRoute(stack).size())
                         .setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW)));
     }
 

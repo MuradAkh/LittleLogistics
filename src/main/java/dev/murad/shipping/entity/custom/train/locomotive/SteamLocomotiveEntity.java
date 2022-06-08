@@ -12,7 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.WorldlyContainer;
@@ -29,6 +29,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -117,7 +118,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
         return new MenuProvider() {
             @Override
             public Component getDisplayName() {
-                return new TranslatableComponent("entity.littlelogistics.steam_locomotive");
+                return Component.translatable("entity.littlelogistics.steam_locomotive");
             }
 
             @Nullable
@@ -165,7 +166,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
         Level world = this.level;
         if (world != null) {
             BlockPos blockpos = this.getOnPos().above().above();
-            Random random = world.random;
+            RandomSource random = world.random;
             if (random.nextFloat() < ShippingConfig.Client.LOCO_SMOKE_MODIFIER.get()) {
                 for(int i = 0; i < random.nextInt(2) + 2; ++i) {
                     AbstractTugEntity.makeParticles(world, blockpos, true, false);

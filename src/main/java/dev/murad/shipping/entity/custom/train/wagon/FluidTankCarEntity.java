@@ -96,7 +96,7 @@ public class FluidTankCarEntity extends AbstractWagonEntity {
 
     private void sendInfoToClient(){
         entityData.set(VOLUME, tank.getFluidAmount());
-        entityData.set(FLUID_TYPE, tank.getFluid().getFluid().getRegistryName().toString());
+        entityData.set(FLUID_TYPE, ForgeRegistries.FLUIDS.getKey(tank.getFluid().getFluid()).toString());
     }
 
     @Override

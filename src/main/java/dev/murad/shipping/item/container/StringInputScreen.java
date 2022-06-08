@@ -8,8 +8,8 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,7 +25,7 @@ public class StringInputScreen extends Screen {
     private Consumer<String> callback;
 
     public StringInputScreen(TugRouteNode node, int index, Consumer<String> callback) {
-        super(new TranslatableComponent("screen.littlelogistics.tug_route.rename", node.getDisplayName(index)));
+        super(Component.translatable("screen.littlelogistics.tug_route.rename", node.getDisplayName(index)));
 
         this.callback = callback;
         this.text = node.hasCustomName() ? node.getName() : "";
@@ -47,14 +47,14 @@ public class StringInputScreen extends Screen {
         int top = (this.height - h) / 2;
 
         // x, y, width, height
-        this.textFieldWidget = new EditBox(this.font, left + 10, top + 10, 135, 20, new TextComponent(text));
+        this.textFieldWidget = new EditBox(this.font, left + 10, top + 10, 135, 20, Component.literal(text));
         this.textFieldWidget.setValue(text);
         this.textFieldWidget.setMaxLength(20);
         this.textFieldWidget.setResponder((s) -> text = s);
         this.addRenderableWidget(textFieldWidget);
 
         // add button
-        this.addRenderableWidget(new Button(left + 105, top + 37, 40, 20, new TranslatableComponent("screen.littlelogistics.tug_route.confirm"), (b) -> {
+        this.addRenderableWidget(new Button(left + 105, top + 37, 40, 20, Component.translatable("screen.littlelogistics.tug_route.confirm"), (b) -> {
             LOGGER.info("Setting to {}", text);
             callback.accept(text.isEmpty() ? null : text);
             this.minecraft.popGuiLayer();
