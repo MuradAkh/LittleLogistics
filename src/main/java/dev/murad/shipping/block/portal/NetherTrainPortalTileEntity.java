@@ -1,10 +1,12 @@
 package dev.murad.shipping.block.portal;
 
-import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3f;
+import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.Train;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -25,6 +27,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BooleanSupplier;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalTileEntity {
@@ -37,7 +40,6 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
     private final static String Z_TAG = "zpos";
     private final static String DIMENSION_TAG = "dimension";
 
-    // todo: serialize and save
     private Optional<PortalLocation> otherPortal = Optional.empty();
 
     public record PortalLocation(ResourceKey<Level> dimension, BlockPos pos) {
@@ -71,14 +73,18 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
 
     public void tick() {
         Task t;
-        if ((t = workQueue.peek()) != null && t.execute()) {
+        // todo: this is a cringe if statement :P
+        if ((t = workQueue.peek()) != null && (t.runnable.getAsBoolean() || t.remainingAttempts-- <= 0)) {
             workQueue.remove();
         }
-
     }
 
-    private void enqueue(Task task) {
-        workQueue.add(task);
+    private void enqueue(BooleanSupplier task) {
+        workQueue.add(new Task(task, 1));
+    }
+
+    private void enqueue(BooleanSupplier task, int maxAttempts) {
+        workQueue.add(new Task(task, maxAttempts));
     }
 
     public void linkPortals(ResourceKey<Level> targetLevelKey, BlockPos targetPos) {
@@ -95,9 +101,6 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
                 return true;
             });
 
-            // wait for 2 seconds for the level to load
-            AtomicInteger remainingTicks = new AtomicInteger(40);
-
             enqueue(() -> {
                 // check if the destination chunk is loaded
                 if (targetLevel.isLoaded(targetPos)) {
@@ -108,9 +111,9 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
                     }
                     return true;
                 } else {
-                    return remainingTicks.decrementAndGet() < 0;
+                    return false;
                 }
-            });
+            }, 40);
         } else if (level != null) {
             showParticles(level, getBlockState(), getBlockPos());
         }
@@ -155,9 +158,6 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
                 return true;
             });
 
-            // wait for 2 seconds for the level to load
-            AtomicInteger remainingTicks = new AtomicInteger(40);
-
             enqueue(() -> {
                 // check if the destination chunk is loaded
                 if (targetLevel.isLoaded(targetPos)) {
@@ -170,15 +170,29 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
                     }
                     return true;
                 } else {
-                    return remainingTicks.decrementAndGet() < 0;
+                    return false;
                 }
-            });
+            }, 40);
         }
     }
 
     private static void chunkLoad(ServerLevel targetLevel, BlockPos pos, ChunkPos chunk) {
         // todo: distance
         targetLevel.getChunkSource().addRegionTicket(TicketType.PORTAL, chunk, 2, pos);
+    }
+
+    /**
+     * Validate all chunks around pos are loaded at a certain distance
+     */
+    private static boolean areChunksLoaded(ServerLevel level, int distance, ChunkPos pos) {
+        for (int i = -distance + 1; i < distance; i++) {
+            for (int j = -distance + 1; j < distance; j++) {
+                if (!level.getChunkSource().hasChunk(pos.x + i, pos.z + j)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public <T extends Entity & LinkableEntity<T>> void selfTeleport(T head) {
@@ -198,40 +212,66 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
                 return true;
             });
 
-            // wait for 2 seconds for the level to load
-            AtomicInteger remainingTicks = new AtomicInteger(40);
-
             enqueue(() -> {
                 // check if the destination chunk is loaded
-                if (targetLevel.isLoaded(targetPos)) {
+                if (areChunksLoaded(targetLevel, 2, targetChunk)) {
                     validateAndWarpTrain(head.getTrain(), targetLevel, targetPos);
                     return true;
                 } else {
-                    return remainingTicks.decrementAndGet() < 0;
+                    return false;
                 }
-            });
+            }, 40);
         });
+    }
 
+    public boolean validateTrainSubstrate(int trainSize,
+                                          Level sourceLevel, NetherTrainPortalTileEntity sourcePortal,
+                                          Level destLevel, NetherTrainPortalTileEntity destPortal) {
+        // todo make configuration
+        if (trainSize > 15) {
+            return false;
+        }
+
+        trainSize++;
+
+        Direction sourceFacing = sourcePortal.getBlockState().getValue(NetherTrainPortalBlock.FACING);
+        Direction destFacing = destPortal.getBlockState().getValue(NetherTrainPortalBlock.FACING);
+
+        // make sure source has enough substrate blocks
+        for (int i = 1; i <= trainSize; i++) {
+            BlockPos sourcePos = sourcePortal.getBlockPos().offset(sourceFacing.getNormal().multiply(i));
+            BlockPos destPos = destPortal.getBlockPos().offset(destFacing.getNormal().multiply(i));
+            // assert that sourcePos and destPos are all obsidian rails
+            if (!sourceLevel.getBlockState(sourcePos).getBlock().equals(ModBlocks.OBSIDIAN_RAIL.get()) ||
+                !destLevel.getBlockState(destPos).getBlock().equals(ModBlocks.OBSIDIAN_RAIL.get()))
+                return false;
+        }
+
+        return true;
     }
 
     private <T extends Entity & LinkableEntity<T>> void validateAndWarpTrain(Train<T> train, ServerLevel targetLevel, BlockPos portalLocation) {
-        Optional.ofNullable(targetLevel.getBlockEntity(portalLocation))
-                .flatMap(e -> e instanceof NetherTrainPortalTileEntity p ? Optional.of(p) : Optional.empty())
-                .ifPresent(portal -> {
-                    warpTrain(train, portal.getBlockState().getValue(IPortalBlock.FACING), portal.getBlockPos(), targetLevel);
-                });
-
+        int trainSize = train.asList().size();
+        BlockEntity be = targetLevel.getBlockEntity(portalLocation);
+        if (be instanceof NetherTrainPortalTileEntity p) {
+            // check that source has enough rails
+            if (!validateTrainSubstrate(trainSize, getLevel(), this, targetLevel, p)) {
+                return;
+            }
+            warpTrain(train, p.getBlockState().getValue(IPortalBlock.FACING), p.getBlockPos(), targetLevel);
+        }
     }
 
 
-    private <T extends Entity & LinkableEntity<T>> void warpTrain(Train<T> train, Direction portalDirection, BlockPos portalPos, ServerLevel targetLevel) {
+    private <T extends Entity & LinkableEntity<T>> void warpTrain(Train<T> train, Direction targetFacing, BlockPos targetPos, ServerLevel targetLevel) {
         List<T> targets = train.asList();
         targets.forEach(LinkableEntity::removeDominated);
         targets.forEach(LinkableEntity::removeDominant);
-        AtomicInteger num = new AtomicInteger(train.asList().size() + 2);
+        AtomicInteger num = new AtomicInteger(targets.size() + 1);
+
         targets
             .stream()
-            .map(e -> teleportEntity(e, num.getAndDecrement(), portalDirection, portalPos, targetLevel))
+            .map(e -> teleportEntity(e, num.getAndDecrement(), targetFacing, targetPos, targetLevel))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .reduce((entity, entity2) -> {
@@ -295,13 +335,9 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
         }
     }
 
-    @FunctionalInterface
-    public interface Task {
-        /**
-         * Execute the task
-         *
-         * @return true if task is finished
-         */
-        boolean execute();
+    @AllArgsConstructor
+    private class Task {
+        private final BooleanSupplier runnable;
+        private int remainingAttempts;
     }
 }
