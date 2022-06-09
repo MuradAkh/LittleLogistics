@@ -2,6 +2,8 @@ package dev.murad.shipping.entity.custom.train.locomotive;
 
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.block.portal.IPortalBlock;
+import dev.murad.shipping.block.portal.NetherTrainPortalTileEntity;
 import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
 import dev.murad.shipping.capability.StallingCapability;
@@ -35,6 +37,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
@@ -353,6 +356,21 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         this.playSound(ModSounds.TUG_UNDOCKING.get(), 0.6f, 1.5f);
     }
 
+    private boolean checkPortal() {
+
+        if(level.getBlockEntity(getOnPos().above().relative(getDirection(), 2)) instanceof NetherTrainPortalTileEntity portal &&
+        portal.getBlockState().getValue(IPortalBlock.FACING).equals(getDirection().getOpposite())) {
+
+            if(applyWithAll(LinkableEntity::allowDockInterface).reduce(Boolean::logicalAnd).orElse(false)){
+                portal.selfTeleport(this);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
     private void tickDockCheck() {
         getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(cap -> {
             int x = (int) Math.floor(this.getX());
@@ -383,7 +401,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                                     .filter(entity -> entity instanceof LocomotiveDockTileEntity)
                                     .map(entity -> (LocomotiveDockTileEntity) entity)
                                     .map(dock -> dock.hold(this, getDirection()))
-                                    .orElse(false);
+                                    .orElse(false) || checkPortal();
 
             boolean changedDock = !docked && shouldDock;
             boolean changedUndock = docked && !shouldDock;
