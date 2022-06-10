@@ -39,9 +39,11 @@ public class PortalLinkerItem extends Item {
     @Override
     public InteractionResult useOn(UseOnContext pContext) {
         Level level = pContext.getLevel();
-
         BlockState state = level.getBlockState(pContext.getClickedPos());
         if(state.getBlock() instanceof IPortalBlock){
+            if (level.isClientSide) {
+                return InteractionResult.SUCCESS;
+            }
             return getState(pContext.getItemInHand()) == State.READY ?
                 handleFirstLink(pContext) : handleSecondLink(pContext);
         } else {
@@ -59,14 +61,13 @@ public class PortalLinkerItem extends Item {
         if(!portal.checkValidDimension(level)){
             // TODO msg user
 
-            return InteractionResult.PASS;
+            return InteractionResult.FAIL;
         }
 
         if (blockState.getValue(IPortalBlock.PORTAL_MODE) == IPortalBlock.PortalMode.UNLINKED){
             setTarget(level, pos, stack, ForgeRegistries.BLOCKS.getKey(blockState.getBlock()).toString());
             return InteractionResult.SUCCESS;
-        } else return InteractionResult.PASS;
-
+        } else return InteractionResult.FAIL;
     }
 
     private InteractionResult handleSecondLink(UseOnContext context){
@@ -80,12 +81,13 @@ public class PortalLinkerItem extends Item {
         if(!state.is(getType(stack))){
             // TODO msg user
 
-            return InteractionResult.PASS;        }
+            return InteractionResult.FAIL;
+        }
 
         if(!portal.checkValidLinkPair(level, getTargetPos(stack), pos, getDimension(stack), stack.getOrCreateTag().getDouble(SCALE_TAG))){
             // TODO msg user
 
-            return InteractionResult.PASS;
+            return InteractionResult.FAIL;
         }
 
         if (state.getValue(IPortalBlock.PORTAL_MODE) == IPortalBlock.PortalMode.UNLINKED){
@@ -95,7 +97,7 @@ public class PortalLinkerItem extends Item {
                 return InteractionResult.SUCCESS;
             }
         }
-        return InteractionResult.PASS;
+        return InteractionResult.FAIL;
     }
 
     @Nullable
