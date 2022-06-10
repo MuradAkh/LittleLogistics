@@ -157,7 +157,7 @@ public class PortalLinkerItem extends Item {
         if (getState(stack).equals(State.WAITING_NEXT)){
             // todo: localize 
             // STOPSHIP: 6/4/2022
-            tooltip.add(new TextComponent(getDimension(stack).toString()));
+            tooltip.add(new TextComponent(getDimension(stack).location().getPath()));
             tooltip.add(new TextComponent(getTargetPos(stack).toString()));
         }
     }

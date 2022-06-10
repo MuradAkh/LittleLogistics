@@ -507,6 +507,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     public void destroy(DamageSource pSource) {
         int i = (int) Stream.of(dominant, dominated).filter(Optional::isPresent).count();
         this.remove(Entity.RemovalReason.KILLED);
+        dropContents();
         if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
             this.spawnAtLocation(this.getPickResult());
             for (int j = 0; j < i; j++) {
@@ -514,6 +515,9 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
             }
         }
 
+    }
+
+    protected void dropContents() {
     }
 
     protected void prevent180() {

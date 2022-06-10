@@ -129,11 +129,8 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
     }
 
     @Override
-    public void remove(RemovalReason r) {
-        if(!this.level.isClientSide){
-            Containers.dropContents(this.level, this, this);
-        }
-        super.remove(r);
+    public void dropContents() {
+        Containers.dropContents(this.level, this, this);
     }
 
     @Nonnull

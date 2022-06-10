@@ -111,11 +111,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     @Override
-    public void remove(RemovalReason r) {
-        if(!this.level.isClientSide){
-            this.spawnAtLocation(routeItemHandler.getStackInSlot(0));
-        }
-        super.remove(r);
+    public void dropContents() {
+        super.dropContents();
+        this.spawnAtLocation(routeItemHandler.getStackInSlot(0));
     }
 
     @Override
