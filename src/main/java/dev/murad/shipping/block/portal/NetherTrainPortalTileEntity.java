@@ -299,8 +299,8 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
                 .map(newEntity -> {
                     newEntity.restoreFrom(oldEntity);
                     oldEntity.remove(Entity.RemovalReason.CHANGED_DIMENSION);
-                    targetLevel.addDuringTeleport(newEntity);
                     newEntity.setPos(targetPos);
+                    targetLevel.addDuringTeleport(newEntity);
                     passengers.forEach(passenger -> {
                         passenger.startRiding(newEntity);
                     });
