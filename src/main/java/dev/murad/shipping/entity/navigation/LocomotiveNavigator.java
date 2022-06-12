@@ -31,11 +31,11 @@ public class LocomotiveNavigator {
     private static final String VISITED_TAG = "visited";
 
     public int getRouteSize(){
-        return routeNodeMap.size();
+        return getCurrentRouteNodes().size();
     }
 
     public int getVisitedSize(){
-        return visitedNodeMap.size();
+        return getCurrentVisitedNodes().size();
     }
 
 
