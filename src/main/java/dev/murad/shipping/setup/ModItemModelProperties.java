@@ -22,7 +22,7 @@ public class ModItemModelProperties {
 
         ItemProperties.register(ModItems.LOCO_ROUTE.get(),
                 new ResourceLocation(ShippingMod.MOD_ID, "locoroutestate"), (stack, world, entity, i) -> {
-                    return !LocoRouteItem.getRoute(stack).isEmpty() ? 0 : 1;
+                    return !LocoRouteItem.getRoute(stack, world).isEmpty() ? 0 : 1;
                 });
     }
 }

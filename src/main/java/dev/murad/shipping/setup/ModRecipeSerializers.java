@@ -30,7 +30,7 @@ public class ModRecipeSerializers {
             "loco_route_copy", () -> new SimpleRecipeSerializer<>(loc -> new AbstractRouteCopyRecipe(loc, ModItems.LOCO_ROUTE.get()) {
                 @Override
                 public boolean stackHasNodes(ItemStack stack) {
-                    return !LocoRouteItem.getRoute(stack).isEmpty();
+                    return !LocoRouteItem.getRoute(stack, null).isEmpty();
                 }
 
                 @Nonnull

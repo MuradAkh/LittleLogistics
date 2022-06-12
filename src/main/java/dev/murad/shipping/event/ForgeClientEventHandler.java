@@ -1,9 +1,6 @@
 package dev.murad.shipping.event;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import dev.murad.shipping.ShippingConfig;
@@ -14,16 +11,12 @@ import dev.murad.shipping.item.PortalLinkerItem;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.*;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.blockentity.BeaconRenderer;
-import net.minecraft.client.renderer.debug.DebugRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
@@ -32,10 +25,7 @@ import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderBlockOverlayEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -175,8 +165,9 @@ public class ForgeClientEventHandler {
             PoseStack pose = event.getPoseStack();
             Vec3 cameraOff = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
 
-            LocoRoute route = LocoRouteItem.getRoute(stack);
-            var list = route.stream().map(LocoRouteNode::toBlockPos).collect(Collectors.toList());
+            LocoRoutes route = LocoRouteItem.getRoute(stack, player.level);
+            var list = route.getNodesForDimension(player.level)
+                    .stream().map(LocoRouteNode::toBlockPos).toList();
             for (BlockPos block : list) {
                 pose.pushPose();
                 pose.translate(block.getX() - cameraOff.x, 1 - cameraOff.y, block.getZ() - cameraOff.z);

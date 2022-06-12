@@ -37,7 +37,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
@@ -138,7 +137,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
             @Override
             protected void onContentsChanged(int slot) {
-                updateNavigatorFromItem();
+                updateNavigatorFromItem(level);
             }
 
             @Override
@@ -561,12 +560,12 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         return super.getCapability(cap);
     }
 
-    private void updateNavigatorFromItem() {
+    private void updateNavigatorFromItem(Level level) {
         ItemStack stack = routeItemHandler.getStackInSlot(0);
         if (stack.getItem() instanceof LocoRouteItem) {
-            navigator.updateWithLocoRouteItem(LocoRouteItem.getRoute(stack));
+            navigator.updateWithLocoRouteItem(LocoRouteItem.getRoute(stack, level));
         } else {
-            navigator.updateWithLocoRouteItem(new LocoRoute());
+            navigator.updateWithLocoRouteItem(new LocoRoutes());
         }
     }
 
@@ -579,7 +578,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         routeItemHandler.deserializeNBT(compound.getCompound(LOCO_ROUTE_INV_TAG));
         navigator.loadFromNbt(compound.getCompound(NAVIGATOR_TAG));
 
-        updateNavigatorFromItem();
+        updateNavigatorFromItem(level);
     }
 
     @Override

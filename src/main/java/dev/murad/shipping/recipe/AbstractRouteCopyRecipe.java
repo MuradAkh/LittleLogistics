@@ -78,7 +78,7 @@ public abstract class AbstractRouteCopyRecipe extends CustomRecipe {
     @Override
     public ItemStack assemble(@Nonnull CraftingContainer inventory) {
         Optional<Pair<ItemStack, Integer>> matchOpt = checkTugRoutes(inventory);
-        if (!matchOpt.isPresent()) return ItemStack.EMPTY;
+        if (matchOpt.isEmpty()) return ItemStack.EMPTY;
 
         Pair<ItemStack, Integer> match = matchOpt.get();
         ItemStack filled = match.getFirst();
