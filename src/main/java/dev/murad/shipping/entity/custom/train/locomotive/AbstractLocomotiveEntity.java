@@ -50,6 +50,7 @@ import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -564,9 +565,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     private void updateNavigatorFromItem() {
         ItemStack stack = routeItemHandler.getStackInSlot(0);
         if (stack.getItem() instanceof LocoRouteItem) {
-            navigator.updateWithLocoRouteItem(LocoRouteItem.getRoute(stack));
+            navigator.updateWithLocoRouteItem(LocoRouteItem.getRoutes(stack, this.level.dimension()));
         } else {
-            navigator.updateWithLocoRouteItem(new LocoRoute());
+            navigator.updateWithLocoRouteItem(new HashMap<>());
         }
     }
 

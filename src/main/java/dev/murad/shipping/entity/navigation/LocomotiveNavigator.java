@@ -1,38 +1,45 @@
 package dev.murad.shipping.entity.navigation;
 
 import dev.murad.shipping.block.rail.MultiShapeRail;
-import dev.murad.shipping.block.rail.SwitchRail;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.util.LocoRoute;
 import dev.murad.shipping.util.LocoRouteNode;
 import dev.murad.shipping.util.RailHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class LocomotiveNavigator {
-    private final Set<BlockPos> routeNodes;
-    private final Set<BlockPos> visitedNodes;
-    private final HashMap<BlockPos, Direction> decisionCache;
+    private final Map<ResourceKey<Level>, Set<BlockPos>> routeNodes;
+    private final Map<ResourceKey<Level>, Set<BlockPos>> visitedNodes;
+    private final HashMap<BlockPos, Direction> decisionCache; // not saved
 
     private final AbstractLocomotiveEntity locomotive;
 
-    private static final String ROUTE_TAG = "route";
-    private static final String VISITED_TAG = "visited";
+    private static final String ROUTE_TAG_LEGACY = "route";
+    private static final String VISITED_TAG_LEGACY = "visited";
+
+    private static final String ROUTE_TAG = "routeN";
+    private static final String VISITED_TAG = "visitedN";
 
     public int getRouteSize(){
-        return routeNodes.size();
+        return routeNodes().size();
     }
 
     public int getVisitedSize(){
-        return visitedNodes.size();
+        return visitedNodes().size();
     }
 
 
@@ -45,8 +52,8 @@ public class LocomotiveNavigator {
     public LocomotiveNavigator(AbstractLocomotiveEntity locomotive) {
         this.locomotive = locomotive;
         this.decisionCache = new HashMap<>();
-        this.visitedNodes = new HashSet<>();
-        this.routeNodes = new HashSet<>();
+        this.visitedNodes = new HashMap<>();
+        this.routeNodes = new HashMap<>();
         reset();
     }
 
@@ -58,13 +65,25 @@ public class LocomotiveNavigator {
         return Optional.empty();
     }
 
+    private Set<BlockPos> routeNodes(){
+        return routeNodes.getOrDefault(locomotive.level.dimension(), new HashSet<>());
+    }
+
+    private Set<BlockPos> visitedNodes(){
+        if(!visitedNodes.containsKey(locomotive.level.dimension())){
+            visitedNodes.put(locomotive.level.dimension(), new HashSet<>());
+        }
+        return visitedNodes.get(locomotive.level.dimension());
+    }
+
+
     public void serverTick(){
         RailHelper.getRail(locomotive.getOnPos().above(), locomotive.level).ifPresent(railPos ->{
-            if(routeNodes.contains(railPos)){
-                visitedNodes.add(railPos);
+            if(routeNodes().contains(railPos)){
+                visitedNodes().add(railPos);
             }
-            if(visitedNodes.size() == routeNodes.size()){
-                visitedNodes.clear();
+            if(visitedNodes().size() == routeNodes().size()){
+                visitedNodes().clear();
             }
             decisionCache.remove(railPos);
 
@@ -86,8 +105,8 @@ public class LocomotiveNavigator {
                     if (choices.size() == 1) {
                         s.setRailState(state, locomotive.level, nextRail, prevExitTaken.getOpposite(), choices.get(0));
                     } else if(choices.size() > 1 && !routeNodes.isEmpty()) {
-                        Set<BlockPos> potential = new HashSet<>(routeNodes);
-                        potential.removeAll(visitedNodes);
+                        Set<BlockPos> potential = new HashSet<>(routeNodes());
+                        potential.removeAll(visitedNodes());
                         if(!decisionCache.containsKey(nextRail)){
                             var decision = locomotive.getRailHelper()
                                    .pickCheaperDir(choices, nextRail,
@@ -101,27 +120,65 @@ public class LocomotiveNavigator {
         });
     }
 
-    public void updateWithLocoRouteItem(LocoRoute route) {
-        Set<BlockPos> newRouteNodes = route.stream().map(LocoRouteNode::toBlockPos).collect(Collectors.toSet());
+    public void updateWithLocoRouteItem(Map<ResourceKey<Level>, LocoRoute> routes) {
+        Map<ResourceKey<Level>, Set<BlockPos>> newRouteNodes = new HashMap<>();
+
+        loadNodes(routes, newRouteNodes);
+
         if (newRouteNodes.equals(routeNodes)) return;
 
         reset();
-        routeNodes.addAll(newRouteNodes);
+        routeNodes.putAll(newRouteNodes);
+    }
+
+    private void loadNodes(Map<ResourceKey<Level>, LocoRoute> source, Map<ResourceKey<Level>, Set<BlockPos>> target) {
+        source.forEach((key, value) -> {
+            target.put(key, value.stream().map(LocoRouteNode::toBlockPos).collect(Collectors.toSet()));
+        });
     }
 
     public void loadFromNbt(@Nullable CompoundTag tag) {
         reset();
         if (tag == null) return;
 
-        // list of intarrays (type 11)
-        routeNodes.addAll(convertTagToSet(tag.getList(ROUTE_TAG, Tag.TAG_INT_ARRAY)));
-        visitedNodes.addAll(convertTagToSet(tag.getList(VISITED_TAG, Tag.TAG_INT_ARRAY)));
+        if(tag.contains(ROUTE_TAG)) {
+            routeNodes.putAll(convertTagToMap(tag.getCompound(ROUTE_TAG)));
+        }
+
+        if(tag.contains(VISITED_TAG)) {
+            visitedNodes.putAll(convertTagToMap(tag.getCompound(VISITED_TAG)));
+        }
+
+        // legacy routes
+        if(tag.contains(ROUTE_TAG_LEGACY, Tag.TAG_INT_ARRAY)) {
+            routeNodes().addAll(convertTagToSet(tag.getList(ROUTE_TAG_LEGACY, Tag.TAG_INT_ARRAY)));
+        }
+
+        if(tag.contains(VISITED_TAG_LEGACY, Tag.TAG_INT_ARRAY)) {
+            visitedNodes().addAll(convertTagToSet(tag.getList(VISITED_TAG_LEGACY, Tag.TAG_INT_ARRAY)));
+        }
     }
 
     public CompoundTag saveToNbt(){
         CompoundTag tag = new CompoundTag();
-        tag.put(ROUTE_TAG, convertSetToTag(routeNodes));
-        tag.put(VISITED_TAG, convertSetToTag(visitedNodes));
+        tag.put(ROUTE_TAG, convertMapToTag(routeNodes));
+        tag.put(VISITED_TAG, convertMapToTag(visitedNodes));
+        return tag;
+    }
+
+    private static Map<ResourceKey<Level>, Set<BlockPos>> convertTagToMap(CompoundTag tag){
+        return tag
+                .getAllKeys()
+                .stream()
+                .collect(Collectors.toMap(key -> ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(key)),
+                        key -> convertTagToSet(tag.getList(key, Tag.TAG_INT_ARRAY))
+                ));
+    }
+
+    private static CompoundTag convertMapToTag(Map<ResourceKey<Level>, Set<BlockPos>> map){
+        CompoundTag tag = new CompoundTag();
+        map.forEach((key, value) -> tag.put(key.location().toString(), convertSetToTag(value)));
+
         return tag;
     }
 

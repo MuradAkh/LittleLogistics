@@ -175,7 +175,7 @@ public class ForgeClientEventHandler {
             PoseStack pose = event.getPoseStack();
             Vec3 cameraOff = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
 
-            LocoRoute route = LocoRouteItem.getRoute(stack);
+            LocoRoute route = LocoRouteItem.getRoute(stack, player.level.dimension());
             var list = route.stream().map(LocoRouteNode::toBlockPos).collect(Collectors.toList());
             for (BlockPos block : list) {
                 pose.pushPose();
