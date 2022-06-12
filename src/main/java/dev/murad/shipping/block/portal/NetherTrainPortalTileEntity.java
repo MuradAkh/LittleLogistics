@@ -28,6 +28,7 @@ import net.minecraft.world.phys.Vec3;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalTileEntity {
@@ -290,9 +291,9 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
         }
 
         var passengers = oldEntity.getPassengers().stream().map(passenger -> {
-            passenger.stopRiding();
+            passenger.removeVehicle();
             return teleportEntity(passenger, num, portalDirection, portalPos, targetLevel);
-        }).filter(Optional::isPresent).map(Optional::get);
+        }).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toSet());
 
         return Optional.ofNullable((Entity) oldEntity.getType().create(targetLevel))
                 .map(e -> (T) e)
