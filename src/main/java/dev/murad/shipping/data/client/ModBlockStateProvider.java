@@ -227,8 +227,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
         getVariantBuilder(ModBlocks.OBSIDIAN_RAIL.get()).forAllStates(state -> ConfiguredModel.builder()
                 .modelFile(models()
-                        .withExistingParent("obsidian_rail", mcLoc("rail_flat"))
-                        .texture("rail", getBlTx("obsidian_rail")))
+                        .withExistingParent("obsidian_rail_glowing_" + state.getValue(ObsidianRail.RAIL_GLOW_LEVEL), modLoc("rail_with_overlay"))
+                        .texture("rail", getBlTx("obsidian_rail"))
+                        .texture("overlay", getBlTx("obsidian_rail_glowing_" + state.getValue(ObsidianRail.RAIL_GLOW_LEVEL))))
                 .rotationY(state.getValue(ObsidianRail.RAIL_SHAPE).equals(RailShape.NORTH_SOUTH) ? 0 : 90)
                 .build());
     }

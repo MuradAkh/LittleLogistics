@@ -1,12 +1,12 @@
 package dev.murad.shipping.block.portal;
 
 import com.mojang.math.Vector3f;
+import dev.murad.shipping.block.rail.TrainPortalSubstrate;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.Train;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -32,8 +32,6 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalTileEntity {
-    private static final DustParticleOptions PARTICLE = new DustParticleOptions(new Vector3f(0.788f, 0.2f, 0.901f), 1.0f);
-
     // only execute work tasks if the BE isn't removed
     private final Queue<Task> workQueue = new LinkedList<>();
     private final static String X_TAG = "xpos";
@@ -225,12 +223,12 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
         });
     }
 
-    public boolean validateTrainSubstrate(int trainSize,
-                                          Level sourceLevel, NetherTrainPortalTileEntity sourcePortal,
-                                          Level destLevel, NetherTrainPortalTileEntity destPortal) {
+    public Optional<List<TrainPortalBlockContext>> validateTrainSubstrate(int trainSize,
+                                                                          ServerLevel sourceLevel, NetherTrainPortalTileEntity sourcePortal,
+                                                                          ServerLevel destLevel, NetherTrainPortalTileEntity destPortal) {
         // todo make configuration
         if (trainSize > 15) {
-            return false;
+            return Optional.empty();
         }
 
         trainSize++;
@@ -238,27 +236,39 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
         Direction sourceFacing = sourcePortal.getBlockState().getValue(NetherTrainPortalBlock.FACING);
         Direction destFacing = destPortal.getBlockState().getValue(NetherTrainPortalBlock.FACING);
 
+        List<TrainPortalBlockContext> contexts = new ArrayList<>();
+
         // make sure source has enough substrate blocks
         for (int i = 1; i <= trainSize; i++) {
             BlockPos sourcePos = sourcePortal.getBlockPos().offset(sourceFacing.getNormal().multiply(i));
             BlockPos destPos = destPortal.getBlockPos().offset(destFacing.getNormal().multiply(i));
+
+            BlockState sourceState = sourceLevel.getBlockState(sourcePos);
+            BlockState destState = destLevel.getBlockState(destPos);
             // assert that sourcePos and destPos are all obsidian rails
-            if (!sourceLevel.getBlockState(sourcePos).getBlock().equals(ModBlocks.OBSIDIAN_RAIL.get()) ||
-                !destLevel.getBlockState(destPos).getBlock().equals(ModBlocks.OBSIDIAN_RAIL.get()))
-                return false;
+            if (!(sourceState.getBlock() instanceof TrainPortalSubstrate ts) ||
+                !(destState.getBlock() instanceof TrainPortalSubstrate td))
+                return Optional.empty();
+            else {
+                contexts.add(new TrainPortalBlockContext(sourceLevel, sourcePos, sourceState, ts));
+                contexts.add(new TrainPortalBlockContext(destLevel, destPos, destState, td));
+            }
         }
 
-        return true;
+        return Optional.of(contexts);
     }
 
     private <T extends Entity & LinkableEntity<T>> void validateAndWarpTrain(Train<T> train, ServerLevel targetLevel, BlockPos portalLocation) {
         int trainSize = train.asList().size();
         BlockEntity be = targetLevel.getBlockEntity(portalLocation);
-        if (be instanceof NetherTrainPortalTileEntity p) {
+        if (be instanceof NetherTrainPortalTileEntity p && getLevel() instanceof ServerLevel sourceLevel) {
             // check that source has enough rails
-            if (!validateTrainSubstrate(trainSize, getLevel(), this, targetLevel, p)) {
+            Optional<List<TrainPortalBlockContext>> railsOpt = validateTrainSubstrate(trainSize, sourceLevel, this, targetLevel, p);
+            if (railsOpt.isEmpty()) {
                 return;
             }
+            // set rails blockstate to start glowing
+            railsOpt.ifPresent(rs -> rs.forEach(ctx -> ctx.substrate.onTeleport(ctx.level, ctx.state, ctx.pos)));
             warpTrain(train, p.getBlockState().getValue(IPortalBlock.FACING), p.getBlockPos(), targetLevel);
         }
     }
@@ -340,5 +350,9 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
     private class Task {
         private final BooleanSupplier runnable;
         private int remainingAttempts;
+    }
+
+    private record TrainPortalBlockContext(ServerLevel level, BlockPos pos, BlockState state, TrainPortalSubstrate substrate) {
+
     }
 }
