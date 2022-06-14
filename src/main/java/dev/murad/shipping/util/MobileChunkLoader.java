@@ -1,37 +1,44 @@
 package dev.murad.shipping.util;
 
-import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.ShippingMod;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraftforge.common.world.ForgeChunkManager;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+@Getter
+@RequiredArgsConstructor
 public class MobileChunkLoader {
-    private Optional<Pair<Integer, Integer>> loadedChunk = Optional.empty();
-    private Entity entity;
+    private final Entity entity;
 
-    public MobileChunkLoader(Entity entity){
-        this.entity = entity;
+    @Nullable
+    private ChunkPos loadedChunk = null;
+
+    private ChunkPos offset(ChunkPos chunk, int x, int z) {
+        return new ChunkPos(chunk.x + x, chunk.z + z);
     }
 
-    private Set<Pair<Integer, Integer>> getSurroundingChunks(Pair<Integer, Integer> chunk){
-        Set<Pair<Integer, Integer>> set = new HashSet<>();
+    private Set<ChunkPos> getSurroundingChunks(ChunkPos chunk){
+        Set<ChunkPos> set = new HashSet<>();
         for(int i = -1; i <= 1; i++){
             for (int j = -1; j <= 1; j++){
-                set.add(new Pair<>(chunk.getFirst() + i, chunk.getSecond() + j));
+                set.add(offset(chunk, i, j));
             }
         }
         return set;
     }
 
-    private void setChunkLoad(boolean add, Pair<Integer, Integer> chunk) {
-        ForgeChunkManager.forceChunk((ServerLevel) entity.level, ShippingMod.MOD_ID, entity, chunk.getFirst(), chunk.getSecond(), add, false);
+    private void setChunkLoad(boolean add, ChunkPos chunk) {
+        ForgeChunkManager.forceChunk((ServerLevel) entity.level, ShippingMod.MOD_ID, entity, chunk.x, chunk.z, add, false);
     }
 
     public void serverTick(){
@@ -41,31 +48,31 @@ public class MobileChunkLoader {
             return;
         }
 
-        Pair<Integer, Integer> currChunk = new Pair<>(entity.chunkPosition().x, entity.chunkPosition().z);
-        if (loadedChunk.isEmpty()){
+        ChunkPos currChunk = entity.chunkPosition();
+        if (loadedChunk == null){
             getSurroundingChunks(currChunk).forEach(c -> setChunkLoad(true, c));
-            loadedChunk = Optional.of(currChunk);
-        } else if (!currChunk.equals(loadedChunk.get())){
-            Set<Pair<Integer, Integer>> needsToBeLoaded = getSurroundingChunks(currChunk);
+            loadedChunk = currChunk;
+        } else if (!currChunk.equals(loadedChunk)){
+            Set<ChunkPos> needsToBeLoaded = getSurroundingChunks(currChunk);
 
-            Set<Pair<Integer, Integer>> toUnload = getSurroundingChunks(loadedChunk.get());
+            Set<ChunkPos> toUnload = getSurroundingChunks(loadedChunk);
             toUnload.removeAll(needsToBeLoaded);
 
-            Set<Pair<Integer, Integer>> prevLoaded = getSurroundingChunks(loadedChunk.get());
+            Set<ChunkPos> prevLoaded = getSurroundingChunks(loadedChunk);
             needsToBeLoaded.removeAll(prevLoaded);
 
 
             toUnload.forEach(c -> setChunkLoad(false, c));
             needsToBeLoaded.forEach(c -> setChunkLoad(true, c));
 
-            loadedChunk = Optional.of(currChunk);
+            loadedChunk = currChunk;
         }
     }
 
     public void addAdditionalSaveData(CompoundTag p_213281_1_) {
-        if(loadedChunk.isPresent()) {
-            p_213281_1_.putInt("xchunk", loadedChunk.get().getFirst());
-            p_213281_1_.putInt("zchunk", loadedChunk.get().getSecond());
+        if(loadedChunk != null) {
+            p_213281_1_.putInt("xchunk", loadedChunk.x);
+            p_213281_1_.putInt("zchunk", loadedChunk.z);
         }
     }
 
@@ -73,11 +80,13 @@ public class MobileChunkLoader {
         if (p_70037_1_.contains("xchunk")) {
             int x = p_70037_1_.getInt("xchunk");
             int z = p_70037_1_.getInt("zchunk");
-            loadedChunk = Optional.of(new Pair<>(x, z));
+            loadedChunk = new ChunkPos(x, z);
         }
     }
 
     public void remove(){
-        loadedChunk.ifPresent(c -> getSurroundingChunks(c).forEach(ch -> this.setChunkLoad(false, ch)));
+        if (loadedChunk != null) {
+            getSurroundingChunks(loadedChunk).forEach(ch -> this.setChunkLoad(false, ch));
+        }
     }
 }
