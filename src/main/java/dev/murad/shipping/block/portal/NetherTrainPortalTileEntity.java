@@ -1,6 +1,7 @@
 package dev.murad.shipping.block.portal;
 
 import com.mojang.math.Vector3f;
+import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.rail.TrainPortalSubstrate;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
@@ -54,14 +55,14 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
 
     public void setLink(ServerLevel targetLevel, BlockPos targetPos) {
         level.setBlockAndUpdate(getBlockPos(),
-                getBlockState().setValue(NetherTrainPortalBlock.PORTAL_MODE, NetherTrainPortalBlock.PortalMode.LINKED));
+                getBlockState().setValue(IPortalBlock.PORTAL_MODE, IPortalBlock.PortalMode.LINKED));
         this.otherPortal = Optional.of(new PortalLocation(targetLevel.dimension(), targetPos));
     }
 
     public void unsetLink() {
         System.out.println("Unsetting");
         level.setBlockAndUpdate(getBlockPos(),
-                getBlockState().setValue(NetherTrainPortalBlock.PORTAL_MODE, NetherTrainPortalBlock.PortalMode.UNLINKED));
+                getBlockState().setValue(IPortalBlock.PORTAL_MODE, IPortalBlock.PortalMode.UNLINKED));
         this.otherPortal = Optional.empty();
     }
 
@@ -71,6 +72,10 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
     }
 
     public void tick() {
+        if(ShippingConfig.Server.DISABLE_PORTALS.get()){
+            return;
+        }
+
         Task t;
         // todo: this is a cringe if statement :P
         if ((t = workQueue.peek()) != null && (t.runnable.getAsBoolean() || t.remainingAttempts-- <= 0)) {
@@ -233,8 +238,8 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
 
         trainSize++;
 
-        Direction sourceFacing = sourcePortal.getBlockState().getValue(NetherTrainPortalBlock.FACING);
-        Direction destFacing = destPortal.getBlockState().getValue(NetherTrainPortalBlock.FACING);
+        Direction sourceFacing = sourcePortal.getBlockState().getValue(IPortalBlock.FACING);
+        Direction destFacing = destPortal.getBlockState().getValue(IPortalBlock.FACING);
 
         List<TrainPortalBlockContext> contexts = new ArrayList<>();
 

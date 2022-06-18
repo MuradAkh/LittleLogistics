@@ -14,6 +14,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.Arrays;
+
 public class ModTileEntitiesTypes {
     public static final RegistryObject<BlockEntityType<TugDockTileEntity>> TUG_DOCK = register(
             "tug_dock",
@@ -66,15 +68,15 @@ public class ModTileEntitiesTypes {
     public static final RegistryObject<BlockEntityType<NetherTrainPortalTileEntity>> NETHER_TRAIN_PORTAL = register(
             "nether_train_portal",
             NetherTrainPortalTileEntity::new,
-            ModBlocks.NETHER_TRAIN_PORTAL
+            ModBlocks.NETHER_TRAIN_PORTAL, ModBlocks.ADVANCED_TRAIN_PORTAL
     );
 
     private static <T extends BlockEntity> RegistryObject<BlockEntityType<T>> register(
             String name,
             BlockEntityType.BlockEntitySupplier<T> factory,
-            RegistryObject<? extends Block> block) {
+            RegistryObject<? extends Block>... block) {
         return Registration.TILE_ENTITIES.register(name, () ->
-                BlockEntityType.Builder.of(factory, block.get()).build(null));
+                BlockEntityType.Builder.of(factory, Arrays.stream(block).map(RegistryObject::get).toArray(Block[]::new)).build(null));
     }
 
     public static void register () {

@@ -60,6 +60,7 @@ public class ModLootTableProvider extends LootTableProvider {
             dropSelf(ModBlocks.CAR_DOCK_RAIL.get());
             dropSelf(ModBlocks.LOCOMOTIVE_DOCK_RAIL.get());
             dropSelf(ModBlocks.NETHER_TRAIN_PORTAL.get());
+            dropSelf(ModBlocks.ADVANCED_TRAIN_PORTAL.get());
             dropSelf(ModBlocks.OBSIDIAN_RAIL.get());
         }
 

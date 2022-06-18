@@ -5,6 +5,7 @@ import dev.murad.shipping.block.dock.DockingBlockStates;
 import dev.murad.shipping.block.energy.VesselChargerBlock;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
 import dev.murad.shipping.block.guiderail.CornerGuideRailBlock;
+import dev.murad.shipping.block.portal.IPortalBlock;
 import dev.murad.shipping.block.portal.NetherTrainPortalBlock;
 import dev.murad.shipping.block.rail.AbstractDockingRail;
 import dev.murad.shipping.block.rail.ObsidianRail;
@@ -223,6 +224,19 @@ public class ModBlockStateProvider extends BlockStateProvider {
                             .rotationY(rot)
                             .build();
             }
+        );
+
+        getVariantBuilder(ModBlocks.ADVANCED_TRAIN_PORTAL.get()).forAllStates(state -> {
+                    int rot = (int) state.getValue(IPortalBlock.FACING).getCounterClockWise().toYRot();
+                    String linked = state.getValue(IPortalBlock.PORTAL_MODE).getSerializedName();
+                    return ConfiguredModel.builder()
+                            .modelFile(models()
+                                    .withExistingParent("nether_train_portal_" + linked,
+                                            modLoc("nether_train_portal_parent_model_" + linked))
+                            )
+                            .rotationY(rot)
+                            .build();
+                }
         );
 
         getVariantBuilder(ModBlocks.OBSIDIAN_RAIL.get()).forAllStates(state -> ConfiguredModel.builder()

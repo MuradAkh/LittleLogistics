@@ -83,6 +83,13 @@ public class ShippingConfig {
         public static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_CHUNKLOADERS;
 
 
+        public static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_PORTALS;
+        public static final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_ADVANCED_PORTAL_WITHIN_DIMENSION;
+        public static final ForgeConfigSpec.ConfigValue<List<String>> ADVANCED_PORTAL_DIMENSIONS;
+        public static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_ADVANCED_PORTAL_RANGE_CHECK;
+        public static final ForgeConfigSpec.ConfigValue<Integer> ADVANCED_PORTAL_OVERWORLD_RANGE;
+
+
         static {
             BUILDER.push("general");
 
@@ -150,6 +157,33 @@ public class ShippingConfig {
                 VESSEL_CHARGER_BASE_MAX_TRANSFER =
                         BUILDER.comment("Base max transfer rate of the Vessel Charger in FE/tick, must be an integer >= 1. Default 100.")
                                 .defineInRange("vesselChargerBaseMaxTransfer", 100, 1, Integer.MAX_VALUE);
+                BUILDER.pop();
+            }
+            BUILDER.pop();
+            BUILDER.push("portal");
+            {
+                BUILDER.push("general");
+                DISABLE_PORTALS =
+                        BUILDER.comment("Disable train portals. Affects both the advanced and the standard nether portal.")
+                                .define("disablePortals", false);
+                BUILDER.pop();
+            }
+            {
+                BUILDER.push("advancedPortal");
+
+                ADVANCED_PORTAL_DIMENSIONS = BUILDER.comment("IDs of dimensions supported by the Advanced Train portal.")
+                        .define("advancedPortalDimensions", List.of("overworld", "the_end", "the_nether"));
+
+                DISABLE_ADVANCED_PORTAL_RANGE_CHECK =
+                        BUILDER.comment("Allow teleporting to any spot in an allowed dimension, similar to ender chests.")
+                                .define("disableAdvancedPortalRangeCheck", false);
+
+                ALLOW_ADVANCED_PORTAL_WITHIN_DIMENSION = BUILDER.comment("Allow using advanced portals within the same dimension, similar to ender chests.")
+                        .define("allowAdvancedPortalsSameDimension", false);
+
+                ADVANCED_PORTAL_OVERWORLD_RANGE = BUILDER.comment("Advanced portal range, in overworld distance.")
+                        .define("advancedPortalRange", 24);
+
                 BUILDER.pop();
             }
             BUILDER.pop();

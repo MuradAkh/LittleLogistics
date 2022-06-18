@@ -5,11 +5,9 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 
 public class CrossDimensionalUtil {
-    public static Vec3 horizontalOverworldDistance(double originDimScale, double targetDimScale, BlockPos blockPos1, BlockPos blockPos2) {
-        Vec3 pos1 = Vec3.atCenterOf(blockPos1).multiply(originDimScale, 0, originDimScale);
-        Vec3 pos2 = Vec3.atCenterOf(blockPos2).multiply(targetDimScale, 0, targetDimScale);
-
-        return pos2.subtract(pos1);
+    public static Vec3 distanceInDimension(double originDimScale, double targetDimScale, BlockPos blockPos1, BlockPos blockPos2) {
+        return Vec3.atLowerCornerOf(CrossDimensionalUtil.getPosInDimension(originDimScale,
+                targetDimScale, blockPos1)).subtract(Vec3.atLowerCornerOf(blockPos2));
     }
 
     public static BlockPos getPosInDimension(double originDimScale, double targetDimScale, BlockPos originPos) {

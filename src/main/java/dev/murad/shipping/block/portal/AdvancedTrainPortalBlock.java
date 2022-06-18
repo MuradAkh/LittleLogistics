@@ -1,10 +1,13 @@
 package dev.murad.shipping.block.portal;
 
+import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.CrossDimensionalUtil;
 import dev.murad.shipping.util.TickerUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -26,10 +29,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class NetherTrainPortalBlock extends Block implements EntityBlock, IPortalBlock {
-
+public class AdvancedTrainPortalBlock extends Block implements IPortalBlock, EntityBlock  {
     VoxelShape SHAPE_N = Stream.of(
                     Block.box(15, 0, 0, 16, 16, 2),
                     Block.box(1, 0, 0, 15, 1, 2),
@@ -62,13 +65,8 @@ public class NetherTrainPortalBlock extends Block implements EntityBlock, IPorta
                     Block.box(2, 1, 1, 4, 15, 15))
             .reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
 
-    public NetherTrainPortalBlock(Properties p_49795_) {
+    public AdvancedTrainPortalBlock(Properties p_49795_) {
         super(p_49795_);
-    }
-
-    @Override
-    public boolean checkValidDimension(Level level) {
-        return level.dimension().equals(Level.NETHER) || level.dimension().equals(Level.OVERWORLD);
     }
 
     @Override
@@ -80,25 +78,30 @@ public class NetherTrainPortalBlock extends Block implements EntityBlock, IPorta
     }
 
     @Override
-    public int linkRadius() {
-        return 24;
+    public int linkRadius()   {
+        return ShippingConfig.Server.ADVANCED_PORTAL_OVERWORLD_RANGE.get();
     }
 
     @Override
     public boolean checkValidLinkPair(Level destinationLevel, BlockPos savedPos, BlockPos clickedPos, ResourceKey<Level> dimension, double scale){
-        boolean valid_dims = (dimension.equals(Level.NETHER) && destinationLevel.dimension().equals(Level.OVERWORLD))
-                || (dimension.equals(Level.OVERWORLD) && destinationLevel.dimension().equals(Level.NETHER));
+        boolean valid_dims = checkValidDimension(destinationLevel) &&
+                (!destinationLevel.dimension().equals(dimension) || ShippingConfig.Server.ALLOW_ADVANCED_PORTAL_WITHIN_DIMENSION.get());
 
         if(!valid_dims){
             return false;
         }
 
-        return IPortalBlock.super.checkValidLinkPair(destinationLevel, savedPos, clickedPos, dimension, scale);
+        return ShippingConfig.Server.DISABLE_ADVANCED_PORTAL_RANGE_CHECK.get()
+                || IPortalBlock.super.checkValidLinkPair(destinationLevel, savedPos, clickedPos, dimension, scale);
+    }
+
+    public static ResourceKey<Level> makeDimension(String name){
+        return ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(name));
     }
 
     @Override
     public Set<ResourceKey<Level>> validDims(){
-        return Set.of(Level.OVERWORLD, Level.NETHER);
+        return ShippingConfig.Server.ADVANCED_PORTAL_DIMENSIONS.get().stream().map(AdvancedTrainPortalBlock::makeDimension).collect(Collectors.toSet());
     }
 
     @SuppressWarnings("deprecation")
@@ -149,5 +152,4 @@ public class NetherTrainPortalBlock extends Block implements EntityBlock, IPorta
                 return SHAPE_N;
         }
     }
-
 }

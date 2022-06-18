@@ -5,6 +5,7 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.block.portal.AdvancedTrainPortalBlock;
 import dev.murad.shipping.block.portal.IPortalBlock;
 import dev.murad.shipping.item.LocoRouteItem;
 import dev.murad.shipping.item.PortalLinkerItem;
@@ -86,7 +87,20 @@ public class ForgeClientEventHandler {
                 AABB a = new AABB(0, 0, 0, 1, 1, 1);
                 LevelRenderer.renderLineBox(pose, buffer.getBuffer(ModRenderType.LINES), a, 50, 0, 150, 1);
                 pose.popPose();
-            } else if (type != null && type.validDims().contains(player.level.dimension())){
+
+                if(!ShippingConfig.Server.ALLOW_ADVANCED_PORTAL_WITHIN_DIMENSION.get() || !(type instanceof AdvancedTrainPortalBlock)){
+                    buffer.endBatch();
+                    return;
+                }
+            }
+
+
+            if(ShippingConfig.Server.DISABLE_ADVANCED_PORTAL_RANGE_CHECK.get() && (type instanceof AdvancedTrainPortalBlock)){
+                buffer.endBatch();
+                return;
+            }
+
+            if (type != null && type.validDims().contains(player.level.dimension())){
                 // render border
                 double thisScale =player.level.dimensionType().coordinateScale();
                 var transposed = CrossDimensionalUtil.getPosInDimension(PortalLinkerItem.getTargetScale(stack), thisScale, savedPos);
@@ -107,13 +121,9 @@ public class ForgeClientEventHandler {
                         pose.popPose();
                     }
                 }
-
-
-
             }
+
             buffer.endBatch();
-
-
         }
     }
 

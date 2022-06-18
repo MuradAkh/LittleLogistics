@@ -7,6 +7,7 @@ import dev.murad.shipping.block.energy.VesselChargerBlock;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
 import dev.murad.shipping.block.guiderail.CornerGuideRailBlock;
 import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
+import dev.murad.shipping.block.portal.AdvancedTrainPortalBlock;
 import dev.murad.shipping.block.portal.NetherTrainPortalBlock;
 import dev.murad.shipping.block.rail.*;
 import dev.murad.shipping.block.rapidhopper.RapidHopperBlock;
@@ -117,6 +118,11 @@ public class ModBlocks {
     public static final RegistryObject<Block> NETHER_TRAIN_PORTAL = register(
             "nether_train_portal",
             () -> new NetherTrainPortalBlock(BlockBehaviour.Properties.of(Material.METAL)),
+            CreativeModeTab.TAB_TRANSPORTATION);
+
+    public static final RegistryObject<Block> ADVANCED_TRAIN_PORTAL = register(
+            "advanced_train_portal",
+            () -> new AdvancedTrainPortalBlock(BlockBehaviour.Properties.of(Material.METAL)),
             CreativeModeTab.TAB_TRANSPORTATION);
 
     public static final RegistryObject<Block> OBSIDIAN_RAIL = register(
