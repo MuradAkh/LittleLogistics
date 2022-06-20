@@ -128,15 +128,15 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     }
 
     @Override
+    public Item getDropItem(){
+        return getPickResult().getItem();
+    }
+
+    @Override
     protected void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         dominantNBT = compound.getCompound("dominant");
         waitForDominated = compound.getBoolean("hasChild");
-    }
-
-    @Override
-    public Item getDropItem(){
-        return getPickResult().getItem();
     }
 
     @Override

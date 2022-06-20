@@ -2,9 +2,11 @@ package dev.murad.shipping.entity.custom.vessel;
 
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.capability.StallingCapability;
+import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
+import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
-import dev.murad.shipping.util.SpringableEntity;
+import dev.murad.shipping.util.SpringPhysicsUtil;
 import dev.murad.shipping.util.Train;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +14,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
@@ -48,18 +53,28 @@ import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public abstract class VesselEntity extends WaterAnimal implements SpringableEntity {
+public abstract class VesselEntity extends WaterAnimal implements LinkableEntity<VesselEntity> {
     @Getter
     @Setter
     private boolean frozen = false;
     private boolean waitForDominated = false;
+
+    protected Optional<VesselEntity> dominant = Optional.empty();
+    protected Optional<VesselEntity> dominated = Optional.empty();
+    private @Nullable
+    CompoundTag dominantNBT;
+    public static final EntityDataAccessor<Integer> DOMINANT_ID = SynchedEntityData.defineId(VesselEntity.class, EntityDataSerializers.INT);
+    public static final EntityDataAccessor<Integer> DOMINATED_ID = SynchedEntityData.defineId(VesselEntity.class, EntityDataSerializers.INT);
+    protected Train<VesselEntity> train;
 
     protected VesselEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
@@ -76,12 +91,6 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
     private Boat.Status status;
     private Boat.Status oldStatus;
     private double lastYd;
-
-    protected Optional<VesselEntity> dominated = Optional.empty();
-    protected Optional<VesselEntity> dominant = Optional.empty();
-    protected Optional<SpringEntity> dominantS = Optional.empty();
-    protected Optional<SpringEntity> dominatedS = Optional.empty();
-    protected Train<VesselEntity> train;
 
     @Override
     public boolean isPickable(){
@@ -101,8 +110,11 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
 
     @Override
     public void tick() {
+        super.tick();
+
+        tickLoad();
+        doChainMath();
         if(this.isAlive()) {
-            tickSpringAliveCheck();
             if(this.tickCount % 10 == 0){
                 this.heal(1f);
             }
@@ -116,17 +128,6 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
             this.unDrown();
         }
 
-        if (!this.level.isClientSide && dominated.isPresent()){
-            waitForDominated = false;
-            if(!((ServerLevel) this.level).isPositionEntityTicking(dominated.get().blockPosition())){
-                this.getTrain().getTug().ifPresent(tug -> tug.setDeltaMovement(Vec3.ZERO));
-                this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
-            } else if (waitForDominated) {
-                this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
-            }
-        }
-
-        super.tick();
     }
 
     private void unDrown(){
@@ -144,17 +145,116 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag nbt) {
-        super.readAdditionalSaveData(nbt);
-        // override speed attributes on load from previous versions
-        resetSpeedAttributes();
-        waitForDominated = nbt.getBoolean("hasChild");
+    public void readAdditionalSaveData(CompoundTag compound) {
+        super.readAdditionalSaveData(compound);
+        dominantNBT = compound.getCompound("dominant");
+        waitForDominated = compound.getBoolean("hasChild");
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag pCompound) {
-        super.addAdditionalSaveData(pCompound);
-        pCompound.putBoolean("hasChild", getDominated().isPresent());
+    public void addAdditionalSaveData(CompoundTag compound) {
+        super.addAdditionalSaveData(compound);
+        if (dominant.isPresent()) {
+            writeNBT(dominant.get(), compound);
+        } else if (dominantNBT != null) {
+            compound.put(SpringEntity.SpringSide.DOMINANT.name(), dominantNBT);
+        }
+
+        compound.putBoolean("hasChild", dominated.isPresent());
+
+    }
+
+    private void writeNBT(Entity entity, CompoundTag globalCompound) {
+        CompoundTag compound = new CompoundTag();
+        compound.putInt("X", (int) Math.floor(entity.getX()));
+        compound.putInt("Y", (int) Math.floor(entity.getY()));
+        compound.putInt("Z", (int) Math.floor(entity.getZ()));
+
+        compound.putString("UUID", entity.getUUID().toString());
+
+        globalCompound.put("dominant", compound);
+    }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        getEntityData().define(DOMINANT_ID, -1);
+        getEntityData().define(DOMINATED_ID, -1);
+    }
+
+    @Override
+    public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+
+        if (level.isClientSide) {
+            if (DOMINANT_ID.equals(key) || DOMINATED_ID.equals(key)) {
+                fetchDominantClient();
+                fetchDominatedClient();
+            }
+        }
+    }
+
+    private void fetchDominantClient() {
+        Entity potential = level.getEntity(getEntityData().get(DOMINANT_ID));
+        if (potential instanceof VesselEntity t) {
+            dominant = Optional.of(t);
+        } else {
+            dominant = Optional.empty();
+        }
+    }
+
+    protected void tickLoad() {
+        if (this.level.isClientSide) {
+            fetchDominantClient();
+            fetchDominatedClient();
+        } else {
+            if (dominant.isEmpty() && dominantNBT != null) {
+                tryToLoadFromNBT(dominantNBT).ifPresent(this::setDominant);
+                dominant.ifPresent(d -> {
+                    d.setDominated(this);
+                    dominantNBT = null; // done loading
+                });
+            }
+            if (dominated.isPresent()){
+                waitForDominated = false;
+                if(!((ServerLevel) this.level).isPositionEntityTicking(dominated.get().blockPosition())){
+                    this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
+                }
+            } else if (waitForDominated) {
+                this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
+            }
+            entityData.set(DOMINANT_ID, dominant.map(Entity::getId).orElse(-1));
+            entityData.set(DOMINATED_ID, dominated.map(Entity::getId).orElse(-1));
+        }
+    }
+
+    private Optional<VesselEntity> tryToLoadFromNBT(CompoundTag compound) {
+        try {
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+            pos.set(compound.getInt("X"), compound.getInt("Y"), compound.getInt("Z"));
+            String uuid = compound.getString("UUID");
+            AABB searchBox = new AABB(
+                    pos.getX() - 2,
+                    pos.getY() - 2,
+                    pos.getZ() - 2,
+                    pos.getX() + 2,
+                    pos.getY() + 2,
+                    pos.getZ() + 2
+            );
+            List<Entity> entities = level.getEntities(this, searchBox, e -> e.getStringUUID().equals(uuid));
+            return entities.stream().findFirst().map(e -> (VesselEntity) e);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
+    private void fetchDominatedClient() {
+        Entity potential = level.getEntity(getEntityData().get(DOMINATED_ID));
+        if (potential instanceof VesselEntity t) {
+            dominated = Optional.of(t);
+        } else {
+            dominated = Optional.empty();
+        }
     }
 
     // reset speed to 1
@@ -191,23 +291,16 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
 
     @Override
     public Optional<VesselEntity> getDominated() {
-        return this.dominated.map(s -> s); // Java...
+        return this.dominated;
+
     }
 
-    @Override
-    public Optional<SpringEntity> getDominatedSpring() {
-        return this.dominatedS; // Java...
-    }
 
     @Override
     public Optional<VesselEntity> getDominant() {
-        return this.dominant.map(s -> s); // Java...
+        return this.dominant;
     }
 
-    @Override
-    public Optional<SpringEntity> getDominantSpring() {
-        return this.dominantS; // Java...
-    }
 
     @Override
     public Train<VesselEntity> getTrain() {
@@ -219,13 +312,13 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
 
     }
 
-    public boolean linkEntities(Player player, Entity target) {
-        if(!(target instanceof VesselEntity)){
+    public boolean linkEntities(Player player, Entity t) {
+        if(!(t instanceof VesselEntity target)){
             player.displayClientMessage(Component.translatable("item.littlelogistics.spring.badTypes"), true);
             return false;
         }
-        Train firstTrain =  this.getTrain();
-        Train secondTrain = ((LinkableEntity) target).getTrain();
+        Train<VesselEntity> firstTrain =  this.getTrain();
+        Train<VesselEntity> secondTrain = target.getTrain();
         if (this.distanceTo(target) > 15){
             player.displayClientMessage(Component.translatable("item.littlelogistics.spring.tooFar"), true);
         } else if (firstTrain.getTug().isPresent() && secondTrain.getTug().isPresent()) {
@@ -233,13 +326,36 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
         } else if (secondTrain.equals(firstTrain)){
             player.displayClientMessage(Component.translatable("item.littlelogistics.spring.noLoops"), true);
         } else if (firstTrain.getTug().isPresent()) {
-            SpringEntity.createSpring((VesselEntity) firstTrain.getTail(), (VesselEntity) secondTrain.getHead());
+            firstTrain.getTail().setDominated(secondTrain.getHead());
+            secondTrain.getHead().setDominant(firstTrain.getTail());
             return true;
         } else {
-            SpringEntity.createSpring((VesselEntity) secondTrain.getTail(), (VesselEntity) firstTrain.getHead());
+            secondTrain.getTail().setDominated(firstTrain.getHead());
+            firstTrain.getHead().setDominant(secondTrain.getTail());
             return true;
         }
         return false;
+    }
+
+    public void doChainMath(){
+        dominant.ifPresent((dominant) -> {
+                SpringPhysicsUtil.adjustSpringedEntities(dominant, this);
+                checkInsideBlocks();
+        });
+    }
+
+    @Override
+    public void handleShearsCut() {
+        if (!this.level.isClientSide && dominant.isPresent()) {
+            spawnChain();
+        }
+        this.dominant.ifPresent(LinkableEntity::removeDominated);
+        removeDominant();
+    }
+
+    private void spawnChain() {
+        var stack = new ItemStack(ModItems.SPRING.get());
+        this.spawnAtLocation(stack);
     }
 
     @Nullable
@@ -460,11 +576,6 @@ public abstract class VesselEntity extends WaterAnimal implements SpringableEnti
         }
 
         return pSource.equals(DamageSource.IN_WALL) || super.isInvulnerableTo(pSource);
-    }
-
-    @Override
-    public void checkInsideBlocks(){
-        super.checkInsideBlocks();
     }
 
     // Get rid of default armour/hands slots itemhandler from mobs

@@ -71,4 +71,8 @@ public interface LinkableEntity<V extends LinkableEntity<V>> {
     boolean allowDockInterface();
 
     BlockPos getBlockPos();
+
+    enum LinkSide {
+        DOMINANT, DOMINATED
+    }
 }

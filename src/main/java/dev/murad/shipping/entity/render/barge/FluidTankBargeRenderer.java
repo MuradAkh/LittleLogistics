@@ -36,9 +36,9 @@ public class FluidTankBargeRenderer extends AbstractVesselRenderer<FluidTankBarg
     }
 
     @Override
-    public void render(FluidTankBargeEntity vesselEntity, float p_225623_2_, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
-        super.render(vesselEntity, p_225623_2_, p_225623_3_, matrixStack, buffer, p_225623_6_);
-        renderFluid(vesselEntity, p_225623_2_, p_225623_3_, matrixStack, buffer, 0, p_225623_6_);
+    public void render(FluidTankBargeEntity vesselEntity, float yaw, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
+        super.render(vesselEntity, yaw, p_225623_3_, matrixStack, buffer, p_225623_6_);
+        renderFluid(vesselEntity, yaw, p_225623_3_, matrixStack, buffer, 0, p_225623_6_);
 
     }
 

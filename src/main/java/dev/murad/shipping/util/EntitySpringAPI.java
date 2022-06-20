@@ -44,17 +44,8 @@ public class EntitySpringAPI {
     private static final BiFunction<Entity, SpringEntity.SpringSide, Vec3> DEFAULT_ANCHOR_LOCATION = (e, sideArg) -> e.position();
     private static final List<Predicate<Entity>> predicates = new ArrayList<>();
     private static final Map<Class<? extends Entity>, BiFunction<Entity, SpringEntity.SpringSide, Vec3>> mapping = new HashMap<>();
-    public static final BiFunction<Entity, SpringEntity.SpringSide, Vec3> DEFAULT_BOAT_ANCHOR = (entity, side) -> {
-        float distanceFromCenter = 0.0625f * 17f * (side == SpringEntity.SpringSide.DOMINANT ? 1f : -1f);
-        double anchorX = entity.getX() + Math.cos((float) ((entity.getYRot() + 90f) * Math.PI / 180f)) * distanceFromCenter;
-        double anchorY = entity.getY();
-        double anchorZ = entity.getZ() + Math.sin((float)((entity.getYRot() + 90f) * Math.PI / 180f)) * distanceFromCenter;
-        return new Vec3(anchorX, anchorY, anchorZ);
-    };
 
-    static {
-        addGenericAnchorMapping(AbstractBargeEntity.class, DEFAULT_BOAT_ANCHOR);
-    }
+
 
     public static boolean isValidTarget(Entity target) {
         return target instanceof LinkableEntity || target instanceof VehicleFrontPart;

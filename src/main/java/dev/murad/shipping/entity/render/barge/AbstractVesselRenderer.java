@@ -37,18 +37,18 @@ public abstract class AbstractVesselRenderer<T extends VesselEntity> extends Ent
         chainModel = new ChainModel(context.bakeLayer(ChainModel.LAYER_LOCATION));
     }
 
-    public void render(T vesselEntity, float p_225623_2_, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
+    public void render(T vesselEntity, float yaw, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
         matrixStack.pushPose();
         matrixStack.translate(0.0D, getModelYoffset(), 0.0D);
         matrixStack.translate(0.0D, 0.07, 0.0D);
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - p_225623_2_));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - yaw));
         matrixStack.scale(-1.0F, -1.0F, 1.0F);
         matrixStack.mulPose(Vector3f.YP.rotationDegrees(getModelYrot()));
         renderModel(vesselEntity, matrixStack, buffer, p_225623_6_);
         getAndRenderChain(vesselEntity, matrixStack, buffer, p_225623_6_);
         matrixStack.popPose();
 
-        getAndRenderLeash(vesselEntity, p_225623_2_, p_225623_3_, matrixStack, buffer, p_225623_6_);
+        getAndRenderLeash(vesselEntity, yaw, p_225623_3_, matrixStack, buffer, p_225623_6_);
 
     }
 
@@ -101,7 +101,7 @@ public abstract class AbstractVesselRenderer<T extends VesselEntity> extends Ent
             if(((Entity) p_225626_1_.getDominant().get()).shouldRender(p_225626_3_, p_225626_5_, p_225626_7_)){
                 return true;
             }
-            if(p_225626_1_.getDominantSpring().get().shouldRender(p_225626_3_, p_225626_5_, p_225626_7_)){
+            if(p_225626_1_.getDominant().get().shouldRender(p_225626_3_, p_225626_5_, p_225626_7_)){
                 return true;
             }
         }

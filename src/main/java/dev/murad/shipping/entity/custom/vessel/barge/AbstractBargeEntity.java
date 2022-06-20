@@ -68,19 +68,9 @@ public abstract class AbstractBargeEntity extends VesselEntity {
     }
 
     @Override
-    public void setDominatedSpring(SpringEntity spring) {
-        this.dominatedS = Optional.of(spring);
-    }
-
-    @Override
     public void setDominant(VesselEntity entity) {
         this.setTrain(entity.getTrain());
         this.dominant = Optional.of(entity);
-    }
-
-    @Override
-    public void setDominantSpring(SpringEntity spring) {
-        this.dominantS = Optional.of(spring);
     }
 
     @Override
@@ -89,7 +79,6 @@ public abstract class AbstractBargeEntity extends VesselEntity {
             return;
         }
         this.dominated = Optional.empty();
-        this.dominatedS = Optional.empty();
         this.train.setTail(this);
     }
 
@@ -99,7 +88,6 @@ public abstract class AbstractBargeEntity extends VesselEntity {
             return;
         }
         this.dominant = Optional.empty();
-        this.dominantS = Optional.empty();
         this.setTrain(new Train(this));
     }
 

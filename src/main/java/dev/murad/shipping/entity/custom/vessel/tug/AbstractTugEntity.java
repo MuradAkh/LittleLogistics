@@ -60,7 +60,7 @@ import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-public abstract class AbstractTugEntity extends VesselEntity implements LinkableEntityHead<VesselEntity>, SpringableEntity, Container, WorldlyContainer, HeadVehicle {
+public abstract class AbstractTugEntity extends VesselEntity implements LinkableEntityHead<VesselEntity>, Container, WorldlyContainer, HeadVehicle {
 
     // CONTAINER STUFF
     @Getter
@@ -469,17 +469,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Override
-    public void setDominatedSpring(SpringEntity spring) {
-        this.dominatedS = Optional.of(spring);
-    }
-
-    @Override
     public void setDominant(VesselEntity entity) {
-
-    }
-
-    @Override
-    public void setDominantSpring(SpringEntity entity) {
 
     }
 

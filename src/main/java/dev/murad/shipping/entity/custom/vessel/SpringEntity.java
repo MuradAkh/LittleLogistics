@@ -72,21 +72,6 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
         return dominant;
     }
 
-    public void setDominant(VesselEntity dominant){
-        if(dominated != null && dominant != null){
-            dominant.setDominated(dominated, this);
-            dominated.setDominant(dominant, this);
-        }
-        this.dominant = dominant;
-    }
-
-    public void setDominated(VesselEntity dominated){
-        if(dominated != null && dominant != null){
-            dominant.setDominated(dominated, this);
-            dominated.setDominant(dominant, this);
-        }
-        this.dominated = dominated;
-    }
 
     public Entity getDominated(){
         return dominant;
@@ -100,8 +85,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
 
     public SpringEntity(@Nonnull VesselEntity dominant, @Nonnull VesselEntity dominatedEntity) {
         super(ModEntityTypes.SPRING.get(), dominant.getCommandSenderWorld());
-        setDominant(dominant);
-        setDominated(dominatedEntity);
+
         setPos((dominant.getX() + dominated.getX())/2, (dominant.getY() + dominated.getY())/2, (dominant.getZ() + dominated.getZ())/2);
     }
 
@@ -115,25 +99,7 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
         return EntitySpringAPI.calculateAnchorPosition(entity, side);
     }
 
-    @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
-        super.onSyncedDataUpdated(key);
 
-        if(level.isClientSide) {
-            if(DOMINANT_ID.equals(key)) {
-                VesselEntity potential = (VesselEntity) level.getEntity(getEntityData().get(DOMINANT_ID));
-                if(potential != null) {
-                    setDominant(potential);
-                }
-            }
-            if(DOMINATED_ID.equals(key)) {
-                VesselEntity potential = (VesselEntity) level.getEntity(getEntityData().get(DOMINATED_ID));
-                if(potential != null) {
-                    setDominated(potential);
-                }
-            }
-        }
-    }
 
     @Override
     public Direction getDirection(){
@@ -212,44 +178,22 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
                 double k = dominant instanceof AbstractTugEntity ? 0.2 : 0.13;
                 double l0 = maxDstSq;
                 dominated.setDeltaMovement(k * (dist - l0) * dx, k * (dist - l0) * dy, k * (dist - l0) * dz);
-                dominated.checkInsideBlocks();
             } else { // front and back entities have not been loaded yet
                 if (dominantNBT != null && dominatedNBT != null) {
                     tryToLoadFromNBT(dominantNBT).ifPresent(e -> {
-                        setDominant(e);
                         entityData.set(DOMINANT_ID, e.getId());
                     });
                     tryToLoadFromNBT(dominatedNBT).ifPresent(e -> {
-                        setDominated(e);
                         entityData.set(DOMINATED_ID, e.getId());
                     });
                 }
-                updateClient();
             }
         }
         return false;
     }
 
-    private void updateClient(){
-        if(this.level.isClientSide) {
-            if(this.dominant == null) {
-                Entity potential = level.getEntity(getEntityData().get(DOMINANT_ID));
-                if (potential != null) {
-                    setDominant((VesselEntity) potential);
-                }
-            }
 
-            if(this.dominated == null) {
-                Entity potential_dominated = level.getEntity(getEntityData().get(DOMINATED_ID));
-                if (potential_dominated != null) {
-                    setDominated((VesselEntity) potential_dominated);
-                }
-            }
-        }
-
-    }
-
-    private float computeTargetYaw(Float currentYaw, Vec3 anchorPos, Vec3 otherAnchorPos) {
+    private static float computeTargetYaw(Float currentYaw, Vec3 anchorPos, Vec3 otherAnchorPos) {
         float idealYaw = (float) (Math.atan2(otherAnchorPos.x - anchorPos.x, -(otherAnchorPos.z - anchorPos.z)) * (180f/Math.PI));
         float closestDistance = Float.POSITIVE_INFINITY;
         float closest = idealYaw;
@@ -339,8 +283,6 @@ public class SpringEntity extends Entity implements IEntityAdditionalSpawnData {
         if(additionalData.readBoolean()) { // has both entities
             int frontID = additionalData.readInt();
             int backID = additionalData.readInt();
-            setDominant((VesselEntity) level.getEntity(frontID));
-            setDominated((VesselEntity) level.getEntity(backID));
 
             dominantNBT = additionalData.readNbt();
             dominatedNBT = additionalData.readNbt();
