@@ -2,6 +2,7 @@ package dev.murad.shipping;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 
+import java.rmi.registry.Registry;
 import java.util.List;
 
 public class ShippingConfig {
@@ -85,7 +86,7 @@ public class ShippingConfig {
 
         public static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_PORTALS;
         public static final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_ADVANCED_PORTAL_WITHIN_DIMENSION;
-        public static final ForgeConfigSpec.ConfigValue<List<String>> ADVANCED_PORTAL_DIMENSIONS;
+        public static final ForgeConfigSpec.ConfigValue<List<? extends String>> ADVANCED_PORTAL_DIMENSIONS;
         public static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_ADVANCED_PORTAL_RANGE_CHECK;
         public static final ForgeConfigSpec.ConfigValue<Integer> ADVANCED_PORTAL_OVERWORLD_RANGE;
 
@@ -172,7 +173,7 @@ public class ShippingConfig {
                 BUILDER.push("advancedPortal");
 
                 ADVANCED_PORTAL_DIMENSIONS = BUILDER.comment("IDs of dimensions supported by the Advanced Train portal.")
-                        .define("advancedPortalDimensions", List.of("overworld", "the_end", "the_nether"));
+                        .defineList("advancedPortalDimensions", () -> List.of("minecraft:overworld", "minecraft:the_end", "minecraft:the_nether"), (obj) -> true);
 
                 DISABLE_ADVANCED_PORTAL_RANGE_CHECK =
                         BUILDER.comment("Allow teleporting to any spot in an allowed dimension, similar to ender chests.")
