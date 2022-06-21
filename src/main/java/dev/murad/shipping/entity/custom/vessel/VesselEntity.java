@@ -1,11 +1,11 @@
 package dev.murad.shipping.entity.custom.vessel;
 
 import dev.murad.shipping.ShippingConfig;
-import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
+import dev.murad.shipping.util.LinkingHandler;
 import dev.murad.shipping.util.SpringPhysicsUtil;
 import dev.murad.shipping.util.Train;
 import lombok.Getter;
@@ -17,7 +17,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -37,6 +36,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WaterlilyBlock;
@@ -58,23 +58,17 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class VesselEntity extends WaterAnimal implements LinkableEntity<VesselEntity> {
     @Getter
     @Setter
     private boolean frozen = false;
-    private boolean waitForDominated = false;
-
-    protected Optional<VesselEntity> dominant = Optional.empty();
-    protected Optional<VesselEntity> dominated = Optional.empty();
-    private @Nullable
-    CompoundTag dominantNBT;
     public static final EntityDataAccessor<Integer> DOMINANT_ID = SynchedEntityData.defineId(VesselEntity.class, EntityDataSerializers.INT);
     public static final EntityDataAccessor<Integer> DOMINATED_ID = SynchedEntityData.defineId(VesselEntity.class, EntityDataSerializers.INT);
-    protected Train<VesselEntity> train;
+    protected final LinkingHandler<VesselEntity> linkingHandler = new LinkingHandler<>(this, VesselEntity.class, DOMINANT_ID, DOMINATED_ID);
 
     protected VesselEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
@@ -112,8 +106,10 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     public void tick() {
         super.tick();
 
-        tickLoad();
-        doChainMath();
+        linkingHandler.tickLoad();
+        if(!this.level.isClientSide) {
+            doChainMath();
+        }
         if(this.isAlive()) {
             if(this.tickCount % 10 == 0){
                 this.heal(1f);
@@ -147,115 +143,32 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
-        dominantNBT = compound.getCompound("dominant");
-        waitForDominated = compound.getBoolean("hasChild");
+        linkingHandler.readAdditionalSaveData(compound);
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
-        if (dominant.isPresent()) {
-            writeNBT(dominant.get(), compound);
-        } else if (dominantNBT != null) {
-            compound.put(SpringEntity.SpringSide.DOMINANT.name(), dominantNBT);
-        }
-
-        compound.putBoolean("hasChild", dominated.isPresent());
+        linkingHandler.addAdditionalSaveData(compound);
 
     }
 
-    private void writeNBT(Entity entity, CompoundTag globalCompound) {
-        CompoundTag compound = new CompoundTag();
-        compound.putInt("X", (int) Math.floor(entity.getX()));
-        compound.putInt("Y", (int) Math.floor(entity.getY()));
-        compound.putInt("Z", (int) Math.floor(entity.getZ()));
-
-        compound.putString("UUID", entity.getUUID().toString());
-
-        globalCompound.put("dominant", compound);
-    }
 
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        getEntityData().define(DOMINANT_ID, -1);
-        getEntityData().define(DOMINATED_ID, -1);
+        LinkingHandler.defineSynchedData(this, DOMINANT_ID, DOMINATED_ID);
     }
 
     @Override
     public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
+        if(linkingHandler != null) {
+            linkingHandler.onSyncedDataUpdated(key);
 
-        if (level.isClientSide) {
-            if (DOMINANT_ID.equals(key) || DOMINATED_ID.equals(key)) {
-                fetchDominantClient();
-                fetchDominatedClient();
-            }
         }
     }
 
-    private void fetchDominantClient() {
-        Entity potential = level.getEntity(getEntityData().get(DOMINANT_ID));
-        if (potential instanceof VesselEntity t) {
-            dominant = Optional.of(t);
-        } else {
-            dominant = Optional.empty();
-        }
-    }
-
-    protected void tickLoad() {
-        if (this.level.isClientSide) {
-            fetchDominantClient();
-            fetchDominatedClient();
-        } else {
-            if (dominant.isEmpty() && dominantNBT != null) {
-                tryToLoadFromNBT(dominantNBT).ifPresent(this::setDominant);
-                dominant.ifPresent(d -> {
-                    d.setDominated(this);
-                    dominantNBT = null; // done loading
-                });
-            }
-            if (dominated.isPresent()){
-                waitForDominated = false;
-                if(!((ServerLevel) this.level).isPositionEntityTicking(dominated.get().blockPosition())){
-                    this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
-                }
-            } else if (waitForDominated) {
-                this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
-            }
-            entityData.set(DOMINANT_ID, dominant.map(Entity::getId).orElse(-1));
-            entityData.set(DOMINATED_ID, dominated.map(Entity::getId).orElse(-1));
-        }
-    }
-
-    private Optional<VesselEntity> tryToLoadFromNBT(CompoundTag compound) {
-        try {
-            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-            pos.set(compound.getInt("X"), compound.getInt("Y"), compound.getInt("Z"));
-            String uuid = compound.getString("UUID");
-            AABB searchBox = new AABB(
-                    pos.getX() - 2,
-                    pos.getY() - 2,
-                    pos.getZ() - 2,
-                    pos.getX() + 2,
-                    pos.getY() + 2,
-                    pos.getZ() + 2
-            );
-            List<Entity> entities = level.getEntities(this, searchBox, e -> e.getStringUUID().equals(uuid));
-            return entities.stream().findFirst().map(e -> (VesselEntity) e);
-        } catch (Exception e) {
-            return Optional.empty();
-        }
-    }
-
-    private void fetchDominatedClient() {
-        Entity potential = level.getEntity(getEntityData().get(DOMINATED_ID));
-        if (potential instanceof VesselEntity t) {
-            dominated = Optional.of(t);
-        } else {
-            dominated = Optional.empty();
-        }
-    }
 
     // reset speed to 1
     private void resetSpeedAttributes() {
@@ -283,7 +196,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
      * Check if this vessel should pull the vessel behind
      */
     public boolean shouldApplySpringPhysics() {
-        if (this.train.getHead() instanceof AbstractTugEntity tug) {
+        if (this.linkingHandler.train.getHead() instanceof AbstractTugEntity tug) {
             return !tug.shouldFreezeTrain();
         }
         return true;
@@ -291,20 +204,20 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
 
     @Override
     public Optional<VesselEntity> getDominated() {
-        return this.dominated;
+        return this.linkingHandler.dominated;
 
     }
 
 
     @Override
     public Optional<VesselEntity> getDominant() {
-        return this.dominant;
+        return this.linkingHandler.dominant;
     }
 
 
     @Override
     public Train<VesselEntity> getTrain() {
-        return this.train;
+        return this.linkingHandler.train;
     }
 
     @Override
@@ -338,18 +251,24 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     }
 
     public void doChainMath(){
-        dominant.ifPresent((dominant) -> {
+        linkingHandler.dominant.ifPresent((dominant) -> {
                 SpringPhysicsUtil.adjustSpringedEntities(dominant, this);
                 checkInsideBlocks();
         });
     }
 
     @Override
+    public void remove(RemovalReason r) {
+        handleLinkableKill();
+        super.remove(r);
+    }
+
+    @Override
     public void handleShearsCut() {
-        if (!this.level.isClientSide && dominant.isPresent()) {
+        if (!this.level.isClientSide && linkingHandler.dominant.isPresent()) {
             spawnChain();
         }
-        this.dominant.ifPresent(LinkableEntity::removeDominated);
+        linkingHandler.dominant.ifPresent(LinkableEntity::removeDominated);
         removeDominant();
     }
 
@@ -595,6 +514,12 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
             return false;
         } else if (!this.level.isClientSide && !this.isRemoved() &&
                 damageSource instanceof EntityDamageSource e && e.getEntity() instanceof Player) {
+            int i = (int) Stream.of(linkingHandler.dominant, linkingHandler.dominated).filter(Optional::isPresent).count();
+            if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                for (int j = 0; j < i; j++) {
+                    spawnChain();
+                }
+            }
             this.remove(RemovalReason.KILLED);
             return true;
         } else {

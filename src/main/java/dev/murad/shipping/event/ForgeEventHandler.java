@@ -1,8 +1,8 @@
 package dev.murad.shipping.event;
 
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.entity.custom.vessel.tug.VehicleFrontPart;
 import dev.murad.shipping.item.SpringItem;
-import dev.murad.shipping.util.EntitySpringAPI;
 import dev.murad.shipping.util.LinkableEntity;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -33,7 +33,7 @@ public class ForgeEventHandler {
         if(!event.getItemStack().isEmpty()) {
             Item item = event.getItemStack().getItem();
             if(item instanceof SpringItem springItem) {
-                if(EntitySpringAPI.isValidTarget(target)) {
+                if(target instanceof LinkableEntity || target instanceof VehicleFrontPart) {
                     springItem.onUsedOnEntity(event.getItemStack(), event.getPlayer(), event.getWorld(), target);
                     event.setCanceled(true);
                     event.setCancellationResult(InteractionResult.SUCCESS);

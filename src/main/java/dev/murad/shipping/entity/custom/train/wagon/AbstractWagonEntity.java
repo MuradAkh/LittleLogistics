@@ -26,19 +26,19 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
 
     @Override
     public void setDominated(AbstractTrainCarEntity entity) {
-        this.dominated = Optional.of(entity);
+        linkingHandler.dominated = Optional.of(entity);
     }
 
 
     @Override
     public void setDominant(AbstractTrainCarEntity entity) {
         this.setTrain(entity.getTrain());
-        this.dominant = Optional.of(entity);
+        linkingHandler.dominant = Optional.of(entity);
     }
 
     @Override
     public void tick() {
-        if(capability.isFrozen() || this.train.getTug().map(s -> (AbstractLocomotiveEntity) s).map(AbstractLocomotiveEntity::shouldFreezeTrain).orElse(false)){
+        if(capability.isFrozen() || linkingHandler.train.getTug().map(s -> (AbstractLocomotiveEntity) s).map(AbstractLocomotiveEntity::shouldFreezeTrain).orElse(false)){
             this.setDeltaMovement(Vec3.ZERO);
         } else {
             super.tick();
@@ -50,8 +50,8 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
         if(!this.isAlive()){
             return;
         }
-        this.dominated = Optional.empty();
-        this.train.setTail(this);
+        linkingHandler.dominated = Optional.empty();
+        linkingHandler.train.setTail(this);
     }
 
     @Override
@@ -59,15 +59,15 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
         if(!this.isAlive()){
             return;
         }
-        this.dominant = Optional.empty();
+        linkingHandler.dominant = Optional.empty();
         this.setTrain(new Train<>(this));
     }
 
     @Override
-    public void setTrain(Train train) {
-        this.train = train;
+    public void setTrain(Train<AbstractTrainCarEntity> train) {
+        linkingHandler.train = train;
         train.setTail(this);
-        dominated.ifPresent(dominated -> {
+        linkingHandler.dominated.ifPresent(dominated -> {
             // avoid recursion loops
             if(!dominated.getTrain().equals(train)){
                 dominated.setTrain(train);
@@ -77,7 +77,7 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
 
     // hack to disable hoppers
     public boolean isDockable() {
-        return this.dominant.map(dom -> this.distanceToSqr(dom) < 1.05).orElse(true);
+        return linkingHandler.dominant.map(dom -> this.distanceToSqr(dom) < 1.05).orElse(true);
     }
 
 
@@ -132,7 +132,7 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
         }
 
         private Optional<StallingCapability> delegate() {
-            if (train.getHead() instanceof AbstractLocomotiveEntity e) {
+            if (linkingHandler.train.getHead() instanceof AbstractLocomotiveEntity e) {
                 return e.getCapability(StallingCapability.STALLING_CAPABILITY).resolve();
             }
             return Optional.empty();

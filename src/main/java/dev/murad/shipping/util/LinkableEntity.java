@@ -21,7 +21,7 @@ public interface LinkableEntity<V extends LinkableEntity<V>> {
     void handleShearsCut();
     Train<V> getTrain();
     boolean linkEntities(Player player, Entity target);
-    void setTrain(Train train);
+    void setTrain(Train<V> train);
     boolean hasWaterOnSides();
 
     default void handleLinkableKill(){

@@ -177,7 +177,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     @Override
     public void tick(){
-        super.tickLoad();
+        linkingHandler.tickLoad();
 
         if (!this.level.isClientSide) {
             tickOldBlockPos();
@@ -190,7 +190,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         var yrot = this.getYRot();
         tickVanilla();
         this.setYRot(yrot);
-        if(this.dominated.isEmpty() && this.getDeltaMovement().length() > 0.05){
+        if(linkingHandler.dominated.isEmpty() && this.getDeltaMovement().length() > 0.05){
             this.setYRot(RailHelper.directionFromVelocity(getDeltaMovement()).toYRot());
         }
         if(!this.level.isClientSide){
@@ -277,7 +277,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         }
 
         if (shouldFreezeTrain()) {
-            this.train.asList().forEach(t -> t.setDeltaMovement(0, 0, 0));
+            linkingHandler.train.asList().forEach(t -> t.setDeltaMovement(0, 0, 0));
         }
     }
 
@@ -448,7 +448,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     public boolean shouldFreezeTrain() {
-        return (stalling.isStalled() && !docked) || this.train.asList().stream().anyMatch(AbstractTrainCarEntity::isFrozen);
+        return (stalling.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(AbstractTrainCarEntity::isFrozen);
     }
 
     private void accelerate() {
@@ -461,7 +461,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     @Override
     public void setDominated(AbstractTrainCarEntity entity) {
-        dominated = Optional.of(entity);
+        linkingHandler.dominated = Optional.of(entity);
     }
 
     @Override
@@ -472,8 +472,8 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     @Override
     public void removeDominated() {
-        dominated = Optional.empty();
-        this.train.setTail(this);
+        linkingHandler.dominated = Optional.empty();
+        linkingHandler.train.setTail(this);
     }
 
     @Override
@@ -482,8 +482,8 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     @Override
-    public void setTrain(Train train) {
-        this.train = train;
+    public void setTrain(Train<AbstractTrainCarEntity> train) {
+        linkingHandler.train = train;
     }
 
     protected final StallingCapability stalling = new StallingCapability() {

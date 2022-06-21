@@ -5,7 +5,6 @@ import dev.murad.shipping.entity.custom.train.locomotive.EnergyLocomotiveEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.SteamLocomotiveEntity;
 import dev.murad.shipping.entity.custom.train.wagon.ChestCarEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
-import dev.murad.shipping.entity.custom.vessel.SpringEntity;
 import dev.murad.shipping.entity.custom.vessel.barge.*;
 import dev.murad.shipping.entity.custom.train.wagon.ChunkLoaderCarEntity;
 import dev.murad.shipping.entity.custom.train.wagon.FluidTankCarEntity;
@@ -66,14 +65,6 @@ public class ModEntityTypes {
                                     MobCategory.MISC).sized(0.7f, 0.9f)
                             .clientTrackingRange(8)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "energy_tug").toString()));
-
-    public static final RegistryObject<EntityType<SpringEntity>> SPRING =
-            Registration.ENTITIES.register("spring",
-                    () -> EntityType.Builder.<SpringEntity>of(SpringEntity::new,
-                                    MobCategory.MISC)
-                            .sized(0.05f, 0.2f)
-                            .clientTrackingRange(8)
-                            .build(new ResourceLocation(ShippingMod.MOD_ID, "spring").toString()));
 
     public static final RegistryObject<EntityType<ChestCarEntity>> CHEST_CAR =
             Registration.ENTITIES.register("chest_car",

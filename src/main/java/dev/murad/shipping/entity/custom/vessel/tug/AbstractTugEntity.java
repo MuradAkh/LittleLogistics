@@ -7,14 +7,11 @@ import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
-import dev.murad.shipping.item.LocoRouteItem;
 import dev.murad.shipping.util.*;
-import dev.murad.shipping.entity.custom.vessel.SpringEntity;
 import dev.murad.shipping.entity.custom.vessel.VesselEntity;
 import dev.murad.shipping.entity.navigation.TugPathNavigator;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModBlocks;
-import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModSounds;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,8 +43,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.entity.PartEntity;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.network.NetworkHooks;
 
@@ -56,7 +51,6 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
@@ -93,7 +87,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     public AbstractTugEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
         this.blocksBuilding = true;
-        this.train = new Train(this);
+        linkingHandler.train = (new Train<>(this));
         this.path = new TugRoute();
         frontHitbox = new VehicleFrontPart(this);
     }
@@ -438,7 +432,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     public boolean shouldFreezeTrain() {
-        return (stalling.isStalled() && !docked) || this.train.asList().stream().anyMatch(VesselEntity::isFrozen);
+        return (stalling.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(VesselEntity::isFrozen);
     }
 
     @Override
@@ -465,7 +459,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Override
     public void setDominated(VesselEntity entity) {
-        this.dominated = Optional.of(entity);
+        linkingHandler.dominated = (Optional.of(entity));
     }
 
     @Override
@@ -475,8 +469,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Override
     public void removeDominated() {
-        this.dominated = Optional.empty();
-        this.train.setTail(this);
+        linkingHandler.dominated = (Optional.empty());
+        linkingHandler.train.setTail(this);
     }
 
     @Override
@@ -485,8 +479,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Override
-    public void setTrain(Train train) {
-        this.train = train;
+    public void setTrain(Train<VesselEntity> train) {
+        linkingHandler.train = train;
     }
 
     @Override
@@ -496,7 +490,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             Containers.dropContents(this.level, this, this);
             this.spawnAtLocation(routeItemHandler.getStackInSlot(0));
         }
-        handleLinkableKill();
         super.remove(r);
     }
 

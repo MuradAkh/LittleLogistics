@@ -104,7 +104,6 @@ public class ModClientEventHandler {
                     }
                 });
 
-        event.registerEntityRenderer(ModEntityTypes.SPRING.get(), DummyEntityRenderer::new);
         event.registerBlockEntityRenderer(ModTileEntitiesTypes.FLUID_HOPPER.get(), FluidHopperTileEntityRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.STEAM_LOCOMOTIVE.get(), ctx -> new TrainCarRenderer<>(ctx,
                 SteamLocomotiveModel::new,
