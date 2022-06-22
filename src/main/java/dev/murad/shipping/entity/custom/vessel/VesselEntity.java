@@ -142,15 +142,14 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
 
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
-        super.readAdditionalSaveData(compound);
         linkingHandler.readAdditionalSaveData(compound);
+        super.readAdditionalSaveData(compound);
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
-        super.addAdditionalSaveData(compound);
         linkingHandler.addAdditionalSaveData(compound);
-
+        super.addAdditionalSaveData(compound);
     }
 
 

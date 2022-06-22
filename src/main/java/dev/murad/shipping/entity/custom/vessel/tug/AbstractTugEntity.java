@@ -289,9 +289,9 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (!player.level.isClientSide()) {
+
             NetworkHooks.openGui((ServerPlayer) player, createContainerProvider(), getDataAccessor()::write);
         }
-        // don't open GUI *and* use item in hand
         return InteractionResult.CONSUME;
     }
 
