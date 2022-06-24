@@ -19,8 +19,8 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -31,7 +31,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class FluidTankBargeEntity extends AbstractBargeEntity{
-    public static int CAPACITY = FluidAttributes.BUCKET_VOLUME * 10;
+    public static int CAPACITY = FluidType.BUCKET_VOLUME * 10;
     protected FluidTank tank = new FluidTank(CAPACITY){
         @Override
         protected void onContentsChanged(){

@@ -39,8 +39,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.fluids.FluidAttributes;
+import net.minecraftforge.client.IFluidTypeRenderProperties;
+import net.minecraftforge.client.RenderProperties;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
 
 public class FluidRenderUtil {
 
@@ -173,7 +175,10 @@ public class FluidRenderUtil {
     private static void drawCubeQuads(PoseStack PoseStack, MultiBufferSource renderBuffer, int combinedLight, FluidStack fluid, int capacity) {
         // other typical RenderTypes used by TER are:
         // getEntityCutout, getBeaconBeam (which has translucent),
-        FluidAttributes attributes = fluid.getFluid().getAttributes();
+        IFluidTypeRenderProperties attributes = RenderProperties.get(fluid.getFluid().getFluidType());
+        if(attributes == null){
+            return;
+        }
         ResourceLocation fluidStill = attributes.getStillTexture(fluid);
 
         if(fluidStill == null){
@@ -182,7 +187,7 @@ public class FluidRenderUtil {
 //        VertexConsumer vertexBuilderBlockQuads = renderBuffer.getBuffer(RenderType.entityTranslucent(new ResourceLocation("minecraft:textures/block/lava_still.png")));
         VertexConsumer vertexBuilderBlockQuads = renderBuffer.getBuffer(RenderType.translucent());
 
-        int color = attributes.getColor();
+        int color = attributes.getColorTint();
         Matrix4f matrixPos = PoseStack.last().pose();     // retrieves the current transformation matrix
         Matrix3f matrixNormal = PoseStack.last().normal();  // retrieves the current transformation matrix for the normal vector
         TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(fluidStill);

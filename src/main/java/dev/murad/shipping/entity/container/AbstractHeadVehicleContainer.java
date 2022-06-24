@@ -17,7 +17,6 @@ import net.minecraftforge.items.SlotItemHandler;
 import javax.annotation.Nullable;
 
 public abstract class AbstractHeadVehicleContainer<T extends DataAccessor, U extends Entity & HeadVehicle> extends AbstractItemHandlerContainer{
-    public static final ResourceLocation EMPTY_ENERGY = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_energy");
     public static final ResourceLocation EMPTY_ATLAS_LOC = InventoryMenu.BLOCK_ATLAS;
     protected T data;
     protected U entity;

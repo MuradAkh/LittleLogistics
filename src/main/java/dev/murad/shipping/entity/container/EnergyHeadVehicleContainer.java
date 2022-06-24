@@ -2,6 +2,7 @@ package dev.murad.shipping.entity.container;
 
 import dev.murad.shipping.entity.accessor.EnergyHeadVehicleDataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
+import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModMenuTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
@@ -18,7 +19,7 @@ public class EnergyHeadVehicleContainer<T extends Entity & HeadVehicle> extends 
         if(entity != null) {
             entity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
                 addSlot(new SlotItemHandler(h, 0, 32, 35)
-                        .setBackground(EMPTY_ATLAS_LOC, EMPTY_ENERGY));
+                        .setBackground(EMPTY_ATLAS_LOC, ModItems.EMPTY_ENERGY));
             });
         }
     }

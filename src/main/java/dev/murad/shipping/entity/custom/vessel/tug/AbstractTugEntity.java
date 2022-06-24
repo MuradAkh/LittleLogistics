@@ -7,6 +7,7 @@ import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
+import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.*;
 import dev.murad.shipping.entity.custom.vessel.VesselEntity;
 import dev.murad.shipping.entity.navigation.TugPathNavigator;
@@ -74,7 +75,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private VehicleFrontPart frontHitbox;
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.BOOLEAN);
 
-    public static final ResourceLocation ROUTE_ICON = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_tug_route");
 
 
     public boolean allowDockInterface(){
@@ -102,7 +102,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Override
     public ResourceLocation getRouteIcon() {
-        return ROUTE_ICON;
+        return ModItems.TUG_ROUTE_ICON;
     }
 
 

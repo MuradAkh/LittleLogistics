@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidAttributes;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -28,7 +28,7 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class FluidHopperTileEntity extends BlockEntity implements IVesselLoader {
-    public static final int CAPACITY = FluidAttributes.BUCKET_VOLUME * 10;
+    public static final int CAPACITY = FluidType.BUCKET_VOLUME * 10;
     private int cooldownTime = 0;
 
     public FluidHopperTileEntity(BlockPos pos, BlockState state) {

@@ -14,6 +14,7 @@ import dev.murad.shipping.entity.render.barge.FluidTankBargeRenderer;
 import dev.murad.shipping.entity.render.barge.StaticVesselRenderer;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModEntityTypes;
+import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -35,9 +36,9 @@ public class ModClientEventHandler {
     @SubscribeEvent
     public static void onTextureStitchEventPre(TextureStitchEvent.Pre event) {
         if (event.getAtlas().location() != AbstractHeadVehicleContainer.EMPTY_ATLAS_LOC) return;
-        event.addSprite(AbstractTugEntity.ROUTE_ICON);
-        event.addSprite(AbstractLocomotiveEntity.ROUTE_ICON);
-        event.addSprite(AbstractHeadVehicleContainer.EMPTY_ENERGY);
+        event.addSprite(ModItems.LOCO_ROUTE_ICON);
+        event.addSprite(ModItems.TUG_ROUTE_ICON);
+        event.addSprite(ModItems.EMPTY_ENERGY);
     }
 
     @SubscribeEvent

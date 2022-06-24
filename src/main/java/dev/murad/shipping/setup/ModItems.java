@@ -1,5 +1,6 @@
 package dev.murad.shipping.setup;
 
+import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.train.locomotive.EnergyLocomotiveEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.SteamLocomotiveEntity;
 import dev.murad.shipping.entity.custom.train.wagon.ChestCarEntity;
@@ -11,11 +12,21 @@ import dev.murad.shipping.entity.custom.vessel.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.SteamTugEntity;
 import dev.murad.shipping.item.*;
 import dev.murad.shipping.item.creative.CreativeCapacitor;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.RegistryObject;
 
 public class ModItems {
+
+    /**
+     *  Empty Icons
+     */
+
+    public static final ResourceLocation LOCO_ROUTE_ICON = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_loco_route");
+    public static final ResourceLocation TUG_ROUTE_ICON = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_tug_route");
+    public static final ResourceLocation EMPTY_ENERGY = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_energy");
+
 
     /**
      * COMMON

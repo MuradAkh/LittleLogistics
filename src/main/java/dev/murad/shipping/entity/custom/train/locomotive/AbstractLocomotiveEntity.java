@@ -12,6 +12,7 @@ import dev.murad.shipping.entity.custom.vessel.tug.VehicleFrontPart;
 import dev.murad.shipping.entity.navigation.LocomotiveNavigator;
 import dev.murad.shipping.item.LocoRouteItem;
 import dev.murad.shipping.setup.ModBlocks;
+import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModSounds;
 import dev.murad.shipping.util.*;
 import lombok.Getter;
@@ -59,7 +60,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     private boolean doflip = false;
     private boolean independentMotion = false;
     private boolean docked = false;
-    private static double LOCO_SPEED = ShippingConfig.Server.LOCO_BASE_SPEED.get();
     private final VehicleFrontPart frontHitbox;
     private int speedRecomputeCooldown = 0;
     private double speedLimit = -1;
@@ -75,7 +75,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     // item handler for loco routes
     private static final String LOCO_ROUTE_INV_TAG = "locoRouteInv";
 
-    public static final ResourceLocation ROUTE_ICON = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_loco_route");
 
     @Getter
     protected ItemStackHandler routeItemHandler = createLocoRouteItemHandler();
@@ -104,7 +103,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     @Override
     public ResourceLocation getRouteIcon() {
-        return ROUTE_ICON;
+        return ModItems.LOCO_ROUTE_ICON;
     }
 
     @Override
@@ -438,9 +437,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                                     },
                                     12))
                     .orElse(12);
-            double minimum = LOCO_SPEED * 0.35;
+            double minimum = ShippingConfig.Server.LOCO_BASE_SPEED.get() * 0.35;
             double modifier = dist / 12d;
-            speedLimit = minimum + (LOCO_SPEED * 0.65 * modifier);
+            speedLimit = minimum + (ShippingConfig.Server.LOCO_BASE_SPEED.get() * 0.65 * modifier);
             speedRecomputeCooldown = 10;
         } else {
             speedRecomputeCooldown--;
