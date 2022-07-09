@@ -33,10 +33,7 @@ import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderBlockOverlayEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderLevelLastEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -69,7 +66,10 @@ public class ForgeClientEventHandler {
 
 
     @SubscribeEvent
-    public static void onRenderWorldLast(RenderLevelLastEvent event) {
+    public static void onRenderWorldLast(RenderLevelStageEvent event) {
+        if(!event.getStage().equals(RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS)){
+            return;
+        }
         Player player = Minecraft.getInstance().player;
         ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);
 
