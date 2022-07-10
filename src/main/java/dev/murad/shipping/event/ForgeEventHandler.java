@@ -2,7 +2,7 @@ package dev.murad.shipping.event;
 
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.vessel.tug.VehicleFrontPart;
-import dev.murad.shipping.global.TrainChunkManager;
+import dev.murad.shipping.global.PlayerTrainChunkManager;
 import dev.murad.shipping.item.SpringItem;
 import dev.murad.shipping.util.LinkableEntity;
 import net.minecraft.server.level.ServerLevel;
@@ -15,6 +15,8 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+
+import java.util.UUID;
 
 /**
  * Forge-wide event bus
@@ -42,7 +44,7 @@ public class ForgeEventHandler {
             return;
         }
         // Get the mana manager for this level
-        TrainChunkManager manager = TrainChunkManager.get((ServerLevel) event.world);
+        PlayerTrainChunkManager manager = PlayerTrainChunkManager.get((ServerLevel) event.world, UUID.fromString(""));
         manager.tick();
     }
 

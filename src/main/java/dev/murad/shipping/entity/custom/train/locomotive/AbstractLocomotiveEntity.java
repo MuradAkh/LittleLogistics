@@ -1,7 +1,6 @@
 package dev.murad.shipping.entity.custom.train.locomotive;
 
 import dev.murad.shipping.ShippingConfig;
-import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
 import dev.murad.shipping.capability.StallingCapability;
@@ -10,7 +9,7 @@ import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.VehicleFrontPart;
 import dev.murad.shipping.entity.navigation.LocomotiveNavigator;
-import dev.murad.shipping.global.TrainChunkManager;
+import dev.murad.shipping.global.PlayerTrainChunkManager;
 import dev.murad.shipping.item.LocoRouteItem;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
@@ -26,7 +25,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -51,6 +49,7 @@ import net.minecraftforge.network.NetworkHooks;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -91,13 +90,13 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     public AbstractLocomotiveEntity(EntityType<?> type, Level world) {
         super(type, world);
         frontHitbox = new VehicleFrontPart(this);
-        TrainChunkManager.enroll(this);
+        PlayerTrainChunkManager.enroll(this, UUID.fromString(""));
     }
 
     public AbstractLocomotiveEntity(EntityType<?> type, Level level, Double x, Double y, Double z) {
         super(type, level, x, y, z);
         frontHitbox = new VehicleFrontPart(this);
-        TrainChunkManager.enroll(this);
+        PlayerTrainChunkManager.enroll(this, UUID.fromString(""));
     }
 
     @Override

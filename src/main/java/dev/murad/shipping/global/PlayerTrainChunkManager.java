@@ -1,50 +1,74 @@
 package dev.murad.shipping.global;
 
 import dev.murad.shipping.util.LinkableEntity;
-import dev.murad.shipping.util.LinkableEntityHead;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
-public class TrainChunkManager extends SavedData {
-    private final static TicketType<Integer> TICKET_TYPE = TicketType.create("littlelogistics:trainticket", Integer::compareTo);
+public class PlayerTrainChunkManager extends SavedData {
+    private final static TicketType<UUID> TRAVEL_TICKET = TicketType.create("littlelogistics:travelticket", UUID::compareTo);
+    private final static TicketType<UUID> LOAD_TICKET = TicketType.create("littlelogistics:loadticket", UUID::compareTo, 200);
     private final Set<LinkableEntity<? extends Entity>> enrolled = new HashSet<>();
     private final Set<ChunkPos> tickets = new HashSet<>();
+    private final Set<ChunkPos> toLoad = new HashSet<>();
     private final ServerLevel level;
+    private boolean active = true;
+    private final UUID uuid;
 
-    public static TrainChunkManager get(ServerLevel level){
+    public static PlayerTrainChunkManager get(ServerLevel level, UUID uuid){
         DimensionDataStorage storage = level.getDataStorage();
-        return storage.computeIfAbsent((tag) -> new TrainChunkManager(tag, level), () -> new TrainChunkManager(level), "littlelogistics:chunkmanager");
+        return storage.computeIfAbsent((tag) -> new PlayerTrainChunkManager(tag, level, uuid), () -> new PlayerTrainChunkManager(level, uuid), "littlelogistics:chunkmanager:" + uuid.toString());
     }
 
 
-    public static <T extends Entity & LinkableEntity<T>>  void enroll(T entity){
+    public static <T extends Entity & LinkableEntity<T>>  void enroll(T entity, UUID uuid){
         if(!entity.level.isClientSide) {
-            var manager = TrainChunkManager.get((ServerLevel) entity.level);
+            var manager = PlayerTrainChunkManager.get((ServerLevel) entity.level, uuid);
             manager.enrolled.add(entity);
             manager.onChanged();
         }
     }
 
+    private void deactivate(){
+        enrolled.forEach(e -> toLoad.addAll(e.getTrain().asList().stream().map(Entity::chunkPosition).collect(Collectors.toSet())));
+        enrolled.clear();
+        tickets.forEach(chunkPos -> level.getChunkSource().addRegionTicket(TRAVEL_TICKET, chunkPos, 0, uuid));
+        tickets.clear();
+
+        active = false;
+    }
+
+    private void activate(){
+        active = true;
+        toLoad.forEach(chunkPos -> level.getChunkSource().removeRegionTicket(LOAD_TICKET, chunkPos, 2, uuid));
+    }
+
     public void tick(){
+        if(!active){
+            return;
+        }
+        boolean changed = enrolled.removeIf(e -> !((Entity) e).isAlive());
+
         enrolled.forEach(entityHead -> entityHead.getTrain()
                 .asList()
                 .stream()
                 .filter(entity -> !((ServerLevel) entity.level).isPositionEntityTicking(entity.getBlockPos()))
                 .forEach(Entity::tick));
 
-        if(enrolled.stream()
+        if(changed || enrolled.stream()
                 .map(e -> (Entity) e)
                 .map(e -> e.chunkPosition().toLong() != new ChunkPos(new BlockPos(e.xOld, e.yOld, e.zOld)).toLong())
                 .reduce(Boolean.FALSE, Boolean::logicalOr)){
@@ -71,7 +95,7 @@ public class TrainChunkManager extends SavedData {
                 .stream()
                 .filter(pos -> !required.contains(pos))
                 .forEach(chunkPos -> {
-                    level.getChunkSource().removeRegionTicket(TICKET_TYPE, chunkPos, 0, 0);
+                    level.getChunkSource().removeRegionTicket(TRAVEL_TICKET, chunkPos, 0, uuid);
                     tickets.remove(chunkPos);
                 });
     }
@@ -82,24 +106,28 @@ public class TrainChunkManager extends SavedData {
             .filter(pos -> !tickets.contains(pos))
                 .collect(Collectors.toSet()) // avoid mutation on the go
                 .forEach(chunkPos -> {
-                    level.getChunkSource().addRegionTicket(TICKET_TYPE, chunkPos, 0, 0);
+                    level.getChunkSource().addRegionTicket(TRAVEL_TICKET, chunkPos, 0, uuid);
                     tickets.add(chunkPos);
                 });
     }
 
 
-    TrainChunkManager(ServerLevel level){
+    PlayerTrainChunkManager(ServerLevel level, UUID uuid){
         this.level = level;
+        this.uuid = uuid;
 
     }
 
-    TrainChunkManager(CompoundTag tag, ServerLevel level){
+    PlayerTrainChunkManager(CompoundTag tag, ServerLevel level, UUID uuid){
         this.level = level;
-
+        this.uuid = uuid;
+        Arrays.stream(tag.getLongArray("chunksToLoad")).forEach(chunk -> toLoad.add(new ChunkPos(chunk)));
     }
 
     @Override
-    public CompoundTag save(CompoundTag p_77763_) {
-        return null;
+    public CompoundTag save(CompoundTag tag) {
+        deactivate();
+        tag.putLongArray("chunksToLoad", toLoad.stream().map(ChunkPos::toLong).collect(Collectors.toList()));
+        return tag;
     }
 }
