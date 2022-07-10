@@ -50,9 +50,9 @@ public class LinkingHandler<T extends Entity & LinkableEntity<T>> {
             }
             if (dominated.isPresent()){
                 waitForDominated = false;
-                if(!((ServerLevel) entity.level).isPositionEntityTicking(dominated.get().blockPosition())){
-                    entity.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
-                }
+//                if(!((ServerLevel) entity.level).isPositionEntityTicking(dominated.get().blockPosition())){
+//                    entity.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
+//                }
             } else if (waitForDominated) {
                 entity.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
             }

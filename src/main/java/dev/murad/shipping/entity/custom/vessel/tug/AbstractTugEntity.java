@@ -7,6 +7,7 @@ import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
+import dev.murad.shipping.global.TrainChunkManager;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.*;
 import dev.murad.shipping.entity.custom.vessel.VesselEntity;
@@ -90,6 +91,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         linkingHandler.train = (new Train<>(this));
         this.path = new TugRoute();
         frontHitbox = new VehicleFrontPart(this);
+        TrainChunkManager.enroll(this);
     }
 
     public AbstractTugEntity(EntityType type, Level worldIn, double x, double y, double z) {
@@ -98,6 +100,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         this.xo = x;
         this.yo = y;
         this.zo = z;
+        TrainChunkManager.enroll(this);
     }
 
     @Override

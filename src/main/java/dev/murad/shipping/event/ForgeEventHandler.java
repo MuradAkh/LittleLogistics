@@ -2,12 +2,15 @@ package dev.murad.shipping.event;
 
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.vessel.tug.VehicleFrontPart;
+import dev.murad.shipping.global.TrainChunkManager;
 import dev.murad.shipping.item.SpringItem;
 import dev.murad.shipping.util.LinkableEntity;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ShearsItem;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -27,6 +30,20 @@ public class ForgeEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void entitySpecificInteract(PlayerInteractEvent.EntityInteractSpecific event) {
         handleEvent(event, event.getTarget());
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onWorldTick(TickEvent.WorldTickEvent event) {
+        // Don't do anything client side
+        if (event.world.isClientSide) {
+            return;
+        }
+        if (event.phase == TickEvent.Phase.START) {
+            return;
+        }
+        // Get the mana manager for this level
+        TrainChunkManager manager = TrainChunkManager.get((ServerLevel) event.world);
+        manager.tick();
     }
 
     private static void handleEvent(PlayerInteractEvent event, Entity target) {
