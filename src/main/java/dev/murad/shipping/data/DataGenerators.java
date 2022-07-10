@@ -22,10 +22,10 @@ public final class DataGenerators {
         gen.addProvider(true, new ModItemModelProvider(gen, existingFileHelper));
 
         ModBlockTagsProvider modBlockTagsProvider = new ModBlockTagsProvider(gen, existingFileHelper);
-        gen.addProvider(false, modBlockTagsProvider);
-        gen.addProvider(false, new ModItemTagsProvider(gen, modBlockTagsProvider, existingFileHelper));
-        gen.addProvider(false, new ModLootTableProvider(gen));
-        gen.addProvider(false, new ModRecipeProvider(gen));
+        gen.addProvider(true, modBlockTagsProvider);
+        gen.addProvider(true, new ModItemTagsProvider(gen, modBlockTagsProvider, existingFileHelper));
+        gen.addProvider(true, new ModLootTableProvider(gen));
+        gen.addProvider(true, new ModRecipeProvider(gen));
     }
 
 }
