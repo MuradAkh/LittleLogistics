@@ -91,7 +91,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         linkingHandler.train = (new Train<>(this));
         this.path = new TugRoute();
         frontHitbox = new VehicleFrontPart(this);
-        PlayerTrainChunkManager.enroll(this, UUID.fromString(""));
+        PlayerTrainChunkManager.enroll(this, new UUID(1, 1));
     }
 
     public AbstractTugEntity(EntityType type, Level worldIn, double x, double y, double z) {
@@ -100,7 +100,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         this.xo = x;
         this.yo = y;
         this.zo = z;
-        PlayerTrainChunkManager.enroll(this, UUID.fromString(""));
+        PlayerTrainChunkManager.enroll(this, new UUID(1, 1));
     }
 
     @Override

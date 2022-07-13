@@ -1,6 +1,7 @@
 package dev.murad.shipping.global;
 
 import dev.murad.shipping.util.LinkableEntity;
+import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -11,10 +12,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -24,14 +22,22 @@ public class PlayerTrainChunkManager extends SavedData {
     private final Set<LinkableEntity<? extends Entity>> enrolled = new HashSet<>();
     private final Set<ChunkPos> tickets = new HashSet<>();
     private final Set<ChunkPos> toLoad = new HashSet<>();
-    private final ServerLevel level;
-    private boolean active = true;
+    private boolean active = false;
+    @Getter
     private final UUID uuid;
+    @Getter
+    private final ServerLevel level;
 
     public static PlayerTrainChunkManager get(ServerLevel level, UUID uuid){
         DimensionDataStorage storage = level.getDataStorage();
-        return storage.computeIfAbsent((tag) -> new PlayerTrainChunkManager(tag, level, uuid), () -> new PlayerTrainChunkManager(level, uuid), "littlelogistics:chunkmanager:" + uuid.toString());
+        return storage.computeIfAbsent((tag) -> new PlayerTrainChunkManager(tag, level, uuid), () -> new PlayerTrainChunkManager(level, uuid), "littlelogistics:chunkmanager-" + uuid.toString());
     }
+
+    public static Optional<PlayerTrainChunkManager> getSaved(ServerLevel level, UUID uuid){
+        DimensionDataStorage storage = level.getDataStorage();
+        return Optional.ofNullable(storage.get((tag) -> new PlayerTrainChunkManager(tag, level, uuid),"littlelogistics:chunkmanager-" + uuid.toString()));
+    }
+
 
 
     public static <T extends Entity & LinkableEntity<T>>  void enroll(T entity, UUID uuid){
@@ -42,25 +48,29 @@ public class PlayerTrainChunkManager extends SavedData {
         }
     }
 
-    private void deactivate(){
-        enrolled.forEach(e -> toLoad.addAll(e.getTrain().asList().stream().map(Entity::chunkPosition).collect(Collectors.toSet())));
+    public void deactivate(){
+        updateToLoad();
         enrolled.clear();
-        tickets.forEach(chunkPos -> level.getChunkSource().addRegionTicket(TRAVEL_TICKET, chunkPos, 0, uuid));
+        tickets.forEach(chunkPos -> level.getChunkSource().removeRegionTicket(TRAVEL_TICKET, chunkPos, 0, uuid));
         tickets.clear();
-
         active = false;
     }
 
-    private void activate(){
+    private void updateToLoad() {
+        toLoad.clear();
+        enrolled.forEach(e -> toLoad.addAll(e.getTrain().asList().stream().map(Entity::chunkPosition).collect(Collectors.toSet())));
+    }
+
+    public void activate(){
         active = true;
-        toLoad.forEach(chunkPos -> level.getChunkSource().removeRegionTicket(LOAD_TICKET, chunkPos, 2, uuid));
+        toLoad.forEach(chunkPos -> level.getChunkSource().addRegionTicket(LOAD_TICKET, chunkPos, 2, uuid));
     }
 
     public void tick(){
+        boolean changed = enrolled.removeIf(e -> !((Entity) e).isAlive());
         if(!active){
             return;
         }
-        boolean changed = enrolled.removeIf(e -> !((Entity) e).isAlive());
 
         enrolled.forEach(entityHead -> entityHead.getTrain()
                 .asList()
@@ -81,6 +91,7 @@ public class PlayerTrainChunkManager extends SavedData {
         enrolled.stream().map(this::computeRequiredTickets).forEach(required::addAll);
         removeUnneededTickets(required);
         addNeededTickets(required);
+        setDirty();
     }
 
     public Set<ChunkPos> computeRequiredTickets(LinkableEntity<? extends Entity> entity){
@@ -115,7 +126,7 @@ public class PlayerTrainChunkManager extends SavedData {
     PlayerTrainChunkManager(ServerLevel level, UUID uuid){
         this.level = level;
         this.uuid = uuid;
-
+        TrainChunkManagerManager.get(level.getServer()).enroll(this);
     }
 
     PlayerTrainChunkManager(CompoundTag tag, ServerLevel level, UUID uuid){
@@ -126,7 +137,7 @@ public class PlayerTrainChunkManager extends SavedData {
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        deactivate();
+        updateToLoad();
         tag.putLongArray("chunksToLoad", toLoad.stream().map(ChunkPos::toLong).collect(Collectors.toList()));
         return tag;
     }

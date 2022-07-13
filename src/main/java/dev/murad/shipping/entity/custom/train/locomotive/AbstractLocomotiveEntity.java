@@ -90,13 +90,13 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     public AbstractLocomotiveEntity(EntityType<?> type, Level world) {
         super(type, world);
         frontHitbox = new VehicleFrontPart(this);
-        PlayerTrainChunkManager.enroll(this, UUID.fromString(""));
+        PlayerTrainChunkManager.enroll(this, new UUID(1, 1));
     }
 
     public AbstractLocomotiveEntity(EntityType<?> type, Level level, Double x, Double y, Double z) {
         super(type, level, x, y, z);
         frontHitbox = new VehicleFrontPart(this);
-        PlayerTrainChunkManager.enroll(this, UUID.fromString(""));
+        PlayerTrainChunkManager.enroll(this, new UUID(1, 1));
     }
 
     @Override
