@@ -2,6 +2,8 @@ package dev.murad.shipping.entity.container;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.murad.shipping.entity.custom.HeadVehicle;
+import dev.murad.shipping.util.EnrollmentHandler;
+import lombok.RequiredArgsConstructor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
@@ -11,6 +13,8 @@ import net.minecraft.world.entity.player.Inventory;
 public abstract class AbstractHeadVehicleScreen<U extends Entity & HeadVehicle, T extends AbstractHeadVehicleContainer<?, U>> extends AbstractVehicleScreen<T>{
     private Button on;
     private Button off;
+    private Button register;
+
     public AbstractHeadVehicleScreen(T menu, Inventory inventory, Component p_i51105_3_) {
         super(menu, inventory, p_i51105_3_);
     }
@@ -32,9 +36,15 @@ public abstract class AbstractHeadVehicleScreen<U extends Entity & HeadVehicle, 
                 pButton -> menu.setEngine(false),
                 getTooltip(Component.translatable("screen.littlelogistics.locomotive.off")));
 
+        register = new Button(this.getGuiLeft() + 160, this.getGuiTop() + 25, 50, 15,
+                Component.literal("Register"),
+                pButton -> menu.enroll(),
+                getTooltip(Component.translatable("screen.littlelogistics.locomotive.register")));
+
 
         this.addRenderableWidget(off);
         this.addRenderableWidget(on);
+        this.addRenderableWidget(register);
 
     }
 
@@ -42,6 +52,7 @@ public abstract class AbstractHeadVehicleScreen<U extends Entity & HeadVehicle, 
     public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         super.render(matrixStack, mouseX, mouseY, partialTicks);
         this.font.draw(matrixStack, Component.translatable("screen.littlelogistics.locomotive.route"), this.getGuiLeft() + 120, this.getGuiTop() + 55, 4210752);
+        this.font.draw(matrixStack, Component.translatable(menu.getEnrollment().text), this.getGuiLeft() + 160, this.getGuiTop() + 55, 4210752);
         this.font.draw(matrixStack, menu.getRouteText(), this.getGuiLeft() + 120, this.getGuiTop() + 65, 4210752);
     }
 
@@ -49,5 +60,6 @@ public abstract class AbstractHeadVehicleScreen<U extends Entity & HeadVehicle, 
     protected void renderBg(PoseStack pPoseStack, float pPartialTick, int pMouseX, int pMouseY) {
         off.active = menu.isOn();
         on.active = !menu.isOn();
+        register.active = menu.getEnrollment().equals(EnrollmentHandler.Enrollment.NOT_ENROLLED);
     }
 }

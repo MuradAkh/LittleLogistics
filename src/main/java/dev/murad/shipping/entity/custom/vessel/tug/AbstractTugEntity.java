@@ -58,6 +58,8 @@ import java.util.stream.IntStream;
 
 public abstract class AbstractTugEntity extends VesselEntity implements LinkableEntityHead<VesselEntity>, Container, WorldlyContainer, HeadVehicle {
 
+    protected final EnrollmentHandler enrollmentHandler;
+
     // CONTAINER STUFF
     @Getter
     protected final ItemStackHandler routeItemHandler = createRouteItemHandler();
@@ -91,7 +93,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         linkingHandler.train = (new Train<>(this));
         this.path = new TugRoute();
         frontHitbox = new VehicleFrontPart(this);
-        PlayerTrainChunkManager.enroll(this, new UUID(1, 1));
+        enrollmentHandler = new EnrollmentHandler(this);
     }
 
     public AbstractTugEntity(EntityType type, Level worldIn, double x, double y, double z) {
@@ -100,7 +102,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         this.xo = x;
         this.yo = y;
         this.zo = z;
-        PlayerTrainChunkManager.enroll(this, new UUID(1, 1));
     }
 
     @Override
@@ -117,7 +118,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
 
-    public abstract DataAccessor getDataAccessor();
+    public abstract DataAccessor getDataAccessor(Player player);
 
     private ItemStackHandler createRouteItemHandler() {
         return new ItemStackHandler(1) {
@@ -167,6 +168,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         nextStop = compound.contains("next_stop") ? compound.getInt("next_stop") : 0;
         engineOn = !compound.contains("engineOn") || compound.getBoolean("engineOn");
         contentsChanged = true;
+        enrollmentHandler.load(compound);
         super.readAdditionalSaveData(compound);
     }
 
@@ -175,6 +177,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         compound.putInt("next_stop", nextStop);
         compound.putBoolean("engineOn", engineOn);
         compound.put("routeHandler", routeItemHandler.serializeNBT());
+        enrollmentHandler.save(compound);
         super.addAdditionalSaveData(compound);
     }
 
@@ -293,9 +296,14 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (!player.level.isClientSide()) {
 
-            NetworkHooks.openGui((ServerPlayer) player, createContainerProvider(), getDataAccessor()::write);
+            NetworkHooks.openGui((ServerPlayer) player, createContainerProvider(), getDataAccessor(player)::write);
         }
         return InteractionResult.CONSUME;
+    }
+
+    @Override
+    public void enroll(UUID uuid) {
+        enrollmentHandler.enroll(uuid);
     }
 
     @Override
@@ -360,12 +368,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     public void tick() {
-
-
         if(this.level.isClientSide
                 && independentMotion){
             makeSmoke();
         }
+        enrollmentHandler.tick();
 
         super.tick();
 

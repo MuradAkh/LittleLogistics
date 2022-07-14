@@ -3,6 +3,7 @@ package dev.murad.shipping.entity.container;
 import dev.murad.shipping.entity.accessor.SteamHeadVehicleDataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.setup.ModMenuTypes;
+import dev.murad.shipping.util.EnrollmentHandler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.Level;
@@ -43,6 +44,11 @@ public class SteamHeadVehicleContainer<T extends Entity & HeadVehicle> extends A
     @Override
     public int visitedSize() {
         return data.visitedSize();
+    }
+
+    @Override
+    public EnrollmentHandler.Enrollment getEnrollment() {
+        return data.enrollment();
     }
 
 }

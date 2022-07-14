@@ -7,7 +7,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
 public class PlayerTrainChunkManager extends SavedData {
     private final static TicketType<UUID> TRAVEL_TICKET = TicketType.create("littlelogistics:travelticket", UUID::compareTo);
     private final static TicketType<UUID> LOAD_TICKET = TicketType.create("littlelogistics:loadticket", UUID::compareTo, 200);
-    private final Set<LinkableEntity<? extends Entity>> enrolled = new HashSet<>();
+    private final Set<Entity> enrolled = new HashSet<>();
     private final Set<ChunkPos> tickets = new HashSet<>();
     private final Set<ChunkPos> toLoad = new HashSet<>();
     private boolean active = false;
@@ -40,7 +39,7 @@ public class PlayerTrainChunkManager extends SavedData {
 
 
 
-    public static <T extends Entity & LinkableEntity<T>>  void enroll(T entity, UUID uuid){
+    public static void enroll(Entity entity, UUID uuid){
         if(!entity.level.isClientSide) {
             var manager = PlayerTrainChunkManager.get((ServerLevel) entity.level, uuid);
             manager.enrolled.add(entity);
@@ -56,9 +55,25 @@ public class PlayerTrainChunkManager extends SavedData {
         active = false;
     }
 
+    private List<Entity> getAllSubjectEntities(Entity entity){
+        List<Entity> subjects = new ArrayList<>();
+        if(entity instanceof LinkableEntity<?> l){ // need to refactor this somehow to be more generic
+           for(var e : l.getTrain().asListOfTugged()){
+               if(e instanceof Entity){
+                   subjects.add((Entity) e);
+               }
+           }
+        }
+
+        if(entity.getParts() != null){
+            subjects.addAll(List.of(entity.getParts()));
+        }
+        return subjects;
+    }
+
     private void updateToLoad() {
         toLoad.clear();
-        enrolled.forEach(e -> toLoad.addAll(e.getTrain().asList().stream().map(Entity::chunkPosition).collect(Collectors.toSet())));
+        enrolled.forEach(e -> toLoad.addAll(getAllSubjectEntities(e).stream().map(Entity::chunkPosition).collect(Collectors.toSet())));
     }
 
     public void activate(){
@@ -72,14 +87,12 @@ public class PlayerTrainChunkManager extends SavedData {
             return;
         }
 
-        enrolled.forEach(entityHead -> entityHead.getTrain()
-                .asList()
+        enrolled.forEach(entityHead -> getAllSubjectEntities(entityHead)
                 .stream()
-                .filter(entity -> !((ServerLevel) entity.level).isPositionEntityTicking(entity.getBlockPos()))
+                .filter(entity -> !((ServerLevel) entity.level).isPositionEntityTicking(entity.blockPosition()))
                 .forEach(Entity::tick));
 
         if(changed || enrolled.stream()
-                .map(e -> (Entity) e)
                 .map(e -> e.chunkPosition().toLong() != new ChunkPos(new BlockPos(e.xOld, e.yOld, e.zOld)).toLong())
                 .reduce(Boolean.FALSE, Boolean::logicalOr)){
             onChanged();
@@ -94,9 +107,9 @@ public class PlayerTrainChunkManager extends SavedData {
         setDirty();
     }
 
-    public Set<ChunkPos> computeRequiredTickets(LinkableEntity<? extends Entity> entity){
+    public Set<ChunkPos> computeRequiredTickets(Entity entity){
         var set = new HashSet<ChunkPos>();
-        entity.getTrain().asList().forEach(e -> set.add(e.chunkPosition()));
+        getAllSubjectEntities(entity).forEach(e -> set.add(e.chunkPosition()));
         set.addAll(ChunkPos.rangeClosed(((Entity) entity).chunkPosition(), 1).collect(Collectors.toList()));
         return set;
     }

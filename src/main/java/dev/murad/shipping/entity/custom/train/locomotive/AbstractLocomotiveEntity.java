@@ -57,6 +57,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     @Setter
     protected boolean engineOn = false;
 
+    protected final EnrollmentHandler enrollmentHandler;
+
+
     @Setter
     private boolean doflip = false;
     private boolean independentMotion = false;
@@ -90,13 +93,18 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     public AbstractLocomotiveEntity(EntityType<?> type, Level world) {
         super(type, world);
         frontHitbox = new VehicleFrontPart(this);
-        PlayerTrainChunkManager.enroll(this, new UUID(1, 1));
+        enrollmentHandler = new EnrollmentHandler(this);
     }
 
     public AbstractLocomotiveEntity(EntityType<?> type, Level level, Double x, Double y, Double z) {
         super(type, level, x, y, z);
         frontHitbox = new VehicleFrontPart(this);
-        PlayerTrainChunkManager.enroll(this, new UUID(1, 1));
+        enrollmentHandler = new EnrollmentHandler(this);
+    }
+
+    @Override
+    public void enroll(UUID uuid) {
+        enrollmentHandler.enroll(uuid);
     }
 
     @Override
@@ -123,7 +131,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             return InteractionResult.PASS;
         }
         if(!this.level.isClientSide){
-            NetworkHooks.openGui((ServerPlayer) pPlayer, createContainerProvider(), getDataAccessor()::write);
+            NetworkHooks.openGui((ServerPlayer) pPlayer, createContainerProvider(), getDataAccessor(pPlayer)::write);
 
         }
 
@@ -161,7 +169,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     protected abstract MenuProvider createContainerProvider();
 
-    public abstract DataAccessor getDataAccessor();
+    public abstract DataAccessor getDataAccessor(Player player);
 
     protected abstract boolean tickFuel();
 
@@ -180,6 +188,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     @Override
     public void tick(){
         linkingHandler.tickLoad();
+        enrollmentHandler.tick();
 
         if (!this.level.isClientSide) {
             tickOldBlockPos();
@@ -566,7 +575,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         }
         routeItemHandler.deserializeNBT(compound.getCompound(LOCO_ROUTE_INV_TAG));
         navigator.loadFromNbt(compound.getCompound(NAVIGATOR_TAG));
-
+        enrollmentHandler.load(compound);
         updateNavigatorFromItem();
     }
 
@@ -576,6 +585,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         compound.putBoolean("eo", engineOn);
         compound.put(LOCO_ROUTE_INV_TAG, routeItemHandler.serializeNBT());
         compound.put(NAVIGATOR_TAG, navigator.saveToNbt());
+        enrollmentHandler.save(compound);
     }
 
     // duplicate due to linking issues

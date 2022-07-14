@@ -1,9 +1,11 @@
 package dev.murad.shipping.entity.accessor;
 
+import dev.murad.shipping.util.EnrollmentHandler;
 import net.minecraft.world.inventory.ContainerData;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 public class EnergyHeadVehicleDataAccessor extends DataAccessor {
     private static final int SHORT_MASK = 0xFFFF;
@@ -44,11 +46,15 @@ public class EnergyHeadVehicleDataAccessor extends DataAccessor {
         return this.data.get(8);
     }
 
+    public EnrollmentHandler.Enrollment enrollment() {
+        return EnrollmentHandler.Enrollment.values()[this.data.get(9)];
+    }
+
     public static class Builder {
         SupplierIntArray arr;
 
         public Builder(int uuid) {
-            this.arr = new SupplierIntArray(9);
+            this.arr = new SupplierIntArray(10);
             this.arr.set(0, uuid);
         }
 
@@ -80,6 +86,11 @@ public class EnergyHeadVehicleDataAccessor extends DataAccessor {
         }
         public Builder withRouteSize(IntSupplier s) {
             this.arr.setSupplier(8, s);
+            return this;
+        }
+
+        public Builder withEnrollment(Supplier<EnrollmentHandler.Enrollment> s) {
+            this.arr.setSupplier(9, () -> s.get().ordinal());
             return this;
         }
 

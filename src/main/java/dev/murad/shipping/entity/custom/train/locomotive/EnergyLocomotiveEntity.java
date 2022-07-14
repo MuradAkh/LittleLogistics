@@ -101,14 +101,14 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
 
             @Nullable
             @Override
-            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player Player) {
-                return new EnergyHeadVehicleContainer(i, level, getDataAccessor(), playerInventory, Player);
+            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player player) {
+                return new EnergyHeadVehicleContainer<EnergyLocomotiveEntity>(i, level, getDataAccessor(player), playerInventory, player);
             }
         };
     }
 
     @Override
-    public EnergyHeadVehicleDataAccessor getDataAccessor() {
+    public EnergyHeadVehicleDataAccessor getDataAccessor(Player player) {
         return new EnergyHeadVehicleDataAccessor.Builder(this.getId())
                 .withOn(() -> engineOn)
                 .withRouteSize(() -> navigator.getRouteSize())
@@ -116,6 +116,7 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
                 .withEnergy(internalBattery::getEnergyStored)
                 .withCapacity(internalBattery::getMaxEnergyStored)
                 .withLit(() -> internalBattery.getEnergyStored() > 0) // has energy
+                .withEnrollment(() -> enrollmentHandler.getEnrollment(player))
                 .build();
     }
 

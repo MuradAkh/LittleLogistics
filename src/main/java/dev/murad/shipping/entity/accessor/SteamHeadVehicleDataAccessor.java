@@ -1,9 +1,11 @@
 package dev.murad.shipping.entity.accessor;
 
+import dev.murad.shipping.util.EnrollmentHandler;
 import net.minecraft.world.inventory.ContainerData;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 public class SteamHeadVehicleDataAccessor extends DataAccessor {
     public SteamHeadVehicleDataAccessor(ContainerData data) {
@@ -30,12 +32,15 @@ public class SteamHeadVehicleDataAccessor extends DataAccessor {
         return this.data.get(5);
     }
 
+    public EnrollmentHandler.Enrollment enrollment() {
+        return EnrollmentHandler.Enrollment.values()[this.data.get(6)];
+    }
 
     public static class Builder {
         SupplierIntArray arr;
 
         public Builder(int uuid) {
-            this.arr = new SupplierIntArray(6);
+            this.arr = new SupplierIntArray(7);
             this.arr.set(0, uuid);
         }
 
@@ -62,6 +67,11 @@ public class SteamHeadVehicleDataAccessor extends DataAccessor {
 
         public Builder withRouteSize(IntSupplier s) {
             this.arr.setSupplier(5, s);
+            return this;
+        }
+
+        public Builder withEnrollment(Supplier<EnrollmentHandler.Enrollment> s) {
+            this.arr.setSupplier(6, () -> s.get().ordinal());
             return this;
         }
 
