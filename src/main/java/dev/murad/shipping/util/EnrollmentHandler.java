@@ -23,8 +23,9 @@ public class EnrollmentHandler {
     }
 
     public void enroll(UUID uuid){
-        this.uuid = uuid;
-        PlayerTrainChunkManager.enroll(entity, uuid);
+        if(PlayerTrainChunkManager.enrollIfAllowed(entity, uuid)){
+            this.uuid = uuid;
+        }
     }
 
     public void save(CompoundTag tag){

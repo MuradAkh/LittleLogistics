@@ -73,4 +73,8 @@ public class TrainChunkManagerManager extends SavedData {
     public Set<PlayerTrainChunkManager> getManagers(UUID uuid){
         return new HashSet<>(managers.column(uuid).values());
     }
+
+    public int countVehicles(UUID uuid){
+        return getManagers(uuid).stream().reduce(0, (i, manager) -> i + manager.getNumVehicles(), Integer::sum);
+    }
 }

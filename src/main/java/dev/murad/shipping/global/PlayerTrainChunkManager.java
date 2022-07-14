@@ -1,12 +1,15 @@
 package dev.murad.shipping.global;
 
+import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.util.LinkableEntity;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
@@ -21,7 +24,11 @@ public class PlayerTrainChunkManager extends SavedData {
     private final Set<Entity> enrolled = new HashSet<>();
     private final Set<ChunkPos> tickets = new HashSet<>();
     private final Set<ChunkPos> toLoad = new HashSet<>();
+    private final int loadLevel = ShippingConfig.Server.CHUNK_LOADING_LEVEL.get();
+    private boolean changed = false;
     private boolean active = false;
+    @Getter
+    private int numVehicles = 0;
     @Getter
     private final UUID uuid;
     @Getter
@@ -43,16 +50,44 @@ public class PlayerTrainChunkManager extends SavedData {
         if(!entity.level.isClientSide) {
             var manager = PlayerTrainChunkManager.get((ServerLevel) entity.level, uuid);
             manager.enrolled.add(entity);
-            manager.onChanged();
+            manager.changed = true;
         }
+    }
+
+    public static boolean enrollIfAllowed(Entity entity, UUID uuid){
+        if(!entity.level.isClientSide) {
+            var manager = PlayerTrainChunkManager.get((ServerLevel) entity.level, uuid);
+            Player player = manager.level.getPlayerByUUID(uuid);
+            if(player == null){
+                return false;
+            }
+            int max = ShippingConfig.Server.MAX_REGISTRERED_VEHICLES_PER_PLAYER.get();
+            int registered = TrainChunkManagerManager.get(manager.level.getServer()).countVehicles(uuid) + 1;
+            if(registered > max){
+                player.sendSystemMessage(Component.translatable("entity.littlelogistics.max_reached"));
+                return false;
+            } else {
+                player.sendSystemMessage(Component.literal("Succesfully registered entity, entities registered: " +  registered + "/" + max));
+                manager.enrolled.add(entity);
+                manager.changed = true;
+                return true;
+            }
+        }
+        return false;
     }
 
     public void deactivate(){
         updateToLoad();
+        numVehicles = enrolled.size();
         enrolled.clear();
-        tickets.forEach(chunkPos -> level.getChunkSource().removeRegionTicket(TRAVEL_TICKET, chunkPos, 0, uuid));
+        tickets.forEach(chunkPos -> level.getChunkSource().removeRegionTicket(TRAVEL_TICKET, chunkPos, loadLevel, uuid));
         tickets.clear();
         active = false;
+    }
+
+    public void activate(){
+        active = true;
+        toLoad.forEach(chunkPos -> level.getChunkSource().addRegionTicket(LOAD_TICKET, chunkPos, 2, uuid));
     }
 
     private List<Entity> getAllSubjectEntities(Entity entity){
@@ -76,13 +111,10 @@ public class PlayerTrainChunkManager extends SavedData {
         enrolled.forEach(e -> toLoad.addAll(getAllSubjectEntities(e).stream().map(Entity::chunkPosition).collect(Collectors.toSet())));
     }
 
-    public void activate(){
-        active = true;
-        toLoad.forEach(chunkPos -> level.getChunkSource().addRegionTicket(LOAD_TICKET, chunkPos, 2, uuid));
-    }
+
 
     public void tick(){
-        boolean changed = enrolled.removeIf(e -> !((Entity) e).isAlive());
+        boolean changed = enrolled.removeIf(e -> !e.isAlive());
         if(!active){
             return;
         }
@@ -92,7 +124,7 @@ public class PlayerTrainChunkManager extends SavedData {
                 .filter(entity -> !((ServerLevel) entity.level).isPositionEntityTicking(entity.blockPosition()))
                 .forEach(Entity::tick));
 
-        if(changed || enrolled.stream()
+        if(this.changed || changed || enrolled.stream()
                 .map(e -> e.chunkPosition().toLong() != new ChunkPos(new BlockPos(e.xOld, e.yOld, e.zOld)).toLong())
                 .reduce(Boolean.FALSE, Boolean::logicalOr)){
             onChanged();
@@ -101,36 +133,41 @@ public class PlayerTrainChunkManager extends SavedData {
 
     private void onChanged() {
         Set<ChunkPos> required = new HashSet<>();
+        numVehicles = enrolled.size();
+        if(ShippingConfig.Server.DISABLE_CHUNK_MANAGEMENT.get()){
+            removeUnneededTickets(required);
+            return;
+        }
         enrolled.stream().map(this::computeRequiredTickets).forEach(required::addAll);
         removeUnneededTickets(required);
         addNeededTickets(required);
         setDirty();
     }
 
-    public Set<ChunkPos> computeRequiredTickets(Entity entity){
+    private Set<ChunkPos> computeRequiredTickets(Entity entity){
         var set = new HashSet<ChunkPos>();
         getAllSubjectEntities(entity).forEach(e -> set.add(e.chunkPosition()));
         set.addAll(ChunkPos.rangeClosed(((Entity) entity).chunkPosition(), 1).collect(Collectors.toList()));
         return set;
     }
 
-    public void removeUnneededTickets(Set<ChunkPos> required){
+    private void removeUnneededTickets(Set<ChunkPos> required){
         Set.copyOf(tickets)
                 .stream()
                 .filter(pos -> !required.contains(pos))
                 .forEach(chunkPos -> {
-                    level.getChunkSource().removeRegionTicket(TRAVEL_TICKET, chunkPos, 0, uuid);
+                    level.getChunkSource().removeRegionTicket(TRAVEL_TICKET, chunkPos, loadLevel, uuid);
                     tickets.remove(chunkPos);
                 });
     }
 
-    public void addNeededTickets(Set<ChunkPos> required){
+    private void addNeededTickets(Set<ChunkPos> required){
         required
             .stream()
             .filter(pos -> !tickets.contains(pos))
                 .collect(Collectors.toSet()) // avoid mutation on the go
                 .forEach(chunkPos -> {
-                    level.getChunkSource().addRegionTicket(TRAVEL_TICKET, chunkPos, 0, uuid);
+                    level.getChunkSource().addRegionTicket(TRAVEL_TICKET, chunkPos, loadLevel, uuid);
                     tickets.add(chunkPos);
                 });
     }
@@ -140,17 +177,27 @@ public class PlayerTrainChunkManager extends SavedData {
         this.level = level;
         this.uuid = uuid;
         TrainChunkManagerManager.get(level.getServer()).enroll(this);
+        if(ShippingConfig.Server.OFFLINE_LOADING.get()){
+            active = true;
+            activate();
+        }
     }
 
     PlayerTrainChunkManager(CompoundTag tag, ServerLevel level, UUID uuid){
         this.level = level;
         this.uuid = uuid;
+        numVehicles = tag.getInt("numVehicles");
         Arrays.stream(tag.getLongArray("chunksToLoad")).forEach(chunk -> toLoad.add(new ChunkPos(chunk)));
+        if(ShippingConfig.Server.OFFLINE_LOADING.get()){
+            active = true;
+            activate();
+        }
     }
 
     @Override
     public CompoundTag save(CompoundTag tag) {
         updateToLoad();
+        tag.putInt("numVehicles", numVehicles);
         tag.putLongArray("chunksToLoad", toLoad.stream().map(ChunkPos::toLong).collect(Collectors.toList()));
         return tag;
     }

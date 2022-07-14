@@ -1,5 +1,6 @@
 package dev.murad.shipping.event;
 
+import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.vessel.tug.VehicleFrontPart;
 import dev.murad.shipping.global.PlayerTrainChunkManager;
@@ -50,7 +51,7 @@ public class ForgeEventHandler {
 
     @SubscribeEvent
     public static void onPlayerSignInEvent(PlayerEvent.PlayerLoggedInEvent event){
-        if (event.getPlayer().level.isClientSide) {
+        if (event.getPlayer().level.isClientSide || ShippingConfig.Server.OFFLINE_LOADING.get()) {
             return;
         }
 
@@ -61,7 +62,7 @@ public class ForgeEventHandler {
 
     @SubscribeEvent
     public static void onPlayerSignInEvent(PlayerEvent.PlayerLoggedOutEvent event){
-        if (event.getPlayer().level.isClientSide) {
+        if (event.getPlayer().level.isClientSide || ShippingConfig.Server.OFFLINE_LOADING.get()) {
             return;
         }
 
