@@ -1,24 +1,41 @@
 package dev.murad.shipping.util;
 
+import com.mojang.authlib.GameProfile;
+import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.global.PlayerTrainChunkManager;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
 public class EnrollmentHandler {
     private static final String UUID_TAG = "EnrollmentHandlerOwner";
     private UUID uuid = null;
-    private boolean enrollMe = false;
+    private int enrollMe = -1;
     private final Entity entity;
 
     public void tick(){
-        if(enrollMe){
-            enrollMe = false;
-            PlayerTrainChunkManager.enroll(entity, uuid);
+        if(enrollMe >= 0){
+            if(enrollMe == 0 && !PlayerTrainChunkManager.enroll(entity, uuid)) {
+              enrollMe = 500;
+            } else {
+                enrollMe--;
+            }
+        }
+    }
+
+    public boolean mayMove(){
+        if(uuid == null){
+            return true;
+        } else if (ShippingConfig.Server.OFFLINE_LOADING.get()){
+            return true;
+        } else {
+            return PlayerTrainChunkManager.get((ServerLevel) entity.level, uuid).isActive();
         }
     }
 
@@ -37,25 +54,13 @@ public class EnrollmentHandler {
     public void load(CompoundTag tag){
         if(tag.contains(UUID_TAG)) {
             uuid = tag.getUUID(UUID_TAG);
-            enrollMe = true;
+            enrollMe = 5;
         }
     }
 
-    public Enrollment getEnrollment(Player player){
-        if(uuid == null) {
-            return Enrollment.NOT_ENROLLED;
-        } else return player.getUUID().equals(uuid) ? Enrollment.ENROLLED_TO_ME : Enrollment.ENROLLED_TO_X;
-    }
-
-    public enum Enrollment {
-        NOT_ENROLLED("screen.littlelogistics.not_enrolled"),
-        ENROLLED_TO_ME("screen.littlelogistics.enrolled_to_me"),
-        ENROLLED_TO_X("screen.littlelogistics.enrolled_to_x");
-
-        Enrollment(String text){
-            this.text = text;
-        }
-
-        public final String text;
+    public Optional<String> getPlayerName(){
+        if(uuid == null)
+            return Optional.empty();
+        else return ((ServerLevel) entity.level).getServer().getProfileCache().get(uuid).map(GameProfile::getName);
     }
 }

@@ -7,71 +7,23 @@ import java.util.function.BooleanSupplier;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
-public class SteamHeadVehicleDataAccessor extends DataAccessor {
+public class SteamHeadVehicleDataAccessor extends HeadVehicleDataAccessor{
     public SteamHeadVehicleDataAccessor(ContainerData data) {
         super(data);
     }
 
     public int getBurnProgress() {
-        return this.data.get(1);
+        return this.data.get(15);
     }
 
-    public boolean isLit() {
-        return this.data.get(2) == 1;
-    }
+    public static class Builder extends HeadVehicleDataAccessor.Builder{
 
-    public boolean isOn() {
-        return this.data.get(3) == 1;
-    }
-
-    public int visitedSize() {
-        return this.data.get(4);
-    }
-
-    public int routeSize() {
-        return this.data.get(5);
-    }
-
-    public EnrollmentHandler.Enrollment enrollment() {
-        return EnrollmentHandler.Enrollment.values()[this.data.get(6)];
-    }
-
-    public static class Builder {
-        SupplierIntArray arr;
-
-        public Builder(int uuid) {
-            this.arr = new SupplierIntArray(7);
-            this.arr.set(0, uuid);
+        public Builder() {
+            this.arr = new SupplierIntArray(20);
         }
 
         public Builder withBurnProgress(IntSupplier burnProgress) {
-            this.arr.setSupplier(1, burnProgress);
-            return this;
-        }
-
-        public Builder withLit(BooleanSupplier lit) {
-            this.arr.setSupplier(2, () -> lit.getAsBoolean() ? 1 : -1);
-            return this;
-        }
-
-
-        public Builder withOn(BooleanSupplier lit) {
-            this.arr.setSupplier(3, () -> lit.getAsBoolean() ? 1 : -1);
-            return this;
-        }
-
-        public Builder withVisitedSize(IntSupplier s) {
-            this.arr.setSupplier(4, s);
-            return this;
-        }
-
-        public Builder withRouteSize(IntSupplier s) {
-            this.arr.setSupplier(5, s);
-            return this;
-        }
-
-        public Builder withEnrollment(Supplier<EnrollmentHandler.Enrollment> s) {
-            this.arr.setSupplier(6, () -> s.get().ordinal());
+            this.arr.setSupplier(15, burnProgress);
             return this;
         }
 

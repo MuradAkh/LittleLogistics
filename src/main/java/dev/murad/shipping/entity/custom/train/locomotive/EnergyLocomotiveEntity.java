@@ -6,6 +6,7 @@ import dev.murad.shipping.entity.accessor.EnergyHeadVehicleDataAccessor;
 import dev.murad.shipping.entity.container.EnergyHeadVehicleContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import dev.murad.shipping.util.EnrollmentHandler;
 import dev.murad.shipping.util.InventoryUtils;
 import dev.murad.shipping.util.ItemHandlerVanillaContainerWrapper;
 import net.minecraft.core.Direction;
@@ -102,21 +103,22 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
             @Nullable
             @Override
             public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player player) {
-                return new EnergyHeadVehicleContainer<EnergyLocomotiveEntity>(i, level, getDataAccessor(player), playerInventory, player);
+                return new EnergyHeadVehicleContainer<EnergyLocomotiveEntity>(i, level, getDataAccessor(), playerInventory, player);
             }
         };
     }
 
     @Override
-    public EnergyHeadVehicleDataAccessor getDataAccessor(Player player) {
-        return new EnergyHeadVehicleDataAccessor.Builder(this.getId())
-                .withOn(() -> engineOn)
-                .withRouteSize(() -> navigator.getRouteSize())
-                .withVisitedSize(() -> navigator.getVisitedSize())
+    public EnergyHeadVehicleDataAccessor getDataAccessor() {
+        return (EnergyHeadVehicleDataAccessor) new EnergyHeadVehicleDataAccessor.Builder()
                 .withEnergy(internalBattery::getEnergyStored)
                 .withCapacity(internalBattery::getMaxEnergyStored)
                 .withLit(() -> internalBattery.getEnergyStored() > 0) // has energy
-                .withEnrollment(() -> enrollmentHandler.getEnrollment(player))
+                .withId(this.getId())
+                .withOn(() -> engineOn)
+                .withRouteSize(() -> navigator.getRouteSize())
+                .withVisitedSize(() -> navigator.getVisitedSize())
+                .withCanMove(enrollmentHandler::mayMove)
                 .build();
     }
 

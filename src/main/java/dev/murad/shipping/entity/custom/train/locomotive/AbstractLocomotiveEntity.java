@@ -7,6 +7,7 @@ import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
+import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.VehicleFrontPart;
 import dev.murad.shipping.entity.navigation.LocomotiveNavigator;
 import dev.murad.shipping.global.PlayerTrainChunkManager;
@@ -58,8 +59,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     protected boolean engineOn = false;
 
     protected final EnrollmentHandler enrollmentHandler;
-
-
     @Setter
     private boolean doflip = false;
     private boolean independentMotion = false;
@@ -87,6 +86,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     protected LocomotiveNavigator navigator = new LocomotiveNavigator(this);
 
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractLocomotiveEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(AbstractLocomotiveEntity.class, EntityDataSerializers.STRING);
     private int dockCheckCooldown = 0;
 
 
@@ -131,7 +131,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             return InteractionResult.PASS;
         }
         if(!this.level.isClientSide){
-            NetworkHooks.openGui((ServerPlayer) pPlayer, createContainerProvider(), getDataAccessor(pPlayer)::write);
+            NetworkHooks.openGui((ServerPlayer) pPlayer, createContainerProvider(), getDataAccessor()::write);
 
         }
 
@@ -169,7 +169,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     protected abstract MenuProvider createContainerProvider();
 
-    public abstract DataAccessor getDataAccessor(Player player);
+    public abstract DataAccessor getDataAccessor();
 
     protected abstract boolean tickFuel();
 
@@ -184,17 +184,24 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         }
     }
 
+    @Override
+    public String owner() {
+        return entityData.get(OWNER);
+    }
 
     @Override
     public void tick(){
         linkingHandler.tickLoad();
-        enrollmentHandler.tick();
 
         if (!this.level.isClientSide) {
             tickOldBlockPos();
             if(remainingStallTime <= 0){
                 navigator.serverTick();
             }
+            enrollmentHandler.tick();
+            enrollmentHandler.getPlayerName().ifPresent(name ->
+                    entityData.set(OWNER, name)
+            );
         }
 
         tickYRot();
@@ -248,6 +255,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     protected void defineSynchedData() {
         super.defineSynchedData();
         entityData.define(INDEPENDENT_MOTION, false);
+        entityData.define(OWNER, "");
     }
 
     private void tickMovement() {
@@ -459,7 +467,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     public boolean shouldFreezeTrain() {
-        return (stalling.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(AbstractTrainCarEntity::isFrozen);
+        return !enrollmentHandler.mayMove() || (stalling.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(AbstractTrainCarEntity::isFrozen);
     }
 
     private void accelerate() {

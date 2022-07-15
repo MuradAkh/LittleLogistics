@@ -27,28 +27,4 @@ public class SteamHeadVehicleContainer<T extends Entity & HeadVehicle> extends A
         return data.getBurnProgress();
     }
 
-    public boolean isLit(){
-        return data.isLit();
-    }
-
-    @Override
-    public boolean isOn(){
-        return data.isOn();
-    }
-
-    @Override
-    public int routeSize() {
-        return data.routeSize();
-    }
-
-    @Override
-    public int visitedSize() {
-        return data.visitedSize();
-    }
-
-    @Override
-    public EnrollmentHandler.Enrollment getEnrollment() {
-        return data.enrollment();
-    }
-
 }

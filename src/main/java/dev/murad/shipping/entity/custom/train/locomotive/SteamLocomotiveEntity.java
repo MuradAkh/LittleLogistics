@@ -77,14 +77,15 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
 
 
     @Override
-    public SteamHeadVehicleDataAccessor getDataAccessor(Player player) {
-        return new SteamHeadVehicleDataAccessor.Builder(this.getId())
+    public SteamHeadVehicleDataAccessor getDataAccessor() {
+        return (SteamHeadVehicleDataAccessor) new SteamHeadVehicleDataAccessor.Builder()
+                .withBurnProgress(this::getBurnProgress)
+                .withId(this.getId())
                 .withOn(() -> engineOn)
                 .withRouteSize(() -> navigator.getRouteSize())
                 .withVisitedSize(() -> navigator.getVisitedSize())
-                .withBurnProgress(this::getBurnProgress)
                 .withLit(this::isLit)
-                .withEnrollment(() -> enrollmentHandler.getEnrollment(player))
+                .withCanMove(enrollmentHandler::mayMove)
                 .build();
     }
 
@@ -125,7 +126,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
             @Nullable
             @Override
             public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player player) {
-                return new SteamHeadVehicleContainer(i, level, getDataAccessor(player), playerInventory, player);
+                return new SteamHeadVehicleContainer(i, level, getDataAccessor(), playerInventory, player);
             }
         };
     }

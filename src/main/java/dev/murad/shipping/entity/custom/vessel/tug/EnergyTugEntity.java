@@ -68,7 +68,7 @@ public class EnergyTugEntity extends AbstractTugEntity {
             @Nullable
             @Override
             public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player player) {
-                return new EnergyHeadVehicleContainer<EnergyTugEntity>(i, level, getDataAccessor(player), playerInventory, player);
+                return new EnergyHeadVehicleContainer<EnergyTugEntity>(i, level, getDataAccessor(), playerInventory, player);
             }
         };
     }
@@ -105,15 +105,16 @@ public class EnergyTugEntity extends AbstractTugEntity {
     }
 
     @Override
-    public EnergyHeadVehicleDataAccessor getDataAccessor(Player player) {
-        return new EnergyHeadVehicleDataAccessor.Builder(this.getId())
+    public EnergyHeadVehicleDataAccessor getDataAccessor() {
+        return (EnergyHeadVehicleDataAccessor) new EnergyHeadVehicleDataAccessor.Builder()
                 .withEnergy(internalBattery::getEnergyStored)
                 .withCapacity(internalBattery::getMaxEnergyStored)
                 .withLit(() -> internalBattery.getEnergyStored() > 0) // has energy
+                .withId(this.getId())
                 .withVisitedSize(() -> nextStop)
                 .withOn(() -> engineOn)
+                .withCanMove(enrollmentHandler::mayMove)
                 .withRouteSize(() -> path != null ? path.size() : 0)
-                .withEnrollment(() -> enrollmentHandler.getEnrollment(player))
                 .build();
     }
 

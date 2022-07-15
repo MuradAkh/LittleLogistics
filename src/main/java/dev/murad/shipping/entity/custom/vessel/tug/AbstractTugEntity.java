@@ -26,6 +26,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.*;
@@ -68,6 +69,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     protected boolean docked = false;
     @Getter
     protected int remainingStallTime = 0;
+    private double swimSpeedMult = 1;
 
     @Setter
     protected boolean engineOn = true;
@@ -77,6 +79,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private int pathfindCooldown = 0;
     private VehicleFrontPart frontHitbox;
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.STRING);
 
 
 
@@ -118,7 +121,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
 
-    public abstract DataAccessor getDataAccessor(Player player);
+    public abstract DataAccessor getDataAccessor();
 
     private ItemStackHandler createRouteItemHandler() {
         return new ItemStackHandler(1) {
@@ -147,6 +150,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
                 return super.insertItem(slot, stack, simulate);
             }
         };
+    }
+
+    @Override
+    public String owner() {
+        return entityData.get(OWNER);
     }
 
     @Override
@@ -296,7 +304,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (!player.level.isClientSide()) {
 
-            NetworkHooks.openGui((ServerPlayer) player, createContainerProvider(), getDataAccessor(player)::write);
+            NetworkHooks.openGui((ServerPlayer) player, createContainerProvider(), getDataAccessor()::write);
         }
         return InteractionResult.CONSUME;
     }
@@ -372,7 +380,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
                 && independentMotion){
             makeSmoke();
         }
-        enrollmentHandler.tick();
+        if(!this.level.isClientSide) {
+            enrollmentHandler.tick();
+            enrollmentHandler.getPlayerName().ifPresent(name ->
+                    entityData.set(OWNER, name));
+        }
 
         super.tick();
 
@@ -442,13 +454,14 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     public boolean shouldFreezeTrain() {
-        return (stalling.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(VesselEntity::isFrozen);
+        return !enrollmentHandler.mayMove() || (stalling.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(VesselEntity::isFrozen);
     }
 
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         entityData.define(INDEPENDENT_MOTION, false);
+        entityData.define(OWNER, "");
     }
 
 
@@ -575,9 +588,41 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         return true;
     }
 
+    @Override
+    protected double swimSpeed() {
+        if(this.level.isClientSide){
+            return super.swimSpeed();
+        }
+
+        if (this.tickCount % 10 == 0){
+           swimSpeedMult = computeSpeedMult();
+        }
+
+        return swimSpeedMult * super.swimSpeed();
+    }
+
+    private double computeSpeedMult(){
+        double mult = 1;
+        boolean doBreak = false;
+        for (int i = 0; i < 10 && !doBreak; i++) {
+            for (Direction direction: List.of(Direction.NORTH, Direction.EAST, Direction.WEST, Direction.SOUTH)) {
+                BlockPos pos = this.getOnPos().relative(direction, i);
+                if(!this.level.getFluidState(pos).isSource()){
+                    doBreak = true;
+                    break;
+                }
+            }
+            if(i > 3) {
+                mult = 1 + ((i / 10f) * 1.8);
+            }
+        }
+        if(mult < swimSpeedMult) return mult;
+        else return (mult + swimSpeedMult * 20) / 21;
+    }
+
     /*
-            Stalling Capability
-     */
+                Stalling Capability
+         */
     private final StallingCapability stalling = new StallingCapability() {
         @Override
         public boolean isDocked() {

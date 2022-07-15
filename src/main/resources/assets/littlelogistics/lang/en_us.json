@@ -68,6 +68,11 @@
   "screen.littlelogistics.locomotive.route": "Visited:",
   "screen.littlelogistics.locomotive.on": "Start Engine",
   "screen.littlelogistics.locomotive.off": "Halt Engine",
+  "screen.littlelogistics.locomotive.register": "Register",
+  "screen.littlelogistics.locomotive.registration": "Registration",
+  "screen.littlelogistics.locomotive.register_info": "Registered vehicles can travel without chunkloaders",
+  "screen.littlelogistics.locomotive.frozen": "As per server config, this vehicle is frozen as the owner is offline",
+
 
   "item.littlelogistics.tug_route.description": "Right click to add node at the end of the route, right click at the same location to remove. Shift right click to bring up menu.",
   "item.littlelogistics.tug_route.num_nodes": "Route Nodes: %s",

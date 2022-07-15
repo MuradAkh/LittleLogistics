@@ -40,29 +40,4 @@ public class EnergyHeadVehicleContainer<T extends Entity & HeadVehicle> extends 
 
         return (double) getEnergy() / getCapacity();
     }
-
-    public boolean isLit() {
-        return this.data.isLit();
-    }
-
-    @Override
-    public boolean isOn() {
-        return this.data.isOn();
-    }
-
-    @Override
-    public int routeSize() {
-        return data.routeSize();
-    }
-
-    @Override
-    public int visitedSize() {
-        return data.visitedSize();
-    }
-
-    @Override
-    public EnrollmentHandler.Enrollment getEnrollment() {
-        return data.enrollment();
-    }
-
 }

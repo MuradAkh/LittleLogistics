@@ -18,4 +18,6 @@ public interface HeadVehicle  {
     ResourceLocation getRouteIcon();
 
     void enroll(UUID uuid);
+
+    String owner();
 }

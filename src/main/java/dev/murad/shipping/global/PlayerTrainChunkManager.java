@@ -46,12 +46,17 @@ public class PlayerTrainChunkManager extends SavedData {
 
 
 
-    public static void enroll(Entity entity, UUID uuid){
+    public static boolean enroll(Entity entity, UUID uuid){
         if(!entity.level.isClientSide) {
             var manager = PlayerTrainChunkManager.get((ServerLevel) entity.level, uuid);
+            if(!manager.active){
+                return false;
+            }
             manager.enrolled.add(entity);
             manager.changed = true;
+            return true;
         }
+        return false;
     }
 
     public static boolean enrollIfAllowed(Entity entity, UUID uuid){
@@ -141,6 +146,7 @@ public class PlayerTrainChunkManager extends SavedData {
         enrolled.stream().map(this::computeRequiredTickets).forEach(required::addAll);
         removeUnneededTickets(required);
         addNeededTickets(required);
+        updateToLoad();
         setDirty();
     }
 
@@ -177,10 +183,9 @@ public class PlayerTrainChunkManager extends SavedData {
         this.level = level;
         this.uuid = uuid;
         TrainChunkManagerManager.get(level.getServer()).enroll(this);
-        if(ShippingConfig.Server.OFFLINE_LOADING.get()){
-            active = true;
-            activate();
-        }
+        // active when creating a new one
+        active = true;
+        setDirty();
     }
 
     PlayerTrainChunkManager(CompoundTag tag, ServerLevel level, UUID uuid){
@@ -189,16 +194,18 @@ public class PlayerTrainChunkManager extends SavedData {
         numVehicles = tag.getInt("numVehicles");
         Arrays.stream(tag.getLongArray("chunksToLoad")).forEach(chunk -> toLoad.add(new ChunkPos(chunk)));
         if(ShippingConfig.Server.OFFLINE_LOADING.get()){
-            active = true;
             activate();
         }
     }
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        updateToLoad();
         tag.putInt("numVehicles", numVehicles);
         tag.putLongArray("chunksToLoad", toLoad.stream().map(ChunkPos::toLong).collect(Collectors.toList()));
         return tag;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 }

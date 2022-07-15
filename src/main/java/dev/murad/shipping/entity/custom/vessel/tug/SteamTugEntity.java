@@ -75,7 +75,7 @@ public class SteamTugEntity extends AbstractTugEntity {
             @Nullable
             @Override
             public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player player) {
-                return new SteamHeadVehicleContainer<SteamTugEntity>(i, level, getDataAccessor(player), playerInventory, player);
+                return new SteamHeadVehicleContainer<SteamTugEntity>(i, level, getDataAccessor(), playerInventory, player);
             }
         };
     }
@@ -95,14 +95,15 @@ public class SteamTugEntity extends AbstractTugEntity {
     }
 
     @Override
-    public SteamHeadVehicleDataAccessor getDataAccessor(Player player) {
-        return new SteamHeadVehicleDataAccessor.Builder(this.getId())
+    public SteamHeadVehicleDataAccessor getDataAccessor() {
+        return (SteamHeadVehicleDataAccessor) new SteamHeadVehicleDataAccessor.Builder()
                 .withBurnProgress(this::getBurnProgress)
+                .withId(this.getId())
                 .withLit(this::isLit)
                 .withVisitedSize(() -> nextStop)
                 .withOn(() -> engineOn)
                 .withRouteSize(() -> path != null ? path.size() : 0)
-                .withEnrollment(() -> enrollmentHandler.getEnrollment(player))
+                .withCanMove(enrollmentHandler::mayMove)
                 .build();
     }
 
