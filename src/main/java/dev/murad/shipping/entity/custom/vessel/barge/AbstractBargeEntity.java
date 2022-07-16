@@ -94,7 +94,7 @@ public abstract class AbstractBargeEntity extends VesselEntity {
         train.setTail(this);
         linkingHandler.dominated.ifPresent(dominated -> {
             // avoid recursion loops
-            if(dominated.getTrain().equals(train)){
+            if(!dominated.getTrain().equals(train)){
                 dominated.setTrain(train);
             }
         });

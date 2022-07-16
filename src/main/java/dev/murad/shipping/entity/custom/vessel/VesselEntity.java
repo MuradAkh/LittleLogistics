@@ -227,12 +227,16 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
         } else if (secondTrain.equals(firstTrain)){
             player.displayClientMessage(Component.translatable("item.littlelogistics.spring.noLoops"), true);
         } else if (firstTrain.getTug().isPresent()) {
-            firstTrain.getTail().setDominated(secondTrain.getHead());
-            secondTrain.getHead().setDominant(firstTrain.getTail());
+            var tail = firstTrain.getTail();
+            var head = secondTrain.getHead();
+            tail.setDominated(head);
+            head.setDominant(tail);
             return true;
         } else {
-            secondTrain.getTail().setDominated(firstTrain.getHead());
-            firstTrain.getHead().setDominant(secondTrain.getTail());
+            var tail = secondTrain.getTail();
+            var head = firstTrain.getHead();
+            tail.setDominated(head);
+            head.setDominant(tail);
             return true;
         }
         return false;
