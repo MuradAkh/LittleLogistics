@@ -19,11 +19,11 @@ import net.minecraftforge.registries.IForgeRegistry;
 
 public class Registration  {
     public static final DeferredRegister<Block> BLOCKS = create(ForgeRegistries.BLOCKS);
-    public static final DeferredRegister<MenuType<?>> CONTAINERS = create(ForgeRegistries.CONTAINERS);
-    public static final DeferredRegister<EntityType<?>> ENTITIES = create(ForgeRegistries.ENTITIES);
+    public static final DeferredRegister<MenuType<?>> CONTAINERS = create(ForgeRegistries.MENU_TYPES);
+    public static final DeferredRegister<EntityType<?>> ENTITIES = create(ForgeRegistries.ENTITY_TYPES);
     public static final DeferredRegister<Item> ITEMS = create(ForgeRegistries.ITEMS);
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = create(ForgeRegistries.RECIPE_SERIALIZERS);
-    public static final DeferredRegister<BlockEntityType<?>> TILE_ENTITIES = create(ForgeRegistries.BLOCK_ENTITIES);
+    public static final DeferredRegister<BlockEntityType<?>> TILE_ENTITIES = create(ForgeRegistries.BLOCK_ENTITY_TYPES);
     public static final DeferredRegister<SoundEvent> SOUND_EVENTS = create(ForgeRegistries.SOUND_EVENTS);
 
 

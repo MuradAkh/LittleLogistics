@@ -15,6 +15,8 @@ public interface HeadVehicle  {
 
     boolean isValid(Player pPlayer);
 
+    boolean hasOwner();
+
     ResourceLocation getRouteIcon();
 
     void enroll(UUID uuid);

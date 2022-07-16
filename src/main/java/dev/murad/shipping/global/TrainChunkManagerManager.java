@@ -41,8 +41,10 @@ public class TrainChunkManagerManager extends SavedData {
                     return;
                 }
                 UUID uuid = compoundTag.getUUID("UUID");
-                PlayerTrainChunkManager.getSaved(level, uuid).ifPresent(manager -> {
-                    managers.put(dimension, uuid, manager);
+                server.execute(() -> {
+                    PlayerTrainChunkManager.getSaved(level, uuid).ifPresent(manager -> {
+                        managers.put(dimension, uuid, manager);
+                    });
                 });
             }
         }

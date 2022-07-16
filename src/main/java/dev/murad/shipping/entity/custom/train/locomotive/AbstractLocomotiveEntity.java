@@ -131,7 +131,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             return InteractionResult.PASS;
         }
         if(!this.level.isClientSide){
-            NetworkHooks.openGui((ServerPlayer) pPlayer, createContainerProvider(), getDataAccessor()::write);
+            NetworkHooks.openScreen((ServerPlayer) pPlayer, createContainerProvider(), getDataAccessor()::write);
 
         }
 
@@ -188,6 +188,12 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     public String owner() {
         return entityData.get(OWNER);
     }
+
+    @Override
+    public boolean hasOwner(){
+        return enrollmentHandler.hasOwner();
+    }
+
 
     @Override
     public void tick(){

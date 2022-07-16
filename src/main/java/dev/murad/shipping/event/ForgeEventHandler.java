@@ -38,36 +38,36 @@ public class ForgeEventHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onWorldTick(TickEvent.WorldTickEvent event) {
+    public static void onWorldTick(TickEvent.LevelTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
             return;
         }
         // Don't do anything client side
-        if (event.world instanceof ServerLevel serverLevel) {
-            TrainChunkManagerManager.get(serverLevel.getServer()).getManagers(event.world.dimension()).forEach(PlayerTrainChunkManager::tick);
+        if (event.level instanceof ServerLevel serverLevel) {
+            TrainChunkManagerManager.get(serverLevel.getServer()).getManagers(event.level.dimension()).forEach(PlayerTrainChunkManager::tick);
 
         }
     }
 
     @SubscribeEvent
     public static void onPlayerSignInEvent(PlayerEvent.PlayerLoggedInEvent event){
-        if (event.getPlayer().level.isClientSide || ShippingConfig.Server.OFFLINE_LOADING.get()) {
+        if (event.getEntity().level.isClientSide || ShippingConfig.Server.OFFLINE_LOADING.get()) {
             return;
         }
 
-        TrainChunkManagerManager.get(event.getPlayer().level.getServer())
-                .getManagers(event.getPlayer().getUUID())
+        TrainChunkManagerManager.get(event.getEntity().level.getServer())
+                .getManagers(event.getEntity().getUUID())
                 .forEach(PlayerTrainChunkManager::activate);
     }
 
     @SubscribeEvent
     public static void onPlayerSignInEvent(PlayerEvent.PlayerLoggedOutEvent event){
-        if (event.getPlayer().level.isClientSide || ShippingConfig.Server.OFFLINE_LOADING.get()) {
+        if (event.getEntity().level.isClientSide || ShippingConfig.Server.OFFLINE_LOADING.get()) {
             return;
         }
 
-        TrainChunkManagerManager.get(event.getPlayer().level.getServer())
-                .getManagers(event.getPlayer().getUUID())
+        TrainChunkManagerManager.get(event.getEntity().level.getServer())
+                .getManagers(event.getEntity().getUUID())
                 .forEach(PlayerTrainChunkManager::deactivate);
     }
 
@@ -76,7 +76,7 @@ public class ForgeEventHandler {
             Item item = event.getItemStack().getItem();
             if(item instanceof SpringItem springItem) {
                 if(target instanceof LinkableEntity || target instanceof VehicleFrontPart) {
-                    springItem.onUsedOnEntity(event.getItemStack(), event.getPlayer(), event.getWorld(), target);
+                    springItem.onUsedOnEntity(event.getItemStack(), event.getEntity(), event.getLevel(), target);
                     event.setCanceled(true);
                     event.setCancellationResult(InteractionResult.SUCCESS);
                 }

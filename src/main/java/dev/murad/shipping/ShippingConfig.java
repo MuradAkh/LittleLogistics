@@ -98,7 +98,7 @@ public class ShippingConfig {
                             .define("disableChunkManagement", false);
 
             MAX_REGISTRERED_VEHICLES_PER_PLAYER = BUILDER.comment("Maximum number of vehicles (barges/cars don't count, only Tugs/Locos) the player is able to register. Lowering this number will not de-register vehicles but will prevent the player from registering more.")
-                    .defineInRange("chunkLoadingLevel", 100, 0, 1000);
+                    .defineInRange("maxVehiclesPerPlayer", 100, 0, 1000);
 
             OFFLINE_LOADING = BUILDER.comment("Load vehicles even when the player is offline")
                     .define("offlineLoading", false);

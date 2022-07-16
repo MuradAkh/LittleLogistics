@@ -29,6 +29,10 @@ public class EnrollmentHandler {
         }
     }
 
+    public boolean hasOwner(){
+        return uuid != null;
+    }
+
     public boolean mayMove(){
         if(uuid == null){
             return true;

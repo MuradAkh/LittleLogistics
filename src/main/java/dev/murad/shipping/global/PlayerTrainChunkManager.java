@@ -6,6 +6,7 @@ import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.Entity;
@@ -72,7 +73,7 @@ public class PlayerTrainChunkManager extends SavedData {
                 player.sendSystemMessage(Component.translatable("entity.littlelogistics.max_reached"));
                 return false;
             } else {
-                player.sendSystemMessage(Component.literal("Succesfully registered entity, entities registered: " +  registered + "/" + max));
+                player.sendSystemMessage(Component.literal("Successfully registered entity, entities registered: " +  registered + "/" + max));
                 manager.enrolled.add(entity);
                 manager.changed = true;
                 return true;
@@ -92,7 +93,9 @@ public class PlayerTrainChunkManager extends SavedData {
 
     public void activate(){
         active = true;
-        toLoad.forEach(chunkPos -> level.getChunkSource().addRegionTicket(LOAD_TICKET, chunkPos, 2, uuid));
+        level.getServer().execute(() -> {
+            toLoad.forEach(chunkPos -> level.getChunkSource().addRegionTicket(LOAD_TICKET, chunkPos, 2, uuid));
+        });
     }
 
     private List<Entity> getAllSubjectEntities(Entity entity){
@@ -129,10 +132,13 @@ public class PlayerTrainChunkManager extends SavedData {
                 .filter(entity -> !((ServerLevel) entity.level).isPositionEntityTicking(entity.blockPosition()))
                 .forEach(Entity::tick));
 
+
         if(this.changed || changed || enrolled.stream()
-                .map(e -> e.chunkPosition().toLong() != new ChunkPos(new BlockPos(e.xOld, e.yOld, e.zOld)).toLong())
+                .map(e -> !e.chunkPosition().equals(new ChunkPos(new BlockPos(e.xOld, e.yOld, e.zOld))))
                 .reduce(Boolean.FALSE, Boolean::logicalOr)){
-            onChanged();
+            this.changed = false;
+            level.getServer().execute(this::onChanged);
+
         }
     }
 

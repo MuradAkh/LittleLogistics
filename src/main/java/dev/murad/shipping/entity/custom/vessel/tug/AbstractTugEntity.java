@@ -304,7 +304,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (!player.level.isClientSide()) {
 
-            NetworkHooks.openGui((ServerPlayer) player, createContainerProvider(), getDataAccessor()::write);
+            NetworkHooks.openScreen((ServerPlayer) player, createContainerProvider(), getDataAccessor()::write);
         }
         return InteractionResult.CONSUME;
     }
@@ -494,6 +494,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     public void removeDominated() {
         linkingHandler.dominated = (Optional.empty());
         linkingHandler.train.setTail(this);
+    }
+
+    @Override
+    public boolean hasOwner(){
+        return enrollmentHandler.hasOwner();
     }
 
     @Override
