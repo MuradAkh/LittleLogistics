@@ -22,7 +22,7 @@ public class EnrollmentHandler {
     public void tick(){
         if(enrollMe >= 0){
             if(enrollMe == 0 && !PlayerTrainChunkManager.enroll(entity, uuid)) {
-              enrollMe = 500;
+              enrollMe = 100;
             } else {
                 enrollMe--;
             }
@@ -39,7 +39,7 @@ public class EnrollmentHandler {
         } else if (ShippingConfig.Server.OFFLINE_LOADING.get()){
             return true;
         } else {
-            return PlayerTrainChunkManager.get((ServerLevel) entity.level, uuid).isActive();
+            return PlayerTrainChunkManager.get((ServerLevel) entity.level, uuid).isActive() && enrollMe < 0;
         }
     }
 

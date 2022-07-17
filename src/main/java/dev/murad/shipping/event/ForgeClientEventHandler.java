@@ -181,7 +181,7 @@ public class ForgeClientEventHandler {
             renderTypeBuffer.endBatch();
         }
 
-        if (stack.getItem().equals(ModItems.CONDUCTORS_WRENCH.get())){
+        if (stack.getItem().equals(ModItems.CONDUCTORS_WRENCH.get()) && player.level.dimension().toString().equals(VehicleTrackerPacketHandler.toRenderDimension)){
             MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
             var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
             Vec3 cameraPosition = camera.getPosition();

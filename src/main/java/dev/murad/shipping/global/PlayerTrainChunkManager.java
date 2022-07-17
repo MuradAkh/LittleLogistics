@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 public class PlayerTrainChunkManager extends SavedData {
     private final static TicketType<UUID> TRAVEL_TICKET = TicketType.create("littlelogistics:travelticket", UUID::compareTo);
-    private final static TicketType<UUID> LOAD_TICKET = TicketType.create("littlelogistics:loadticket", UUID::compareTo, 200);
+    private final static TicketType<UUID> LOAD_TICKET = TicketType.create("littlelogistics:loadticket", UUID::compareTo, 500);
     private final Set<Entity> enrolled = new HashSet<>();
     private final Set<ChunkPos> tickets = new HashSet<>();
     private final Set<ChunkPos> toLoad = new HashSet<>();
@@ -80,10 +80,10 @@ public class PlayerTrainChunkManager extends SavedData {
             int max = ShippingConfig.Server.MAX_REGISTRERED_VEHICLES_PER_PLAYER.get();
             int registered = TrainChunkManagerManager.get(manager.level.getServer()).countVehicles(uuid) + 1;
             if(registered > max){
-                player.sendSystemMessage(Component.translatable("entity.littlelogistics.max_reached"));
+                player.sendSystemMessage(Component.translatable("global.littlelogistics.locomotive.register_success", max));
                 return false;
             } else {
-                player.sendSystemMessage(Component.literal("Successfully registered entity, entities registered: " +  registered + "/" + max));
+                player.sendSystemMessage(Component.translatable("global.littlelogistics.locomotive.register_fail", max, registered));
                 manager.enrolled.add(entity);
                 manager.changed = true;
                 return true;
@@ -144,7 +144,7 @@ public class PlayerTrainChunkManager extends SavedData {
 
         Player player = level.getPlayerByUUID(uuid);
         if(player instanceof ServerPlayer serverPlayer && serverPlayer.getItemInHand(InteractionHand.MAIN_HAND).getItem().equals(ModItems.CONDUCTORS_WRENCH.get())) {
-            VehicleTrackerPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer), VehicleTrackerClientPacket.of(getEntityPositions()));
+            VehicleTrackerPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer), VehicleTrackerClientPacket.of(getEntityPositions(), level.dimension().toString()));
         }
 
         if(this.changed || changed || enrolled.stream()

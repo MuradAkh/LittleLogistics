@@ -22,6 +22,7 @@ public class VehicleTrackerPacketHandler {
     public static final ResourceLocation LOCATION = new ResourceLocation(ShippingMod.MOD_ID, "vehicle_tracker_channel");
     private static final String PROTOCOL_VERSION = "1";
     public static List<EntityPosition> toRender = new ArrayList<>();
+    public static String toRenderDimension = "";
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
             LOCATION,
             () -> PROTOCOL_VERSION,
@@ -39,6 +40,7 @@ public class VehicleTrackerPacketHandler {
     public static void handleData(VehicleTrackerClientPacket packet, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             VehicleTrackerPacketHandler.toRender = packet.parse();
+            VehicleTrackerPacketHandler.toRenderDimension = packet.dimension;
         });
 
         ctx.get().setPacketHandled(true);

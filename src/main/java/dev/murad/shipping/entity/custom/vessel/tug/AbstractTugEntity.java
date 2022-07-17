@@ -341,8 +341,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
                 tickRouteCheck();
                 tickCheckDock();
 
-                    followPath();
-                    followGuideRail();
+                followPath();
+                followGuideRail();
 
             }
 

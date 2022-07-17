@@ -3,27 +3,27 @@ package dev.murad.shipping.network.client;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class VehicleTrackerClientPacket {
     public final CompoundTag tag;
+    public final String dimension;
 
     public VehicleTrackerClientPacket(FriendlyByteBuf buffer) {
         this.tag = buffer.readNbt();
+        this.dimension = new String(buffer.readByteArray());
     }
 
     public void encode(FriendlyByteBuf buf) {
         buf.writeNbt(tag);
+        buf.writeByteArray(dimension.getBytes());
     }
 
-    public static VehicleTrackerClientPacket of(List<EntityPosition> types) {
+    public static VehicleTrackerClientPacket of(List<EntityPosition> types, String dimension) {
         CompoundTag tag = new CompoundTag();
         int i = 0;
         for (EntityPosition position : types) {
@@ -38,7 +38,7 @@ public class VehicleTrackerClientPacket {
             coords.putInt("eid", position.id());
             tag.put(String.valueOf(i++), coords);
         }
-        return new VehicleTrackerClientPacket(tag);
+        return new VehicleTrackerClientPacket(tag, dimension);
     }
 
     public List<EntityPosition> parse() {

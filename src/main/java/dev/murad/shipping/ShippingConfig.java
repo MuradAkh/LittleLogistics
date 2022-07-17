@@ -171,7 +171,7 @@ public class ShippingConfig {
                 BUILDER.push("general");
                 TRAIN_MAX_SPEED =
                         BUILDER.comment("Max speed that trains can be accelerated to. High speed may cause chunk loading lag or issues, not advised for servers or packs. Default 0.25, max is 1")
-                                .defineInRange("trainMaxSpeed", 0.25, 0.01, 1);
+                                .defineInRange("trainMaxSpeed", 0.6, 0.01, 1);
 
                 TRAIN_EXEMPT_DAMAGE_SOURCES = BUILDER.comment("Damage sources that trains are invulnerable to")
                                 .define("trainInvuln", List.of("create.mechanical_saw", "create.mechanical_drill"));
@@ -184,7 +184,7 @@ public class ShippingConfig {
                 BUILDER.push("locomotive");
                 LOCO_BASE_SPEED =
                         BUILDER.comment("Locomotive base speed. High speed may cause chunk loading lag or issues, not advised for servers or packs. Default 0.2, max is 0.9")
-                                .defineInRange("locoBaseSpeed", 0.2, 0.01, 0.9);
+                                .defineInRange("locoBaseSpeed", 0.5, 0.01, 0.9);
 
                 STEAM_LOCO_FUEL_MULTIPLIER =
                         BUILDER.comment("Increases the burn duration of Steam locomotive fuel by N times when compared to furnace, must be an integer >= 1. Default 4.")
