@@ -1,6 +1,11 @@
 package dev.murad.shipping.global;
 
+import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.network.client.EntityPosition;
+import dev.murad.shipping.network.client.VehicleTrackerClientPacket;
+import dev.murad.shipping.network.client.VehicleTrackerPacketHandler;
+import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
@@ -8,12 +13,17 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -132,6 +142,10 @@ public class PlayerTrainChunkManager extends SavedData {
                 .filter(entity -> !((ServerLevel) entity.level).isPositionEntityTicking(entity.blockPosition()))
                 .forEach(Entity::tick));
 
+        Player player = level.getPlayerByUUID(uuid);
+        if(player instanceof ServerPlayer serverPlayer && serverPlayer.getItemInHand(InteractionHand.MAIN_HAND).getItem().equals(ModItems.CONDUCTORS_WRENCH.get())) {
+            VehicleTrackerPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer), VehicleTrackerClientPacket.of(getEntityPositions()));
+        }
 
         if(this.changed || changed || enrolled.stream()
                 .map(e -> !e.chunkPosition().equals(new ChunkPos(new BlockPos(e.xOld, e.yOld, e.zOld))))
@@ -140,6 +154,12 @@ public class PlayerTrainChunkManager extends SavedData {
             level.getServer().execute(this::onChanged);
 
         }
+    }
+
+    public List<EntityPosition> getEntityPositions(){
+        return enrolled.stream().map(entity ->
+                new EntityPosition(entity.getType().toString(), entity.getId(), entity.position(), new Vec3(entity.xOld, entity.yOld, entity.zOld)))
+                .collect(Collectors.toList());
     }
 
     private void onChanged() {
@@ -156,10 +176,13 @@ public class PlayerTrainChunkManager extends SavedData {
         setDirty();
     }
 
-    private Set<ChunkPos> computeRequiredTickets(Entity entity){
+    private Set<ChunkPos> computeRequiredTickets(Entity entity) {
         var set = new HashSet<ChunkPos>();
-        getAllSubjectEntities(entity).forEach(e -> set.add(e.chunkPosition()));
-        set.addAll(ChunkPos.rangeClosed(((Entity) entity).chunkPosition(), 1).collect(Collectors.toList()));
+        getAllSubjectEntities(entity).stream()
+                .map(Entity::chunkPosition)
+                .map(pos -> ChunkPos.rangeClosed(pos, 1))
+                .forEach(pos -> set.addAll(pos.collect(Collectors.toList())));
+
         return set;
     }
 

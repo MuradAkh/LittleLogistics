@@ -3,6 +3,7 @@ package dev.murad.shipping.setup;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.network.VehiclePacketHandler;
 import dev.murad.shipping.network.TugRoutePacketHandler;
+import dev.murad.shipping.network.client.VehicleTrackerPacketHandler;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.MenuType;
@@ -41,13 +42,14 @@ public class Registration  {
         ENTITIES.register(eventBus);
         SOUND_EVENTS.register(eventBus);
 
+        ModEntityTypes.register();
         ModItems.register();
         ModBlocks.register();
         ModTileEntitiesTypes.register();
         ModRecipeSerializers.register();
         ModMenuTypes.register();
-        ModEntityTypes.register();
         TugRoutePacketHandler.register();
+        VehicleTrackerPacketHandler.register();
         VehiclePacketHandler.register();
         ModSounds.register();
     }
