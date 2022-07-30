@@ -51,7 +51,7 @@ public class ChunkLoaderBargeEntity extends AbstractBargeEntity {
 
     @Override
     public Item getDropItem() {
-        return ModItems.CHUNK_LOADER_BARGE.get();
+        return ModItems.SEATER_BARGE.get();
     }
 
     @Override

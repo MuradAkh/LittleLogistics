@@ -195,9 +195,10 @@ public class ForgeClientEventHandler {
                 double y;
                 double z;
                 if (entity == null) {
-                    x = Mth.lerp(event.getPartialTick(), position.oldPos().x, position.pos().x);
-                    y = Mth.lerp(event.getPartialTick(), position.oldPos().y, position.pos().y);
-                    z = Mth.lerp(event.getPartialTick(), position.oldPos().z, position.pos().z);
+                    //FIXME: partial ticks weren't working properly
+                    x = (position.pos().x);
+                    y = (position.pos().y);
+                    z = (position.pos().z);
 
                 }else{
                     x = Mth.lerp(event.getPartialTick(), entity.xOld, entity.getX());

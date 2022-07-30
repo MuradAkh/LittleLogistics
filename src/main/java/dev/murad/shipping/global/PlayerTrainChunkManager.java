@@ -110,10 +110,12 @@ public class PlayerTrainChunkManager extends SavedData {
 
     private List<Entity> getAllSubjectEntities(Entity entity){
         List<Entity> subjects = new ArrayList<>();
+        subjects.add(entity);
         if(entity instanceof LinkableEntity<?> l){ // need to refactor this somehow to be more generic
            for(var e : l.getTrain().asListOfTugged()){
-               if(e instanceof Entity){
-                   subjects.add((Entity) e);
+               if(e instanceof Entity entity1){
+                   subjects.add(entity);
+                   subjects.addAll(entity1.getPassengers());
                }
            }
         }
