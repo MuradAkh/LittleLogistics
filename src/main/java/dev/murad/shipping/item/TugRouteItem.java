@@ -63,7 +63,7 @@ public class TugRouteItem extends Item {
         ItemStack itemstack = player.getItemInHand(hand);
         if(!player.level.isClientSide){
             if (player.isShiftKeyDown()) {
-                NetworkHooks.openGui((ServerPlayer) player, createContainerProvider(hand), getDataAccessor(player, hand)::write);
+                NetworkHooks.openScreen((ServerPlayer) player, createContainerProvider(hand), getDataAccessor(player, hand)::write);
             } else {
                 int x = (int) Math.floor(player.getX());
                 int z = (int) Math.floor(player.getZ());

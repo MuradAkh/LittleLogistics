@@ -3,6 +3,7 @@ package dev.murad.shipping.entity.container;
 import dev.murad.shipping.entity.accessor.SteamHeadVehicleDataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.setup.ModMenuTypes;
+import dev.murad.shipping.util.EnrollmentHandler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.Level;
@@ -24,25 +25,6 @@ public class SteamHeadVehicleContainer<T extends Entity & HeadVehicle> extends A
 
     public int getBurnProgress(){
         return data.getBurnProgress();
-    }
-
-    public boolean isLit(){
-        return data.isLit();
-    }
-
-    @Override
-    public boolean isOn(){
-        return data.isOn();
-    }
-
-    @Override
-    public int routeSize() {
-        return data.routeSize();
-    }
-
-    @Override
-    public int visitedSize() {
-        return data.visitedSize();
     }
 
 }

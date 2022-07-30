@@ -130,12 +130,14 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
 
     @Override
     public void addAdditionalSaveData(CompoundTag p_213281_1_) {
+        super.addAdditionalSaveData(p_213281_1_);
         ContainerHelper.saveAllItems(p_213281_1_, this.itemStacks);
 
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag p_70037_1_) {
+        super.readAdditionalSaveData(p_70037_1_);
         ContainerHelper.loadAllItems(p_70037_1_, this.itemStacks);
     }
 

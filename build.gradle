@@ -2,6 +2,7 @@ buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net' }
         maven { url = 'https://maven.parchmentmc.org' }
+        maven { url = 'https://cursemaven.com' }
         mavenCentral()
     }
     dependencies {
@@ -168,6 +169,9 @@ dependencies {
 //    runtimeOnly fg.deobf("com.teamcofh:thermal_foundation:1.16.5-1.4.3.10")
 //    runtimeOnly fg.deobf("com.teamcofh:thermal_expansion:1.16.5-1.4.2.4")
 
+    // spark
+    runtimeOnly fg.deobf("curse.maven:spark-361579:3875647")
+
     // create
 //    compileOnly fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:${rootProject.flywheel_version}")
 //    compileOnly fg.deobf("com.simibubi.create:Create:${rootProject.create_version}")
@@ -269,5 +273,10 @@ repositories {
         // Create and Flywheel
         name 'tterrag maven'
         url 'https://maven.tterrag.com'
+    }
+
+    maven {
+        name 'curseforge'
+        url 'https://cursemaven.com'
     }
 }

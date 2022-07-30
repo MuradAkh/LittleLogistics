@@ -6,6 +6,7 @@ import dev.murad.shipping.entity.accessor.EnergyHeadVehicleDataAccessor;
 import dev.murad.shipping.entity.container.EnergyHeadVehicleContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import dev.murad.shipping.util.EnrollmentHandler;
 import dev.murad.shipping.util.InventoryUtils;
 import dev.murad.shipping.util.ItemHandlerVanillaContainerWrapper;
 import net.minecraft.core.Direction;
@@ -101,21 +102,23 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
 
             @Nullable
             @Override
-            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player Player) {
-                return new EnergyHeadVehicleContainer(i, level, getDataAccessor(), playerInventory, Player);
+            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player player) {
+                return new EnergyHeadVehicleContainer<EnergyLocomotiveEntity>(i, level, getDataAccessor(), playerInventory, player);
             }
         };
     }
 
     @Override
     public EnergyHeadVehicleDataAccessor getDataAccessor() {
-        return new EnergyHeadVehicleDataAccessor.Builder(this.getId())
-                .withOn(() -> engineOn)
-                .withRouteSize(() -> navigator.getRouteSize())
-                .withVisitedSize(() -> navigator.getVisitedSize())
+        return (EnergyHeadVehicleDataAccessor) new EnergyHeadVehicleDataAccessor.Builder()
                 .withEnergy(internalBattery::getEnergyStored)
                 .withCapacity(internalBattery::getMaxEnergyStored)
                 .withLit(() -> internalBattery.getEnergyStored() > 0) // has energy
+                .withId(this.getId())
+                .withOn(() -> engineOn)
+                .withRouteSize(() -> navigator.getRouteSize())
+                .withVisitedSize(() -> navigator.getVisitedSize())
+                .withCanMove(enrollmentHandler::mayMove)
                 .build();
     }
 

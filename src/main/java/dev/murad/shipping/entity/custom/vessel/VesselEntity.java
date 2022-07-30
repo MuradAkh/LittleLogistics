@@ -191,20 +191,9 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
 
     public abstract Item getDropItem();
 
-    /**
-     * Check if this vessel should pull the vessel behind
-     */
-    public boolean shouldApplySpringPhysics() {
-        if (this.linkingHandler.train.getHead() instanceof AbstractTugEntity tug) {
-            return !tug.shouldFreezeTrain();
-        }
-        return true;
-    }
-
     @Override
     public Optional<VesselEntity> getDominated() {
         return this.linkingHandler.dominated;
-
     }
 
 
@@ -238,12 +227,16 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
         } else if (secondTrain.equals(firstTrain)){
             player.displayClientMessage(Component.translatable("item.littlelogistics.spring.noLoops"), true);
         } else if (firstTrain.getTug().isPresent()) {
-            firstTrain.getTail().setDominated(secondTrain.getHead());
-            secondTrain.getHead().setDominant(firstTrain.getTail());
+            var tail = firstTrain.getTail();
+            var head = secondTrain.getHead();
+            tail.setDominated(head);
+            head.setDominant(tail);
             return true;
         } else {
-            secondTrain.getTail().setDominated(firstTrain.getHead());
-            firstTrain.getHead().setDominant(secondTrain.getTail());
+            var tail = secondTrain.getTail();
+            var head = firstTrain.getHead();
+            tail.setDominated(head);
+            head.setDominant(tail);
             return true;
         }
         return false;
@@ -558,7 +551,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
                     f5 = 0.96F;
                 }
 
-                f6 *= (float) this.getAttribute(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get()).getValue();
+                f6 *= (float) swimSpeed();
                 this.moveRelative(f6, p_213352_1_);
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 Vec3 vector3d6 = this.getDeltaMovement();
@@ -675,5 +668,9 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
         }
 
         this.calculateEntityAnimation(this, false);
+    }
+
+    protected double swimSpeed() {
+        return this.getAttribute(ForgeMod.SWIM_SPEED.get()).getValue();
     }
 }

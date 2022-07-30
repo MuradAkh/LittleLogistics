@@ -25,7 +25,7 @@ public class ChunkLoaderCarEntity extends AbstractWagonEntity {
 
     @Override
     public ItemStack getPickResult() {
-        return new ItemStack(ModItems.CHUNK_LOADER_CAR.get());
+        return new ItemStack(ModItems.SEATER_CAR.get());
     }
 
 

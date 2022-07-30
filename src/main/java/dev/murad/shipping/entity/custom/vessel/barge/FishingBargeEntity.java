@@ -74,7 +74,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
 
     @Override
     protected void doInteract(Player player) {
-        NetworkHooks.openGui((ServerPlayer) player, createContainerProvider(), buffer -> buffer.writeInt(this.getId()));
+        NetworkHooks.openScreen((ServerPlayer) player, createContainerProvider(), buffer -> buffer.writeInt(this.getId()));
 
     }
 

@@ -14,7 +14,7 @@ public class SupplierIntArray implements ContainerData {
 
     @Override
     public int get(int i) {
-        return suppliers[i].getAsInt();
+        return suppliers[i] == null ? 0 : suppliers[i].getAsInt();
     }
 
     @Override

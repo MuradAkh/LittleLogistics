@@ -17,6 +17,8 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.Map;
+
 public class ModItems {
 
     /**
@@ -48,8 +50,8 @@ public class ModItems {
     public static final RegistryObject<Item> CHEST_BARGE = Registration.ITEMS.register("barge",
             () -> new VesselItem(new Item.Properties().tab(CreativeModeTab.TAB_TRANSPORTATION), ChestBargeEntity::new));
 
-    public static final RegistryObject<Item> CHUNK_LOADER_BARGE = Registration.ITEMS.register("chunk_loader_barge",
-            () -> new VesselItem(new Item.Properties().tab(CreativeModeTab.TAB_TRANSPORTATION), ChunkLoaderBargeEntity::new));
+//    public static final RegistryObject<Item> CHUNK_LOADER_BARGE = Registration.ITEMS.register("chunk_loader_barge",
+//            () -> new VesselItem(new Item.Properties().tab(CreativeModeTab.TAB_TRANSPORTATION), ChunkLoaderBargeEntity::new));
 
     public static final RegistryObject<Item> FISHING_BARGE = Registration.ITEMS.register("fishing_barge",
             () -> new VesselItem(new Item.Properties().tab(CreativeModeTab.TAB_TRANSPORTATION), FishingBargeEntity::new));
@@ -79,8 +81,8 @@ public class ModItems {
     public static final RegistryObject<Item> FLUID_CAR = Registration.ITEMS.register("fluid_car",
             () -> new TrainCarItem(FluidTankCarEntity::new, new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
 
-    public static final RegistryObject<Item> CHUNK_LOADER_CAR = Registration.ITEMS.register("chunk_loader_car",
-            () -> new TrainCarItem(ChunkLoaderCarEntity::new, new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+//    public static final RegistryObject<Item> CHUNK_LOADER_CAR = Registration.ITEMS.register("chunk_loader_car",
+//            () -> new TrainCarItem(ChunkLoaderCarEntity::new, new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
 
     public static final RegistryObject<Item> SEATER_CAR = Registration.ITEMS.register("seater_car",
             () -> new TrainCarItem(SeaterCarEntity::new, new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
@@ -99,6 +101,7 @@ public class ModItems {
 
     public static final RegistryObject<Item> LOCO_ROUTE = Registration.ITEMS.register("locomotive_route",
             () -> new LocoRouteItem(new Item.Properties().stacksTo(16).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+
 
     public static void register () {
 

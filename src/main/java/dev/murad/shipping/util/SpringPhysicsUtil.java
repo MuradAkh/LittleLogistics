@@ -67,7 +67,7 @@ public class SpringPhysicsUtil {
 
         float targetYaw = SpringPhysicsUtil.computeTargetYaw(dominated.getYRot(), frontAnchor, backAnchor);
         dominated.setYRot((float) ((alpha * dominated.getYRot() + targetYaw * (1f - alpha)) % 360));
-        double k = dominant instanceof AbstractTugEntity ? 0.2 : 0.13;
+        double k = dominant instanceof AbstractTugEntity ? 0.3 : 0.4;
         double l0 = maxDstSq;
         dominated.setDeltaMovement(k * (dist - l0) * dx, k * (dist - l0) * dy, k * (dist - l0) * dz);
     }

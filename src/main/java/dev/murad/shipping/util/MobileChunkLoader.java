@@ -35,12 +35,6 @@ public class MobileChunkLoader {
     }
 
     public void serverTick(){
-        if(ShippingConfig.Server.DISABLE_CHUNKLOADERS.get()){
-            // Not the best UX, but if server owners want better UX they should use a datapack to disable the recipe
-            entity.remove(Entity.RemovalReason.DISCARDED);
-            return;
-        }
-
         Pair<Integer, Integer> currChunk = new Pair<>(entity.chunkPosition().x, entity.chunkPosition().z);
         if (loadedChunk.isEmpty()){
             getSurroundingChunks(currChunk).forEach(c -> setChunkLoad(true, c));

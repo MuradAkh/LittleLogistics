@@ -1,34 +1,38 @@
 package dev.murad.shipping.event;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.item.LocoRouteItem;
 import dev.murad.shipping.item.TugRouteItem;
+import dev.murad.shipping.network.client.EntityPosition;
+import dev.murad.shipping.network.client.VehicleTrackerPacketHandler;
+import dev.murad.shipping.setup.EntityItemMap;
+import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LocoRoute;
 import dev.murad.shipping.util.LocoRouteNode;
 import dev.murad.shipping.util.RailHelper;
 import dev.murad.shipping.util.TugRouteNode;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BeaconRenderer;
-import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -38,6 +42,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.List;
+import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.stream.Collectors;
 
@@ -46,6 +51,7 @@ import java.util.stream.Collectors;
  */
 @Mod.EventBusSubscriber(modid = ShippingMod.MOD_ID, value = Dist.CLIENT)
 public class ForgeClientEventHandler {
+
     public static final ResourceLocation BEAM_LOCATION = new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/beacon_beam.png");
 
     public static class ModRenderType extends RenderType {
@@ -174,5 +180,70 @@ public class ForgeClientEventHandler {
             }
             renderTypeBuffer.endBatch();
         }
+
+        if (stack.getItem().equals(ModItems.CONDUCTORS_WRENCH.get()) && player.level.dimension().toString().equals(VehicleTrackerPacketHandler.toRenderDimension)){
+            MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
+            Vec3 cameraPosition = camera.getPosition();
+            double d0 = cameraPosition.x();
+            double d1 = cameraPosition.y();
+            double d2 = cameraPosition.z();
+
+            for(EntityPosition position : VehicleTrackerPacketHandler.toRender){
+                Entity entity = player.level.getEntity(position.id());
+                double x;
+                double y;
+                double z;
+                if (entity == null) {
+                    //FIXME: partial ticks weren't working properly
+                    x = (position.pos().x);
+                    y = (position.pos().y);
+                    z = (position.pos().z);
+
+                }else{
+                    x = Mth.lerp(event.getPartialTick(), entity.xOld, entity.getX());
+                    y = Mth.lerp(event.getPartialTick(), entity.yOld, entity.getY());
+                    z = Mth.lerp(event.getPartialTick(), entity.zOld, entity.getZ());
+                }
+
+                Vec3 posToRender = computeFixedDistance(new Vec3(x, y, z), cameraPosition);
+                PoseStack matrixStack = event.getPoseStack();
+
+                matrixStack.pushPose();
+                matrixStack.translate(posToRender.x -d0, posToRender.y  -d1, posToRender.z -d2);
+                matrixStack.mulPose(Vector3f.YP.rotationDegrees(-camera.getYRot()));
+                matrixStack.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
+
+                Minecraft.getInstance().getItemRenderer().renderStatic(
+                        new ItemStack(EntityItemMap.get(position.type())),
+                        ItemTransforms.TransformType.GROUND,
+                        150,
+                        OverlayTexture.NO_OVERLAY,
+                        matrixStack,
+                        renderTypeBuffer,
+                        position.id()
+                        );
+
+                matrixStack.scale(-0.025F, -0.025F, -0.025F);
+                Matrix4f matrix4f = matrixStack.last().pose();
+                Font fontRenderer = Minecraft.getInstance().font;
+                String text = String.valueOf(Math.round(position.pos().distanceTo(player.position()) * 10) / 10d);
+                float width = (-fontRenderer.width(text) / (float) 2);
+                fontRenderer.drawInBatch(text, width, 0.0F, -1, true, matrix4f, renderTypeBuffer, true, 0, 15728880);
+                matrixStack.popPose();
+
+
+            }
+
+            renderTypeBuffer.endBatch();
+        }
+    }
+
+    private static Vec3 computeFixedDistance(Vec3 target, Vec3 position){
+        target = target.add(0, 2, 0);
+        Vec3 delta = position.vectorTo(target);
+        if(delta.length() < 5)
+            return target;
+        else return position.add(delta.normalize().scale(5));
     }
 }
