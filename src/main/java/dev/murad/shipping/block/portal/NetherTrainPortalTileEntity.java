@@ -295,6 +295,11 @@ public class NetherTrainPortalTileEntity extends BlockEntity implements IPortalT
                 entity2.setDominant(entity);
                 return entity2;
             });
+
+        enqueue(() -> {
+            targets.forEach(Entity::tick);
+            return true;
+        });
     }
 
     private <T extends Entity> Optional<T> teleportEntity(T oldEntity, int num, Direction portalDirection, BlockPos portalPos, ServerLevel targetLevel) {
