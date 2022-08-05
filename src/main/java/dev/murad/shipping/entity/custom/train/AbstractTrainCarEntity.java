@@ -57,7 +57,6 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     public static final EntityDataAccessor<Integer> DOMINANT_ID = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
     public static final EntityDataAccessor<Integer> DOMINATED_ID = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
     protected Train<AbstractTrainCarEntity> train;
-    protected static double TRAIN_SPEED = ShippingConfig.Server.TRAIN_MAX_SPEED.get();
     @Getter
     protected final RailHelper railHelper;
     private boolean waitForDominated;
@@ -223,13 +222,13 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         this.setYRot(yrot);
         if (!level.isClientSide) {
             doChainMath();
-            enforceMaxVelocity(TRAIN_SPEED);
+            enforceMaxVelocity(ShippingConfig.Server.TRAIN_MAX_SPEED.get());
         }
     }
 
     @Override
     public float getMaxCartSpeedOnRail() {
-        return (float) TRAIN_SPEED;
+        return ShippingConfig.Server.TRAIN_MAX_SPEED.get().floatValue();
     }
 
     protected void enforceMaxVelocity(double maxSpeed) {

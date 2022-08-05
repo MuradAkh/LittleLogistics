@@ -7,15 +7,13 @@ import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
-import dev.murad.shipping.item.LocoRouteItem;
-import dev.murad.shipping.util.*;
 import dev.murad.shipping.entity.custom.vessel.SpringEntity;
 import dev.murad.shipping.entity.custom.vessel.VesselEntity;
 import dev.murad.shipping.entity.navigation.TugPathNavigator;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.setup.ModBlocks;
-import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModSounds;
+import dev.murad.shipping.util.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.core.BlockPos;
@@ -45,8 +43,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.entity.PartEntity;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.network.NetworkHooks;
 
@@ -500,7 +496,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Override
     public void remove(RemovalReason r) {
-        if (!this.level.isClientSide) {
+        if (!this.level.isClientSide && r.equals(RemovalReason.KILLED)) {
             this.spawnAtLocation(this.getDropItem());
             Containers.dropContents(this.level, this, this);
             this.spawnAtLocation(routeItemHandler.getStackInSlot(0));
