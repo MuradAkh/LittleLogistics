@@ -77,8 +77,8 @@ public class ShippingConfig {
         public static final ForgeConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_CAPACITY;
         public static final ForgeConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_MAX_TRANSFER;
 
-        public static final ForgeConfigSpec.ConfigValue<List<String>> TRAIN_EXEMPT_DAMAGE_SOURCES;
-        public static final ForgeConfigSpec.ConfigValue<List<String>> VESSEL_EXEMPT_DAMAGE_SOURCES;
+        public static final ForgeConfigSpec.ConfigValue<List<? extends String>> TRAIN_EXEMPT_DAMAGE_SOURCES;
+        public static final ForgeConfigSpec.ConfigValue<List<? extends String>> VESSEL_EXEMPT_DAMAGE_SOURCES;
 
         public static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_CHUNKLOADERS;
 
@@ -95,7 +95,7 @@ public class ShippingConfig {
             {
                 BUILDER.push("general");
                 VESSEL_EXEMPT_DAMAGE_SOURCES = BUILDER.comment("Damage sources that vessels are invulnerable to")
-                        .define("vesselInvuln", List.of("create.mechanical_saw", "create.mechanical_drill"));
+                        .defineList("vesselInvuln", List.of("create.mechanical_saw", "create.mechanical_drill"), s -> true);
 
                 BUILDER.pop();
             }
@@ -161,7 +161,7 @@ public class ShippingConfig {
                                 .defineInRange("trainMaxSpeed", 0.25, 0.01, 1);
 
                 TRAIN_EXEMPT_DAMAGE_SOURCES = BUILDER.comment("Damage sources that trains are invulnerable to")
-                                .define("trainInvuln", List.of("create.mechanical_saw", "create.mechanical_drill"));
+                                .defineList("trainInvuln", List.of("create.mechanical_saw", "create.mechanical_drill"), s -> true);
 
 
 

@@ -222,7 +222,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     @Override
     public float getMaxCartSpeedOnRail() {
-        return (float) (TRAIN_SPEED * 0.8);
+        return (float) (ShippingConfig.Server.TRAIN_MAX_SPEED.get() * 0.8);
     }
 
     public void flip() {
@@ -371,7 +371,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             Function<Double, Double> prepCord =
                     (Double d) -> Math.abs(d - d.intValue());
             Predicate<Double> aroundCentre =
-                    (var i) -> prepCord.apply(i) < 0.65 && prepCord.apply(i) > 0.35;
+                    (var i) -> prepCord.apply(i) < 0.8 && prepCord.apply(i) > 0.2;
 
             if(!aroundCentre.test(this.getX()) || !aroundCentre.test(this.getZ())){
                 return;
@@ -438,9 +438,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                                     },
                                     12))
                     .orElse(12);
-            double minimum = LOCO_SPEED * 0.35;
+            double minimum = ShippingConfig.Server.LOCO_BASE_SPEED.get() * 0.35;
             double modifier = dist / 12d;
-            speedLimit = minimum + (LOCO_SPEED * 0.65 * modifier);
+            speedLimit = minimum + (ShippingConfig.Server.LOCO_BASE_SPEED.get() * 0.65 * modifier);
             speedRecomputeCooldown = 10;
         } else {
             speedRecomputeCooldown--;

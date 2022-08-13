@@ -95,7 +95,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
 
     @Override
     public void remove(RemovalReason r) {
-        if (!this.level.isClientSide) {
+        if (!this.level.isClientSide && r.equals(RemovalReason.KILLED)) {
             Containers.dropContents(this.level, this, this);
         }
         super.remove(r);

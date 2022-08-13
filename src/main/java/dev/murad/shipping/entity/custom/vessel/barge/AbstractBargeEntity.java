@@ -123,7 +123,7 @@ public abstract class AbstractBargeEntity extends VesselEntity {
 
     @Override
     public void remove(RemovalReason r){
-        if (!this.level.isClientSide) {
+        if (!this.level.isClientSide && r.equals(RemovalReason.KILLED)) {
             this.spawnAtLocation(this.getDropItem());
         }
         handleLinkableKill();
