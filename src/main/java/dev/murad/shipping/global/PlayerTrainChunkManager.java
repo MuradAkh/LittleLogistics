@@ -83,7 +83,7 @@ public class PlayerTrainChunkManager extends SavedData {
                 player.sendSystemMessage(Component.translatable("global.littlelogistics.locomotive.register_success", max));
                 return false;
             } else {
-                player.sendSystemMessage(Component.translatable("global.littlelogistics.locomotive.register_fail", max, registered));
+                player.sendSystemMessage(Component.translatable("global.littlelogistics.locomotive.register_fail", registered, max));
                 manager.enrolled.add(entity);
                 manager.changed = true;
                 return true;
@@ -114,7 +114,7 @@ public class PlayerTrainChunkManager extends SavedData {
         if(entity instanceof LinkableEntity<?> l){ // need to refactor this somehow to be more generic
            for(var e : l.getTrain().asListOfTugged()){
                if(e instanceof Entity entity1){
-                   subjects.add(entity);
+                   subjects.add(entity1);
                    subjects.addAll(entity1.getPassengers());
                }
            }
