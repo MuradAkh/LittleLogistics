@@ -2,9 +2,13 @@ package dev.murad.shipping.entity.container;
 
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.accessor.DataAccessor;
+import dev.murad.shipping.entity.accessor.HeadVehicleDataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
+import dev.murad.shipping.global.PlayerTrainChunkManager;
+import dev.murad.shipping.network.EnrollVehiclePacket;
 import dev.murad.shipping.network.VehiclePacketHandler;
 import dev.murad.shipping.network.SetEnginePacket;
+import dev.murad.shipping.util.EnrollmentHandler;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
@@ -16,16 +20,18 @@ import net.minecraftforge.items.SlotItemHandler;
 
 import javax.annotation.Nullable;
 
-public abstract class AbstractHeadVehicleContainer<T extends DataAccessor, U extends Entity & HeadVehicle> extends AbstractItemHandlerContainer{
+public abstract class AbstractHeadVehicleContainer<T extends HeadVehicleDataAccessor, U extends Entity & HeadVehicle> extends AbstractItemHandlerContainer{
     public static final ResourceLocation EMPTY_ATLAS_LOC = InventoryMenu.BLOCK_ATLAS;
     protected T data;
     protected U entity;
+    protected Player player;
 
     public AbstractHeadVehicleContainer(@Nullable MenuType<?> containerType, int windowId, Level world, T data,
                                         Inventory playerInventory, Player player) {
         super(containerType, windowId, playerInventory, player);
         this.entity = (U) world.getEntity(data.getEntityUUID());
         this.data = data;
+        this.player = playerInventory.player;
         layoutPlayerInventorySlots(8, 84);
         this.addDataSlots(data);
 
@@ -38,12 +44,36 @@ public abstract class AbstractHeadVehicleContainer<T extends DataAccessor, U ext
         return 2;
     }
 
-    public abstract boolean isOn();
-    public abstract int routeSize();
-    public abstract int visitedSize();
+    public boolean isLit(){
+        return data.isLit();
+    }
+
+    public boolean isOn(){
+        return data.isOn();
+    }
+
+    public int routeSize() {
+        return data.routeSize();
+    }
+
+    public int visitedSize() {
+        return data.visitedSize();
+    };
 
     public void setEngine(boolean state){
         VehiclePacketHandler.INSTANCE.sendToServer(new SetEnginePacket(entity.getId(), state));
+    }
+
+    public void enroll(){
+        VehiclePacketHandler.INSTANCE.sendToServer(new EnrollVehiclePacket(entity.getId()));
+    }
+
+    public String getOwner(){
+        return entity.owner();
+    }
+
+    public boolean canMove(){
+        return data.canMove();
     }
 
     public String getRouteText(){

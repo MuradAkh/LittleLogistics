@@ -77,25 +77,38 @@ public class ShippingConfig {
         public static final ForgeConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_CAPACITY;
         public static final ForgeConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_MAX_TRANSFER;
 
-        public static final ForgeConfigSpec.ConfigValue<List<String>> TRAIN_EXEMPT_DAMAGE_SOURCES;
-        public static final ForgeConfigSpec.ConfigValue<List<String>> VESSEL_EXEMPT_DAMAGE_SOURCES;
+        public static final ForgeConfigSpec.ConfigValue<List<? extends String>> TRAIN_EXEMPT_DAMAGE_SOURCES;
+        public static final ForgeConfigSpec.ConfigValue<List<? extends String>> VESSEL_EXEMPT_DAMAGE_SOURCES;
 
-        public static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_CHUNKLOADERS;
+
+        public static final ForgeConfigSpec.ConfigValue<Integer> CHUNK_LOADING_LEVEL;
+        public static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_CHUNK_MANAGEMENT;
+        public static final ForgeConfigSpec.ConfigValue<Integer> MAX_REGISTRERED_VEHICLES_PER_PLAYER;
+        public static final ForgeConfigSpec.ConfigValue<Boolean> OFFLINE_LOADING;
 
 
         static {
-            BUILDER.push("general");
+            BUILDER.push("chunk management - requires restart");
+            BUILDER.comment("By default, little logistics allows players to register vehicles that will be loaded automatically. This is not regular chunkloading, no other ticking will happen in this chunks and no surrounding chunks will be loaded. A very minimal number of chunks will be loaded as \"border chunks\" where only LL entities are active by default.");
 
-            DISABLE_CHUNKLOADERS =
-                    BUILDER.comment("Automatically kill chunkloader vehicles, this is intended for servers that regulate chunkloading using different mods. Please consider adding a datapack to disable the recipe if using this option.")
-                            .define("disableChunkLoading", false);
+            CHUNK_LOADING_LEVEL = BUILDER.comment("Chunkloading level, from low perf impact to high. 0: no ticking (except LL, recommended), 1: tile entity ticking, 2: entity ticking (regular).")
+                            .defineInRange("chunkLoadingLevel", 0, 0, 2);
+
+            DISABLE_CHUNK_MANAGEMENT = BUILDER.comment("Completely disable the chunk management system.")
+                            .define("disableChunkManagement", false);
+
+            MAX_REGISTRERED_VEHICLES_PER_PLAYER = BUILDER.comment("Maximum number of vehicles (barges/cars don't count, only Tugs/Locos) the player is able to register. Lowering this number will not de-register vehicles but will prevent the player from registering more.")
+                    .defineInRange("maxVehiclesPerPlayer", 100, 0, 1000);
+
+            OFFLINE_LOADING = BUILDER.comment("Load vehicles even when the player is offline")
+                    .define("offlineLoading", false);
 
             BUILDER.pop();
             BUILDER.push("vessel");
             {
                 BUILDER.push("general");
                 VESSEL_EXEMPT_DAMAGE_SOURCES = BUILDER.comment("Damage sources that vessels are invulnerable to")
-                        .define("vesselInvuln", List.of("create.mechanical_saw", "create.mechanical_drill"));
+                        .defineList("vesselInvuln", List.of("create.mechanical_saw", "create.mechanical_drill"), s -> true);
 
                 BUILDER.pop();
             }
@@ -158,10 +171,10 @@ public class ShippingConfig {
                 BUILDER.push("general");
                 TRAIN_MAX_SPEED =
                         BUILDER.comment("Max speed that trains can be accelerated to. High speed may cause chunk loading lag or issues, not advised for servers or packs. Default 0.25, max is 1")
-                                .defineInRange("trainMaxSpeed", 0.25, 0.01, 1);
+                                .defineInRange("trainMaxSpeed", 0.6, 0.01, 1);
 
                 TRAIN_EXEMPT_DAMAGE_SOURCES = BUILDER.comment("Damage sources that trains are invulnerable to")
-                                .define("trainInvuln", List.of("create.mechanical_saw", "create.mechanical_drill"));
+                                .defineList("trainInvuln", List.of("create.mechanical_saw", "create.mechanical_drill"), s -> true);
 
 
 
@@ -171,7 +184,7 @@ public class ShippingConfig {
                 BUILDER.push("locomotive");
                 LOCO_BASE_SPEED =
                         BUILDER.comment("Locomotive base speed. High speed may cause chunk loading lag or issues, not advised for servers or packs. Default 0.2, max is 0.9")
-                                .defineInRange("locoBaseSpeed", 0.2, 0.01, 0.9);
+                                .defineInRange("locoBaseSpeed", 0.5, 0.01, 0.9);
 
                 STEAM_LOCO_FUEL_MULTIPLIER =
                         BUILDER.comment("Increases the burn duration of Steam locomotive fuel by N times when compared to furnace, must be an integer >= 1. Default 4.")

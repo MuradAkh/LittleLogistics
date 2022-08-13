@@ -1,12 +1,12 @@
 package dev.murad.shipping.entity.custom.vessel.tug;
 
 import dev.murad.shipping.ShippingConfig;
-import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
+import dev.murad.shipping.global.PlayerTrainChunkManager;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.*;
 import dev.murad.shipping.entity.custom.vessel.VesselEntity;
@@ -26,6 +26,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.*;
@@ -52,10 +53,13 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 public abstract class AbstractTugEntity extends VesselEntity implements LinkableEntityHead<VesselEntity>, Container, WorldlyContainer, HeadVehicle {
+
+    protected final EnrollmentHandler enrollmentHandler;
 
     // CONTAINER STUFF
     @Getter
@@ -65,6 +69,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     protected boolean docked = false;
     @Getter
     protected int remainingStallTime = 0;
+    private double swimSpeedMult = 1;
 
     @Setter
     protected boolean engineOn = true;
@@ -74,6 +79,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private int pathfindCooldown = 0;
     private VehicleFrontPart frontHitbox;
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.STRING);
 
 
 
@@ -90,6 +96,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         linkingHandler.train = (new Train<>(this));
         this.path = new TugRoute();
         frontHitbox = new VehicleFrontPart(this);
+        enrollmentHandler = new EnrollmentHandler(this);
     }
 
     public AbstractTugEntity(EntityType type, Level worldIn, double x, double y, double z) {
@@ -146,6 +153,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Override
+    public String owner() {
+        return entityData.get(OWNER);
+    }
+
+    @Override
     public boolean isPushedByFluid() {
         return true;
     }
@@ -164,6 +176,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         nextStop = compound.contains("next_stop") ? compound.getInt("next_stop") : 0;
         engineOn = !compound.contains("engineOn") || compound.getBoolean("engineOn");
         contentsChanged = true;
+        enrollmentHandler.load(compound);
         super.readAdditionalSaveData(compound);
     }
 
@@ -172,6 +185,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         compound.putInt("next_stop", nextStop);
         compound.putBoolean("engineOn", engineOn);
         compound.put("routeHandler", routeItemHandler.serializeNBT());
+        enrollmentHandler.save(compound);
         super.addAdditionalSaveData(compound);
     }
 
@@ -290,9 +304,14 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (!player.level.isClientSide()) {
 
-            NetworkHooks.openGui((ServerPlayer) player, createContainerProvider(), getDataAccessor()::write);
+            NetworkHooks.openScreen((ServerPlayer) player, createContainerProvider(), getDataAccessor()::write);
         }
         return InteractionResult.CONSUME;
+    }
+
+    @Override
+    public void enroll(UUID uuid) {
+        enrollmentHandler.enroll(uuid);
     }
 
     @Override
@@ -322,8 +341,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
                 tickRouteCheck();
                 tickCheckDock();
 
-                    followPath();
-                    followGuideRail();
+                followPath();
+                followGuideRail();
 
             }
 
@@ -357,11 +376,14 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     public void tick() {
-
-
         if(this.level.isClientSide
                 && independentMotion){
             makeSmoke();
+        }
+        if(!this.level.isClientSide) {
+            enrollmentHandler.tick();
+            enrollmentHandler.getPlayerName().ifPresent(name ->
+                    entityData.set(OWNER, name));
         }
 
         super.tick();
@@ -432,13 +454,14 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     public boolean shouldFreezeTrain() {
-        return (stalling.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(VesselEntity::isFrozen);
+        return !enrollmentHandler.mayMove() || (stalling.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(VesselEntity::isFrozen);
     }
 
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         entityData.define(INDEPENDENT_MOTION, false);
+        entityData.define(OWNER, "");
     }
 
 
@@ -471,6 +494,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     public void removeDominated() {
         linkingHandler.dominated = (Optional.empty());
         linkingHandler.train.setTail(this);
+    }
+
+    @Override
+    public boolean hasOwner(){
+        return enrollmentHandler.hasOwner();
     }
 
     @Override
@@ -565,9 +593,41 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         return true;
     }
 
+    @Override
+    protected double swimSpeed() {
+        if(this.level.isClientSide){
+            return super.swimSpeed();
+        }
+
+        if (this.tickCount % 10 == 0){
+           swimSpeedMult = computeSpeedMult();
+        }
+
+        return swimSpeedMult * super.swimSpeed();
+    }
+
+    private double computeSpeedMult(){
+        double mult = 1;
+        boolean doBreak = false;
+        for (int i = 0; i < 10 && !doBreak; i++) {
+            for (Direction direction: List.of(Direction.NORTH, Direction.EAST, Direction.WEST, Direction.SOUTH)) {
+                BlockPos pos = this.getOnPos().relative(direction, i);
+                if(!this.level.getFluidState(pos).isSource()){
+                    doBreak = true;
+                    break;
+                }
+            }
+            if(i > 3) {
+                mult = 1 + ((i / 10f) * 1.8);
+            }
+        }
+        if(mult < swimSpeedMult) return mult;
+        else return (mult + swimSpeedMult * 20) / 21;
+    }
+
     /*
-            Stalling Capability
-     */
+                Stalling Capability
+         */
     private final StallingCapability stalling = new StallingCapability() {
         @Override
         public boolean isDocked() {

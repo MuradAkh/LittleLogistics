@@ -1,15 +1,16 @@
 package dev.murad.shipping.entity.custom.train.locomotive;
 
 import dev.murad.shipping.ShippingConfig;
-import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
+import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.VehicleFrontPart;
 import dev.murad.shipping.entity.navigation.LocomotiveNavigator;
+import dev.murad.shipping.global.PlayerTrainChunkManager;
 import dev.murad.shipping.item.LocoRouteItem;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
@@ -49,6 +50,7 @@ import net.minecraftforge.network.NetworkHooks;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -56,6 +58,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     @Setter
     protected boolean engineOn = false;
 
+    protected final EnrollmentHandler enrollmentHandler;
     @Setter
     private boolean doflip = false;
     private boolean independentMotion = false;
@@ -83,17 +86,25 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     protected LocomotiveNavigator navigator = new LocomotiveNavigator(this);
 
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractLocomotiveEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(AbstractLocomotiveEntity.class, EntityDataSerializers.STRING);
     private int dockCheckCooldown = 0;
 
 
     public AbstractLocomotiveEntity(EntityType<?> type, Level world) {
         super(type, world);
         frontHitbox = new VehicleFrontPart(this);
+        enrollmentHandler = new EnrollmentHandler(this);
     }
 
     public AbstractLocomotiveEntity(EntityType<?> type, Level level, Double x, Double y, Double z) {
         super(type, level, x, y, z);
         frontHitbox = new VehicleFrontPart(this);
+        enrollmentHandler = new EnrollmentHandler(this);
+    }
+
+    @Override
+    public void enroll(UUID uuid) {
+        enrollmentHandler.enroll(uuid);
     }
 
     @Override
@@ -120,7 +131,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             return InteractionResult.PASS;
         }
         if(!this.level.isClientSide){
-            NetworkHooks.openGui((ServerPlayer) pPlayer, createContainerProvider(), getDataAccessor()::write);
+            NetworkHooks.openScreen((ServerPlayer) pPlayer, createContainerProvider(), getDataAccessor()::write);
 
         }
 
@@ -173,6 +184,16 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         }
     }
 
+    @Override
+    public String owner() {
+        return entityData.get(OWNER);
+    }
+
+    @Override
+    public boolean hasOwner(){
+        return enrollmentHandler.hasOwner();
+    }
+
 
     @Override
     public void tick(){
@@ -183,6 +204,10 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             if(remainingStallTime <= 0){
                 navigator.serverTick();
             }
+            enrollmentHandler.tick();
+            enrollmentHandler.getPlayerName().ifPresent(name ->
+                    entityData.set(OWNER, name)
+            );
         }
 
         tickYRot();
@@ -221,7 +246,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     @Override
     public float getMaxCartSpeedOnRail() {
-        return (float) (TRAIN_SPEED * 0.8);
+        return (float) (ShippingConfig.Server.TRAIN_MAX_SPEED.get() * 0.9);
     }
 
     public void flip() {
@@ -236,6 +261,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     protected void defineSynchedData() {
         super.defineSynchedData();
         entityData.define(INDEPENDENT_MOTION, false);
+        entityData.define(OWNER, "");
     }
 
     private void tickMovement() {
@@ -370,7 +396,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             Function<Double, Double> prepCord =
                     (Double d) -> Math.abs(d - d.intValue());
             Predicate<Double> aroundCentre =
-                    (var i) -> prepCord.apply(i) < 0.65 && prepCord.apply(i) > 0.35;
+                    (var i) -> prepCord.apply(i) < 0.8 && prepCord.apply(i) > 0.2;
 
             if(!aroundCentre.test(this.getX()) || !aroundCentre.test(this.getZ())){
                 return;
@@ -437,9 +463,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                                     },
                                     12))
                     .orElse(12);
-            double minimum = ShippingConfig.Server.LOCO_BASE_SPEED.get() * 0.35;
+            double minimum = ShippingConfig.Server.LOCO_BASE_SPEED.get() * 0.2;
             double modifier = dist / 12d;
-            speedLimit = minimum + (ShippingConfig.Server.LOCO_BASE_SPEED.get() * 0.65 * modifier);
+            speedLimit = minimum + (ShippingConfig.Server.LOCO_BASE_SPEED.get() * 0.8 * modifier);
             speedRecomputeCooldown = 10;
         } else {
             speedRecomputeCooldown--;
@@ -447,7 +473,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     public boolean shouldFreezeTrain() {
-        return (stalling.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(AbstractTrainCarEntity::isFrozen);
+        return !enrollmentHandler.mayMove() || (stalling.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(AbstractTrainCarEntity::isFrozen);
     }
 
     private void accelerate() {
@@ -563,7 +589,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         }
         routeItemHandler.deserializeNBT(compound.getCompound(LOCO_ROUTE_INV_TAG));
         navigator.loadFromNbt(compound.getCompound(NAVIGATOR_TAG));
-
+        enrollmentHandler.load(compound);
         updateNavigatorFromItem();
     }
 
@@ -573,6 +599,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         compound.putBoolean("eo", engineOn);
         compound.put(LOCO_ROUTE_INV_TAG, routeItemHandler.serializeNBT());
         compound.put(NAVIGATOR_TAG, navigator.saveToNbt());
+        enrollmentHandler.save(compound);
     }
 
     // duplicate due to linking issues

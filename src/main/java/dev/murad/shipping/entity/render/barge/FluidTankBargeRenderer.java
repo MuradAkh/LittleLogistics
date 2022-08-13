@@ -53,7 +53,7 @@ public class FluidTankBargeRenderer extends AbstractVesselRenderer<FluidTankBarg
 
         matrixStackIn.pushPose();
         matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(180.0F - yaw));
-        matrixStackIn.translate(-0.3, 0.3, -0.25);
+        matrixStackIn.translate(-0.3, 0.4, -0.25);
         matrixStackIn.scale(1f, 1.2f, 1f);
         FluidRenderUtil.renderCubeUsingQuads(FluidTankBargeEntity.CAPACITY, fluid, partialTicks, matrixStackIn, bufferIn, combinedLightIn, combinedOverlayIn);
 

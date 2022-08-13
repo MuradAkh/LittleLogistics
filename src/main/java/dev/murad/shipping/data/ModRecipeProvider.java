@@ -230,14 +230,14 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.GLASS))
                 .save(consumer);
 
-        ShapedRecipeBuilder.shaped(ModItems.CHUNK_LOADER_BARGE.get())
-                .define('_', Items.ENDER_EYE)
-                .define('#', Items.OBSIDIAN)
-                .define('$', Items.IRON_INGOT)
-                .pattern("#_#")
-                .pattern("$$$")
-                .unlockedBy("has_item", has(Items.ENDER_EYE))
-                .save(consumer);
+//        ShapedRecipeBuilder.shaped(ModItems.CHUNK_LOADER_BARGE.get())
+//                .define('_', Items.ENDER_EYE)
+//                .define('#', Items.OBSIDIAN)
+//                .define('$', Items.IRON_INGOT)
+//                .pattern("#_#")
+//                .pattern("$$$")
+//                .unlockedBy("has_item", has(Items.ENDER_EYE))
+//                .save(consumer);
 
         ShapedRecipeBuilder.shaped(ModBlocks.RAPID_HOPPER.get())
                 .define('_', Items.HOPPER)
@@ -265,16 +265,16 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern(" $ ")
                 .unlockedBy("has_item", has(ModItems.SEATER_CAR.get()))
                 .save(consumer);
-
-        ShapedRecipeBuilder.shaped(ModItems.CHUNK_LOADER_CAR.get())
-                .define('#', Items.ENDER_EYE)
-                .define('_', Items.OBSIDIAN)
-                .define('$', ModItems.SEATER_CAR.get())
-                .pattern("   ")
-                .pattern("_#_")
-                .pattern(" $ ")
-                .unlockedBy("has_item", has(ModItems.SEATER_CAR.get()))
-                .save(consumer);
+//
+//        ShapedRecipeBuilder.shaped(ModItems.CHUNK_LOADER_CAR.get())
+//                .define('#', Items.ENDER_EYE)
+//                .define('_', Items.OBSIDIAN)
+//                .define('$', ModItems.SEATER_CAR.get())
+//                .pattern("   ")
+//                .pattern("_#_")
+//                .pattern(" $ ")
+//                .unlockedBy("has_item", has(ModItems.SEATER_CAR.get()))
+//                .save(consumer);
 
         ShapedRecipeBuilder.shaped(ModItems.FLUID_CAR.get())
                 .define('#', Items.GLASS)

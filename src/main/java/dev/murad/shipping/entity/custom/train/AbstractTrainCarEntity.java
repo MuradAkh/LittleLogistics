@@ -198,13 +198,12 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         this.setYRot(yrot);
         if (!level.isClientSide) {
             doChainMath();
-            enforceMaxVelocity(TRAIN_SPEED);
         }
     }
 
     @Override
     public float getMaxCartSpeedOnRail() {
-        return (float) TRAIN_SPEED;
+        return (float) (ShippingConfig.Server.TRAIN_MAX_SPEED.get() * 1f);
     }
 
     protected void enforceMaxVelocity(double maxSpeed) {

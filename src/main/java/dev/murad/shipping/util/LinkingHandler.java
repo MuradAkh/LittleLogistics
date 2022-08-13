@@ -1,6 +1,7 @@
 package dev.murad.shipping.util;
 
 import dev.murad.shipping.capability.StallingCapability;
+import dev.murad.shipping.entity.custom.HeadVehicle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -11,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -50,15 +52,28 @@ public class LinkingHandler<T extends Entity & LinkableEntity<T>> {
             }
             if (dominated.isPresent()){
                 waitForDominated = false;
-                if(!((ServerLevel) entity.level).isPositionEntityTicking(dominated.get().blockPosition())){
-                    entity.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
-                }
+                stallNonTicking();
             } else if (waitForDominated) {
                 entity.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
             }
             entity.getEntityData().set(dominantID, dominant.map(Entity::getId).orElse(-1));
             entity.getEntityData().set(dominatedID, dominated.map(Entity::getId).orElse(-1));
         }
+    }
+
+    private void stallNonTicking() {
+//        boolean skip = entity.getTrain()
+//                .getTug()
+//                .flatMap(tug -> {
+//                    if (tug instanceof HeadVehicle h)
+//                        return Optional.of(h);
+//                    else return Optional.empty();
+//                })
+//                .map(HeadVehicle::hasOwner).orElse(true);
+//
+//        if(!skip && !((ServerLevel) entity.level).isPositionEntityTicking(dominated.get().blockPosition())){
+//            entity.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
+//        }
     }
 
     public void readAdditionalSaveData(CompoundTag compound) {
