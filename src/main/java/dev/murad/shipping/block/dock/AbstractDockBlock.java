@@ -8,8 +8,6 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 
-import javax.annotation.Nullable;
-
 public abstract class AbstractDockBlock extends Block implements EntityBlock {
     public AbstractDockBlock(Properties p_i48440_1_) {
         super(p_i48440_1_);
@@ -40,7 +38,6 @@ public abstract class AbstractDockBlock extends Block implements EntityBlock {
         builder.add(DockingBlockStates.FACING);
     }
 
-    @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context){
         return this.defaultBlockState()
