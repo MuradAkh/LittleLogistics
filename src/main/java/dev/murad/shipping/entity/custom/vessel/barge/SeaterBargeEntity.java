@@ -65,4 +65,14 @@ public class SeaterBargeEntity extends AbstractBargeEntity{
     protected void doInteract(Player player) {
         player.startRiding(this);
     }
+
+    @Override
+    public boolean isEmptyForDocking() {
+        return true;
+    }
+
+    @Override
+    public boolean isFullForDocking() {
+        return true;
+    }
 }

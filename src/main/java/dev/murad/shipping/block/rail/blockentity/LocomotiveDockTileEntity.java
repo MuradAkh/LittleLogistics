@@ -23,7 +23,7 @@ public class LocomotiveDockTileEntity extends AbstractHeadDockTileEntity<Abstrac
     }
 
     @Override
-    protected boolean checkBadDirCondition(AbstractTrainCarEntity tug, Direction direction) {
+    protected boolean isEntityWrongDirectionForDocking(AbstractTrainCarEntity tug, Direction direction) {
         return !tug.getDirection().equals(getBlockState().getValue(DockingBlockStates.FACING));
     }
 

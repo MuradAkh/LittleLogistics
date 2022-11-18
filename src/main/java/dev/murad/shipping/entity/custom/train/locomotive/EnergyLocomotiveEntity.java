@@ -184,4 +184,16 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
         compound.put("energy_storage", energyNBT);
         super.addAdditionalSaveData(compound);
     }
+
+    @Override
+    public boolean isEmptyForDocking() {
+        // never dock for empty condition -- not supported
+        // todo: disable wait until empty for head docks
+        return true;
+    }
+
+    @Override
+    public boolean isFullForDocking() {
+        return this.internalBattery.getEnergyStored() >= this.internalBattery.getMaxEnergyStored();
+    }
 }

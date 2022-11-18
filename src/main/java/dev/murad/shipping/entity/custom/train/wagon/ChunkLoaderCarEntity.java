@@ -58,4 +58,13 @@ public class ChunkLoaderCarEntity extends AbstractWagonEntity {
         mobileChunkLoader.readAdditionalSaveData(p_70037_1_);
     }
 
+    @Override
+    public boolean isEmptyForDocking() {
+        return true;
+    }
+
+    @Override
+    public boolean isFullForDocking() {
+        return true;
+    }
 }

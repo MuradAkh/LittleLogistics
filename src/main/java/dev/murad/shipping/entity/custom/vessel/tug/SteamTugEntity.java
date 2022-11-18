@@ -176,6 +176,11 @@ public class SteamTugEntity extends AbstractTugEntity {
         return itemHandler.getStackInSlot(0).isEmpty();
     }
 
+    public boolean isFull() {
+        ItemStack stack = itemHandler.getStackInSlot(0);
+        return !stack.isEmpty() && stack.getCount() >= stack.getItem().getMaxStackSize(stack);
+    }
+
     @Override
     public ItemStack getItem(int p_70301_1_) {
         return itemHandler.getStackInSlot(p_70301_1_);
@@ -192,4 +197,13 @@ public class SteamTugEntity extends AbstractTugEntity {
         }
     }
 
+    @Override
+    public boolean isEmptyForDocking() {
+        return isEmpty();
+    }
+
+    @Override
+    public boolean isFullForDocking() {
+        return isFull();
+    }
 }

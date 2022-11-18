@@ -70,6 +70,14 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
         return true;
     }
 
+    public boolean isFull() {
+        for(ItemStack stack : this.itemStacks) {
+            if (stack.isEmpty()) return false;
+            if (stack.getCount() < stack.getItem().getMaxStackSize(stack)) return false;
+        }
+        return true;
+    }
+
     @Override
     public ItemStack getItem(int p_70301_1_) {
         return this.itemStacks.get(p_70301_1_);
@@ -154,5 +162,18 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
     @Override
     public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack p_180461_2_, Direction p_180461_3_) {
         return isDockable();
+    }
+
+    /**
+     * Check if all slots of the container are empty
+     */
+    @Override
+    public boolean isEmptyForDocking() {
+        return isEmpty();
+    }
+
+    @Override
+    public boolean isFullForDocking() {
+        return isFull();
     }
 }

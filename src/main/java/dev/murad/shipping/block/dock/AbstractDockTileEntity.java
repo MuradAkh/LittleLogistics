@@ -19,7 +19,18 @@ public abstract class AbstractDockTileEntity<T extends Entity & LinkableEntity<T
         super(p_i48289_1_, pos, s);
     }
 
-    public abstract boolean hold(T vessel, Direction direction);
+    /**
+     * Checks whether the entity vessel should dock. Does not check docking conditions for other docks or entities
+     */
+    public boolean shouldDock(T vessel, Direction direction) {
+        DockingMode mode = getBlockState().getValue(DockingBlockStates.DOCKING_MODE);
+
+        return switch (mode) {
+            case WAIT_TIMEOUT -> false; // todo: impl configurable timeout
+            case WAIT_UNTIL_EMPTY -> !vessel.isEmptyForDocking();
+            case WAIT_UNTIL_FULL -> !vessel.isFullForDocking();
+        };
+    }
 
     public Optional<HopperBlockEntity> getHopper(BlockPos p){
         BlockEntity mayBeHopper = this.level.getBlockEntity(p);

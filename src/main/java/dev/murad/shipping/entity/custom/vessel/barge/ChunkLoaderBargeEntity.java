@@ -58,4 +58,17 @@ public class ChunkLoaderBargeEntity extends AbstractBargeEntity {
     protected void doInteract(Player player) {
 
     }
+
+    /**
+     * Default true for docking conditions so that they never dock.
+     */
+    @Override
+    public boolean isEmptyForDocking() {
+        return true;
+    }
+
+    @Override
+    public boolean isFullForDocking() {
+        return true;
+    }
 }

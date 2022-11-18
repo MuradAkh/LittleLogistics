@@ -1,7 +1,6 @@
 package dev.murad.shipping.block.dock;
 
 import com.mojang.datafixers.util.Pair;
-import dev.murad.shipping.block.IVesselLoader;
 import dev.murad.shipping.util.InventoryUtils;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.LinkableEntityHead;
@@ -31,37 +30,36 @@ public abstract class AbstractHeadDockTileEntity<T extends Entity & LinkableEnti
         return InventoryUtils.mayMoveIntoInventory((Container) tugEntity, hopper);
     }
 
-
-    public boolean hold(T tug, Direction direction){
-        if (!(tug instanceof LinkableEntityHead) || checkBadDirCondition(tug, direction)){
+    /**
+     * Checks if the whole chain of vessels should dock
+     * @param vessel    any vessel, non-null, might not be head entity
+     * @param direction direction of travel of the vessel
+     */
+    public boolean shouldDockChain(T vessel, Direction direction) {
+        // checks vessel head is a head entity
+        if (!(vessel instanceof LinkableEntityHead)) {
             return false;
         }
 
-        // force tug to be docked when powered
-        // todo: add UI for inverted mode toggle?
-        if (getBlockState().getValue(DockingBlockStates.POWERED)) {
+        // check direction of vessel
+        if (isEntityWrongDirectionForDocking(vessel, direction)) {
+            return false;
+        }
+
+        // if head dock is powered or needs to dock
+        if (getBlockState().getValue(DockingBlockStates.POWERED) || this.shouldDock(vessel, direction)) {
             return true;
         }
 
-        for (BlockPos p : getTargetBlockPos()) {
-            if (getHopper(p).map(hopper -> handleItemHopper(tug, hopper))
-                    .orElse(getVesselLoader(p).map(l -> l.hold(tug, IVesselLoader.Mode.EXPORT)).orElse(false))) {
-                return true;
-            }
-        }
-
-
-        List<Pair<T, AbstractTailDockTileEntity<T>>> barges = getTailDockPairs(tug);
-
-
-        if (barges.stream().map(pair -> pair.getSecond().hold(pair.getFirst(), direction)).reduce(false, Boolean::logicalOr)){
-            return true;
-        }
-
-        return false;
+        // check each dock in the rest of the chain
+        List<Pair<T, AbstractTailDockTileEntity<T>>> tails = getTailDockPairs(vessel);
+        return tails.stream().map(pair -> pair.getSecond().shouldDock(pair.getFirst(), direction)).reduce(false, Boolean::logicalOr);
     }
 
-    protected abstract boolean checkBadDirCondition(T tug, Direction direction);
+    /**
+     * Checks if entity `direction` is facing the wrong way to be able to dock to this dock.
+     */
+    protected abstract boolean isEntityWrongDirectionForDocking(T tug, Direction direction);
 
     protected abstract Direction getRowDirection(Direction facing);
 

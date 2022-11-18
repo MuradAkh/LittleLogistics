@@ -1,6 +1,7 @@
 package dev.murad.shipping.block.rail;
 
 import dev.murad.shipping.block.dock.DockingBlockStates;
+import dev.murad.shipping.block.dock.DockingMode;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.util.RailShapeUtil;
 import net.minecraft.core.BlockPos;
@@ -66,7 +67,8 @@ public abstract class AbstractDockingRail extends BaseRailBlock implements Entit
         BlockState blockstate = super.defaultBlockState();
         return blockstate
                 .setValue(RAIL_SHAPE, getRailShapeFromFacing(pContext.getHorizontalDirection()))
-                .setValue(WATERLOGGED, flag);
+                .setValue(WATERLOGGED, flag)
+                .setValue(DockingBlockStates.DOCKING_MODE, DockingMode.WAIT_TIMEOUT);
     }
 
     @Override
@@ -77,14 +79,6 @@ public abstract class AbstractDockingRail extends BaseRailBlock implements Entit
         else return super.canSurvive(pState, pLevel, pPos);
     }
 
-    protected static void fixHopperPos(BlockState state, Level level, BlockPos pos){
-        var dirs = state.getValue(RAIL_SHAPE).equals(RailShape.EAST_WEST) ?
-                List.of(Direction.NORTH, Direction.SOUTH) :
-                List.of(Direction.EAST, Direction.WEST);
-
-        dirs.forEach(d ->  DockingBlockStates.fixHopperPos(state, level, pos, d, d.getOpposite()));
-    }
-
     @Override
     public void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pBlock, BlockPos pFromPos, boolean pIsMoving) {
         if (!pLevel.isClientSide && pLevel.getBlockState(pPos).is(this)) {
@@ -92,7 +86,6 @@ public abstract class AbstractDockingRail extends BaseRailBlock implements Entit
                 dropResources(pState, pLevel, pPos);
                 pLevel.removeBlock(pPos, pIsMoving);
             } else {
-                fixHopperPos(pState, pLevel, pPos);
                 this.updateState(pState, pLevel, pPos, pBlock);
             }
         }
@@ -101,6 +94,6 @@ public abstract class AbstractDockingRail extends BaseRailBlock implements Entit
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
         super.createBlockStateDefinition(pBuilder);
-        pBuilder.add(WATERLOGGED, RAIL_SHAPE);
+        pBuilder.add(WATERLOGGED, RAIL_SHAPE, DockingBlockStates.DOCKING_MODE);
     }
 }

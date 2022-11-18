@@ -76,6 +76,10 @@
   "global.littlelogistics.locomotive.register_success": "Maximim number of registered vehicles reached: %s",
   "global.littlelogistics.locomotive.register_fail": "Successfully registered the vehicle, vehicles registered: %s/%s",
 
+  "global.littlelogistics.docking_mode.wait_until_full": "Wait until storage is full",
+  "global.littlelogistics.docking_mode.wait_until_empty": "Wait until storage is empty",
+  "global.littlelogistics.docking_mode.wait_timeout": "Wait until items finish transferring",
+
   "item.littlelogistics.tug_route.description": "Right click to add node at the end of the route, right click at the same location to remove. Shift right click to bring up menu.",
   "item.littlelogistics.tug_route.num_nodes": "Route Nodes: %s",
   "item.littlelogistics.tug_route.added": "Added Route Node X:%s Z:%s",

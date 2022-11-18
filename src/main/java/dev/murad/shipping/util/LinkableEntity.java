@@ -24,6 +24,9 @@ public interface LinkableEntity<V extends LinkableEntity<V>> {
     void setTrain(Train<V> train);
     boolean hasWaterOnSides();
 
+    boolean isEmptyForDocking();
+    boolean isFullForDocking();
+
     default void handleLinkableKill(){
         this.getDominated().ifPresent(LinkableEntity::removeDominant);
         this.getDominant().ifPresent(LinkableEntity::removeDominated);

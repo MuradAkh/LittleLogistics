@@ -257,6 +257,15 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
         return true;
     }
 
+    public boolean allSlotsOccupied() {
+        for (int i = 0; i < itemHandler.getSlots(); i++){
+            if(itemHandler.getStackInSlot(i).isEmpty() || itemHandler.getStackInSlot(i).getItem().equals(Items.AIR)){
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public ItemStack getItem(int p_70301_1_) {
         return itemHandler.getStackInSlot(p_70301_1_);
@@ -324,6 +333,16 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
     @Override
     public void clearContent() {
 
+    }
+
+    @Override
+    public boolean isEmptyForDocking() {
+        return this.isEmpty();
+    }
+
+    @Override
+    public boolean isFullForDocking() {
+        return this.allSlotsOccupied();
     }
 
     public enum Status {

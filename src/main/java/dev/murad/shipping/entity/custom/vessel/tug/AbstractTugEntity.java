@@ -248,7 +248,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
                             Optional.ofNullable(level.getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
                                     .filter(entity -> entity instanceof TugDockTileEntity)
                                     .map(entity -> (TugDockTileEntity) entity)
-                                    .map(dock -> dock.hold(this, curr))
+                                    .map(dock -> dock.shouldDockChain(this, curr))
                                     .orElse(false))
                     .reduce(false, (acc, curr) -> acc || curr);
 

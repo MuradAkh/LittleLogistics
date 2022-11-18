@@ -13,14 +13,6 @@ public abstract class AbstractDockBlock extends Block implements EntityBlock {
         super(p_i48440_1_);
     }
 
-
-
-    @Deprecated
-    public void neighborChanged(BlockState state, Level world, BlockPos p_220069_3_, Block p_220069_4_, BlockPos p_220069_5_, boolean p_220069_6_) {
-        super.neighborChanged(state, world, p_220069_3_, p_220069_4_, p_220069_5_, p_220069_6_);
-        DockingBlockStates.fixHopperPos(state, world, p_220069_3_, Direction.UP, state.getValue(DockingBlockStates.FACING));
-    }
-
     @SuppressWarnings("deprecation")
     @Override
     public BlockState rotate(BlockState state, Rotation rot) {
@@ -35,13 +27,13 @@ public abstract class AbstractDockBlock extends Block implements EntityBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(DockingBlockStates.FACING);
+        builder.add(DockingBlockStates.FACING, DockingBlockStates.DOCKING_MODE);
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context){
         return this.defaultBlockState()
-                .setValue(DockingBlockStates.FACING, context.getHorizontalDirection().getOpposite());
-
+                .setValue(DockingBlockStates.FACING, context.getHorizontalDirection().getOpposite())
+                .setValue(DockingBlockStates.DOCKING_MODE, DockingMode.WAIT_TIMEOUT);
     }
 }

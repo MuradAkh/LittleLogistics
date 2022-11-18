@@ -14,10 +14,19 @@ public interface ItemHandlerVanillaContainerWrapper extends Container {
     }
 
     default boolean isEmpty() {
-        for (int i = 0; i <  getRawHandler().getSlots(); i++) {
-            if(! getRawHandler().getStackInSlot(i).isEmpty()){
+        for (int i = 0; i < getRawHandler().getSlots(); i++) {
+            if(!getRawHandler().getStackInSlot(i).isEmpty()){
                 return false;
             }
+        }
+        return true;
+    }
+
+    default boolean isFull() {
+        for (int i = 0; i < getRawHandler().getSlots(); i++) {
+            ItemStack stack = getRawHandler().getStackInSlot(i);
+            if (stack.isEmpty()) return false;
+            if (stack.getCount() < stack.getItem().getMaxStackSize(stack)) return false;
         }
         return true;
     }

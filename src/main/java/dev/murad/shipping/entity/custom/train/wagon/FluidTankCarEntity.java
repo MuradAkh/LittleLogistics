@@ -123,4 +123,14 @@ public class FluidTankCarEntity extends AbstractWagonEntity {
             return holder.cast();
         return super.getCapability(capability, facing);
     }
+
+    @Override
+    public boolean isEmptyForDocking() {
+        return this.tank.isEmpty();
+    }
+
+    @Override
+    public boolean isFullForDocking() {
+        return this.tank.getFluidAmount() >= this.tank.getCapacity();
+    }
 }

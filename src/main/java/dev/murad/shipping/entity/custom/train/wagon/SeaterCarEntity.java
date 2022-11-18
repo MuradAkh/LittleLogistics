@@ -128,4 +128,14 @@ public class SeaterCarEntity extends AbstractWagonEntity {
         }
         return super.getCapability(cap);
     }
+
+    @Override
+    public boolean isEmptyForDocking() {
+        return true;
+    }
+
+    @Override
+    public boolean isFullForDocking() {
+        return true;
+    }
 }

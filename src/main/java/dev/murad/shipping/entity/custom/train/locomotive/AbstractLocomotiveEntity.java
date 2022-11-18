@@ -407,7 +407,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             boolean shouldDock = Optional.ofNullable(level.getBlockEntity(getOnPos().above()))
                                     .filter(entity -> entity instanceof LocomotiveDockTileEntity)
                                     .map(entity -> (LocomotiveDockTileEntity) entity)
-                                    .map(dock -> dock.hold(this, getDirection()))
+                                    .map(dock -> dock.shouldDockChain(this, getDirection()))
                                     .orElse(false);
 
             boolean changedDock = !docked && shouldDock;

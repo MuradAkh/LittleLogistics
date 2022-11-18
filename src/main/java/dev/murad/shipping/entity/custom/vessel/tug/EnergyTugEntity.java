@@ -97,6 +97,18 @@ public class EnergyTugEntity extends AbstractTugEntity {
 
     }
 
+    @Override
+    public boolean isEmptyForDocking() {
+        // never dock for empty condition -- not supported
+        // todo: disable wait until empty for head docks
+        return true;
+    }
+
+    @Override
+    public boolean isFullForDocking() {
+        return this.internalBattery.getEnergyStored() >= this.internalBattery.getMaxEnergyStored();
+    }
+
     // Energy tug can be loaded at all times since there is no concern
     // with mix-ups like with fluids and items
     @Override

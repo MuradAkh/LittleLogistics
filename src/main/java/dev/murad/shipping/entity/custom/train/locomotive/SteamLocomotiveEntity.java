@@ -212,4 +212,14 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
         compound.putInt("burn_capacity", burnCapacity);
         super.addAdditionalSaveData(compound);
     }
+
+    @Override
+    public boolean isEmptyForDocking() {
+        return isEmpty();
+    }
+
+    @Override
+    public boolean isFullForDocking() {
+        return isFull();
+    }
 }

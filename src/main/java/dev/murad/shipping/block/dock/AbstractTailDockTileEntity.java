@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractTailDockTileEntity<T extends Entity & LinkableEntity<T>> extends AbstractDockTileEntity<T> {
+
     public AbstractTailDockTileEntity(BlockEntityType<?> t, BlockPos pos, BlockState state) {
         super(t, pos, state);
     }
@@ -32,21 +33,6 @@ public abstract class AbstractTailDockTileEntity<T extends Entity & LinkableEnti
         return getBlockState().getValue(DockingBlockStates.INVERTED);
     }
 
-
-    @Override
-    public boolean hold(T vessel, Direction direction) {
-        if (checkBadDirCondition(direction))
-        {
-            return false;
-        }
-
-        for (BlockPos p : getTargetBlockPos()) {
-            if (checkInterface(vessel, p)){
-                return true;
-            }
-        }
-        return false;
-    }
 
     @NotNull
     private Boolean checkInterface(T vessel, BlockPos p) {

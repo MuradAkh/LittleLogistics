@@ -31,18 +31,13 @@ import java.util.List;
 import java.util.Set;
 
 public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
+
+    @Getter
+    @RequiredArgsConstructor
     public enum OutDirection implements StringRepresentable {
         LEFT("left"), RIGHT("right");
 
         final String serializedName;
-        OutDirection(String name) {
-            this.serializedName = name;
-        }
-
-        @Override
-        public String getSerializedName() {
-            return serializedName;
-        }
 
         public Direction getOutDirection(Direction inDirection) {
             return this == RIGHT ? inDirection.getCounterClockWise() : inDirection.getClockWise();

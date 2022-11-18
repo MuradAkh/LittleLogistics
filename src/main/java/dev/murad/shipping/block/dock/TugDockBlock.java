@@ -38,7 +38,7 @@ public class TugDockBlock extends AbstractDockBlock {
     @Override
     public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
         if(InteractionUtil.doConfigure(player, hand)){
-            world.setBlockAndUpdate(pos, state.setValue(DockingBlockStates.INVERTED, !state.getValue(DockingBlockStates.INVERTED)));
+            DockingBlockStates.cycleDockingMode(world, pos, state);
             return InteractionResult.SUCCESS;
         }
 

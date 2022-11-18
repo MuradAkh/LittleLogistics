@@ -22,8 +22,7 @@ public class TrainCarDockingRail extends AbstractDockingRail{
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
         if (InteractionUtil.doConfigure(pPlayer, pHand)) {
-            pLevel.setBlockAndUpdate(pPos, pState.setValue(DockingBlockStates.INVERTED, !pState.getValue(DockingBlockStates.INVERTED)));
-            fixHopperPos(pState, pLevel, pPos);
+            DockingBlockStates.cycleDockingMode(pLevel, pPos, pState);
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;

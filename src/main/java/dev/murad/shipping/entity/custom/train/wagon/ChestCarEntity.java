@@ -126,4 +126,14 @@ public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVa
     public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack p_180461_2_, Direction p_180461_3_) {
         return isDockable();
     }
+
+    @Override
+    public boolean isEmptyForDocking() {
+        return isEmpty();
+    }
+
+    @Override
+    public boolean isFullForDocking() {
+        return isFull();
+    }
 }
