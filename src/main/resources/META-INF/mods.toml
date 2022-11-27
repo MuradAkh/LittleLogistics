@@ -15,11 +15,11 @@ issueTrackerURL="https://github.com/MuradAkh/LittleLogistics/issues" #optional
 # A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory
 # The modid of the mod
-modId="${mod_id}" #mandatory
+modId="littlelogistics" #mandatory
 # The version number of the mod - there's a few well known ${} variables useable here or just hardcode it
 # ${mod_version} will substitute the value of the Implementation-Version as read from the mod's JAR file metadata
 # see the associated build.gradle script for how to populate this completely automatically during a build
-version="${mod_version}" #mandatory
+version="1" #mandatory
  # A display name for the mod
 displayName="${mod_title}" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification https://mcforge.readthedocs.io/en/latest/gettingstarted/autoupdate/
@@ -34,7 +34,7 @@ authors="${mod_author}" #optional
 # The description text for the mod (multi line!) (#mandatory)
 description='''${mod_description}'''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
-[[dependencies.shipping]] #optional
+[[dependencies.littlelogistics]] #optional
     # the modid of the dependency
     modId="forge" #mandatory
     # Does this dependency have to exist - if not, ordering below must be specified
@@ -46,7 +46,7 @@ description='''${mod_description}'''
     # Side this dependency is applied on - BOTH, CLIENT or SERVER
     side="BOTH"
 # Here's another dependency
-[[dependencies.shipping]]
+[[dependencies.littlelogistics]]
     modId="minecraft"
     mandatory=true
 # This version range declares a minimum of the current minecraft version up to but not including the next major version
@@ -54,9 +54,16 @@ description='''${mod_description}'''
     ordering="NONE"
     side="BOTH"
 
-[[dependencies.shipping]]
+[[dependencies.littlelogistics]]
     modId="patchouli"
     mandatory=false
     versionRange="${patchouli_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.littlelogistics]]
+    modId="liteloadlib"
+    mandatory=true
+    versionRange="[1.0.0,)"
     ordering="NONE"
     side="BOTH"

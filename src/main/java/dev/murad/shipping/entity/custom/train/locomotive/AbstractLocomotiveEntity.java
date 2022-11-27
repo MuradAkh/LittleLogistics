@@ -1,5 +1,6 @@
 package dev.murad.shipping.entity.custom.train.locomotive;
 
+import dev.murad.liteloadlib.api.EnrollmentHandler;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
@@ -7,10 +8,8 @@ import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
-import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.VehicleFrontPart;
 import dev.murad.shipping.entity.navigation.LocomotiveNavigator;
-import dev.murad.shipping.global.PlayerTrainChunkManager;
 import dev.murad.shipping.item.LocoRouteItem;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
@@ -33,8 +32,8 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PoweredRailBlock;
@@ -103,8 +102,8 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     @Override
-    public void enroll(UUID uuid) {
-        enrollmentHandler.enroll(uuid);
+    public EnrollmentHandler getEnrollmentHandler() {
+        return enrollmentHandler;
     }
 
     @Override

@@ -4,7 +4,6 @@ import dev.murad.shipping.entity.accessor.EnergyHeadVehicleDataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModMenuTypes;
-import dev.murad.shipping.util.EnrollmentHandler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;

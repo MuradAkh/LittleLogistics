@@ -1,12 +1,12 @@
 package dev.murad.shipping.entity.custom.vessel.tug;
 
+import dev.murad.liteloadlib.api.EnrollmentHandler;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
-import dev.murad.shipping.global.PlayerTrainChunkManager;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.*;
 import dev.murad.shipping.entity.custom.vessel.VesselEntity;
@@ -26,7 +26,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.*;
@@ -310,8 +309,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Override
-    public void enroll(UUID uuid) {
-        enrollmentHandler.enroll(uuid);
+    public EnrollmentHandler getEnrollmentHandler() {
+        return enrollmentHandler;
     }
 
     @Override

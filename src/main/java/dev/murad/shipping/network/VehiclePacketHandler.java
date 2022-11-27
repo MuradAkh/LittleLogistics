@@ -2,8 +2,6 @@ package dev.murad.shipping.network;
 
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.HeadVehicle;
-import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
-import dev.murad.shipping.global.PlayerTrainChunkManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
@@ -29,7 +27,6 @@ public final class VehiclePacketHandler {
     public static void register() {
         // int index, Class<MSG> messageType, BiConsumer<MSG, PacketBuffer> encoder, Function<PacketBuffer, MSG> decoder, BiConsumer<MSG, Supplier<NetworkEvent.Context>> messageConsumer
         INSTANCE.registerMessage(id++, SetEnginePacket.class, SetEnginePacket::encode, SetEnginePacket::new, VehiclePacketHandler::handleSetEngine);
-        INSTANCE.registerMessage(id++, EnrollVehiclePacket.class, EnrollVehiclePacket::encode, EnrollVehiclePacket::new, VehiclePacketHandler::handleEnrollVehicle);
     }
 
 
@@ -39,20 +36,6 @@ public final class VehiclePacketHandler {
                 var loco = serverPlayer.level.getEntity(operation.locoId);
                 if(loco != null && loco.distanceTo(serverPlayer) < 6 && loco instanceof HeadVehicle l){
                     l.setEngineOn(operation.state);
-                }
-            });
-
-        });
-
-        ctx.get().setPacketHandled(true);
-    }
-
-    public static void handleEnrollVehicle(EnrollVehiclePacket operation, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            Optional.of(ctx.get()).map(NetworkEvent.Context::getSender).ifPresent(serverPlayer -> {
-                var loco = serverPlayer.level.getEntity(operation.locoId);
-                if(loco != null && loco.distanceTo(serverPlayer) < 6 && loco instanceof HeadVehicle l){
-                    l.enroll(serverPlayer.getUUID());
                 }
             });
 

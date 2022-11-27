@@ -1,17 +1,15 @@
 package dev.murad.shipping.event;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+import dev.murad.liteloadlib.api.EntityPosition;
+import dev.murad.liteloadlib.api.LLLClientAPI;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.item.LocoRouteItem;
 import dev.murad.shipping.item.TugRouteItem;
-import dev.murad.shipping.network.client.EntityPosition;
-import dev.murad.shipping.network.client.VehicleTrackerPacketHandler;
 import dev.murad.shipping.setup.EntityItemMap;
-import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LocoRoute;
 import dev.murad.shipping.util.LocoRouteNode;
@@ -30,9 +28,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -42,7 +38,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.List;
-import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.stream.Collectors;
 
@@ -181,7 +176,7 @@ public class ForgeClientEventHandler {
             renderTypeBuffer.endBatch();
         }
 
-        if (stack.getItem().equals(ModItems.CONDUCTORS_WRENCH.get()) && player.level.dimension().toString().equals(VehicleTrackerPacketHandler.toRenderDimension)){
+        if (stack.getItem().equals(ModItems.CONDUCTORS_WRENCH.get()) && player.level.dimension().toString().equals(LLLClientAPI.getTrackedEntitiesDimension())){
             MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
             var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
             Vec3 cameraPosition = camera.getPosition();
@@ -189,7 +184,7 @@ public class ForgeClientEventHandler {
             double d1 = cameraPosition.y();
             double d2 = cameraPosition.z();
 
-            for(EntityPosition position : VehicleTrackerPacketHandler.toRender){
+            for(EntityPosition position : LLLClientAPI.getEntitiesToRender()){
                 Entity entity = player.level.getEntity(position.id());
                 double x;
                 double y;

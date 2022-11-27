@@ -1,14 +1,10 @@
 package dev.murad.shipping.entity.container;
 
-import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.entity.accessor.DataAccessor;
+import dev.murad.liteloadlib.api.LLLClientAPI;
 import dev.murad.shipping.entity.accessor.HeadVehicleDataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
-import dev.murad.shipping.global.PlayerTrainChunkManager;
-import dev.murad.shipping.network.EnrollVehiclePacket;
-import dev.murad.shipping.network.VehiclePacketHandler;
 import dev.murad.shipping.network.SetEnginePacket;
-import dev.murad.shipping.util.EnrollmentHandler;
+import dev.murad.shipping.network.VehiclePacketHandler;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
@@ -65,7 +61,7 @@ public abstract class AbstractHeadVehicleContainer<T extends HeadVehicleDataAcce
     }
 
     public void enroll(){
-        VehiclePacketHandler.INSTANCE.sendToServer(new EnrollVehiclePacket(entity.getId()));
+        LLLClientAPI.sendEntityEnrollmentPacket(entity);
     }
 
     public String getOwner(){
