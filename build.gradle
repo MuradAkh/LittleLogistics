@@ -282,9 +282,8 @@ repositories {
     }
 
     maven {
-        // Local
-        name 'tterrag maven'
-        url 'https://maven.tterrag.com'
+        name 'edtoaster maven'
+        url 'https://maven.edtoaster.ca'
     }
 
     maven {
