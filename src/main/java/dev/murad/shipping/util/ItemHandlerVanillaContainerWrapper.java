@@ -23,7 +23,7 @@ public interface ItemHandlerVanillaContainerWrapper extends Container {
     }
 
     default ItemStack getItem(int pIndex) {
-        return  getRawHandler().getStackInSlot(pIndex);
+        return getRawHandler().getStackInSlot(pIndex);
     }
 
     default ItemStack removeItem(int pIndex, int pCount) {
@@ -31,13 +31,13 @@ public interface ItemHandlerVanillaContainerWrapper extends Container {
     }
 
     default ItemStack removeItemNoUpdate(int pIndex) {
-        var stack =  getRawHandler().getStackInSlot(pIndex);
-         getRawHandler().setStackInSlot(pIndex, ItemStack.EMPTY);
+        var stack = getRawHandler().getStackInSlot(pIndex);
+        getRawHandler().setStackInSlot(pIndex, ItemStack.EMPTY);
         return stack;
     }
 
     default void setItem(int pIndex, ItemStack pStack) {
-         getRawHandler().insertItem(pIndex, pStack, false);
+         getRawHandler().setStackInSlot(pIndex, pStack);
     }
 
     default void setChanged() {
