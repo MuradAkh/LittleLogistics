@@ -37,10 +37,10 @@
 
   "block.littlelogistics.tug_dock": "Quai de Remorqueur",
   "block.littlelogistics.barge_dock": "Quai de Barge",
-  "block.littlelogistics.guide_rail_tug": "Guide du remorqueur",
+  "block.littlelogistics.guide_rail_tug": "Guide de remorqueur",
   "block.littlelogistics.guide_rail_corner": "Guide d'ammarage de remorqueur",
   "block.littlelogistics.vessel_charger": "Chargeur de Véhicules",
-  "block.littlelogistics.fluid_hopper": "Entonnoir Liquide",
+  "block.littlelogistics.fluid_hopper": "Entonnoir à Liquide",
   "block.littlelogistics.rapid_hopper": "Entonnoir Rapide",
   "block.littlelogistics.vessel_detector": "Détécteur de Véhicules",
 
