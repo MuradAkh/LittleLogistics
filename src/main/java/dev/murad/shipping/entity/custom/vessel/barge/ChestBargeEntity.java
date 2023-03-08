@@ -41,8 +41,6 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
         super.remove(r);
     }
 
-
-
     @Override
     public Item getDropItem() {
         return ModItems.CHEST_BARGE.get();
@@ -71,32 +69,31 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
     }
 
     @Override
-    public ItemStack getItem(int p_70301_1_) {
-        return this.itemStacks.get(p_70301_1_);
+    public ItemStack getItem(int slot) {
+        return this.itemStacks.get(slot);
     }
 
     @Override
-    public ItemStack removeItem(int p_70298_1_, int p_70298_2_) {
-        return ContainerHelper.removeItem(this.itemStacks, p_70298_1_, p_70298_2_);
-
+    public ItemStack removeItem(int slot, int count) {
+        return ContainerHelper.removeItem(this.itemStacks, slot, count);
     }
 
     @Override
-    public ItemStack removeItemNoUpdate(int p_70304_1_) {
-        ItemStack itemstack = this.itemStacks.get(p_70304_1_);
+    public ItemStack removeItemNoUpdate(int slot) {
+        ItemStack itemstack = this.itemStacks.get(slot);
         if (itemstack.isEmpty()) {
             return ItemStack.EMPTY;
         } else {
-            this.itemStacks.set(p_70304_1_, ItemStack.EMPTY);
+            this.itemStacks.set(slot, ItemStack.EMPTY);
             return itemstack;
         }
     }
 
     @Override
-    public void setItem(int p_70299_1_, ItemStack p_70299_2_) {
-        this.itemStacks.set(p_70299_1_, p_70299_2_);
-        if (!p_70299_2_.isEmpty() && p_70299_2_.getCount() > this.getMaxStackSize()) {
-            p_70299_2_.setCount(this.getMaxStackSize());
+    public void setItem(int slot, ItemStack stack) {
+        this.itemStacks.set(slot, stack);
+        if (!stack.isEmpty() && stack.getCount() > this.getMaxStackSize()) {
+            stack.setCount(this.getMaxStackSize());
         }
     }
 
@@ -106,11 +103,11 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
     }
 
     @Override
-    public boolean stillValid(Player p_70300_1_) {
+    public boolean stillValid(Player player) {
         if (this.isRemoved()) {
             return false;
         } else {
-            return !(p_70300_1_.distanceToSqr(this) > 64.0D);
+            return !(player.distanceToSqr(this) > 64.0D);
         }
     }
 
@@ -129,20 +126,19 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag p_213281_1_) {
-        super.addAdditionalSaveData(p_213281_1_);
-        ContainerHelper.saveAllItems(p_213281_1_, this.itemStacks);
-
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        ContainerHelper.saveAllItems(tag, this.itemStacks);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag p_70037_1_) {
-        super.readAdditionalSaveData(p_70037_1_);
-        ContainerHelper.loadAllItems(p_70037_1_, this.itemStacks);
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        ContainerHelper.loadAllItems(tag, this.itemStacks);
     }
 
     @Override
-    public int[] getSlotsForFace(Direction p_180463_1_) {
+    public int[] getSlotsForFace(Direction face) {
         return IntStream.range(0, getContainerSize()).toArray();
     }
 
