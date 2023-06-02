@@ -173,8 +173,8 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:spark-361579:3875647")
 
     // create
-    runtimeOnly fg.deobf("curse.maven:create-328085:4011414")
-    compileOnly fg.deobf("curse.maven:create-328085:4011414")
+    runtimeOnly fg.deobf("curse.maven:create-328085:4547147")
+    compileOnly fg.deobf("curse.maven:create-328085:4547147")
 
 //    compileOnly fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:${rootProject.flywheel_version}")
 //    compileOnly fg.deobf("com.simibubi.create:Create:${rootProject.create_version}")
@@ -260,6 +260,11 @@ publishing {
 }
 
 repositories {
+    maven {
+        name 'curseforge'
+        url 'https://cursemaven.com'
+    }
+
     maven {
         // JEI
         name = "Progwml6 maven"
