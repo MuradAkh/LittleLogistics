@@ -4,20 +4,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.HeadVehicle;
-import dev.murad.shipping.util.EnrollmentHandler;
-import lombok.RequiredArgsConstructor;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
-
-import java.awt.font.FontRenderContext;
 
 public abstract class AbstractHeadVehicleScreen<U extends Entity & HeadVehicle, T extends AbstractHeadVehicleContainer<?, U>> extends AbstractVehicleScreen<T>{
     private static final ResourceLocation REGISTRATION = new ResourceLocation(ShippingMod.MOD_ID, "textures/container/vehicle_registration.png");

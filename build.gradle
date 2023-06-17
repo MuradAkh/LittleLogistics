@@ -4,6 +4,7 @@ buildscript {
         maven { url = 'https://maven.parchmentmc.org' }
         maven { url = 'https://cursemaven.com' }
         mavenCentral()
+        mavenLocal()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
@@ -169,6 +170,8 @@ dependencies {
 //    runtimeOnly fg.deobf("com.teamcofh:thermal_foundation:1.16.5-1.4.3.10")
 //    runtimeOnly fg.deobf("com.teamcofh:thermal_expansion:1.16.5-1.4.2.4")
 
+    runtimeOnly fg.deobf("dev.murad.liteloadlib:liteloadlib:mc${mc_version}-v${lll_version}")
+    compileOnly fg.deobf("dev.murad.liteloadlib:liteloadlib:mc${mc_version}-v${lll_version}")
     // spark
     runtimeOnly fg.deobf("curse.maven:spark-361579:3875647")
 
@@ -284,7 +287,13 @@ repositories {
     }
 
     maven {
+        name 'edtoaster maven'
+        url 'https://maven.edtoaster.ca'
+    }
+
+    maven {
         name 'curseforge'
         url 'https://cursemaven.com'
     }
+    mavenLocal()
 }

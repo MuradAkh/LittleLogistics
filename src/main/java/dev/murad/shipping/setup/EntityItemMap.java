@@ -21,6 +21,6 @@ public class EntityItemMap {
         if(ENTITY_CREATOR_ITEMS.isEmpty()){
             init();
         }
-        return ENTITY_CREATOR_ITEMS.getOrDefault(entityType, Items.MINECART);
+        return ENTITY_CREATOR_ITEMS.getOrDefault(entityType, ModItems.CONDUCTORS_WRENCH.get());
     }
 }

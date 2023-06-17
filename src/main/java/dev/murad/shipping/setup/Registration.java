@@ -3,7 +3,6 @@ package dev.murad.shipping.setup;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.network.VehiclePacketHandler;
 import dev.murad.shipping.network.TugRoutePacketHandler;
-import dev.murad.shipping.network.client.VehicleTrackerPacketHandler;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.MenuType;
@@ -49,7 +48,6 @@ public class Registration  {
         ModRecipeSerializers.register();
         ModMenuTypes.register();
         TugRoutePacketHandler.register();
-        VehicleTrackerPacketHandler.register();
         VehiclePacketHandler.register();
         ModSounds.register();
     }
