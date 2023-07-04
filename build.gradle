@@ -169,10 +169,10 @@ dependencies {
 //    runtimeOnly fg.deobf("com.teamcofh:thermal_expansion:1.16.5-1.4.2.4")
 
     // create
-    compileOnly fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:${rootProject.flywheel_version}")
-    compileOnly fg.deobf("com.simibubi.create:Create:${rootProject.create_version}")
-//    runtimeOnly fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:${rootProject.flywheel_version}")
-//    runtimeOnly fg.deobf("com.simibubi.create:Create:${rootProject.create_version}")
+    compileOnly fg.deobf("com.jozufozu.flywheel:flywheel-forge-1.18.2:${rootProject.flywheel_version}")
+    compileOnly fg.deobf("com.simibubi.create:create-1.18.2:${rootProject.create_version}:all")
+//    runtimeOnly fg.deobf("com.jozufozu.flywheel:flywheel-forge-1.18.2:${rootProject.flywheel_version}")
+//    runtimeOnly fg.deobf("com.simibubi.create:create-1.18.2:${rootProject.create_version}:all")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
@@ -212,7 +212,8 @@ processResources {
                 "mod_license":              project.mod_license,
                 "mc_version_range":         project.mc_version_range,
                 "forge_version_range":      project.forge_version_range,
-                "patchouli_version_range":  project.patchouli_version_range
+                "patchouli_version_range":  project.patchouli_version_range,
+                "create_version_range":     project.create_version_range
     }
     filesMatching("pack.mcmeta") {
         expand "mod_id": project.mod_id
@@ -270,4 +271,19 @@ repositories {
         name 'tterrag maven'
         url 'https://maven.tterrag.com'
     }
+
+    maven {
+        // location of the maven for Curios API
+        url = "https://maven.theillusivec4.top/"
+    }
+
+    maven {
+        // location of maven for CC: Tweaked
+        name = "squiddev"
+        url = "https://squiddev.cc/maven/"
+        content {
+            includeGroup "org.squiddev"
+        }
+    }
+
 }
