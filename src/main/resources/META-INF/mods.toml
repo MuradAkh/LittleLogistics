@@ -60,3 +60,10 @@ description='''${mod_description}'''
     versionRange="${patchouli_version_range}"
     ordering="NONE"
     side="BOTH"
+
+[[dependencies.shipping]]
+modId="create"
+mandatory=false
+versionRange="${create_version_range}"
+ordering="NONE"
+side="BOTH"

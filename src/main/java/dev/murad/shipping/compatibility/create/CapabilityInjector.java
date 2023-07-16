@@ -1,7 +1,7 @@
 package dev.murad.shipping.compatibility.create;
 
-import com.simibubi.create.content.contraptions.components.structureMovement.train.capability.CapabilityMinecartController;
-import com.simibubi.create.content.contraptions.components.structureMovement.train.capability.MinecartController;
+import com.simibubi.create.content.contraptions.minecart.capability.CapabilityMinecartController;
+import com.simibubi.create.content.contraptions.minecart.capability.MinecartController;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.custom.train.wagon.SeaterCarEntity;
 import net.minecraftforge.common.capabilities.Capability;
