@@ -51,22 +51,22 @@ public class ForgeEventHandler {
 
     @SubscribeEvent
     public static void onPlayerSignInEvent(PlayerEvent.PlayerLoggedInEvent event){
-        if (event.getEntity().level.isClientSide || ShippingConfig.Server.OFFLINE_LOADING.get()) {
+        if (event.getEntity().level().isClientSide() || ShippingConfig.Server.OFFLINE_LOADING.get()) {
             return;
         }
 
-        TrainChunkManagerManager.get(event.getEntity().level.getServer())
+        TrainChunkManagerManager.get(event.getEntity().level().getServer())
                 .getManagers(event.getEntity().getUUID())
                 .forEach(PlayerTrainChunkManager::activate);
     }
 
     @SubscribeEvent
     public static void onPlayerSignInEvent(PlayerEvent.PlayerLoggedOutEvent event){
-        if (event.getEntity().level.isClientSide || ShippingConfig.Server.OFFLINE_LOADING.get()) {
+        if (event.getEntity().level().isClientSide || ShippingConfig.Server.OFFLINE_LOADING.get()) {
             return;
         }
 
-        TrainChunkManagerManager.get(event.getEntity().level.getServer())
+        TrainChunkManagerManager.get(event.getEntity().level().getServer())
                 .getManagers(event.getEntity().getUUID())
                 .forEach(PlayerTrainChunkManager::deactivate);
     }

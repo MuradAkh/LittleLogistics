@@ -16,10 +16,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 
@@ -58,7 +58,7 @@ public class FluidHopperTileEntity extends BlockEntity implements IVesselLoader 
     @Override
     @Nonnull
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
+        if (capability == ForgeCapabilities.FLUID_HANDLER)
             return holder.cast();
         return super.getCapability(capability, facing);
     }
@@ -109,9 +109,9 @@ public class FluidHopperTileEntity extends BlockEntity implements IVesselLoader 
 
     private Optional<IFluidHandler> getExternalFluidHandler(BlockPos pos){
         return Optional.ofNullable(this.level.getBlockEntity(pos))
-                .map(tile -> tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY))
+                .map(tile -> tile.getCapability(ForgeCapabilities.FLUID_HANDLER))
                 .flatMap(LazyOptional::resolve)
-                .map(Optional::of).orElseGet(() -> IVesselLoader.getEntityCapability(pos, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, this.level));
+                .map(Optional::of).orElseGet(() -> IVesselLoader.getEntityCapability(pos, ForgeCapabilities.FLUID_HANDLER, this.level));
 
     }
 
@@ -130,7 +130,7 @@ public class FluidHopperTileEntity extends BlockEntity implements IVesselLoader 
 
     @Override
     public<T extends Entity & LinkableEntity<T>> boolean hold(T vehicle, Mode mode) {
-        return vehicle.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).map(iFluidHandler -> {
+        return vehicle.getCapability(ForgeCapabilities.FLUID_HANDLER).map(iFluidHandler -> {
             switch (mode) {
                 case IMPORT:
                     return !FluidUtil.tryFluidTransfer(this.tank, iFluidHandler, 1, false).isEmpty();

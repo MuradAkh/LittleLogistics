@@ -1,7 +1,7 @@
 package dev.murad.shipping.entity.render.train;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import dev.murad.shipping.entity.custom.vessel.barge.FluidTankBargeEntity;
 import dev.murad.shipping.entity.custom.train.wagon.FluidTankCarEntity;
 import dev.murad.shipping.util.FluidRenderUtil;
@@ -12,17 +12,18 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
 public class FluidTankCarRenderer extends TrainCarRenderer<FluidTankCarEntity>{
-    public FluidTankCarRenderer(EntityRendererProvider.Context context, Function<ModelPart, EntityModel> baseModel, ModelLayerLocation layerLocation, String baseTexture) {
+    public FluidTankCarRenderer(EntityRendererProvider.Context context, Function<ModelPart, EntityModel<FluidTankCarEntity>> baseModel, ModelLayerLocation layerLocation, String baseTexture) {
         super(context, baseModel, layerLocation, baseTexture);
     }
 
     @Override
-    public void render(FluidTankCarEntity vesselEntity, float p_225623_2_, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
-        super.render(vesselEntity, p_225623_2_, p_225623_3_, matrixStack, buffer, p_225623_6_);
+    public void render(@NotNull FluidTankCarEntity entity, float yaw, float partialTicks, @NotNull PoseStack matrixStack, @NotNull MultiBufferSource buffer, int p_225623_6_) {
+        super.render(entity, yaw, partialTicks, matrixStack, buffer, p_225623_6_);
 
     }
 
@@ -34,7 +35,7 @@ public class FluidTankCarRenderer extends TrainCarRenderer<FluidTankCarEntity>{
         if (renderFluid == null) return;
 
         matrixStackIn.pushPose();
-        matrixStackIn.mulPose(Vector3f.ZN.rotationDegrees(180));
+        matrixStackIn.mulPose(Axis.ZN.rotationDegrees(180));
         matrixStackIn.translate(-0.22, -1.05, -0.11);
         matrixStackIn.scale(0.9f, 0.9f, 0.83f);
         FluidRenderUtil.renderCubeUsingQuads(FluidTankBargeEntity.CAPACITY, fluid, partialTicks, matrixStackIn, bufferIn, pPackedLight, pPackedLight);

@@ -6,7 +6,6 @@ import dev.murad.shipping.entity.accessor.EnergyHeadVehicleDataAccessor;
 import dev.murad.shipping.entity.container.EnergyHeadVehicleContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
-import dev.murad.shipping.util.EnrollmentHandler;
 import dev.murad.shipping.util.InventoryUtils;
 import dev.murad.shipping.util.ItemHandlerVanillaContainerWrapper;
 import net.minecraft.core.Direction;
@@ -19,16 +18,15 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -57,7 +55,7 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
         return new ItemStackHandler(1) {
             @Override
             public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-                return stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
+                return stack.getCapability(ForgeCapabilities.ENERGY).isPresent();
             }
 
             @Nonnull
@@ -75,9 +73,9 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+        if (cap == ForgeCapabilities.ITEM_HANDLER) {
             return handler.cast();
-        } else if (cap == CapabilityEnergy.ENERGY) {
+        } else if (cap == ForgeCapabilities.ENERGY) {
             return holder.cast();
         }
 
@@ -86,8 +84,8 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
 
     @Override
     public void remove(RemovalReason r) {
-        if(!this.level.isClientSide){
-            Containers.dropContents(this.level, this, this);
+        if(!this.level().isClientSide){
+            Containers.dropContents(this.level(), this, this);
         }
         super.remove(r);
     }
@@ -102,8 +100,8 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
 
             @Nullable
             @Override
-            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player player) {
-                return new EnergyHeadVehicleContainer<EnergyLocomotiveEntity>(i, level, getDataAccessor(), playerInventory, player);
+            public AbstractContainerMenu createMenu(int i, @NotNull Inventory playerInventory, @NotNull Player player) {
+                return new EnergyHeadVehicleContainer<EnergyLocomotiveEntity>(i, level(), getDataAccessor(), playerInventory, player);
             }
         };
     }
@@ -125,7 +123,7 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
     @Override
     public void tick() {
         // grab energy from capacitor
-        if (!level.isClientSide) {
+        if (!level().isClientSide) {
             IEnergyStorage capability = InventoryUtils.getEnergyCapabilityInSlot(0, itemHandler);
             if (capability != null) {
                 // simulate first
@@ -155,29 +153,29 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
     }
 
     @Override
-    public int[] getSlotsForFace(Direction p_180463_1_) {
+    public int @NotNull [] getSlotsForFace(@NotNull Direction dir) {
         return new int[]{0};
     }
 
     @Override
-    public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
+    public boolean canPlaceItemThroughFace(int index, @NotNull ItemStack itemStack, @Nullable Direction dir) {
         return stalling.isDocked();
     }
 
     @Override
-    public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack p_180461_2_, Direction p_180461_3_) {
+    public boolean canTakeItemThroughFace(int index, @NotNull ItemStack itemStack, @NotNull Direction dir) {
         return false;
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag compound) {
+    public void readAdditionalSaveData(@NotNull CompoundTag compound) {
         itemHandler.deserializeNBT(compound.getCompound("inv"));
         internalBattery.readAdditionalSaveData(compound.getCompound("energy_storage"));
         super.readAdditionalSaveData(compound);
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag compound) {
+    public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         compound.put("inv", itemHandler.serializeNBT());
         CompoundTag energyNBT = new CompoundTag();
         internalBattery.addAdditionalSaveData(energyNBT);

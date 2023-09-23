@@ -1,7 +1,7 @@
 package dev.murad.shipping.entity.render.barge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.vessel.barge.FluidTankBargeEntity;
 import dev.murad.shipping.entity.models.FluidTankBargeModel;
@@ -12,13 +12,13 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
+import org.jetbrains.annotations.NotNull;
 
 public class FluidTankBargeRenderer extends AbstractVesselRenderer<FluidTankBargeEntity> {
     private static final ResourceLocation BARGE_TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/fluid_barge.png");
 
-    private final EntityModel model;
-
+    private final EntityModel<FluidTankBargeEntity> model;
 
     public FluidTankBargeRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -26,20 +26,19 @@ public class FluidTankBargeRenderer extends AbstractVesselRenderer<FluidTankBarg
     }
 
     @Override
-    EntityModel getModel(FluidTankBargeEntity entity) {
+    EntityModel<FluidTankBargeEntity> getModel(FluidTankBargeEntity entity) {
         return model;
     }
 
     @Override
-    public ResourceLocation getTextureLocation(FluidTankBargeEntity p_110775_1_) {
+    public @NotNull ResourceLocation getTextureLocation(@NotNull FluidTankBargeEntity entity) {
         return BARGE_TEXTURE;
     }
 
     @Override
-    public void render(FluidTankBargeEntity vesselEntity, float yaw, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
-        super.render(vesselEntity, yaw, p_225623_3_, matrixStack, buffer, p_225623_6_);
-        renderFluid(vesselEntity, yaw, p_225623_3_, matrixStack, buffer, 0, p_225623_6_);
-
+    public void render(@NotNull FluidTankBargeEntity entity, float yaw, float partialTick, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
+        super.render(entity, yaw, partialTick, matrixStack, buffer, p_225623_6_);
+        renderFluid(entity, yaw, partialTick, matrixStack, buffer, 0, p_225623_6_);
     }
 
 
@@ -52,7 +51,7 @@ public class FluidTankBargeRenderer extends AbstractVesselRenderer<FluidTankBarg
         if (renderFluid == null) return;
 
         matrixStackIn.pushPose();
-        matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(180.0F - yaw));
+        matrixStackIn.mulPose(Axis.YP.rotationDegrees(180.0F - yaw));
         matrixStackIn.translate(-0.3, 0.4, -0.25);
         matrixStackIn.scale(1f, 1.2f, 1f);
         FluidRenderUtil.renderCubeUsingQuads(FluidTankBargeEntity.CAPACITY, fluid, partialTicks, matrixStackIn, bufferIn, combinedLightIn, combinedOverlayIn);

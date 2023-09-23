@@ -17,6 +17,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 
@@ -52,7 +53,7 @@ public class SeaterCarEntity extends AbstractWagonEntity {
             return InteractionResult.PASS;
         } else if (this.isVehicle()) {
             return InteractionResult.PASS;
-        } else if (!this.level.isClientSide) {
+        } else if (!this.level().isClientSide) {
             return pPlayer.startRiding(this) ? InteractionResult.CONSUME : InteractionResult.PASS;
         } else {
             return InteractionResult.SUCCESS;
@@ -87,14 +88,16 @@ public class SeaterCarEntity extends AbstractWagonEntity {
     }
 
     @Override
-    public void positionRider(Entity entity) {
-        if (this.hasPassenger(entity)) {
-            if(entity instanceof Player) {
+    protected void positionRider(@NotNull Entity passenger, Entity.@NotNull MoveFunction pCallback) {
+        if (this.hasPassenger(passenger)) {
+            if (passenger instanceof Player) {
+                // Position player differently than all other entities
+                // TODO: Maybe we could override Entity#getPassengersRidingOffset instead
                 float f = -0.22F;
-                Vec3 vector3d = (new Vec3((double) f, 0.0D, 0.0D)).yRot(-this.getYRot() * ((float) Math.PI / 180F) - ((float) Math.PI / 2F));
-                entity.setPos(this.getX() + vector3d.x, this.getY(), this.getZ() + vector3d.z);
-            }else {
-                super.positionRider(entity);
+                Vec3 vector3d = new Vec3(f, 0.0D, 0.0D).yRot(-this.getYRot() * ((float) Math.PI / 180F) - ((float) Math.PI / 2F));
+                pCallback.accept(passenger, this.getX() + vector3d.x, this.getY(), this.getZ() + vector3d.z);
+            } else {
+                super.positionRider(passenger, pCallback);
             }
         }
     }

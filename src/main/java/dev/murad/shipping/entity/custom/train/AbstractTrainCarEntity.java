@@ -5,7 +5,6 @@ import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
-import dev.murad.shipping.entity.custom.vessel.VesselEntity;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.LinkingHandler;
@@ -22,7 +21,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -89,18 +87,18 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         return EXITS.get(pShape);
     }
 
-    public AbstractTrainCarEntity(EntityType<?> p_38087_, Level p_38088_) {
-        super(p_38087_, p_38088_);
+    public AbstractTrainCarEntity(EntityType<?> entityType, Level level) {
+        super(entityType, level);
         linkingHandler.train = new Train<>(this);
         railHelper = new RailHelper(this);
     }
 
-    public AbstractTrainCarEntity(EntityType<?> p_38087_, Level level, Double aDouble, Double aDouble1, Double aDouble2) {
-        super(p_38087_, level, aDouble, aDouble1, aDouble2);
-        var pos = new BlockPos(aDouble, aDouble1, aDouble2);
-        var state = level.getBlockState(pos);
+    public AbstractTrainCarEntity(EntityType<?> p_38087_, Level level, double x, double y, double z) {
+        super(p_38087_, level, x, y, z);
+        var pos = BlockPos.containing(x, y, z);
+        var state = level().getBlockState(pos);
         if (state.getBlock() instanceof BaseRailBlock railBlock) {
-            RailShape railshape = (railBlock).getRailDirection(state, this.level, pos, this);
+            RailShape railshape = (railBlock).getRailDirection(state, this.level(), pos, this);
             var exit = RailHelper.EXITS.get(railshape).getFirst();
             this.setYRot(RailHelper.directionFromVelocity(new Vec3(exit.getX(), exit.getY(), exit.getZ())).toYRot());
         }
@@ -110,7 +108,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     protected Optional<RailShape> getRailShape() {
         for (var pos : Arrays.asList(getOnPos().above(), getOnPos())) {
-            var state = level.getBlockState(pos);
+            var state = level().getBlockState(pos);
             if (state.getBlock() instanceof BaseRailBlock railBlock) {
                 return Optional.of(railHelper.getShape(pos));
             }
@@ -125,18 +123,18 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     }
 
     @Override
-    public Item getDropItem(){
+    public @NotNull Item getDropItem(){
         return getPickResult().getItem();
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag compound) {
+    protected void readAdditionalSaveData(@NotNull CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         linkingHandler.readAdditionalSaveData(compound);
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag compound) {
+    protected void addAdditionalSaveData(@NotNull CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         linkingHandler.addAdditionalSaveData(compound);
 
@@ -155,7 +153,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                     pos.getY() + 2,
                     pos.getZ() + 2
             );
-            List<Entity> entities = level.getEntities(this, searchBox, e -> e.getStringUUID().equals(uuid));
+            List<Entity> entities = level().getEntities(this, searchBox, e -> e.getStringUUID().equals(uuid));
             return entities.stream().findFirst().map(e -> (AbstractTrainCarEntity) e);
         } catch (Exception e) {
             return Optional.empty();
@@ -196,7 +194,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         var yrot = this.getYRot();
         tickVanilla();
         this.setYRot(yrot);
-        if (!level.isClientSide) {
+        if (!level().isClientSide) {
             doChainMath();
         }
     }
@@ -220,7 +218,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     @Override
     public void push(Entity pEntity) {
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
             // not perfect, doesn't work when a mob stand in the way without moving, but works well enough underwater to keep this
             if (pEntity instanceof LivingEntity l && l.getVehicle() == null){
                 this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
@@ -293,10 +291,10 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         int j = Mth.floor(position.y - (double)0.2F);
         int k = Mth.floor(position.z);
         BlockPos blockpos = new BlockPos(i, j, k);
-        if (this.level.isEmptyBlock(blockpos)) {
+        if (this.level().isEmptyBlock(blockpos)) {
             BlockPos blockpos1 = blockpos.below();
-            BlockState blockstate = this.level.getBlockState(blockpos1);
-            if (blockstate.collisionExtendsVertically(this.level, blockpos1, this)) {
+            BlockState blockstate = this.level().getBlockState(blockpos1);
+            if (blockstate.collisionExtendsVertically(this.level(), blockpos1, this)) {
                 return blockpos1;
             }
         }
@@ -312,22 +310,22 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         var yrot = this.getYRot();
         // if the car is part of a train, enforce that direction instead
         Optional<RailShape> railShape = getRailShape();
-        if (linkingHandler.dominated.isPresent() && railShape.isPresent()) {
+        if (linkingHandler.follower.isPresent() && railShape.isPresent()) {
             Optional<Pair<Direction, Integer>> r = railHelper.traverseBi(getOnPos().above(),
-                    RailHelper.samePositionPredicate(linkingHandler.dominated.get()), 5, this);
+                    RailHelper.samePositionPredicate(linkingHandler.follower.get()), 5, this);
             if (r.isPresent()) {
-                Direction hordir = yawHelper(r, linkingHandler.dominated.get());
-                Optional<Vec3i> directionOpt = RailHelper.getDirectionToOtherExit(hordir, railShape.get());
+                Direction yaw = yawHelper(r.get(), linkingHandler.follower.get());
+                Optional<Vec3i> directionOpt = RailHelper.getDirectionToOtherExit(yaw, railShape.get());
                 if (directionOpt.isPresent()) {
                     Vec3i direction = directionOpt.get();
                     return ((float) (Mth.atan2(direction.getZ(), direction.getX()) * 180.0D / Math.PI) + 90);
                 }
             }
-        } else if (linkingHandler.dominant.isPresent() && railShape.isPresent()) {
+        } else if (linkingHandler.leader.isPresent() && railShape.isPresent()) {
             Optional<Pair<Direction, Integer>> r = railHelper.traverseBi(getOnPos().above(),
-                    RailHelper.samePositionPredicate(linkingHandler.dominant.get()), 5, this);
+                    RailHelper.samePositionPredicate(linkingHandler.leader.get()), 5, this);
             if (r.isPresent()) {
-                Direction hordir = yawHelper(r, linkingHandler.dominant.get());
+                Direction hordir = yawHelper(r.get(), linkingHandler.leader.get());
                 Optional<Vec3i> directionOpt = RailHelper.getDirectionToOtherExit(hordir, railShape.get());
                 if (directionOpt.isPresent()) {
                     Vec3i direction = directionOpt.get();
@@ -346,15 +344,15 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     }
 
-    private Direction yawHelper(Optional<Pair<Direction, Integer>> r, Entity e) {
+    private Direction yawHelper(Pair<Direction, Integer> r, Entity e) {
         Direction hordir = null;
-        if(r.get().getSecond() == 0) {
+        if(r.getSecond() == 0) {
             Vec3 dirvec = new Vec3(e.xo - this.xo,0, e.zo - this.zo);
-            hordir = Direction.fromNormal((int) dirvec.normalize().x, 0, (int) dirvec.normalize().z); // may fail
+            hordir = Direction.fromDelta((int) dirvec.normalize().x, 0, (int) dirvec.normalize().z); // may fail
         }
         // if still null
         if (hordir == null){
-            hordir = r.get().getFirst();
+            hordir = r.getFirst();
         }
         return hordir;
     }
@@ -362,7 +360,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     @Override
     public boolean isInvulnerableTo(DamageSource pSource) {
-        if (ShippingConfig.Server.TRAIN_EXEMPT_DAMAGE_SOURCES.get().contains(pSource.msgId)){
+        if (ShippingConfig.Server.TRAIN_EXEMPT_DAMAGE_SOURCES.get().contains(pSource.getMsgId())){
             return true;
         }
         return super.isInvulnerableTo(pSource);
@@ -379,13 +377,13 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         int i = Mth.floor(pX);
         int j = Mth.floor(pY);
         int k = Mth.floor(pZ);
-        if (this.level.getBlockState(new BlockPos(i, j - 1, k)).is(BlockTags.RAILS)) {
+        if (this.level().getBlockState(new BlockPos(i, j - 1, k)).is(BlockTags.RAILS)) {
             --j;
         }
 
-        BlockState blockstate = this.level.getBlockState(new BlockPos(i, j, k));
+        BlockState blockstate = this.level().getBlockState(new BlockPos(i, j, k));
         if (BaseRailBlock.isRail(blockstate)) {
-            RailShape railshape = ((BaseRailBlock) blockstate.getBlock()).getRailDirection(blockstate, this.level, new BlockPos(i, j, k), this);
+            RailShape railshape = ((BaseRailBlock) blockstate.getBlock()).getRailDirection(blockstate, this.level(), new BlockPos(i, j, k), this);
             pY = j;
             if (railshape.isAscending()) {
                 pY = j + 1;
@@ -452,10 +450,10 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     }
 
     @Override
-    public void destroy(DamageSource pSource) {
-        int i = (int) Stream.of(linkingHandler.dominant, linkingHandler.dominated).filter(Optional::isPresent).count();
+    public void destroy(@NotNull DamageSource pSource) {
+        int i = (int) Stream.of(linkingHandler.leader, linkingHandler.follower).filter(Optional::isPresent).count();
         this.remove(Entity.RemovalReason.KILLED);
-        if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+        if (this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
             this.spawnAtLocation(this.getPickResult());
             for (int j = 0; j < i; j++) {
                 spawnChain();
@@ -478,7 +476,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
 
     private void doChainMath() {
-        linkingHandler.dominant.ifPresent(parent -> {
+        linkingHandler.leader.ifPresent(parent -> {
             var railDirDis =
                     railHelper.traverseBi(this.getOnPos().above(), RailHelper.samePositionPredicate(parent), 5, this);
 
@@ -519,7 +517,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                     setDeltaMovement(Vec3.ZERO);
                 }
             } else {
-                linkingHandler.dominant.ifPresent(LinkableEntity::removeDominated);
+                linkingHandler.leader.ifPresent(LinkableEntity::removeDominated);
                 removeDominant();
             }
         });
@@ -533,12 +531,12 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     @Override
     public Optional<AbstractTrainCarEntity> getDominated() {
-        return linkingHandler.dominated;
+        return linkingHandler.follower;
     }
 
     @Override
     public Optional<AbstractTrainCarEntity> getDominant() {
-        return linkingHandler.dominant;
+        return linkingHandler.leader;
     }
 
     private void spawnChain() {
@@ -548,10 +546,10 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     @Override
     public void handleShearsCut() {
-        if (!this.level.isClientSide && linkingHandler.dominant.isPresent()) {
+        if (!this.level().isClientSide && linkingHandler.leader.isPresent()) {
             spawnChain();
         }
-        linkingHandler.dominant.ifPresent(LinkableEntity::removeDominated);
+        linkingHandler.leader.ifPresent(LinkableEntity::removeDominated);
         removeDominant();
     }
 
@@ -571,14 +569,14 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     }
 
     private void invertDoms() {
-        var temp = linkingHandler.dominant;
-        linkingHandler.dominant = linkingHandler.dominated;
-        linkingHandler.dominated = temp;
+        var temp = linkingHandler.leader;
+        linkingHandler.leader = linkingHandler.follower;
+        linkingHandler.follower = temp;
     }
 
     private Optional<Integer> distHelper(AbstractTrainCarEntity car1, AbstractTrainCarEntity car2) {
         return railHelper.traverseBi(car1.getOnPos().above(),
-                (l, p) -> RailHelper.getRail(car2.getOnPos().above(), car2.level)
+                (l, p) -> RailHelper.getRail(car2.getOnPos().above(), car2.level())
                         .map(rp -> rp.equals(p)).orElse(false), 5, car1).map(Pair::getSecond);
     }
 

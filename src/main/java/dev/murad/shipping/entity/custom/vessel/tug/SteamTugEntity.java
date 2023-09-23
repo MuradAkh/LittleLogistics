@@ -22,10 +22,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -75,7 +76,7 @@ public class SteamTugEntity extends AbstractTugEntity {
             @Nullable
             @Override
             public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player player) {
-                return new SteamHeadVehicleContainer<SteamTugEntity>(i, level, getDataAccessor(), playerInventory, player);
+                return new SteamHeadVehicleContainer<SteamTugEntity>(i, level(), getDataAccessor(), playerInventory, player);
             }
         };
     }
@@ -110,7 +111,7 @@ public class SteamTugEntity extends AbstractTugEntity {
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+        if (cap == ForgeCapabilities.ITEM_HANDLER) {
             return handler.cast();
         }
 
@@ -143,7 +144,7 @@ public class SteamTugEntity extends AbstractTugEntity {
 
 
     @Override
-    public void readAdditionalSaveData(CompoundTag compound) {
+    public void readAdditionalSaveData(@NotNull CompoundTag compound) {
         burnTime = compound.contains("burn") ? compound.getInt("burn") : 0;
         burnCapacity = compound.contains("burn_capacity") ? compound.getInt("burn_capacity") : 0;
         if(compound.contains("inv")){
@@ -157,7 +158,7 @@ public class SteamTugEntity extends AbstractTugEntity {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag compound) {
+    public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         compound.putInt("burn", burnTime);
         compound.putInt("burn_capacity", burnCapacity);
         compound.put("tugItemHandler", itemHandler.serializeNBT());

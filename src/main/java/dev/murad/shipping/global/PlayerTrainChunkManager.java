@@ -1,6 +1,5 @@
 package dev.murad.shipping.global;
 
-import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.network.client.EntityPosition;
 import dev.murad.shipping.network.client.VehicleTrackerClientPacket;
@@ -11,11 +10,9 @@ import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -55,11 +52,9 @@ public class PlayerTrainChunkManager extends SavedData {
         return Optional.ofNullable(storage.get((tag) -> new PlayerTrainChunkManager(tag, level, uuid),"littlelogistics:chunkmanager-" + uuid.toString()));
     }
 
-
-
     public static boolean enroll(Entity entity, UUID uuid){
-        if(!entity.level.isClientSide) {
-            var manager = PlayerTrainChunkManager.get((ServerLevel) entity.level, uuid);
+        if(!entity.level().isClientSide) {
+            var manager = PlayerTrainChunkManager.get((ServerLevel) entity.level(), uuid);
             if(!manager.active){
                 return false;
             }
@@ -71,8 +66,8 @@ public class PlayerTrainChunkManager extends SavedData {
     }
 
     public static boolean enrollIfAllowed(Entity entity, UUID uuid){
-        if(!entity.level.isClientSide) {
-            var manager = PlayerTrainChunkManager.get((ServerLevel) entity.level, uuid);
+        if(!entity.level().isClientSide) {
+            var manager = PlayerTrainChunkManager.get((ServerLevel) entity.level(), uuid);
             Player player = manager.level.getPlayerByUUID(uuid);
             if(player == null){
                 return false;
@@ -141,7 +136,7 @@ public class PlayerTrainChunkManager extends SavedData {
 
         enrolled.forEach(entityHead -> getAllSubjectEntities(entityHead)
                 .stream()
-                .filter(entity -> !((ServerLevel) entity.level).isPositionEntityTicking(entity.blockPosition()))
+                .filter(entity -> !((ServerLevel) entity.level()).isPositionEntityTicking(entity.blockPosition()))
                 .forEach(Entity::tick));
 
         Player player = level.getPlayerByUUID(uuid);
@@ -150,7 +145,7 @@ public class PlayerTrainChunkManager extends SavedData {
         }
 
         if(this.changed || changed || enrolled.stream()
-                .map(e -> !e.chunkPosition().equals(new ChunkPos(new BlockPos(e.xOld, e.yOld, e.zOld))))
+                .map(e -> !e.chunkPosition().equals(new ChunkPos(BlockPos.containing(e.xOld, e.yOld, e.zOld))))
                 .reduce(Boolean.FALSE, Boolean::logicalOr)){
             this.changed = false;
             level.getServer().execute(this::onChanged);

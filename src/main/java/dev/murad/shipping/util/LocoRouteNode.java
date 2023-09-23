@@ -10,6 +10,9 @@ import net.minecraft.world.phys.Vec3;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
+/**
+ * TODO: Model using schemas to easier serialize/deserialize
+ */
 public class LocoRouteNode {
     private static final String NAME_TAG = "name";
     private static final String X_TAG = "x";
@@ -21,17 +24,13 @@ public class LocoRouteNode {
     @Getter
     private String name;
     @Getter
-    private final double x, y, z;
+    private final int x, y, z;
 
-    public LocoRouteNode(@Nullable String name, double x, double y, double z) {
+    public LocoRouteNode(@Nullable String name, int x, int y, int z) {
         this.name = name;
         this.x = x;
         this.y = y;
         this.z = z;
-    }
-
-    public LocoRouteNode(double x, double y, double z) {
-        this(null, x, y, z);
     }
 
     public void setName(@Nullable String name) {
@@ -78,9 +77,10 @@ public class LocoRouteNode {
         }
 
         CompoundTag coords = tag.getCompound(COORDS_TAG);
-        double x = coords.getDouble(X_TAG);
-        double y = coords.getDouble(Y_TAG);
-        double z = coords.getDouble(Z_TAG);
+        // Backwards incompatible. Used to be double, but now it is int (BlockPos recently change to int only)
+        int x = coords.getInt(X_TAG);
+        int y = coords.getInt(Y_TAG);
+        int z = coords.getInt(Z_TAG);
 
         return new LocoRouteNode(name, x, y, z);
     }

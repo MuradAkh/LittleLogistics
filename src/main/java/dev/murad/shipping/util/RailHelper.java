@@ -83,8 +83,8 @@ public class RailHelper {
 
     @NotNull
     public RailShape getShape(BlockPos pos) {
-        var state = minecart.level.getBlockState(pos);
-        return ((BaseRailBlock) state.getBlock()).getRailDirection(state, minecart.level, pos, minecart);
+        var state = minecart.level().getBlockState(pos);
+        return ((BaseRailBlock) state.getBlock()).getRailDirection(state, minecart.level(), pos, minecart);
     }
 
     @NotNull
@@ -95,11 +95,11 @@ public class RailHelper {
 
     @NotNull
     public RailShape getShape(BlockPos pos, Direction direction) {
-        var state = minecart.level.getBlockState(pos);
+        var state = minecart.level().getBlockState(pos);
            if(state.getBlock() instanceof MultiShapeRail){
-            return ((MultiShapeRail) state.getBlock()).getVanillaRailShapeFromDirection(state, pos, minecart.level, direction);
+            return ((MultiShapeRail) state.getBlock()).getVanillaRailShapeFromDirection(state, pos, minecart.level(), direction);
         } else {
-            return ((BaseRailBlock) state.getBlock()).getRailDirection(state, minecart.level, pos, minecart);
+            return ((BaseRailBlock) state.getBlock()).getRailDirection(state, minecart.level(), pos, minecart);
         }
     }
 
@@ -123,11 +123,11 @@ public class RailHelper {
     }
 
     public Optional<Pair<Direction, Integer>> traverseBi(BlockPos railPos, BiPredicate<Direction, BlockPos> predicate, int limit, AbstractTrainCarEntity car){
-        return getRail(railPos, minecart.level).flatMap(pos -> {
+        return getRail(railPos, minecart.level()).flatMap(pos -> {
             var shape = getShape(pos, car.getDirection().getOpposite());
             var dirs = EXITS_DIRECTION.get(shape);
-            var first = traverse(pos, minecart.level, dirs.getSecond().horizontal.getOpposite(), predicate, limit);
-            var second = traverse(pos, minecart.level, dirs.getFirst().horizontal.getOpposite(), predicate, limit);
+            var first = traverse(pos, minecart.level(), dirs.getSecond().horizontal.getOpposite(), predicate, limit);
+            var second = traverse(pos, minecart.level(), dirs.getFirst().horizontal.getOpposite(), predicate, limit);
             if(second.isEmpty()){
                 return first.map(i -> Pair.of(dirs.getFirst().horizontal, i));
             } else if (first.isEmpty()){
@@ -178,7 +178,7 @@ public class RailHelper {
 
         return getOtherExit(entrance, shape)
                 .flatMap(raildir ->
-                    getRail(raildir.above ? railpos.relative(raildir.horizontal).above() : railpos.relative(raildir.horizontal), minecart.level)
+                    getRail(raildir.above ? railpos.relative(raildir.horizontal).above() : railpos.relative(raildir.horizontal), minecart.level())
                             .map(pos -> Pair.of(pos, raildir.horizontal))
                 );
     }
@@ -213,7 +213,7 @@ public class RailHelper {
         Direction inputSide = prevExitTaken.getOpposite();
 
         // todo: we need to check if blocks are actually loaded
-        BlockState state = minecart.level.getBlockState(pos);
+        BlockState state = minecart.level().getBlockState(pos);
         if (state.getBlock() instanceof MultiShapeRail r) {
             // if rail is a MultiShapeRail, return all possible outputs from the input side
             // it doesn't matter if this rail is automatically switching.
@@ -252,10 +252,10 @@ public class RailHelper {
 
             getNextNodes(curr.pos, curr.prevExitTaken).forEach(raildir -> {
                 BlockPos pos = raildir.above ? curr.pos.relative(raildir.horizontal).above() : curr.pos.relative(raildir.horizontal);
-                if(minecart.level.getBlockState(pos).is(Blocks.VOID_AIR)){
+                if(minecart.level().getBlockState(pos).is(Blocks.VOID_AIR)){
                     ends.add(new RailPathFindNode(pos, raildir.horizontal, curr.pathLength  + 1, heuristic.apply(pos)));
                 } else {
-                    getRail(pos, minecart.level).ifPresent(nextPos -> {
+                    getRail(pos, minecart.level()).ifPresent(nextPos -> {
                         queue.add(new RailPathFindNode(nextPos, raildir.horizontal, curr.pathLength + 1, heuristic.apply(nextPos)));
                     });
                 }
@@ -267,8 +267,8 @@ public class RailHelper {
     }
 
     public static BiPredicate<Direction, BlockPos> samePositionPredicate(AbstractTrainCarEntity entity){
-        var targetRail = getRail(entity.getOnPos().above(), entity.level);
-        return (direction, p) -> getRail(p, entity.level)
+        var targetRail = getRail(entity.getOnPos().above(), entity.level());
+        return (direction, p) -> getRail(p, entity.level())
                 .flatMap(pos -> targetRail.map(rp -> rp.equals(pos)))
                 .orElse(false);
     }

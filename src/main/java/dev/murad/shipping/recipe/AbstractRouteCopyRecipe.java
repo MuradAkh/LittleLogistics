@@ -1,21 +1,24 @@
 package dev.murad.shipping.recipe;
 
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
 public abstract class AbstractRouteCopyRecipe extends CustomRecipe {
     private final Item item;
-    public AbstractRouteCopyRecipe(ResourceLocation resourceLocation, Item matchingItem) {
-        super(resourceLocation);
+    public AbstractRouteCopyRecipe(ResourceLocation resourceLocation, CraftingBookCategory cat, Item matchingItem) {
+        super(resourceLocation, cat);
         this.item = matchingItem;
     }
 
@@ -76,9 +79,9 @@ public abstract class AbstractRouteCopyRecipe extends CustomRecipe {
 
     @Nonnull
     @Override
-    public ItemStack assemble(@Nonnull CraftingContainer inventory) {
+    public ItemStack assemble(@Nonnull CraftingContainer inventory, @NotNull RegistryAccess pRegistryAccess) {
         Optional<Pair<ItemStack, Integer>> matchOpt = checkTugRoutes(inventory);
-        if (!matchOpt.isPresent()) return ItemStack.EMPTY;
+        if (matchOpt.isEmpty()) return ItemStack.EMPTY;
 
         Pair<ItemStack, Integer> match = matchOpt.get();
         ItemStack filled = match.getFirst();
@@ -99,5 +102,4 @@ public abstract class AbstractRouteCopyRecipe extends CustomRecipe {
     public boolean canCraftInDimensions(int x, int y) {
         return x * y >= 2;
     }
-
 }

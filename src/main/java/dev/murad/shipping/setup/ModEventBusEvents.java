@@ -10,6 +10,7 @@ import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = ShippingMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModEventBusEvents {
+
     @SubscribeEvent
     public static void addEntityAttributes(EntityAttributeCreationEvent event) {
         event.put(ModEntityTypes.STEAM_TUG.get(), SteamTugEntity.setCustomAttributes().build());
@@ -20,5 +21,4 @@ public class ModEventBusEvents {
         event.put(ModEntityTypes.CHEST_BARGE.get(), VesselEntity.setCustomAttributes().build());
         event.put(ModEntityTypes.SEATER_BARGE.get(), VesselEntity.setCustomAttributes().build());
     }
-
 }

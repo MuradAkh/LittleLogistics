@@ -29,8 +29,6 @@ public class ShippingConfig {
         public static final ForgeConfigSpec.ConfigValue<Double> LOCO_SMOKE_MODIFIER;
         public static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_TUG_ROUTE_BEACONS;
 
-
-
         static {
             BUILDER.push("general");
             TUG_SMOKE_MODIFIER =

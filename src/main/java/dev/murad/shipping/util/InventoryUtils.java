@@ -1,15 +1,13 @@
 package dev.murad.shipping.util;
 
-import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nullable;
@@ -47,7 +45,7 @@ public class InventoryUtils {
                 }
             } else if (!airList.isEmpty() && target instanceof Entity){
                 Entity e = (Entity) target;
-                boolean validSlot = e.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+                boolean validSlot = e.getCapability(ForgeCapabilities.ITEM_HANDLER)
                         .map(itemHandler -> airList.stream()
                                 .map(j -> itemHandler.isItemValid(j, stack))
                                 .reduce(false, Boolean::logicalOr)).orElse(true);
@@ -75,15 +73,15 @@ public class InventoryUtils {
         return -1;
     }
 
-    public static boolean canMergeItems(ItemStack p_145894_0_, ItemStack p_145894_1_) {
-        if (p_145894_0_.getItem() != p_145894_1_.getItem()) {
+    public static boolean canMergeItems(ItemStack stack1, ItemStack stack2) {
+        if (stack1.getItem() != stack2.getItem()) {
             return false;
-        } else if (p_145894_0_.getDamageValue() != p_145894_1_.getDamageValue()) {
+        } else if (stack1.getDamageValue() != stack2.getDamageValue()) {
             return false;
-        } else if (p_145894_0_.getCount() > p_145894_0_.getMaxStackSize()) {
+        } else if (stack1.getCount() > stack1.getMaxStackSize()) {
             return false;
         } else {
-            return ItemStack.tagMatches(p_145894_0_, p_145894_1_);
+            return ItemStack.isSameItemSameTags(stack1, stack2);
         }
     }
 
@@ -91,7 +89,7 @@ public class InventoryUtils {
     public static IEnergyStorage getEnergyCapabilityInSlot(int slot, ItemStackHandler handler) {
         ItemStack stack = handler.getStackInSlot(slot);
         if (!stack.isEmpty()) {
-            LazyOptional<IEnergyStorage> capabilityLazyOpt = stack.getCapability(CapabilityEnergy.ENERGY);
+            LazyOptional<IEnergyStorage> capabilityLazyOpt = stack.getCapability(ForgeCapabilities.ENERGY);
             if (capabilityLazyOpt.isPresent()) {
                 Optional<IEnergyStorage> capabilityOpt = capabilityLazyOpt.resolve();
                 if (capabilityOpt.isPresent()) {

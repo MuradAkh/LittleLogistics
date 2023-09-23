@@ -1,29 +1,14 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = 'https://maven.parchmentmc.org' }
-        maven { url = 'https://cursemaven.com' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath 'org.parchmentmc:librarian:1.+'
-        classpath 'org.spongepowered:mixingradle:0.7.+'
-    }
-}
-
+// This is the new and fancy way to apply plugins :)
 plugins {
-    id "io.freefair.lombok" version "6.4.1"
+    id 'io.freefair.lombok' version '6.4.1'
+    id 'net.minecraftforge.gradle' version "${forge_gradle_version}"
+    id 'org.parchmentmc.librarian.forgegradle' version "${parchment_gradle_version}"
+
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'org.spongepowered.mixin' version '0.7.+'
 }
-
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.parchmentmc.librarian.forgegradle'
-// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
-apply plugin: 'org.spongepowered.mixin'
-
 
 group = mod_group // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = mod_id
@@ -33,6 +18,9 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17) // Mojang ships Java
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
+    enableIdeaPrepareRuns = true
+    copyIdeResources = true
+
     // The mappings can be changed at any time, and must be in the following format.
     // Channel:   Version:
     // snapshot   YYYYMMDD   Snapshot are built nightly.
@@ -112,9 +100,9 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-
-
-            forceExit = false
+//
+//
+//            forceExit = false
 
             args '--mod', "${project.mod_id}", '--all',
                     '--existing', file('src/main/resources').toString(),
@@ -158,28 +146,24 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
     // compile against the JEI API but do not include it at runtime
-//    // at runtime, use the full JEI jar
-//
+
+    // at runtime, use the full JEI jar
 //    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
 //    compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api")
-//    compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")
-//    runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
-//
+
+    runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
+    compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")
+
 //    runtimeOnly fg.deobf("com.teamcofh:cofh_core:1.16.5-1.4.2.9")
 //    runtimeOnly fg.deobf("com.teamcofh:thermal_foundation:1.16.5-1.4.3.10")
 //    runtimeOnly fg.deobf("com.teamcofh:thermal_expansion:1.16.5-1.4.2.4")
 
-    // spark
-    runtimeOnly fg.deobf("curse.maven:spark-361579:3875647")
+//    // spark
+//    runtimeOnly fg.deobf("curse.maven:spark-361579:3875647")
 
     // create
-    runtimeOnly fg.deobf("curse.maven:create-328085:4547147")
-    compileOnly fg.deobf("curse.maven:create-328085:4547147")
-
-//    compileOnly fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:${rootProject.flywheel_version}")
-//    compileOnly fg.deobf("com.simibubi.create:Create:${rootProject.create_version}")
-//    runtimeOnly fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:${rootProject.flywheel_version}")
-//    runtimeOnly fg.deobf("com.simibubi.create:Create:${rootProject.create_version}")
+    runtimeOnly fg.deobf("curse.maven:create-328085:${rootProject.create_version}")
+    compileOnly fg.deobf("curse.maven:create-328085:${rootProject.create_version}")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
@@ -203,26 +187,26 @@ jar.finalizedBy('reobfJar')
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
 //publish.dependsOn('reobfJar')
 
-processResources {
-    inputs.property "version", project.mod_version
-    filteringCharset "UTF-8"
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            "mod_id":                   project.mod_id,
+            "mod_version":              project.mod_version,
+            "mod_icon_path":            project.mod_icon_path,
+            "mod_title":                project.mod_title,
+            "mod_description":          project.mod_description,
+            "mod_url":                  project.mod_url,
+            "mod_author":               project.mod_author,
+            "mod_license":              project.mod_license,
+            "mc_version_range":         project.mc_version_range,
+            "forge_version_range":      project.forge_version_range,
+            "patchouli_version_range":  project.patchouli_version_range,
+            "version":                  project.mod_version
+    ]
 
-    // will replace ${} strings inside mods.toml
-    filesMatching("META-INF/mods.toml") {
-        expand  "mod_id":                   project.mod_id,
-                "mod_version":              project.mod_version,
-                "mod_icon_path":            project.mod_icon_path,
-                "mod_title":                project.mod_title,
-                "mod_description":          project.mod_description,
-                "mod_url":                  project.mod_url,
-                "mod_author":               project.mod_author,
-                "mod_license":              project.mod_license,
-                "mc_version_range":         project.mc_version_range,
-                "forge_version_range":      project.forge_version_range,
-                "patchouli_version_range":  project.patchouli_version_range
-    }
-    filesMatching("pack.mcmeta") {
-        expand "mod_id": project.mod_id
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties
     }
 }
 

@@ -1,9 +1,11 @@
 package dev.murad.shipping.entity.container;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractVehicleScreen<T extends AbstractItemHandlerContainer> extends AbstractContainerScreen<T> {
     public AbstractVehicleScreen(T menu, Inventory inventory, Component p_i51105_3_) {
@@ -15,9 +17,9 @@ public abstract class AbstractVehicleScreen<T extends AbstractItemHandlerContain
     }
 
     @Override
-    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(matrixStack);
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
-        this.renderTooltip(matrixStack, mouseX, mouseY);
+    public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        this.renderBackground(graphics);
+        super.render(graphics, mouseX, mouseY, partialTicks);
+        this.renderTooltip(graphics, mouseX, mouseY);
     }
 }

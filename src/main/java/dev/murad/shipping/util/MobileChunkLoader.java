@@ -1,7 +1,6 @@
 package dev.murad.shipping.util;
 
 import com.mojang.datafixers.util.Pair;
-import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.ShippingMod;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -31,7 +30,7 @@ public class MobileChunkLoader {
     }
 
     private void setChunkLoad(boolean add, Pair<Integer, Integer> chunk) {
-        ForgeChunkManager.forceChunk((ServerLevel) entity.level, ShippingMod.MOD_ID, entity, chunk.getFirst(), chunk.getSecond(), add, false);
+        ForgeChunkManager.forceChunk((ServerLevel) entity.level(), ShippingMod.MOD_ID, entity, chunk.getFirst(), chunk.getSecond(), add, false);
     }
 
     public void serverTick(){

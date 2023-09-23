@@ -1,5 +1,6 @@
 package dev.murad.shipping.setup;
 
+import com.google.common.collect.ImmutableList;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.train.locomotive.EnergyLocomotiveEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.SteamLocomotiveEntity;
@@ -12,14 +13,25 @@ import dev.murad.shipping.entity.custom.vessel.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.SteamTugEntity;
 import dev.murad.shipping.item.*;
 import dev.murad.shipping.item.creative.CreativeCapacitor;
+import dev.murad.shipping.util.MultiMap;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ItemLike;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 public class ModItems {
+    private static final MultiMap<ResourceKey<CreativeModeTab>, RegistryObject<? extends Item>> PRIVATE_TAB_REGISTRY = new MultiMap<>();
 
     /**
      *  Empty Icons
@@ -33,78 +45,87 @@ public class ModItems {
     /**
      * COMMON
      */
-    public static final RegistryObject<Item> CONDUCTORS_WRENCH = Registration.ITEMS.register("conductors_wrench",
-            () -> new WrenchItem(new Item.Properties().tab(CreativeModeTab.TAB_TRANSPORTATION).stacksTo(1)));
+    public static final RegistryObject<Item> CONDUCTORS_WRENCH = register("conductors_wrench",
+            () -> new WrenchItem(new Item.Properties().stacksTo(1)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
 
-    public static final RegistryObject<Item> SPRING = Registration.ITEMS.register("spring",
-            () -> new SpringItem(new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+    public static final RegistryObject<Item> SPRING = register("spring",
+            () -> new SpringItem(new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> CREATIVE_CAPACITOR = Registration.ITEMS.register("creative_capacitor",
-            () -> new CreativeCapacitor(new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+    public static final RegistryObject<Item> CREATIVE_CAPACITOR = register("creative_capacitor",
+            () -> new CreativeCapacitor(new Item.Properties().stacksTo(1)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
     /**
      * Vessels
      */
 
-    public static final RegistryObject<Item> CHEST_BARGE = Registration.ITEMS.register("barge",
-            () -> new VesselItem(new Item.Properties().tab(CreativeModeTab.TAB_TRANSPORTATION), ChestBargeEntity::new));
+    public static final RegistryObject<Item> CHEST_BARGE = register("barge",
+            () -> new VesselItem(new Item.Properties(), ChestBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-//    public static final RegistryObject<Item> CHUNK_LOADER_BARGE = Registration.ITEMS.register("chunk_loader_barge",
-//            () -> new VesselItem(new Item.Properties().tab(CreativeModeTab.TAB_TRANSPORTATION), ChunkLoaderBargeEntity::new));
+//    public static final RegistryObject<Item> CHUNK_LOADER_BARGE = register("chunk_loader_barge",
+//            () -> new VesselItem(new Item.Properties(), ChunkLoaderBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> FISHING_BARGE = Registration.ITEMS.register("fishing_barge",
-            () -> new VesselItem(new Item.Properties().tab(CreativeModeTab.TAB_TRANSPORTATION), FishingBargeEntity::new));
+    public static final RegistryObject<Item> FISHING_BARGE = register("fishing_barge",
+            () -> new VesselItem(new Item.Properties(), FishingBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> FLUID_BARGE = Registration.ITEMS.register("fluid_barge",
-            () -> new VesselItem(new Item.Properties().tab(CreativeModeTab.TAB_TRANSPORTATION), FluidTankBargeEntity::new));
+    public static final RegistryObject<Item> FLUID_BARGE = register("fluid_barge",
+            () -> new VesselItem(new Item.Properties(), FluidTankBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> SEATER_BARGE = Registration.ITEMS.register("seater_barge",
-            () -> new VesselItem(new Item.Properties().tab(CreativeModeTab.TAB_TRANSPORTATION), SeaterBargeEntity::new));
+    public static final RegistryObject<Item> SEATER_BARGE = register("seater_barge",
+            () -> new VesselItem(new Item.Properties(), SeaterBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> STEAM_TUG = Registration.ITEMS.register("tug",
-            () -> new VesselItem(new Item.Properties().tab(CreativeModeTab.TAB_TRANSPORTATION), SteamTugEntity::new));
+    public static final RegistryObject<Item> STEAM_TUG = register("tug",
+            () -> new VesselItem(new Item.Properties(), SteamTugEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> ENERGY_TUG = Registration.ITEMS.register("energy_tug",
-            () -> new VesselItem(new Item.Properties().tab(CreativeModeTab.TAB_TRANSPORTATION), EnergyTugEntity::new));
+    public static final RegistryObject<Item> ENERGY_TUG = register("energy_tug",
+            () -> new VesselItem(new Item.Properties(), EnergyTugEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
     /**
      * Trains
      */
 
-    public static final RegistryObject<Item> TUG_ROUTE = Registration.ITEMS.register("tug_route",
-            () -> new TugRouteItem(new Item.Properties().stacksTo(16).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+    public static final RegistryObject<Item> TUG_ROUTE = register("tug_route",
+            () -> new TugRouteItem(new Item.Properties().stacksTo(16)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> CHEST_CAR = Registration.ITEMS.register("chest_car",
-            () -> new TrainCarItem(ChestCarEntity::new, new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+    public static final RegistryObject<Item> CHEST_CAR = register("chest_car",
+            () -> new TrainCarItem(ChestCarEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> FLUID_CAR = Registration.ITEMS.register("fluid_car",
-            () -> new TrainCarItem(FluidTankCarEntity::new, new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+    public static final RegistryObject<Item> FLUID_CAR = register("fluid_car",
+            () -> new TrainCarItem(FluidTankCarEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-//    public static final RegistryObject<Item> CHUNK_LOADER_CAR = Registration.ITEMS.register("chunk_loader_car",
-//            () -> new TrainCarItem(ChunkLoaderCarEntity::new, new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+    public static final RegistryObject<Item> SEATER_CAR = register("seater_car",
+            () -> new TrainCarItem(SeaterCarEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> SEATER_CAR = Registration.ITEMS.register("seater_car",
-            () -> new TrainCarItem(SeaterCarEntity::new, new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+    public static final RegistryObject<Item> STEAM_LOCOMOTIVE = register("steam_locomotive",
+            () -> new TrainCarItem(SteamLocomotiveEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> STEAM_LOCOMOTIVE = Registration.ITEMS.register("steam_locomotive",
-            () -> new TrainCarItem(SteamLocomotiveEntity::new, new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+    public static final RegistryObject<Item> ENERGY_LOCOMOTIVE = register("energy_locomotive",
+            () -> new TrainCarItem(EnergyLocomotiveEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> ENERGY_LOCOMOTIVE = Registration.ITEMS.register("energy_locomotive",
-            () -> new TrainCarItem(EnergyLocomotiveEntity::new, new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+    public static final RegistryObject<Item> RECEIVER_COMPONENT = register("receiver_component",
+            () -> new Item(new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> RECEIVER_COMPONENT = Registration.ITEMS.register("receiver_component",
-            () -> new Item(new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+    public static final RegistryObject<Item> TRANSMITTER_COMPONENT = register("transmitter_component",
+            () -> new Item(new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> TRANSMITTER_COMPONENT = Registration.ITEMS.register("transmitter_component",
-            () -> new Item(new Item.Properties().stacksTo(64).tab(CreativeModeTab.TAB_TRANSPORTATION)));
-
-    public static final RegistryObject<Item> LOCO_ROUTE = Registration.ITEMS.register("locomotive_route",
-            () -> new LocoRouteItem(new Item.Properties().stacksTo(16).tab(CreativeModeTab.TAB_TRANSPORTATION)));
+    public static final RegistryObject<Item> LOCO_ROUTE = register("locomotive_route",
+            () -> new LocoRouteItem(new Item.Properties().stacksTo(16)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
 
-    public static void register () {
-
+    public static void buildCreativeTab(BuildCreativeModeTabContentsEvent event) {
+        PRIVATE_TAB_REGISTRY.getOrDefault(event.getTabKey(), new ArrayList<>())
+                .forEach(event::accept);
     }
 
+    private static <T extends Item> RegistryObject<T> register(String name, Supplier<T> itemSupplier, List<ResourceKey<CreativeModeTab>> tabs) {
+        var res = Registration.ITEMS.register(name, itemSupplier);
+
+        for (var tab : tabs) {
+            PRIVATE_TAB_REGISTRY.putInsert(tab, res);
+        }
+
+        return res;
+    }
+
+    public static void register() {}
 }

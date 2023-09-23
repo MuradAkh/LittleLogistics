@@ -8,13 +8,13 @@ import net.minecraftforge.registries.RegistryObject;
 public class ModSounds {
 
     public static final RegistryObject<SoundEvent> STEAM_TUG_WHISTLE = Registration.SOUND_EVENTS.register("steam_tug_whistle",
-            () -> new SoundEvent(new ResourceLocation(ShippingMod.MOD_ID, "steam_tug_whistle")));
+            () -> SoundEvent.createFixedRangeEvent(new ResourceLocation(ShippingMod.MOD_ID, "steam_tug_whistle"), 64f));
 
     public static final RegistryObject<SoundEvent> TUG_DOCKING = Registration.SOUND_EVENTS.register("tug_docking",
-            () -> new SoundEvent(new ResourceLocation(ShippingMod.MOD_ID, "tug_docking")));
+            () -> SoundEvent.createFixedRangeEvent(new ResourceLocation(ShippingMod.MOD_ID, "tug_docking"), 64f));
 
     public static final RegistryObject<SoundEvent> TUG_UNDOCKING = Registration.SOUND_EVENTS.register("tug_undocking",
-            () -> new SoundEvent(new ResourceLocation(ShippingMod.MOD_ID, "tug_undocking")));
+            () -> SoundEvent.createFixedRangeEvent(new ResourceLocation(ShippingMod.MOD_ID, "tug_undocking"), 64f));
 
     public static void register () {}
 }

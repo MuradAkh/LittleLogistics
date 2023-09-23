@@ -4,7 +4,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 
@@ -12,8 +15,6 @@ public abstract class AbstractDockBlock extends Block implements EntityBlock {
     public AbstractDockBlock(Properties p_i48440_1_) {
         super(p_i48440_1_);
     }
-
-
 
     @Deprecated
     public void neighborChanged(BlockState state, Level world, BlockPos p_220069_3_, Block p_220069_4_, BlockPos p_220069_5_, boolean p_220069_6_) {

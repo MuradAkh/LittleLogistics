@@ -30,15 +30,17 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -81,22 +83,21 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
     protected MenuProvider createContainerProvider() {
         return new MenuProvider() {
             @Override
-            public Component getDisplayName() {
+            public @NotNull Component getDisplayName() {
                 return Component.translatable("screen.littlelogistics.fishing_barge");
             }
 
-            @Nullable
             @Override
             public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player Player) {
-                return new FishingBargeContainer(i, level, getId(), playerInventory, Player);
+                return new FishingBargeContainer(i, level(), getId(), playerInventory, Player);
             }
         };
     }
 
     @Override
     public void remove(RemovalReason r) {
-        if (!this.level.isClientSide) {
-            Containers.dropContents(this.level, this, this);
+        if (!this.level().isClientSide) {
+            Containers.dropContents(this.level(), this, this);
         }
         super.remove(r);
     }
@@ -111,7 +112,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
     public void tick(){
         super.tick();
         tickWaterOnSidesCheck();
-        if(!this.level.isClientSide && this.getStatus() == Status.DEPLOYED){
+        if(!this.level().isClientSide && this.getStatus() == Status.DEPLOYED){
             if(fishCooldown < 0) {
                 tickFish();
                 fishCooldown = FISHING_COOLDOWN;
@@ -119,7 +120,6 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
                 fishCooldown--;
             }
         }
-
     }
 
     private void tickWaterOnSidesCheck(){
@@ -132,7 +132,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
 
     private double computeDepthPenalty(){
         int count = 0;
-        for (BlockPos pos = this.getOnPos(); this.level.getBlockState(pos).getBlock().equals(Blocks.WATER); pos = pos.below()){
+        for (BlockPos pos = this.getOnPos(); this.level().getBlockState(pos).getBlock().equals(Blocks.WATER); pos = pos.below()){
             count ++;
         }
         count = Math.min(count, 20);
@@ -147,15 +147,20 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
                 *  FISHING_TREASURE_CHANCE : 0;
         double r = Math.random();
         if(r < chance){
-            LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerLevel) this.level))
+            LootParams params = new LootParams.Builder((ServerLevel) this.level())
                     .withParameter(LootContextParams.ORIGIN, this.position())
                     .withParameter(LootContextParams.THIS_ENTITY, this)
                     .withParameter(LootContextParams.TOOL, new ItemStack(Items.FISHING_ROD))
-                    .withRandom(this.random);
+                    .withParameter(LootContextParams.KILLER_ENTITY, this)
+                    .withParameter(LootContextParams.THIS_ENTITY, this)
+                    .create(LootContextParamSets.FISHING);
 
-            lootcontext$builder.withParameter(LootContextParams.KILLER_ENTITY, this).withParameter(LootContextParams.THIS_ENTITY, this);
-            LootTable loottable = this.level.getServer().getLootTables().get(r < treasure_chance ? BuiltInLootTables.FISHING_TREASURE : FISHING_LOOT_TABLE);
-            List<ItemStack> list = loottable.getRandomItems(lootcontext$builder.create(LootContextParamSets.FISHING));
+            LootTable loottable = this.level()
+                    .getServer()
+                    .getLootData()
+                    .getLootTable(r < treasure_chance ? BuiltInLootTables.FISHING_TREASURE : FISHING_LOOT_TABLE);
+
+            List<ItemStack> list = loottable.getRandomItems(params);
             for (ItemStack stack : list) {
                 int slot = InventoryUtils.findSlotFotItem(this, stack);
                 if (slot != -1) {
@@ -182,7 +187,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag compound) {
+    public void readAdditionalSaveData(@NotNull CompoundTag compound) {
         //backwards compat
         CompoundTag inv = compound.getCompound("inv");
         inv.remove("Size");
@@ -195,7 +200,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag compound) {
+    public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         compound.put("inv", itemHandler.serializeNBT());
         compound.putString("overfish", overFishedString());
         super.addAdditionalSaveData(compound);
@@ -314,7 +319,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+        if (cap == ForgeCapabilities.ITEM_HANDLER) {
             return handler.cast();
         }
 

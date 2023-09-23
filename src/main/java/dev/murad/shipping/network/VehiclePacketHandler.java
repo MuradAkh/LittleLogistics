@@ -36,7 +36,7 @@ public final class VehiclePacketHandler {
     public static void handleSetEngine(SetEnginePacket operation, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             Optional.of(ctx.get()).map(NetworkEvent.Context::getSender).ifPresent(serverPlayer -> {
-                var loco = serverPlayer.level.getEntity(operation.locoId);
+                var loco = serverPlayer.level().getEntity(operation.locoId);
                 if(loco != null && loco.distanceTo(serverPlayer) < 6 && loco instanceof HeadVehicle l){
                     l.setEngineOn(operation.state);
                 }
@@ -50,7 +50,7 @@ public final class VehiclePacketHandler {
     public static void handleEnrollVehicle(EnrollVehiclePacket operation, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             Optional.of(ctx.get()).map(NetworkEvent.Context::getSender).ifPresent(serverPlayer -> {
-                var loco = serverPlayer.level.getEntity(operation.locoId);
+                var loco = serverPlayer.level().getEntity(operation.locoId);
                 if(loco != null && loco.distanceTo(serverPlayer) < 6 && loco instanceof HeadVehicle l){
                     l.enroll(serverPlayer.getUUID());
                 }

@@ -48,7 +48,7 @@ public class TugRouteItem extends Item {
             @Nullable
             @Override
             public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player Player) {
-                return new TugRouteContainer(i, Player.level, getDataAccessor(Player, hand), playerInventory, Player);
+                return new TugRouteContainer(i, Player.level(), getDataAccessor(Player, hand), playerInventory, Player);
             }
         };
     }
@@ -61,7 +61,7 @@ public class TugRouteItem extends Item {
 
     public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
-        if(!player.level.isClientSide){
+        if(!player.level().isClientSide){
             if (player.isShiftKeyDown()) {
                 NetworkHooks.openScreen((ServerPlayer) player, createContainerProvider(hand), getDataAccessor(player, hand)::write);
             } else {

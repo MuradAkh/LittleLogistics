@@ -46,7 +46,7 @@ public abstract class AbstractBargeEntity extends VesselEntity {
 
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
             doInteract(player);
         }
         // don't interact *and* use current item
@@ -61,13 +61,13 @@ public abstract class AbstractBargeEntity extends VesselEntity {
 
     @Override
     public void setDominated(VesselEntity entity) {
-        linkingHandler.dominated = Optional.of(entity);
+        linkingHandler.follower = Optional.of(entity);
     }
 
     @Override
     public void setDominant(VesselEntity entity) {
         this.setTrain(entity.getTrain());
-        linkingHandler.dominant = Optional.of(entity);
+        linkingHandler.leader = Optional.of(entity);
     }
 
     @Override
@@ -75,7 +75,7 @@ public abstract class AbstractBargeEntity extends VesselEntity {
         if(!this.isAlive()){
             return;
         }
-        linkingHandler.dominated = Optional.empty();
+        linkingHandler.follower = Optional.empty();
         linkingHandler.train.setTail(this);
     }
 
@@ -84,7 +84,7 @@ public abstract class AbstractBargeEntity extends VesselEntity {
         if(!this.isAlive()){
             return;
         }
-        linkingHandler.dominant = Optional.empty();
+        linkingHandler.leader = Optional.empty();
         this.setTrain(new Train(this));
     }
 
@@ -92,7 +92,7 @@ public abstract class AbstractBargeEntity extends VesselEntity {
     public void setTrain(Train<VesselEntity> train) {
         linkingHandler.train = train;
         train.setTail(this);
-        linkingHandler.dominated.ifPresent(dominated -> {
+        linkingHandler.follower.ifPresent(dominated -> {
             // avoid recursion loops
             if(!dominated.getTrain().equals(train)){
                 dominated.setTrain(train);
@@ -102,7 +102,7 @@ public abstract class AbstractBargeEntity extends VesselEntity {
 
     @Override
     public void remove(RemovalReason r){
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
             this.spawnAtLocation(this.getDropItem());
         }
         super.remove(r);
@@ -110,7 +110,7 @@ public abstract class AbstractBargeEntity extends VesselEntity {
 
     // hack to disable hoppers
     public boolean isDockable() {
-        return this.linkingHandler.dominant.map(dom -> this.distanceToSqr((Entity) dom) < 1.1).orElse(true);
+        return this.linkingHandler.leader.map(dom -> this.distanceToSqr((Entity) dom) < 1.1).orElse(true);
     }
 
     public boolean allowDockInterface(){

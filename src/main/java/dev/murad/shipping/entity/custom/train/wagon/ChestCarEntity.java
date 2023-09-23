@@ -14,10 +14,11 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -37,8 +38,8 @@ public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVa
 
     @Override
     public void remove(RemovalReason r) {
-        if (!this.level.isClientSide) {
-            Containers.dropContents(this.level, this, this);
+        if (!this.level().isClientSide) {
+            Containers.dropContents(this.level(), this, this);
         }
         super.remove(r);
     }
@@ -54,14 +55,14 @@ public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVa
 
     @Override
     public InteractionResult interact(Player player, InteractionHand hand){
-        if(!this.level.isClientSide){
+        if(!this.level().isClientSide){
             player.openMenu(this);
         }
         return InteractionResult.CONSUME;
     }
 
     @Nullable
-    public AbstractContainerMenu createMenu(int pContainerId, Inventory pInventory, Player pPlayer) {
+    public AbstractContainerMenu createMenu(int pContainerId, @NotNull Inventory pInventory, Player pPlayer) {
         if (pPlayer.isSpectator()) {
             return null;
         } else {
@@ -70,7 +71,7 @@ public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVa
     }
 
     @Override
-    public boolean stillValid(Player pPlayer) {
+    public boolean stillValid(@NotNull Player pPlayer) {
         if (this.isRemoved()) {
             return false;
         } else {
@@ -85,13 +86,13 @@ public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVa
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag t) {
+    public void addAdditionalSaveData(@NotNull CompoundTag t) {
         super.addAdditionalSaveData(t);
         t.put("inv", itemHandler.serializeNBT());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag t) {
+    public void readAdditionalSaveData(@NotNull CompoundTag t) {
         super.readAdditionalSaveData(t);
         itemHandler.deserializeNBT(t.getCompound("inv"));
     }
@@ -99,7 +100,7 @@ public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVa
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+        if (cap == ForgeCapabilities.ITEM_HANDLER) {
             return handler.cast();
         }
 
@@ -109,7 +110,7 @@ public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVa
     // hack to disable hoppers before docking complete
 
     @Override
-    public int[] getSlotsForFace(Direction p_180463_1_) {
+    public int @NotNull [] getSlotsForFace(@NotNull Direction p_180463_1_) {
         return IntStream.range(0, getContainerSize()).toArray();
     }
 

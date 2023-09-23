@@ -6,7 +6,6 @@ import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntit
 import dev.murad.shipping.util.Train;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -26,14 +25,14 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
 
     @Override
     public void setDominated(AbstractTrainCarEntity entity) {
-        linkingHandler.dominated = Optional.of(entity);
+        linkingHandler.follower = Optional.of(entity);
     }
 
 
     @Override
     public void setDominant(AbstractTrainCarEntity entity) {
         this.setTrain(entity.getTrain());
-        linkingHandler.dominant = Optional.of(entity);
+        linkingHandler.leader = Optional.of(entity);
     }
 
     @Override
@@ -50,7 +49,7 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
         if(!this.isAlive()){
             return;
         }
-        linkingHandler.dominated = Optional.empty();
+        linkingHandler.follower = Optional.empty();
         linkingHandler.train.setTail(this);
     }
 
@@ -59,7 +58,7 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
         if(!this.isAlive()){
             return;
         }
-        linkingHandler.dominant = Optional.empty();
+        linkingHandler.leader = Optional.empty();
         this.setTrain(new Train<>(this));
     }
 
@@ -67,7 +66,7 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
     public void setTrain(Train<AbstractTrainCarEntity> train) {
         linkingHandler.train = train;
         train.setTail(this);
-        linkingHandler.dominated.ifPresent(dominated -> {
+        linkingHandler.follower.ifPresent(dominated -> {
             // avoid recursion loops
             if(!dominated.getTrain().equals(train)){
                 dominated.setTrain(train);
@@ -77,7 +76,7 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
 
     // hack to disable hoppers
     public boolean isDockable() {
-        return linkingHandler.dominant.map(dom -> this.distanceToSqr(dom) < 1.05).orElse(true);
+        return linkingHandler.leader.map(dom -> this.distanceToSqr(dom) < 1.05).orElse(true);
     }
 
 

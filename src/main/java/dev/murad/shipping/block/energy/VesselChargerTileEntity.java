@@ -16,8 +16,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nonnull;
@@ -38,7 +38,7 @@ public class VesselChargerTileEntity extends BlockEntity implements IVesselLoade
     @Override
     @Nonnull
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        if (capability == CapabilityEnergy.ENERGY)
+        if (capability == ForgeCapabilities.ENERGY)
             return holder.cast();
         return super.getCapability(capability, facing);
     }
@@ -60,7 +60,7 @@ public class VesselChargerTileEntity extends BlockEntity implements IVesselLoade
 
     private boolean tryChargeEntity() {
         return IVesselLoader.getEntityCapability(getBlockPos().relative(getBlockState().getValue(VesselChargerBlock.FACING)),
-                CapabilityEnergy.ENERGY, level).map(iEnergyStorage -> {
+                ForgeCapabilities.ENERGY, level).map(iEnergyStorage -> {
                     int vesselCap = iEnergyStorage.receiveEnergy(MAX_TRANSFER, true);
                     int toTransfer = internalBattery.extractEnergy(vesselCap, false);
                     return iEnergyStorage.receiveEnergy(toTransfer, false) > 0;
@@ -83,7 +83,7 @@ public class VesselChargerTileEntity extends BlockEntity implements IVesselLoade
 
     @Override
     public<T extends Entity & LinkableEntity<T>> boolean hold(T vehicle, Mode mode) {
-        return vehicle.getCapability(CapabilityEnergy.ENERGY).map(energyHandler -> {
+        return vehicle.getCapability(ForgeCapabilities.ENERGY).map(energyHandler -> {
             switch (mode) {
                 case EXPORT:
                     return (energyHandler.getEnergyStored() < energyHandler.getMaxEnergyStored() - 50) && internalBattery.getEnergyStored() > 50;

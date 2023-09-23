@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -33,13 +34,13 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 @Mod.EventBusSubscriber(modid = ShippingMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ModClientEventHandler {
 
-    @SubscribeEvent
-    public static void onTextureStitchEventPre(TextureStitchEvent.Pre event) {
-        if (event.getAtlas().location() != AbstractHeadVehicleContainer.EMPTY_ATLAS_LOC) return;
-        event.addSprite(ModItems.LOCO_ROUTE_ICON);
-        event.addSprite(ModItems.TUG_ROUTE_ICON);
-        event.addSprite(ModItems.EMPTY_ENERGY);
-    }
+//    @SubscribeEvent
+//    public static void onTextureStitchEventPre(TextureStitchEvent.Pre event) {
+//        if (event.getAtlas().location() != AbstractHeadVehicleContainer.EMPTY_ATLAS_LOC) return;
+//        event.addSprite(ModItems.LOCO_ROUTE_ICON);
+//        event.addSprite(ModItems.TUG_ROUTE_ICON);
+//        event.addSprite(ModItems.EMPTY_ENERGY);
+//    }
 
     @SubscribeEvent
     public static void onRenderTypeSetup(FMLClientSetupEvent event) {
@@ -151,6 +152,15 @@ public class ModClientEventHandler {
         event.registerLayerDefinition(FluidTankCarModel.LAYER_LOCATION, FluidTankCarModel::createBodyLayer);
         event.registerLayerDefinition(ChunkLoaderCarModel.LAYER_LOCATION, ChunkLoaderCarModel::createBodyLayer);
         event.registerLayerDefinition(SeaterCarModel.LAYER_LOCATION, SeaterCarModel::createBodyLayer);
+    }
 
+    /**
+     * Subscribe to event when building each creative mode tab. Items are added to tabs here.
+     * @param event The creative tab currently being built
+     */
+    @SubscribeEvent
+    public static void buildTabContents(BuildCreativeModeTabContentsEvent event) {
+        ModBlocks.buildCreativeTab(event);
+        ModItems.buildCreativeTab(event);
     }
 }

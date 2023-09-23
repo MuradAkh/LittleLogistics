@@ -6,7 +6,6 @@ import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
-import dev.murad.shipping.global.PlayerTrainChunkManager;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.*;
 import dev.murad.shipping.entity.custom.vessel.VesselEntity;
@@ -26,10 +25,10 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.*;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -47,6 +46,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -59,7 +59,7 @@ import java.util.stream.IntStream;
 
 public abstract class AbstractTugEntity extends VesselEntity implements LinkableEntityHead<VesselEntity>, Container, WorldlyContainer, HeadVehicle {
 
-    protected final EnrollmentHandler enrollmentHandler;
+    protected final ChunkManagerEnrollmentHandler enrollmentHandler;
 
     // CONTAINER STUFF
     @Getter
@@ -96,7 +96,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         linkingHandler.train = (new Train<>(this));
         this.path = new TugRoute();
         frontHitbox = new VehicleFrontPart(this);
-        enrollmentHandler = new EnrollmentHandler(this);
+        enrollmentHandler = new ChunkManagerEnrollmentHandler(this);
     }
 
     public AbstractTugEntity(EntityType type, Level worldIn, double x, double y, double z) {
@@ -165,7 +165,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     protected abstract MenuProvider createContainerProvider();
 
     @Override
-    public void readAdditionalSaveData(CompoundTag compound) {
+    public void readAdditionalSaveData(@NotNull CompoundTag compound) {
         if(compound.contains("inv")){
             ItemStackHandler old = new ItemStackHandler();
             old.deserializeNBT(compound.getCompound("inv"));
@@ -181,7 +181,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag compound) {
+    public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         compound.putInt("next_stop", nextStop);
         compound.putBoolean("engineOn", engineOn);
         compound.put("routeHandler", routeItemHandler.serializeNBT());
@@ -245,7 +245,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             boolean shouldDock = this.getSideDirections()
                     .stream()
                     .map((curr) ->
-                            Optional.ofNullable(level.getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
+                            Optional.ofNullable(level().getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
                                     .filter(entity -> entity instanceof TugDockTileEntity)
                                     .map(entity -> (TugDockTileEntity) entity)
                                     .map(dock -> dock.hold(this, curr))
@@ -274,25 +274,37 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     protected void makeSmoke() {
-        Level world = this.level;
+        Level world = this.level();
         if (world != null) {
             BlockPos blockpos = this.getOnPos().above().above();
             RandomSource random = world.random;
             if (random.nextFloat() < ShippingConfig.Client.TUG_SMOKE_MODIFIER.get()) {
                 for(int i = 0; i < random.nextInt(2) + 2; ++i) {
-                    makeParticles(world, blockpos, true, false);
+                    makeParticles(world, blockpos, this);
                 }
             }
         }
     }
 
-    public static void makeParticles(Level p_220098_0_, BlockPos p_220098_1_, boolean p_220098_2_, boolean p_220098_3_) {
-        RandomSource random = p_220098_0_.getRandom();
+    public static void makeParticles(Level level, BlockPos pos, Entity entity) {
+        RandomSource random = level.getRandom();
         Supplier<Boolean> h = () -> random.nextDouble() < 0.5;
-        SimpleParticleType basicparticletype = p_220098_2_ ? ParticleTypes.CAMPFIRE_SIGNAL_SMOKE : ParticleTypes.CAMPFIRE_COSY_SMOKE;
-        double xdrift = (h.get() ? 1 : -1) * random.nextDouble() * 2;
-        double zdrift = (h.get() ? 1 : -1) * random.nextDouble() * 2;
-        p_220098_0_.addAlwaysVisibleParticle(basicparticletype, true, (double)p_220098_1_.getX() + 0.5D + random.nextDouble() / 3.0D * (double)(random.nextBoolean() ? 1 : -1), (double)p_220098_1_.getY() + random.nextDouble() + random.nextDouble(), (double)p_220098_1_.getZ() + 0.5D + random.nextDouble() / 3.0D * (double)(random.nextBoolean() ? 1 : -1), 0.007D * xdrift, 0.05D, 0.007D * zdrift);
+
+        var dx = (entity.getX() - entity.xOld) / 12.0;
+        var dy = (entity.getY() - entity.yOld) / 12.0;
+        var dz = (entity.getZ() - entity.zOld) / 12.0;
+
+        double xDrift = (h.get() ? 1 : -1) * random.nextDouble() * 2;
+        double zDrift = (h.get() ? 1 : -1) * random.nextDouble() * 2;
+
+        var particleType = random.nextBoolean() ? ParticleTypes.CAMPFIRE_SIGNAL_SMOKE : ParticleTypes.CAMPFIRE_COSY_SMOKE;
+
+        level.addAlwaysVisibleParticle(particleType,
+                true,
+                (double)pos.getX() + 0.5D + random.nextDouble() / 3.0D * (double)(random.nextBoolean() ? 1 : -1),
+                (double)pos.getY() + random.nextDouble() + random.nextDouble(),
+                (double)pos.getZ() + 0.5D + random.nextDouble() / 3.0D * (double)(random.nextBoolean() ? 1 : -1),
+                0.007D * xDrift + dx, 0.05D + dy, 0.007D * zDrift + dz);
     }
 
     @Override
@@ -302,7 +314,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
-        if (!player.level.isClientSide()) {
+        if (!player.level().isClientSide()) {
 
             NetworkHooks.openScreen((ServerPlayer) player, createContainerProvider(), getDataAccessor()::write);
         }
@@ -315,10 +327,10 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+    public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
 
-        if(level.isClientSide) {
+        if(level().isClientSide) {
             if(INDEPENDENT_MOTION.equals(key)) {
                 independentMotion = entityData.get(INDEPENDENT_MOTION);
             }
@@ -337,7 +349,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         }
 
         public void tick() {
-            if(!AbstractTugEntity.this.level.isClientSide) {
+            if(!AbstractTugEntity.this.level().isClientSide) {
                 tickRouteCheck();
                 tickCheckDock();
 
@@ -376,18 +388,17 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     public void tick() {
-        if(this.level.isClientSide
-                && independentMotion){
+        if(this.level().isClientSide && independentMotion){
             makeSmoke();
         }
-        if(!this.level.isClientSide) {
+
+        if(!this.level().isClientSide) {
             enrollmentHandler.tick();
             enrollmentHandler.getPlayerName().ifPresent(name ->
                     entityData.set(OWNER, name));
         }
 
         super.tick();
-
     }
 
     private void followGuideRail(){
@@ -399,9 +410,9 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
                 return;
         }
 
-        List<BlockState> belowList = Arrays.asList(this.level.getBlockState(getOnPos().below()),
-                this.level.getBlockState(getOnPos().below().below()));
-        BlockState water = this.level.getBlockState(getOnPos());
+        List<BlockState> belowList = Arrays.asList(this.level().getBlockState(getOnPos().below()),
+                this.level().getBlockState(getOnPos().below().below()));
+        BlockState water = this.level().getBlockState(getOnPos());
         for (BlockState below : belowList) {
             if (below.is(ModBlocks.GUIDE_RAIL_TUG.get()) && water.is(Blocks.WATER)) {
                 Direction arrows = TugGuideRailBlock.getArrowsDirection(below);
@@ -482,7 +493,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Override
     public void setDominated(VesselEntity entity) {
-        linkingHandler.dominated = (Optional.of(entity));
+        linkingHandler.follower = (Optional.of(entity));
     }
 
     @Override
@@ -492,7 +503,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Override
     public void removeDominated() {
-        linkingHandler.dominated = (Optional.empty());
+        linkingHandler.follower = (Optional.empty());
         linkingHandler.train.setTail(this);
     }
 
@@ -513,19 +524,15 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Override
     public void remove(RemovalReason r) {
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
             this.spawnAtLocation(this.getDropItem());
-            Containers.dropContents(this.level, this, this);
+            Containers.dropContents(this.level(), this, this);
             this.spawnAtLocation(routeItemHandler.getStackInSlot(0));
         }
         super.remove(r);
     }
 
-
     // Have to implement IInventory to work with hoppers
-
-
-
     @Override
     public ItemStack removeItem(int p_70298_1_, int p_70298_2_) {
         return null;
@@ -595,7 +602,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Override
     protected double swimSpeed() {
-        if(this.level.isClientSide){
+        if(this.level().isClientSide){
             return super.swimSpeed();
         }
 
@@ -612,7 +619,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         for (int i = 0; i < 10 && !doBreak; i++) {
             for (Direction direction: List.of(Direction.NORTH, Direction.EAST, Direction.WEST, Direction.SOUTH)) {
                 BlockPos pos = this.getOnPos().relative(direction, i);
-                if(!this.level.getFluidState(pos).isSource()){
+                if(!this.level().getFluidState(pos).isSource()){
                     doBreak = true;
                     break;
                 }

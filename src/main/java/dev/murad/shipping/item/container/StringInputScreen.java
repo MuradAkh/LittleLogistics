@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.util.TugRouteNode;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -13,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -54,27 +56,23 @@ public class StringInputScreen extends Screen {
         this.addRenderableWidget(textFieldWidget);
 
         // add button
-        this.addRenderableWidget(new Button(left + 105, top + 37, 40, 20, Component.translatable("screen.littlelogistics.tug_route.confirm"), (b) -> {
+        this.addRenderableWidget(Button.builder(Component.translatable("screen.littlelogistics.tug_route.confirm"), (b) -> {
             LOGGER.info("Setting to {}", text);
             callback.accept(text.isEmpty() ? null : text);
             this.minecraft.popGuiLayer();
-        }));
+        }).pos(left + 105, top + 37).size(40, 20).build());
     }
 
     @Override
-    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(matrixStack);
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
+    public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        this.renderBackground(graphics);
+        super.render(graphics, mouseX, mouseY, partialTicks);
     }
 
-    public void renderBackground(PoseStack p_230446_1_) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, GUI);
-
+    public void renderBackground(@NotNull GuiGraphics graphics) {
         int w = 156, h = 65;
         int i = (this.width - w) / 2;
         int j = (this.height - h) / 2;
-        this.blit(p_230446_1_, i, j, 0, 0, w, h);
+        graphics.blit(GUI, i, j, 0, 0, w, h);
     }
 }

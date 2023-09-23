@@ -1,7 +1,6 @@
 package dev.murad.shipping.block.vesseldetector;
 
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Vector3f;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.MathUtil;
 import dev.murad.shipping.util.TickerUtil;
@@ -26,6 +25,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -108,7 +108,7 @@ public class VesselDetectorBlock extends Block implements EntityBlock {
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player entity, InteractionHand hand, BlockHitResult hit) {
         if (level.isClientSide()) {
-            showParticles(pos, state, entity.level);
+            showParticles(pos, state, entity.level());
         }
 
         return InteractionResult.SUCCESS;

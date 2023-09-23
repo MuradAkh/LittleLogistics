@@ -7,13 +7,12 @@ import lombok.RequiredArgsConstructor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 
 import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class EnrollmentHandler {
+public class ChunkManagerEnrollmentHandler {
     private static final String UUID_TAG = "EnrollmentHandlerOwner";
     private UUID uuid = null;
     private int enrollMe = -1;
@@ -39,7 +38,7 @@ public class EnrollmentHandler {
         } else if (ShippingConfig.Server.OFFLINE_LOADING.get()){
             return true;
         } else {
-            return PlayerTrainChunkManager.get((ServerLevel) entity.level, uuid).isActive() && enrollMe < 0;
+            return PlayerTrainChunkManager.get((ServerLevel) entity.level(), uuid).isActive() && enrollMe < 0;
         }
     }
 
@@ -65,6 +64,6 @@ public class EnrollmentHandler {
     public Optional<String> getPlayerName(){
         if(uuid == null)
             return Optional.empty();
-        else return ((ServerLevel) entity.level).getServer().getProfileCache().get(uuid).map(GameProfile::getName);
+        else return ((ServerLevel) entity.level()).getServer().getProfileCache().get(uuid).map(GameProfile::getName);
     }
 }

@@ -5,8 +5,9 @@ import dev.murad.shipping.setup.ModMenuTypes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.SlotItemHandler;
+import org.jetbrains.annotations.NotNull;
 
 public class FishingBargeContainer extends AbstractItemHandlerContainer {
     private final FishingBargeEntity fishingBargeEntity;
@@ -18,7 +19,7 @@ public class FishingBargeContainer extends AbstractItemHandlerContainer {
         layoutPlayerInventorySlots(8, 49 + 18 * 2);
 
         if(fishingBargeEntity != null) {
-            fishingBargeEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
+            fishingBargeEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(h -> {
                 for(int l = 0; l < 3; ++l) {
                     for (int k = 0; k < 9; ++k) {
                         this.addSlot(new SlotItemHandler(h, l * 9 + k, 8 + k * 18, 18 * (l + 1) ));
@@ -34,7 +35,7 @@ public class FishingBargeContainer extends AbstractItemHandlerContainer {
     }
 
     @Override
-    public boolean stillValid(Player p_75145_1_) {
-        return fishingBargeEntity.stillValid(p_75145_1_);
+    public boolean stillValid(@NotNull Player player) {
+        return fishingBargeEntity.stillValid(player);
     }
 }

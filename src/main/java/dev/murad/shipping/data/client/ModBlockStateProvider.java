@@ -11,6 +11,7 @@ import dev.murad.shipping.block.vesseldetector.VesselDetectorBlock;
 import dev.murad.shipping.setup.ModBlocks;
 import net.minecraft.core.Direction;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.HopperBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,8 +24,8 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 
 public class ModBlockStateProvider extends BlockStateProvider {
 
-    public ModBlockStateProvider(DataGenerator gen, ExistingFileHelper exFileHelper) {
-        super(gen, ShippingMod.MOD_ID, exFileHelper);
+    public ModBlockStateProvider(PackOutput output, ExistingFileHelper exFileHelper) {
+        super(output, ShippingMod.MOD_ID, exFileHelper);
     }
 
     public static ResourceLocation getBlTx(String name){

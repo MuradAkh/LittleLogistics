@@ -7,10 +7,8 @@ import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
-import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.VehicleFrontPart;
 import dev.murad.shipping.entity.navigation.LocomotiveNavigator;
-import dev.murad.shipping.global.PlayerTrainChunkManager;
 import dev.murad.shipping.item.LocoRouteItem;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
@@ -46,6 +44,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -58,7 +57,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     @Setter
     protected boolean engineOn = false;
 
-    protected final EnrollmentHandler enrollmentHandler;
+    protected final ChunkManagerEnrollmentHandler enrollmentHandler;
     @Setter
     private boolean doflip = false;
     private boolean independentMotion = false;
@@ -93,13 +92,13 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     public AbstractLocomotiveEntity(EntityType<?> type, Level world) {
         super(type, world);
         frontHitbox = new VehicleFrontPart(this);
-        enrollmentHandler = new EnrollmentHandler(this);
+        enrollmentHandler = new ChunkManagerEnrollmentHandler(this);
     }
 
     public AbstractLocomotiveEntity(EntityType<?> type, Level level, Double x, Double y, Double z) {
         super(type, level, x, y, z);
         frontHitbox = new VehicleFrontPart(this);
-        enrollmentHandler = new EnrollmentHandler(this);
+        enrollmentHandler = new ChunkManagerEnrollmentHandler(this);
     }
 
     @Override
@@ -119,7 +118,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     @Override
     public void remove(RemovalReason r) {
-        if(!this.level.isClientSide){
+        if(!this.level().isClientSide){
             this.spawnAtLocation(routeItemHandler.getStackInSlot(0));
         }
         super.remove(r);
@@ -130,7 +129,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         if(!pHand.equals(InteractionHand.MAIN_HAND)){
             return InteractionResult.PASS;
         }
-        if(!this.level.isClientSide){
+        if(!this.level().isClientSide){
             NetworkHooks.openScreen((ServerPlayer) pPlayer, createContainerProvider(), getDataAccessor()::write);
 
         }
@@ -174,10 +173,10 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     protected abstract boolean tickFuel();
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+    public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
 
-        if(level.isClientSide) {
+        if(level().isClientSide) {
             if(INDEPENDENT_MOTION.equals(key)) {
                 independentMotion = entityData.get(INDEPENDENT_MOTION);
             }
@@ -199,7 +198,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     public void tick(){
         linkingHandler.tickLoad();
 
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
             tickOldBlockPos();
             if(remainingStallTime <= 0){
                 navigator.serverTick();
@@ -214,15 +213,15 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         var yrot = this.getYRot();
         tickVanilla();
         this.setYRot(yrot);
-        if(linkingHandler.dominated.isEmpty() && this.getDeltaMovement().length() > 0.05){
+        if(linkingHandler.follower.isEmpty() && this.getDeltaMovement().length() > 0.05){
             this.setYRot(RailHelper.directionFromVelocity(getDeltaMovement()).toYRot());
         }
-        if(!this.level.isClientSide){
+        if(!this.level().isClientSide){
             tickDockCheck();
             tickMovement();
         }
 
-        if(this.level.isClientSide
+        if(this.level().isClientSide
                 && independentMotion){
             doMovementEffect();
         }
@@ -271,7 +270,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                 forceStallCheck = true;
         } else{
             if (collisionCheckCooldown <= 0 || forceStallCheck){
-               var result = railHelper.traverse(getOnPos().above(), this.level, this.getDirection(), (dir, pos)
+               var result = railHelper.traverse(getOnPos().above(), this.level(), this.getDirection(), (dir, pos)
                        -> checkCollision(pos) || checkStopSign(pos, dir),
                        4);
                if(result.isPresent()){
@@ -288,7 +287,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             entityData.set(INDEPENDENT_MOTION, true);
             accelerate();
         }else{
-            if(RailHelper.getRail(this.getOnPos().above(), this.level)
+            if(RailHelper.getRail(this.getOnPos().above(), this.level())
                     .map(railHelper::getShape)
                     .map(Enum::name)
                     .map(s -> s.contains("ASCENDING"))
@@ -308,13 +307,13 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     private boolean checkStopSign(BlockPos pos, Direction prevExitTaken){
 
-        return RailHelper.getRail(pos, this.level).flatMap(block -> {
-            if(level.getBlockState(block).getBlock() instanceof MultiShapeRail r){
-                if(!this.level.getEntitiesOfClass(Entity.class, new AABB(pos), e -> e.equals(this) || e.equals(frontHitbox)).isEmpty())
+        return RailHelper.getRail(pos, this.level()).flatMap(block -> {
+            if(level().getBlockState(block).getBlock() instanceof MultiShapeRail r){
+                if(!this.level().getEntitiesOfClass(Entity.class, new AABB(pos), e -> e.equals(this) || e.equals(frontHitbox)).isEmpty())
                     return Optional.empty();
-                return r.getPriorityDirectionsToCheck(level.getBlockState(block), prevExitTaken.getOpposite())
+                return r.getPriorityDirectionsToCheck(level().getBlockState(block), prevExitTaken.getOpposite())
                         .stream()
-                        .map(p -> railHelper.traverse(pos.relative(p), this.level, p, (dir, f) -> checkLocoCollision(f), 2))
+                        .map(p -> railHelper.traverse(pos.relative(p), this.level(), p, (dir, f) -> checkLocoCollision(f), 2))
                         .map(Optional::isPresent)
                         .reduce(Boolean::logicalOr);
             } else return Optional.of(false);
@@ -324,7 +323,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     private boolean checkCollision(BlockPos pos) {
         AABB aabb = new AABB(pos);
-        return !this.level.getEntitiesOfClass(Entity.class, aabb, e -> {
+        return !this.level().getEntitiesOfClass(Entity.class, aabb, e -> {
             if(e instanceof AbstractTrainCarEntity t) {
                 return t.getTrain().getTug().map(f -> !f.getUUID().equals(this.getUUID())).orElse(true);
             } else if (e instanceof AbstractMinecart ) return true;
@@ -337,7 +336,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     // to avoid deadlock for stopsign, you only care about incoming "heads"
     private boolean checkLocoCollision(BlockPos pos) {
         AABB aabb = new AABB(pos);
-        return !this.level.getEntitiesOfClass(Entity.class, aabb, e -> {
+        return !this.level().getEntitiesOfClass(Entity.class, aabb, e -> {
             if(e instanceof AbstractLocomotiveEntity t) {
                 return t.getTrain().getTug().map(f -> !f.getUUID().equals(this.getUUID())).orElse(true);
             } else if(e instanceof VehicleFrontPart p) {
@@ -404,7 +403,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
 
             // Check docks
-            boolean shouldDock = Optional.ofNullable(level.getBlockEntity(getOnPos().above()))
+            boolean shouldDock = Optional.ofNullable(level().getBlockEntity(getOnPos().above()))
                                     .filter(entity -> entity instanceof LocomotiveDockTileEntity)
                                     .map(entity -> (LocomotiveDockTileEntity) entity)
                                     .map(dock -> dock.hold(this, getDirection()))
@@ -429,7 +428,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     private double getSpeedModifier(){
         // adjust speed based on slope etc.
-        var state = this.level.getBlockState(this.getOnPos().above());
+        var state = this.level().getBlockState(this.getOnPos().above());
         if (state.is(Blocks.POWERED_RAIL)){
             if(!state.getValue(PoweredRailBlock.POWERED)){
                 return 0;
@@ -446,17 +445,17 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     private void tickSpeedLimit(){
         if(speedRecomputeCooldown < 0 || speedLimit < 0 ) {
-            var dist = RailHelper.getRail(getOnPos().above(), this.level).flatMap(pos ->
+            var dist = RailHelper.getRail(getOnPos().above(), this.level()).flatMap(pos ->
                             railHelper.traverse(pos,
-                                    this.level,
+                                    this.level(),
                                     this.getDirection(),
                                     (direction, p) -> {
-                                        var railoc = RailHelper.getRail(p, this.level);
+                                        var railoc = RailHelper.getRail(p, this.level());
                                         if (railoc.isEmpty()) {
                                             return true;
                                         }
                                         var shape = railHelper.getShape(railoc.get());
-                                        var block = this.level.getBlockState(railoc.get());
+                                        var block = this.level().getBlockState(railoc.get());
                                         return !(shape.equals(RailShape.EAST_WEST) || shape.equals(RailShape.NORTH_SOUTH))
                                                 || block.is(ModBlocks.LOCOMOTIVE_DOCK_RAIL.get())
                                                 || block.getBlock() instanceof MultiShapeRail;
@@ -486,7 +485,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     @Override
     public void setDominated(AbstractTrainCarEntity entity) {
-        linkingHandler.dominated = Optional.of(entity);
+        linkingHandler.follower = Optional.of(entity);
     }
 
     @Override
@@ -497,7 +496,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     @Override
     public void removeDominated() {
-        linkingHandler.dominated = Optional.empty();
+        linkingHandler.follower = Optional.empty();
         linkingHandler.train.setTail(this);
     }
 
@@ -582,7 +581,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag compound) {
+    protected void readAdditionalSaveData(@NotNull CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         if(compound.contains("eo")) {
             engineOn = compound.getBoolean("eo");
@@ -594,7 +593,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag compound) {
+    protected void addAdditionalSaveData(@NotNull CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.putBoolean("eo", engineOn);
         compound.put(LOCO_ROUTE_INV_TAG, routeItemHandler.serializeNBT());

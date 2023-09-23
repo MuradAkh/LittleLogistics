@@ -19,14 +19,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -68,7 +69,7 @@ public class FluidTankCarEntity extends AbstractWagonEntity {
 
     @Override
     public InteractionResult interact(Player player, InteractionHand hand){
-        if(!this.level.isClientSide){
+        if(!this.level().isClientSide){
             FluidUtil.interactWithFluidHandler(player, InteractionHand.MAIN_HAND, tank);
             player.displayClientMessage(FluidDisplayUtil.getFluidDisplay(tank), false);
         }
@@ -80,7 +81,7 @@ public class FluidTankCarEntity extends AbstractWagonEntity {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag)
+    public void readAdditionalSaveData(@NotNull CompoundTag tag)
     {
         super.readAdditionalSaveData(tag);
         tank.readFromNBT(tag);
@@ -88,7 +89,7 @@ public class FluidTankCarEntity extends AbstractWagonEntity {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag)
+    public void addAdditionalSaveData(@NotNull CompoundTag tag)
     {
         super.addAdditionalSaveData(tag);
         tank.writeToNBT(tag);
@@ -100,10 +101,10 @@ public class FluidTankCarEntity extends AbstractWagonEntity {
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+    public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
 
-        if(level.isClientSide) {
+        if(level().isClientSide) {
             if(VOLUME.equals(key)) {
                 clientCurrAmount =  entityData.get(VOLUME);
                 tank.setFluid(new FluidStack(clientCurrFluid, clientCurrAmount));
@@ -119,7 +120,7 @@ public class FluidTankCarEntity extends AbstractWagonEntity {
     @Nonnull
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing)
     {
-        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
+        if (capability == ForgeCapabilities.FLUID_HANDLER)
             return holder.cast();
         return super.getCapability(capability, facing);
     }

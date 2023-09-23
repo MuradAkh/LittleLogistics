@@ -1,6 +1,7 @@
 package dev.murad.shipping.setup;
 
 
+import com.google.common.collect.ImmutableList;
 import dev.murad.shipping.block.dock.BargeDockBlock;
 import dev.murad.shipping.block.dock.TugDockBlock;
 import dev.murad.shipping.block.energy.VesselChargerBlock;
@@ -10,116 +11,160 @@ import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.block.rail.*;
 import dev.murad.shipping.block.rapidhopper.RapidHopperBlock;
 import dev.murad.shipping.block.vesseldetector.VesselDetectorBlock;
+import dev.murad.shipping.util.MultiMap;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.*;
 import java.util.function.Supplier;
 
 public class ModBlocks {
+
+    private static final MultiMap<ResourceKey<CreativeModeTab>, RegistryObject<? extends ItemLike>> PRIVATE_TAB_REGISTRY = new MultiMap<>();
+
+    // Taken from IRON_BLOCK
+    private static BlockBehaviour.Properties METAL_BLOCK_BEHAVIOUR =
+            BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(0.5F, 6.0F)
+                    .sound(SoundType.METAL);
+    private static BlockBehaviour.Properties RAIL_BLOCK_BEHAVIOUR = BlockBehaviour.Properties.copy(Blocks.RAIL);
+
     public static final RegistryObject<Block> TUG_DOCK = register(
             "tug_dock",
-            () -> new TugDockBlock(Block.Properties.of(Material.METAL)
-                    .destroyTime(0.5f)
-            ),
-            CreativeModeTab.TAB_TRANSPORTATION);
+            () -> new TugDockBlock(METAL_BLOCK_BEHAVIOUR),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
 
     public static final RegistryObject<Block> BARGE_DOCK = register(
             "barge_dock",
-            () -> new BargeDockBlock(Block.Properties.of(Material.METAL)
-                    .destroyTime(0.5f)
-            ),
-            CreativeModeTab.TAB_TRANSPORTATION);
+            () -> new BargeDockBlock(METAL_BLOCK_BEHAVIOUR),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
 
     public static final RegistryObject<Block> GUIDE_RAIL_CORNER = register(
             "guide_rail_corner",
-            () -> new CornerGuideRailBlock(Block.Properties.of(Material.METAL)
-                    .destroyTime(0.5f)
-            ),
-            CreativeModeTab.TAB_TRANSPORTATION);
+            () -> new CornerGuideRailBlock(METAL_BLOCK_BEHAVIOUR),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
 
     public static final RegistryObject<Block> VESSEL_DETECTOR = register(
             "vessel_detector",
-            () -> new VesselDetectorBlock(Block.Properties.of(Material.METAL)
-                    .destroyTime(0.5f)
-            ),
-            CreativeModeTab.TAB_TRANSPORTATION);
+            () -> new VesselDetectorBlock(METAL_BLOCK_BEHAVIOUR),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
 
     public static final RegistryObject<Block> GUIDE_RAIL_TUG = register(
             "guide_rail_tug",
-            () -> new TugGuideRailBlock(Block.Properties.of(Material.METAL)
-                    .destroyTime(0.5f)
-            ),
-            CreativeModeTab.TAB_TRANSPORTATION);
+            () -> new TugGuideRailBlock(METAL_BLOCK_BEHAVIOUR),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
 
     public static final RegistryObject<Block> FLUID_HOPPER = register(
             "fluid_hopper",
-            () -> new FluidHopperBlock(Block.Properties.of(Material.METAL)
-                    .destroyTime(0.5f)
-            ),
-            CreativeModeTab.TAB_TRANSPORTATION);
+            () -> new FluidHopperBlock(METAL_BLOCK_BEHAVIOUR),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
 
     public static final RegistryObject<Block> VESSEL_CHARGER = register(
             "vessel_charger",
-            () -> new VesselChargerBlock(Block.Properties.of(Material.METAL)
-                    .destroyTime(0.5f)
-            ),
-            CreativeModeTab.TAB_TRANSPORTATION);
+            () -> new VesselChargerBlock(METAL_BLOCK_BEHAVIOUR),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
 
     public static final RegistryObject<Block> RAPID_HOPPER = register(
             "rapid_hopper",
-            () -> new RapidHopperBlock(Block.Properties.of(Material.METAL)
-                    .destroyTime(0.5f)
-            ),
-            CreativeModeTab.TAB_REDSTONE);
+            () -> new RapidHopperBlock(METAL_BLOCK_BEHAVIOUR),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
 
     public static final RegistryObject<Block> SWITCH_RAIL = register(
             "switch_rail",
-            () -> new SwitchRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL), false),
-            CreativeModeTab.TAB_TRANSPORTATION);
+            () -> new SwitchRail(RAIL_BLOCK_BEHAVIOUR, false),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
 
     public static final RegistryObject<Block> AUTOMATIC_SWITCH_RAIL = register(
             "automatic_switch_rail",
-            () -> new SwitchRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL), true),
-            CreativeModeTab.TAB_TRANSPORTATION);
+            () -> new SwitchRail(RAIL_BLOCK_BEHAVIOUR, true),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
 
     public static final RegistryObject<Block> TEE_JUNCTION_RAIL = register(
             "tee_junction_rail",
-            () -> new TeeJunctionRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL), false),
-            CreativeModeTab.TAB_TRANSPORTATION);
+            () -> new TeeJunctionRail(RAIL_BLOCK_BEHAVIOUR, false),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
 
     public static final RegistryObject<Block> AUTOMATIC_TEE_JUNCTION_RAIL = register(
             "automatic_tee_junction_rail",
-            () -> new TeeJunctionRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL), true),
-            CreativeModeTab.TAB_TRANSPORTATION);
+            () -> new TeeJunctionRail(RAIL_BLOCK_BEHAVIOUR, true),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
 
     public static final RegistryObject<Block> JUNCTION_RAIL = register(
             "junction_rail",
-            () -> new JunctionRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL)),
-            CreativeModeTab.TAB_TRANSPORTATION);
+            () -> new JunctionRail(RAIL_BLOCK_BEHAVIOUR),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
 
     public static final RegistryObject<Block> CAR_DOCK_RAIL = register(
             "car_dock_rail",
-            () -> new TrainCarDockingRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL)),
-            CreativeModeTab.TAB_TRANSPORTATION);
+            () -> new TrainCarDockingRail(RAIL_BLOCK_BEHAVIOUR),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
 
     public static final RegistryObject<Block> LOCOMOTIVE_DOCK_RAIL = register(
             "locomotive_dock_rail",
-            () -> new LocomotiveDockingRail(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL)),
-            CreativeModeTab.TAB_TRANSPORTATION);
+            () -> new LocomotiveDockingRail(RAIL_BLOCK_BEHAVIOUR),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
 
-    public static <T extends Block> RegistryObject<T> registerNoItem(String name, Supplier<T> block){
+    public static void buildCreativeTab(BuildCreativeModeTabContentsEvent event) {
+        PRIVATE_TAB_REGISTRY.getOrDefault(event.getTabKey(), new ArrayList<>())
+                .forEach(event::accept);
+    }
+
+    private static <T extends Block> RegistryObject<T> registerNoItem(String name, Supplier<T> block){
         return Registration.BLOCKS.register(name, block);
     }
 
-    public static <T extends Block> RegistryObject<T> register(String name, Supplier<T> block, CreativeModeTab group){
+    private static <T extends Block> RegistryObject<T> register(String name, Supplier<T> block, List<ResourceKey<CreativeModeTab>> tabs){
         RegistryObject<T> ret = registerNoItem(name, block);
-        Registration.ITEMS.register(name, () -> new BlockItem(ret.get(), new Item.Properties().tab(group)));
+        RegistryObject<BlockItem> item = Registration.ITEMS.register(name, () -> new BlockItem(ret.get(), new Item.Properties()));
+
+        for (var tab : tabs) {
+            PRIVATE_TAB_REGISTRY.putInsert(tab, item);
+        }
+
         return ret;
     }
 

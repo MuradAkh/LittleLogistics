@@ -1,11 +1,8 @@
 package dev.murad.shipping.entity.accessor;
 
-import dev.murad.shipping.util.EnrollmentHandler;
 import net.minecraft.world.inventory.ContainerData;
 
-import java.util.function.BooleanSupplier;
 import java.util.function.IntSupplier;
-import java.util.function.Supplier;
 
 public class EnergyHeadVehicleDataAccessor extends HeadVehicleDataAccessor {
     private static final int SHORT_MASK = 0xFFFF;

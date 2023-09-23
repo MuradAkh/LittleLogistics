@@ -10,12 +10,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 public class TugRouteContainer extends AbstractContainerMenu {
     private static final Logger LOGGER = LogManager.getLogger(TugRouteContainer.class);
 
-    private boolean isOffHand;
-    private ItemStack itemStack;
+    private final boolean isOffHand;
+    private final ItemStack itemStack;
 
     public TugRouteContainer(int windowId, Level level, TugRouteScreenDataAccessor data, Inventory playerInventory, Player player) {
         super(ModMenuTypes.TUG_ROUTE_CONTAINER.get(), windowId);
@@ -33,13 +34,18 @@ public class TugRouteContainer extends AbstractContainerMenu {
         return itemStack;
     }
 
+    /**
+     * Tug route container has no inventory so this will never actually be called.
+     */
     @Override
-    public ItemStack quickMoveStack(Player p_38941_, int p_38942_) {
+    @NotNull
+    public ItemStack quickMoveStack(@NotNull Player player, int p_38942_) {
+        //noinspection DataFlowIssue
         return null;
     }
 
     @Override
-    public boolean stillValid(Player player) {
+    public boolean stillValid(@NotNull Player player) {
         return true;
     }
 }

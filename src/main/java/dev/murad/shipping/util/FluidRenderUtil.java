@@ -26,9 +26,6 @@ package dev.murad.shipping.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -37,14 +34,15 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
+import org.joml.*;
+
+import java.lang.Math;
 
 public class FluidRenderUtil {
 
-    private static void addQuadVertex(Matrix4f matrixPos, Matrix3f matrixNormal, VertexConsumer renderBuffer, Vector3f pos, Vec2 texUV, Vector3f normalVector, int color, int lightmapValue) {
+    private static void addQuadVertex(Matrix4f matrixPos, Matrix3f matrixNormal, VertexConsumer renderBuffer, Vector3f pos, Vector2f texUV, Vector3f normalVector, int color, int lightmapValue) {
         float a = 1.0F;
         float r = (color >> 16 & 0xFF) / 255.0F;
         float g = (color >> 8 & 0xFF) / 255.0F;
@@ -58,14 +56,14 @@ public class FluidRenderUtil {
                 .endVertex();
     }
 
-    private static void addQuad(Matrix4f matrixPos, Matrix3f matrixNormal, VertexConsumer renderBuffer, Vector3f blpos, Vector3f brpos, Vector3f trpos, Vector3f tlpos, Vec2 blUVpos, Vec2 brUVpos, Vec2 trUVpos, Vec2 tlUVpos, Vector3f normalVector, int color, int lightmapValue) {
+    private static void addQuad(Matrix4f matrixPos, Matrix3f matrixNormal, VertexConsumer renderBuffer, Vector3f blpos, Vector3f brpos, Vector3f trpos, Vector3f tlpos, Vector2f blUVpos, Vector2f brUVpos, Vector2f trUVpos, Vector2f tlUVpos, Vector3f normalVector, int color, int lightmapValue) {
         addQuadVertex(matrixPos, matrixNormal, renderBuffer, blpos, blUVpos, normalVector, color, lightmapValue);
         addQuadVertex(matrixPos, matrixNormal, renderBuffer, brpos, brUVpos, normalVector, color, lightmapValue);
         addQuadVertex(matrixPos, matrixNormal, renderBuffer, trpos, trUVpos, normalVector, color, lightmapValue);
         addQuadVertex(matrixPos, matrixNormal, renderBuffer, tlpos, tlUVpos, normalVector, color, lightmapValue);
     }
 
-    private static void addFace(Direction whichFace, Matrix4f matrixPos, Matrix3f matrixNormal, VertexConsumer renderBuffer, int color, Vec3 centrePos, float width, float height, Vec2 bottomLeftUV, float texUwidth, float texVheight, int lightmapValue) {
+    private static void addFace(Direction whichFace, Matrix4f matrixPos, Matrix3f matrixNormal, VertexConsumer renderBuffer, int color, Vector3f centrePos, float width, float height, Vector2f bottomLeftUV, float texUwidth, float texVheight, int lightmapValue) {
         // the Direction class has a bunch of methods which can help you rotate quads
         //  I've written the calculations out long hand, and based them on a centre position, to make it clearer what
         //   is going on.
@@ -140,10 +138,10 @@ public class FluidRenderUtil {
 
         // texture coordinates are "upside down" relative to the face
         // eg bottom left = [U min, V max]
-        Vec2 bottomLeftUVpos = new Vec2(bottomLeftUV.x, bottomLeftUV.y);
-        Vec2 bottomRightUVpos = new Vec2(bottomLeftUV.x + texUwidth, bottomLeftUV.y);
-        Vec2 topLeftUVpos = new Vec2(bottomLeftUV.x + texUwidth, bottomLeftUV.y + texVheight);
-        Vec2 topRightUVpos = new Vec2(bottomLeftUV.x, bottomLeftUV.y + texVheight);
+        Vector2f bottomLeftUVpos = new Vector2f(bottomLeftUV.x, bottomLeftUV.y);
+        Vector2f bottomRightUVpos = new Vector2f(bottomLeftUV.x + texUwidth, bottomLeftUV.y);
+        Vector2f topLeftUVpos = new Vector2f(bottomLeftUV.x + texUwidth, bottomLeftUV.y + texVheight);
+        Vector2f topRightUVpos = new Vector2f(bottomLeftUV.x, bottomLeftUV.y + texVheight);
 
         Vector3f normalVector = whichFace.step();  // gives us the normal to the face
 
@@ -191,7 +189,7 @@ public class FluidRenderUtil {
         TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(fluidStill);
 
         // we use the whole texture
-        Vec2 bottomLeftUV = new Vec2(sprite.getU0(), sprite.getV0());
+        Vector2f bottomLeftUV = new Vector2f(sprite.getU0(), sprite.getV0());
         float UVwidth = sprite.getU1() - sprite.getU0();
         float UVheight = sprite.getV1() - sprite.getV0();
 
@@ -203,12 +201,12 @@ public class FluidRenderUtil {
 
         if(scale <= 0) { PoseStack.scale(.5f, Math.abs(scale) + .21f, .5f); }
 
-        final Vec3 EAST_FACE_MIDPOINT = new Vec3(1.0, 0.5, 0.5);
-        final Vec3 WEST_FACE_MIDPOINT = new Vec3(0.0, 0.5, 0.5);
-        final Vec3 NORTH_FACE_MIDPOINT = new Vec3(0.5, 0.5, 0.0);
-        final Vec3 SOUTH_FACE_MIDPOINT = new Vec3(0.5, 0.5, 1.0);
-        final Vec3 UP_FACE_MIDPOINT = new Vec3(0.5, 1.0, 0.5);
-        final Vec3 DOWN_FACE_MIDPOINT = new Vec3(0.5, 0.0, 0.5);
+        final Vector3f EAST_FACE_MIDPOINT = new Vector3f(1.0f, 0.5f, 0.5f);
+        final Vector3f WEST_FACE_MIDPOINT = new Vector3f(0.0f, 0.5f, 0.5f);
+        final Vector3f NORTH_FACE_MIDPOINT = new Vector3f(0.5f, 0.5f, 0.0f);
+        final Vector3f SOUTH_FACE_MIDPOINT = new Vector3f(0.5f, 0.5f, 1.0f);
+        final Vector3f UP_FACE_MIDPOINT = new Vector3f(0.5f, 1.0f, 0.5f);
+        final Vector3f DOWN_FACE_MIDPOINT = new Vector3f(0.5f, 0.0f, 0.5f);
 
         addFace(Direction.EAST, matrixPos, matrixNormal, vertexBuilderBlockQuads,
                 color, EAST_FACE_MIDPOINT, WIDTH, HEIGHT, bottomLeftUV, UVwidth, UVheight, combinedLight);

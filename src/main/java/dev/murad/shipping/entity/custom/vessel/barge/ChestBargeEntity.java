@@ -14,6 +14,7 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.stream.IntStream;
@@ -35,8 +36,8 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
 
     @Override
     public void remove(RemovalReason r) {
-        if (!this.level.isClientSide) {
-            Containers.dropContents(this.level, this, this);
+        if (!this.level().isClientSide) {
+            Containers.dropContents(this.level(), this, this);
         }
         super.remove(r);
     }
@@ -126,13 +127,13 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
+    public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         ContainerHelper.saveAllItems(tag, this.itemStacks);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
+    public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         ContainerHelper.loadAllItems(tag, this.itemStacks);
     }

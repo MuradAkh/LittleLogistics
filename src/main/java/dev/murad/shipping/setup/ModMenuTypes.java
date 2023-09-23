@@ -28,37 +28,37 @@ public class ModMenuTypes {
             Registration.CONTAINERS.register("tug_container",
                     () -> IForgeMenuType.create(
                             (windowId, inv, data) ->
-                                    new SteamHeadVehicleContainer<>(windowId, inv.player.level, new SteamHeadVehicleDataAccessor(makeIntArray(data)), inv, inv.player)));
+                                    new SteamHeadVehicleContainer<>(windowId, inv.player.level(), new SteamHeadVehicleDataAccessor(makeIntArray(data)), inv, inv.player)));
 
     public static final RegistryObject<MenuType<EnergyHeadVehicleContainer<EnergyTugEntity>>> ENERGY_TUG_CONTAINER =
             Registration.CONTAINERS.register("energy_tug_container",
                     () -> IForgeMenuType.create(
                             (windowId, inv, data) ->
-                                    new EnergyHeadVehicleContainer<>(windowId, inv.player.level, new EnergyHeadVehicleDataAccessor(makeIntArray(data)), inv, inv.player)));
+                                    new EnergyHeadVehicleContainer<>(windowId, inv.player.level(), new EnergyHeadVehicleDataAccessor(makeIntArray(data)), inv, inv.player)));
 
     public static final RegistryObject<MenuType<SteamHeadVehicleContainer<SteamLocomotiveEntity>>> STEAM_LOCOMOTIVE_CONTAINER =
             Registration.CONTAINERS.register("steam_locomotive_container",
                     () -> IForgeMenuType.create(
                             (windowId, inv, data) ->
-                                    new SteamHeadVehicleContainer<>(windowId, inv.player.level, new SteamHeadVehicleDataAccessor(makeIntArray(data)), inv, inv.player)));
+                                    new SteamHeadVehicleContainer<>(windowId, inv.player.level(), new SteamHeadVehicleDataAccessor(makeIntArray(data)), inv, inv.player)));
 
     public static final RegistryObject<MenuType<EnergyHeadVehicleContainer<EnergyLocomotiveEntity>>> ENERGY_LOCOMOTIVE_CONTAINER =
             Registration.CONTAINERS.register("energy_locomotive_container",
                     () -> IForgeMenuType.create(
                             (windowId, inv, data) ->
-                                    new EnergyHeadVehicleContainer<>(windowId, inv.player.level, new EnergyHeadVehicleDataAccessor(makeIntArray(data)), inv, inv.player)));
+                                    new EnergyHeadVehicleContainer<>(windowId, inv.player.level(), new EnergyHeadVehicleDataAccessor(makeIntArray(data)), inv, inv.player)));
 
     public static final RegistryObject<MenuType<FishingBargeContainer>> FISHING_BARGE_CONTAINER =
             Registration.CONTAINERS.register("fishing_barge_container",
                     () -> IForgeMenuType.create(
                             (windowId, inv, data) ->
-                                    new FishingBargeContainer(windowId, inv.player.level, data.readInt(), inv, inv.player)));
+                                    new FishingBargeContainer(windowId, inv.player.level(), data.readInt(), inv, inv.player)));
 
     public static final RegistryObject<MenuType<TugRouteContainer>> TUG_ROUTE_CONTAINER =
             Registration.CONTAINERS.register("tug_route_container",
                     () -> IForgeMenuType.create(
                             (windowId, inv, data) ->
-                                    new TugRouteContainer(windowId, inv.player.level, new TugRouteScreenDataAccessor(makeIntArray(data)), inv, inv.player)));
+                                    new TugRouteContainer(windowId, inv.player.level(), new TugRouteScreenDataAccessor(makeIntArray(data)), inv, inv.player)));
 
 
 

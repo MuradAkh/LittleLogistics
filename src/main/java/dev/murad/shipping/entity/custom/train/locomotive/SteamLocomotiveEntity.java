@@ -25,10 +25,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import org.jetbrains.annotations.NotNull;
 
 
 import javax.annotation.Nonnull;
@@ -119,22 +120,21 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
     protected MenuProvider createContainerProvider() {
         return new MenuProvider() {
             @Override
-            public Component getDisplayName() {
+            public @NotNull Component getDisplayName() {
                 return Component.translatable("entity.littlelogistics.steam_locomotive");
             }
 
-            @Nullable
             @Override
-            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player player) {
-                return new SteamHeadVehicleContainer(i, level, getDataAccessor(), playerInventory, player);
+            public AbstractContainerMenu createMenu(int i, @NotNull Inventory playerInventory, @NotNull Player player) {
+                return new SteamHeadVehicleContainer<>(i, level(), getDataAccessor(), playerInventory, player);
             }
         };
     }
 
     @Override
     public void remove(RemovalReason r) {
-        if(!this.level.isClientSide){
-            Containers.dropContents(this.level, this, this);
+        if(!this.level().isClientSide){
+            Containers.dropContents(this.level(), this, this);
         }
         super.remove(r);
     }
@@ -142,7 +142,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+        if (cap == ForgeCapabilities.ITEM_HANDLER) {
             return handler.cast();
         }
 
@@ -165,30 +165,28 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
 
 
     protected void doMovementEffect() {
-        Level world = this.level;
-        if (world != null) {
-            BlockPos blockpos = this.getOnPos().above().above();
-            RandomSource random = world.random;
-            if (random.nextFloat() < ShippingConfig.Client.LOCO_SMOKE_MODIFIER.get()) {
-                for(int i = 0; i < random.nextInt(2) + 2; ++i) {
-                    AbstractTugEntity.makeParticles(world, blockpos, true, false);
-                }
+        Level level = this.level();
+        BlockPos blockpos = this.getOnPos().above().above();
+        RandomSource random = level.random;
+        if (random.nextFloat() < ShippingConfig.Client.LOCO_SMOKE_MODIFIER.get()) {
+            for(int i = 0; i < random.nextInt(2) + 2; ++i) {
+                AbstractTugEntity.makeParticles(level, blockpos, this);
             }
         }
     }
 
     @Override
-    public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack p_180461_2_, Direction p_180461_3_) {
+    public boolean canTakeItemThroughFace(int index, @NotNull ItemStack itemStack, @NotNull Direction dir) {
         return false;
     }
 
     @Override
-    public int[] getSlotsForFace(Direction p_180463_1_) {
+    public int @NotNull [] getSlotsForFace(@NotNull Direction dir) {
         return new int[]{0};
     }
 
     @Override
-    public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
+    public boolean canPlaceItemThroughFace(int index, @NotNull ItemStack itemStack, @Nullable Direction dir) {
         return stalling.isDocked();
     }
 
@@ -198,7 +196,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag compound) {
+    public void readAdditionalSaveData(@NotNull CompoundTag compound) {
         itemHandler.deserializeNBT(compound.getCompound("inv"));
         burnTime = compound.contains("burn") ? compound.getInt("burn") : 0;
         burnCapacity = compound.contains("burn_capacity") ? compound.getInt("burn_capacity") : 0;
@@ -206,7 +204,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag compound) {
+    public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         compound.put("inv", itemHandler.serializeNBT());
         compound.putInt("burn", burnTime);
         compound.putInt("burn_capacity", burnCapacity);

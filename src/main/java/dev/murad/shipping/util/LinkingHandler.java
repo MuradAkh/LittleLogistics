@@ -1,18 +1,15 @@
 package dev.murad.shipping.util;
 
 import dev.murad.shipping.capability.StallingCapability;
-import dev.murad.shipping.entity.custom.HeadVehicle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -21,8 +18,9 @@ public class LinkingHandler<T extends Entity & LinkableEntity<T>> {
     private final T entity;
     private final Class<T> clazz;
 
-    public Optional<T> dominant = Optional.empty();
-    public Optional<T> dominated = Optional.empty();
+    public Optional<T> leader = Optional.empty();
+    public Optional<T> follower = Optional.empty();
+
     public Train<T> train;
 
     private @Nullable
@@ -39,25 +37,25 @@ public class LinkingHandler<T extends Entity & LinkableEntity<T>> {
     }
 
     public void tickLoad() {
-        if (entity.level.isClientSide) {
+        if (entity.level().isClientSide) {
             fetchDominantClient();
             fetchDominatedClient();
         } else {
-            if (dominant.isEmpty() && dominantNBT != null) {
+            if (leader.isEmpty() && dominantNBT != null) {
                 tryToLoadFromNBT(dominantNBT).ifPresent(entity::setDominant);
-                dominant.ifPresent(d -> {
+                leader.ifPresent(d -> {
                     d.setDominated(entity);
                     dominantNBT = null; // done loading
                 });
             }
-            if (dominated.isPresent()){
+            if (follower.isPresent()){
                 waitForDominated = false;
                 stallNonTicking();
             } else if (waitForDominated) {
                 entity.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
             }
-            entity.getEntityData().set(dominantID, dominant.map(Entity::getId).orElse(-1));
-            entity.getEntityData().set(dominatedID, dominated.map(Entity::getId).orElse(-1));
+            entity.getEntityData().set(dominantID, leader.map(Entity::getId).orElse(-1));
+            entity.getEntityData().set(dominatedID, follower.map(Entity::getId).orElse(-1));
         }
     }
 
@@ -82,13 +80,13 @@ public class LinkingHandler<T extends Entity & LinkableEntity<T>> {
     }
 
     public void addAdditionalSaveData(CompoundTag compound) {
-        if (dominant.isPresent()) {
-            writeNBT(dominant.get(), compound);
+        if (leader.isPresent()) {
+            writeNBT(leader.get(), compound);
         } else if (dominantNBT != null) {
             compound.put(LinkableEntity.LinkSide.DOMINANT.name(), dominantNBT);
         }
 
-        compound.putBoolean("hasChild", dominated.isPresent());
+        compound.putBoolean("hasChild", follower.isPresent());
 
     }
 
@@ -110,7 +108,7 @@ public class LinkingHandler<T extends Entity & LinkableEntity<T>> {
 
     public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> key) {
 
-        if (entity.level.isClientSide) {
+        if (entity.level().isClientSide) {
             if (dominatedID.equals(key) || dominantID.equals(key)) {
                 fetchDominantClient();
                 fetchDominatedClient();
@@ -119,11 +117,11 @@ public class LinkingHandler<T extends Entity & LinkableEntity<T>> {
     }
 
     private void fetchDominantClient() {
-        Entity potential = entity.level.getEntity(entity.getEntityData().get(dominantID));
+        Entity potential = entity.level().getEntity(entity.getEntityData().get(dominantID));
         if (clazz.isInstance(potential)) {
-            dominant = Optional.of(clazz.cast(potential));
+            leader = Optional.of(clazz.cast(potential));
         } else {
-            dominant = Optional.empty();
+            leader = Optional.empty();
         }
     }
 
@@ -140,7 +138,7 @@ public class LinkingHandler<T extends Entity & LinkableEntity<T>> {
                     pos.getY() + 2,
                     pos.getZ() + 2
             );
-            List<Entity> entities = entity.level.getEntities(entity, searchBox, e -> e.getStringUUID().equals(uuid) && clazz.isInstance(e));
+            List<Entity> entities = entity.level().getEntities(entity, searchBox, e -> e.getStringUUID().equals(uuid) && clazz.isInstance(e));
             return entities.stream().findFirst().map(e -> clazz.cast(e));
         } catch (Exception e) {
             return Optional.empty();
@@ -148,11 +146,11 @@ public class LinkingHandler<T extends Entity & LinkableEntity<T>> {
     }
 
     private void fetchDominatedClient() {
-        Entity potential = entity.level.getEntity(entity.getEntityData().get(dominatedID));
+        Entity potential = entity.level().getEntity(entity.getEntityData().get(dominatedID));
         if (clazz.isInstance(potential)) {
-            dominated = Optional.of((clazz.cast(potential)));
+            follower = Optional.of((clazz.cast(potential)));
         } else {
-            dominated = Optional.empty();
+            follower = Optional.empty();
         }
     }
 }

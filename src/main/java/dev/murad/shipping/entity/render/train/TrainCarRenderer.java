@@ -3,7 +3,7 @@ package dev.murad.shipping.entity.render.train;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.entity.models.ChainModel;
@@ -34,7 +34,7 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
 
     private final ChainModel chainModel;
 
-    public TrainCarRenderer(EntityRendererProvider.Context context, Function<ModelPart, EntityModel> baseModel, ModelLayerLocation layerLocation, String baseTexture) {
+    public TrainCarRenderer(EntityRendererProvider.Context context, Function<ModelPart, EntityModel<T>> baseModel, ModelLayerLocation layerLocation, String baseTexture) {
         super(context);
         chainModel = new ChainModel(context.bakeLayer(ChainModel.LAYER_LOCATION));
         entityModel = baseModel.apply(context.bakeLayer(layerLocation));
@@ -89,8 +89,8 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
         int segments = (int) Math.ceil(dist * 4);
 
         // TODO: fix pitch
-        matrixStack.mulPose(Vector3f.YP.rotation(-(float) Math.atan2(vec.z, vec.x)));
-        matrixStack.mulPose(Vector3f.ZP.rotation((float) (Math.asin(vec.y / dist))));
+        matrixStack.mulPose(Axis.YP.rotation(-(float) Math.atan2(vec.z, vec.x)));
+        matrixStack.mulPose(Axis.ZP.rotation((float) (Math.asin(vec.y / dist))));
         matrixStack.pushPose();
         VertexConsumer ivertexbuilderChain = buffer.getBuffer(chainModel.renderType(CHAIN_TEXTURE));
         for (int i = 1; i < segments; i++) {
@@ -159,8 +159,8 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
         }
 
         pose.translate(0.0D, 0.375D, 0.0D);
-        pose.mulPose(Vector3f.YP.rotationDegrees(180.0F - yaw));
-        pose.mulPose(Vector3f.XN.rotationDegrees(pitch));
+        pose.mulPose(Axis.YP.rotationDegrees(180.0F - yaw));
+        pose.mulPose(Axis.XN.rotationDegrees(pitch));
         float f5 = (float)car.getHurtTime() - partialTicks;
         float f6 = car.getDamage() - partialTicks;
         if (f6 < 0.0F) {
@@ -168,7 +168,7 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
         }
 
         if (f5 > 0.0F) {
-            pose.mulPose(Vector3f.XP.rotationDegrees(Mth.sin(f5) * f5 * f6 / 10.0F * (float)car.getHurtDir()));
+            pose.mulPose(Axis.XP.rotationDegrees(Mth.sin(f5) * f5 * f6 / 10.0F * (float)car.getHurtDir()));
         }
 
         pose.translate(0, 1.1, 0);

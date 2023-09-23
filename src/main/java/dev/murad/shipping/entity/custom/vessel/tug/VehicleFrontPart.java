@@ -3,6 +3,7 @@ package dev.murad.shipping.entity.custom.vessel.tug;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -35,7 +36,8 @@ public class VehicleFrontPart extends PartEntity<Entity> {
         return getParent().getPickResult();
     }
 
-    public Packet<?> getAddEntityPacket() {
+    @Override
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
         throw new UnsupportedOperationException();
     }
 

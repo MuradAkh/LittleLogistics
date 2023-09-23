@@ -21,12 +21,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -68,7 +68,7 @@ public class EnergyTugEntity extends AbstractTugEntity {
             @Nullable
             @Override
             public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player player) {
-                return new EnergyHeadVehicleContainer<EnergyTugEntity>(i, level, getDataAccessor(), playerInventory, player);
+                return new EnergyHeadVehicleContainer<EnergyTugEntity>(i, level(), getDataAccessor(), playerInventory, player);
             }
         };
     }
@@ -77,7 +77,7 @@ public class EnergyTugEntity extends AbstractTugEntity {
         return new ItemStackHandler(1) {
             @Override
             public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-                return stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
+                return stack.getCapability(ForgeCapabilities.ENERGY).isPresent();
             }
 
             @Nonnull
@@ -119,7 +119,7 @@ public class EnergyTugEntity extends AbstractTugEntity {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag compound) {
+    public void readAdditionalSaveData(@NotNull CompoundTag compound) {
         internalBattery.readAdditionalSaveData(compound.getCompound("energy_storage"));
         if(compound.contains("inv")){
             ItemStackHandler old = new ItemStackHandler();
@@ -132,7 +132,7 @@ public class EnergyTugEntity extends AbstractTugEntity {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag compound) {
+    public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         CompoundTag energyNBT = new CompoundTag();
         internalBattery.addAdditionalSaveData(energyNBT);
         compound.put("energy_storage", energyNBT);
@@ -143,7 +143,7 @@ public class EnergyTugEntity extends AbstractTugEntity {
     @Override
     public void tick() {
         // grab energy from capacitor
-        if (!level.isClientSide) {
+        if (!level().isClientSide) {
             IEnergyStorage capability = InventoryUtils.getEnergyCapabilityInSlot(0, itemHandler);
             if (capability != null) {
                 // simulate first
@@ -186,11 +186,11 @@ public class EnergyTugEntity extends AbstractTugEntity {
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == CapabilityEnergy.ENERGY) {
+        if (cap == ForgeCapabilities.ENERGY) {
             return holder.cast();
         }
 
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+        if (cap == ForgeCapabilities.ITEM_HANDLER) {
             return handler.cast();
         }
 

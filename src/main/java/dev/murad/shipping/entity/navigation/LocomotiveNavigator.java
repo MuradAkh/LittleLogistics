@@ -59,7 +59,7 @@ public class LocomotiveNavigator {
     }
 
     public void serverTick(){
-        RailHelper.getRail(locomotive.getOnPos().above(), locomotive.level).ifPresent(railPos ->{
+        RailHelper.getRail(locomotive.getOnPos().above(), locomotive.level()).ifPresent(railPos ->{
             if(routeNodes.contains(railPos)){
                 visitedNodes.add(railPos);
             }
@@ -80,21 +80,21 @@ public class LocomotiveNavigator {
             locomotive.getRailHelper().getNext(railPos, moveDir).ifPresent(pair -> {
                 var nextRail = pair.getFirst();
                 var prevExitTaken = pair.getSecond();
-                var state = locomotive.getLevel().getBlockState(nextRail);
+                var state = locomotive.level().getBlockState(nextRail);
                 if (state.getBlock() instanceof MultiShapeRail s && s.isAutomaticSwitching()){
                     var choices = s.getPossibleOutputDirections(state, prevExitTaken.getOpposite()).stream().toList();
                     if (choices.size() == 1) {
-                        s.setRailState(state, locomotive.level, nextRail, prevExitTaken.getOpposite(), choices.get(0));
+                        s.setRailState(state, locomotive.level(), nextRail, prevExitTaken.getOpposite(), choices.get(0));
                     } else if(choices.size() > 1 && !routeNodes.isEmpty()) {
                         Set<BlockPos> potential = new HashSet<>(routeNodes);
                         potential.removeAll(visitedNodes);
                         if(!decisionCache.containsKey(nextRail)){
                             var decision = locomotive.getRailHelper()
                                    .pickCheaperDir(choices, nextRail,
-                                           RailHelper.samePositionHeuristicSet(potential), locomotive.getLevel());
+                                           RailHelper.samePositionHeuristicSet(potential), locomotive.level());
                             decisionCache.put(nextRail, decision);
                         };
-                        s.setRailState(state, locomotive.level, nextRail, prevExitTaken.getOpposite(), decisionCache.get(nextRail));
+                        s.setRailState(state, locomotive.level(), nextRail, prevExitTaken.getOpposite(), decisionCache.get(nextRail));
                     }
                 }
             });

@@ -4,12 +4,11 @@ import dev.murad.shipping.entity.accessor.EnergyHeadVehicleDataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModMenuTypes;
-import dev.murad.shipping.util.EnrollmentHandler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.SlotItemHandler;
 
 public class EnergyHeadVehicleContainer<T extends Entity & HeadVehicle> extends AbstractHeadVehicleContainer<EnergyHeadVehicleDataAccessor, T> {
@@ -18,10 +17,10 @@ public class EnergyHeadVehicleContainer<T extends Entity & HeadVehicle> extends 
         super(ModMenuTypes.ENERGY_LOCOMOTIVE_CONTAINER.get(), windowId, world, data, playerInventory, player);
 
         if(entity != null) {
-            entity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
-                addSlot(new SlotItemHandler(h, 0, 32, 35)
-                        .setBackground(EMPTY_ATLAS_LOC, ModItems.EMPTY_ENERGY));
-            });
+            entity.getCapability(ForgeCapabilities.ITEM_HANDLER)
+                    .ifPresent(
+                            h -> addSlot(new SlotItemHandler(h, 0, 32, 35)
+                                    .setBackground(EMPTY_ATLAS_LOC, ModItems.EMPTY_ENERGY)));
         }
     }
 
