@@ -1,5 +1,6 @@
 package dev.murad.shipping.util;
 
+import lombok.NonNull;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
@@ -59,18 +60,22 @@ public class InventoryUtils {
         return false;
     }
 
-    public static int findSlotFotItem(Container target, ItemStack itemStack) {
-        for (int i = 0; i < target.getContainerSize(); i++) {
-            ItemStack stack = target.getItem(i);
-            if(stack.isEmpty() || stack.getItem().equals(Items.AIR)){
-                return i;
-            }
-            else if (canMergeItems(stack, itemStack)) {
-                return i;
+    public static boolean isEmpty(ItemStackHandler itemHandler) {
+        for (int i = 0; i < itemHandler.getSlots(); i++){
+            if(!itemHandler.getStackInSlot(i).isEmpty() && !itemHandler.getStackInSlot(i).getItem().equals(Items.AIR)){
+                return false;
             }
         }
+        return true;
+    }
 
-        return -1;
+    @NonNull
+    public static ItemStack moveItemStackIntoHandler(ItemStackHandler handler, @NonNull ItemStack stack) {
+        var slots = handler.getSlots();
+        for (int i = 0; i < slots && !stack.isEmpty(); i++) {
+            stack = handler.insertItem(i, stack, false);
+        }
+        return stack;
     }
 
     public static boolean canMergeItems(ItemStack stack1, ItemStack stack2) {

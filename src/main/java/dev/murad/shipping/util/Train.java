@@ -1,10 +1,8 @@
 package dev.murad.shipping.util;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class Train <V extends LinkableEntity<V>> {
@@ -38,7 +36,7 @@ public class Train <V extends LinkableEntity<V>> {
         if(this.head.checkNoLoopsDominated()) {
             // just in case - to avoid crashing the world.
             this.head.removeDominated();
-            this.head.getDominated().ifPresent(LinkableEntity::removeDominant);
+            this.head.getFollower().ifPresent(LinkableEntity::removeDominant);
             return new ArrayList<>();
         }
         return tug.map(tugEntity -> {
@@ -54,7 +52,7 @@ public class Train <V extends LinkableEntity<V>> {
         if(this.head.checkNoLoopsDominated()) {
             // just in case - to avoid crashing the world.
             this.head.removeDominated();
-            this.head.getDominated().ifPresent(LinkableEntity::removeDominant);
+            this.head.getFollower().ifPresent(LinkableEntity::removeDominant);
             return new ArrayList<>();
         }
 
@@ -66,7 +64,7 @@ public class Train <V extends LinkableEntity<V>> {
     }
 
     public Optional<V> getNext(V entity){
-        return entity.getDominated().map(t -> (V) t);
+        return entity.getFollower().map(t -> (V) t);
     }
 
     public void setHead(V head) {

@@ -43,7 +43,7 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
 
     public void render(T car, float yaw, float pPartialTicks, PoseStack pose, MultiBufferSource buffer, int pPackedLight) {
         //getAndRenderChain(car, pose, buffer, pPackedLight);
-        if (car.getDominant().isPresent()) return;
+        if (car.getLeader().isPresent()) return;
 
         pose.pushPose();
 
@@ -51,8 +51,8 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
         AbstractTrainCarEntity t = car;
         Pair<Vec3, Vec3> attachmentPoints = renderCarAndGetAttachmentPoints(car, yaw, pPartialTicks, pose, buffer, pPackedLight);
 
-        while (t.getDominated().isPresent()) {
-            AbstractTrainCarEntity nextT = t.getDominated().get();
+        while (t.getFollower().isPresent()) {
+            AbstractTrainCarEntity nextT = t.getFollower().get();
             EntityRenderer<? super AbstractTrainCarEntity> renderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(nextT);
             if (renderer instanceof RenderWithAttachmentPoints) {
                 @SuppressWarnings("unchecked")

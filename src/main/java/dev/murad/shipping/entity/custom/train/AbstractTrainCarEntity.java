@@ -225,7 +225,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
             }
             if (!pEntity.noPhysics && !this.noPhysics) {
                 // fix carts with passengers falling behind
-                if (!this.hasPassenger(pEntity) || this.getDominant().isPresent()) {
+                if (!this.hasPassenger(pEntity) || this.getLeader().isPresent()) {
                     double d0 = pEntity.getX() - this.getX();
                     double d1 = pEntity.getZ() - this.getZ();
                     double d2 = d0 * d0 + d1 * d1;
@@ -530,12 +530,12 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     }
 
     @Override
-    public Optional<AbstractTrainCarEntity> getDominated() {
+    public Optional<AbstractTrainCarEntity> getFollower() {
         return linkingHandler.follower;
     }
 
     @Override
-    public Optional<AbstractTrainCarEntity> getDominant() {
+    public Optional<AbstractTrainCarEntity> getLeader() {
         return linkingHandler.leader;
     }
 
@@ -599,8 +599,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
         }
 
-        return curr.filter(pair -> (!(pair.getFirst() instanceof AbstractLocomotiveEntity) || pair.getFirst().getDominated().isEmpty())
-                && (!(pair.getSecond() instanceof AbstractLocomotiveEntity) || pair.getSecond().getDominated().isEmpty()));
+        return curr.filter(pair -> (!(pair.getFirst() instanceof AbstractLocomotiveEntity) || pair.getFirst().getFollower().isEmpty())
+                && (!(pair.getSecond() instanceof AbstractLocomotiveEntity) || pair.getSecond().getFollower().isEmpty()));
 
 
     }
