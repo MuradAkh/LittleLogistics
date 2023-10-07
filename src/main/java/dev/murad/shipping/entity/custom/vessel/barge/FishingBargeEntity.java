@@ -73,9 +73,15 @@ public class FishingBargeEntity extends AbstractBargeEntity {
 
 
     @Override
+    // Only called on the server side
     protected void doInteract(Player player) {
-        // TODO: check status of connected inventories and print to chat
-        System.out.println(getConnectedInventories().size());
+        var size = getConnectedInventories().size();
+
+        player.displayClientMessage(
+                switch (size) {
+                    case 0 -> Component.translatable("global.littlelogistics.no_connected_inventory_barge");
+                    default -> Component.translatable("global.littlelogistics.connected_inventory", size);
+                }, false);
     }
 
     @Override

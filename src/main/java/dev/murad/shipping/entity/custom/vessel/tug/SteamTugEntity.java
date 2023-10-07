@@ -6,10 +6,10 @@ import dev.murad.shipping.entity.container.SteamHeadVehicleContainer;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModSounds;
+import dev.murad.shipping.util.FuelItemStackHandler;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.WaterAnimal;
@@ -19,22 +19,20 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
-import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class SteamTugEntity extends AbstractTugEntity {
-    private static final int FURNACE_FUEL_MULTIPLIER= ShippingConfig.Server.STEAM_TUG_FUEL_MULTIPLIER.get();
-    private final ItemStackHandler itemHandler = createHandler();
-    private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
+    private final ForgeConfigSpec.ConfigValue<Double> FURNACE_FUEL_MULTIPLIER = ShippingConfig.Server.STEAM_TUG_FUEL_MULTIPLIER;
+    private final FuelItemStackHandler fuelItemHandler = new FuelItemStackHandler();
+    private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> fuelItemHandler);
     protected int burnTime = 0;
     protected int burnCapacity = 0;
 
@@ -44,25 +42,6 @@ public class SteamTugEntity extends AbstractTugEntity {
 
     public SteamTugEntity(Level worldIn, double x, double y, double z) {
         super(ModEntityTypes.STEAM_TUG.get(), worldIn, x, y, z);
-    }
-
-    private ItemStackHandler createHandler() {
-        return new ItemStackHandler(1) {
-            @Override
-            public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-                return FurnaceBlockEntity.isFuel(stack);
-            }
-
-            @Nonnull
-            @Override
-            public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-                if (!isItemValid(slot, stack)) {
-                    return stack;
-                }
-
-                return super.insertItem(slot, stack, simulate);
-            }
-        };
     }
 
     @Override
@@ -124,17 +103,11 @@ public class SteamTugEntity extends AbstractTugEntity {
             burnTime--;
             return true;
         } else {
-            ItemStack stack = itemHandler.getStackInSlot(0);
-            if (!stack.isEmpty()) {
-                burnCapacity = (ForgeHooks.getBurnTime(stack, null) * FURNACE_FUEL_MULTIPLIER) - 1;
-                burnTime = burnCapacity - 1;
-                stack.shrink(1);
-                return true;
-            } else {
-                burnCapacity = 0;
-                burnTime = 0;
-                return false;
-            }
+            int burnTime = fuelItemHandler.tryConsumeFuel();
+            int adjustedBurnTime = (int) Math.ceil(burnTime * FURNACE_FUEL_MULTIPLIER.get());
+            this.burnCapacity = adjustedBurnTime;
+            this.burnTime = adjustedBurnTime;
+            return adjustedBurnTime > 0;
         }
     }
 
@@ -147,13 +120,7 @@ public class SteamTugEntity extends AbstractTugEntity {
     public void readAdditionalSaveData(@NotNull CompoundTag compound) {
         burnTime = compound.contains("burn") ? compound.getInt("burn") : 0;
         burnCapacity = compound.contains("burn_capacity") ? compound.getInt("burn_capacity") : 0;
-        if(compound.contains("inv")){
-            ItemStackHandler old = new ItemStackHandler();
-            old.deserializeNBT(compound.getCompound("inv"));
-            itemHandler.setStackInSlot(0, old.getStackInSlot(1));
-        }else{
-            itemHandler.deserializeNBT(compound.getCompound("tugItemHandler"));
-        }
+        fuelItemHandler.deserializeNBT(compound.getCompound("fuelItems"));
         super.readAdditionalSaveData(compound);
     }
 
@@ -161,7 +128,7 @@ public class SteamTugEntity extends AbstractTugEntity {
     public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         compound.putInt("burn", burnTime);
         compound.putInt("burn_capacity", burnCapacity);
-        compound.put("tugItemHandler", itemHandler.serializeNBT());
+        compound.put("fuelItems", fuelItemHandler.serializeNBT());
         super.addAdditionalSaveData(compound);
     }
 
@@ -174,22 +141,22 @@ public class SteamTugEntity extends AbstractTugEntity {
     // Have to implement IInventory to work with hoppers
     @Override
     public boolean isEmpty() {
-        return itemHandler.getStackInSlot(0).isEmpty();
+        return fuelItemHandler.getStackInSlot(0).isEmpty();
     }
 
     @Override
-    public ItemStack getItem(int p_70301_1_) {
-        return itemHandler.getStackInSlot(p_70301_1_);
+    public @NotNull ItemStack getItem(int p_70301_1_) {
+        return fuelItemHandler.getStackInSlot(p_70301_1_);
     }
 
     @Override
-    public void setItem(int p_70299_1_, ItemStack p_70299_2_) {
-        if (!this.itemHandler.isItemValid(p_70299_1_, p_70299_2_)){
+    public void setItem(int slot, @NotNull ItemStack stack) {
+        if (!this.fuelItemHandler.isItemValid(slot, stack)){
             return;
         }
-        this.itemHandler.insertItem(p_70299_1_, p_70299_2_, false);
-        if (!p_70299_2_.isEmpty() && p_70299_2_.getCount() > this.getMaxStackSize()) {
-            p_70299_2_.setCount(this.getMaxStackSize());
+        this.fuelItemHandler.insertItem(slot, stack, false);
+        if (!stack.isEmpty() && stack.getCount() > this.getMaxStackSize()) {
+            stack.setCount(this.getMaxStackSize());
         }
     }
 

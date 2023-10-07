@@ -6,6 +6,7 @@
   "item.littlelogistics.fishing_barge": "Auto-Vis Sleepaak",
   "item.littlelogistics.spring": "Sleepkabel",
   "item.littlelogistics.tug_route": "Sleepboot Route",
+  "item.littlelogistics.locomotive_route": "Locomotive Route",
   "item.littlelogistics.energy_tug": "Elektrische Sleepboot",
   "item.littlelogistics.fluid_barge": "Sleepaak met Vloeistof Tank",
   "item.littlelogistics.fluid_car": "Wagon met Vloeistof Tank",
@@ -14,6 +15,10 @@
   "item.littlelogistics.seater_car": "Wagon",
   "item.littlelogistics.steam_locomotive": "Stoomlocomotief",
   "item.littlelogistics.energy_locomotive": "Elektrische Locomotief",
+
+  "item.littlelogistics.receiver_component": "Wireless Receiver Component",
+  "item.littlelogistics.transmitter_component": "Wireless Transmitter Component",
+  "item.littlelogistics.conductors_wrench": "Conductor's Wrench",
 
   "entity.littlelogistics.tug": "Stoom Sleepboot",
   "entity.littlelogistics.barge": "Sleepaak met Kist",
@@ -38,8 +43,14 @@
   "block.littlelogistics.fluid_hopper": "Vloeistof Trechter",
   "block.littlelogistics.rapid_hopper": "Snelle Trechter",
   "block.littlelogistics.vessel_detector": "Vaartuig Detector",
+
   "block.littlelogistics.junction_rail": "Wissel",
   "block.littlelogistics.switch_rail": "Spoorwegknooppunt",
+  "block.littlelogistics.automatic_switch_rail": "Automatic Switch Rail",
+  "block.littlelogistics.tee_junction_rail": "T-Junction Rail",
+  "block.littlelogistics.automatic_tee_junction_rail": "Automatic T-Junction Rail",
+  "block.littlelogistics.locomotive_dock_rail": "Locomotive Docking Rail",
+  "block.littlelogistics.car_dock_rail": "Train Car Docking Rail",
 
   "screen.littlelogistics.tug": "Stoom Sleepboot",
   "screen.littlelogistics.fishing_barge": "Auto-Vis Sleepaak",
@@ -51,9 +62,23 @@
   "screen.littlelogistics.tug_route.up_button": "Verplaats Tussenstop omhoog",
   "screen.littlelogistics.tug_route.down_button": "Verplaats Tussenstop omlaag",
   "screen.littlelogistics.tug_route.delete_button": "Verwijder Tussenstop",
-
   "screen.littlelogistics.tug_route.rename": "%s Hernoemen",
   "screen.littlelogistics.tug_route.confirm": "Opslaan",
+
+  "screen.littlelogistics.locomotive.route": "Visited:",
+  "screen.littlelogistics.locomotive.on": "Start Engine",
+  "screen.littlelogistics.locomotive.off": "Halt Engine",
+  "screen.littlelogistics.locomotive.register": "Register",
+  "screen.littlelogistics.locomotive.registration": "Registration",
+  "screen.littlelogistics.locomotive.register_info": "Registered vehicles can travel without chunkloaders",
+  "screen.littlelogistics.locomotive.frozen": "As per server config, this vehicle is frozen as the owner is offline",
+
+  "global.littlelogistics.locomotive.register_success": "Maximum number of registered vehicles reached: %s",
+  "global.littlelogistics.locomotive.register_fail": "Successfully registered the vehicle, vehicles registered: %s/%s",
+
+  "global.littlelogistics.no_connected_inventory_barge": "This barge requires a connected inventory behind it but none was provided. Link additional barges that provide inventory behind this one, such as a Chest Barge.",
+  "global.littlelogistics.no_connected_inventory_car": "This barge requires a connected inventory behind it but none was provided. Link additional barges that provide inventory behind this one, such as a Chest Car.",
+  "global.littlelogistics.connected_inventory": "This barge has %s connected inventories",
 
   "item.littlelogistics.tug_route.description": "Rechter muisklik om een tussenstop toe te voegen aan het einde van de route, rechter muisklik op dezelfde plek om deze te verwijderen. Shift rechter muisklik om menu te openen.",
   "item.littlelogistics.tug_route.num_nodes": "Route Tussenstops: %s",
@@ -62,9 +87,18 @@
   "item.littlelogistics.tug_route.node": "%s. Tussenstop ",
   "item.littlelogistics.tug_route.node_named": "%s. %s",
   "item.littlelogistics.tug_route.node_line": "Tussenstop %s: %s, %s",
+
+  "item.littlelogistics.conductors_wrench.description": "Can be used to rotate vanilla rails and configure Little Logistics blocks.",
+
+  "item.littlelogistics.locomotive_route.description": "Right click on a rail to add or remove it from the route.",
+  "item.littlelogistics.locomotive_route.num_nodes": "Route Nodes: %s",
+  "item.littlelogistics.locomotive_route.added": "Added Route Node X:%s Y:%s Z:%s",
+  "item.littlelogistics.locomotive_route.removed": "Removed Route Node X:%s Y:%s Z:%s",
+
   "item.littlelogistics.spring.description": "Wordt gebruikt om sleepaken/sleepboten te koppelen",
   "item.littlelogistics.spring.notToSelf": "Kan vaartuig niet aan zichzelf koppelen",
   "item.littlelogistics.spring.noTwoTugs": "Kan geen twee sleepboten koppelen",
+  "item.littlelogistics.spring.noTwoLoco": "Can't link two locomotives",
   "item.littlelogistics.spring.tooFar": "Vaartuigen te ver weg om te koppelen",
   "item.littlelogistics.spring.noLoops": "Kan vaartuigen niet in een lus koppelen",
   "item.littlelogistics.spring.badTypes": "Kan deze types vaartuigen niet koppelen!",
@@ -80,5 +114,5 @@
 
   "subtitle.littlelogistics.steam_tug_whistle": "Stoom Sleeboot fluit",
   "subtitle.littlelogistics.tug_docking": "Sleepboot meert aan",
-  "subtitle.littlelogistics.tug_undocking":  "Sleepboot meert af"
+  "subtitle.littlelogistics.tug_undocking": "Sleepboot meert af"
 }
