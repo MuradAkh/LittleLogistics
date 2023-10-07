@@ -129,16 +129,16 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         if(!pHand.equals(InteractionHand.MAIN_HAND)){
             return InteractionResult.PASS;
         }
+
         if(!this.level().isClientSide){
             NetworkHooks.openScreen((ServerPlayer) pPlayer, createContainerProvider(), getDataAccessor()::write);
-
         }
 
         return InteractionResult.CONSUME;
     }
 
     private ItemStackHandler createLocoRouteItemHandler() {
-        return new ItemStackHandler(1) {
+        return new ItemStackHandler() {
             @Override
             protected int getStackLimit(int slot, @Nonnull ItemStack stack) {
                 return 1;
@@ -152,16 +152,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             @Override
             public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
                 return stack.getItem() instanceof LocoRouteItem;
-            }
-
-            @Nonnull
-            @Override
-            public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-                if (!isItemValid(slot, stack)) {
-                    return stack;
-                }
-
-                return super.insertItem(slot, stack, simulate);
             }
         };
     }
