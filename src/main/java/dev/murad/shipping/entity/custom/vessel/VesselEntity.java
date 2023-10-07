@@ -314,7 +314,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
         Boat.Status Boat$status = this.isUnderwater();
         if (Boat$status != null) {
             this.waterLevel = this.getBoundingBox().maxY;
-            return status;
+            return Boat$status;
         } else if (this.checkInWater()) {
             return Boat.Status.IN_WATER;
         } else {
