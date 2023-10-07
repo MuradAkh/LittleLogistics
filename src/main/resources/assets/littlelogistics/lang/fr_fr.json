@@ -6,9 +6,19 @@
   "item.littlelogistics.fishing_barge": "Barge de Pêche",
   "item.littlelogistics.spring": "Chaîne de Bateau",
   "item.littlelogistics.tug_route": "Chemin de Halage",
+  "item.littlelogistics.locomotive_route": "Locomotive Route",
   "item.littlelogistics.energy_tug": "Remorqueur Électrique",
   "item.littlelogistics.fluid_barge": "Remorqueur de Transport de Liquide",
+  "item.littlelogistics.fluid_car": "Fluid Tank Train Car",
+  "item.littlelogistics.chest_car": "Chest Train Car",
+  "item.littlelogistics.chunk_loader_car": "Chunk Loader Train Car",
+  "item.littlelogistics.seater_car": "Train Car",
+  "item.littlelogistics.steam_locomotive": "Steam Locomotive",
+  "item.littlelogistics.energy_locomotive": "Energy Locomotive",
 
+  "item.littlelogistics.receiver_component": "Wireless Receiver Component",
+  "item.littlelogistics.transmitter_component": "Wireless Transmitter Component",
+  "item.littlelogistics.conductors_wrench": "Conductor's Wrench",
 
   "entity.littlelogistics.tug": "Remorqueur à Vapeur",
   "entity.littlelogistics.barge": "Barge de Coffre",
@@ -18,6 +28,12 @@
   "entity.littlelogistics.energy_tug": "Remorqueur Électrique",
   "entity.littlelogistics.fluid_barge": "Remorqueur de Transport de Liquide",
   "entity.littlelogistics.seater_barge": "Barge de Chaise",
+  "entity.littlelogistics.fluid_car": "Fluid Tank Train Car",
+  "entity.littlelogistics.chest_car": "Chest Train Car",
+  "entity.littlelogistics.chunk_loader_car": "Chunk Loader Train Car",
+  "entity.littlelogistics.seater_car": "Train Car",
+  "entity.littlelogistics.steam_locomotive": "Steam Locomotive",
+  "entity.littlelogistics.energy_locomotive": "Energy Locomotive",
 
   "block.littlelogistics.tug_dock": "Quai de Remorqueur",
   "block.littlelogistics.barge_dock": "Quai de Barge",
@@ -25,21 +41,67 @@
   "block.littlelogistics.guide_rail_corner": "Guide d'angle du remorqueur",
   "block.littlelogistics.vessel_charger": "Chargeur de Bateau",
   "block.littlelogistics.fluid_hopper": "Entonnoir Liquide",
+  "block.littlelogistics.rapid_hopper": "Rapid Hopper",
+  "block.littlelogistics.vessel_detector": "Vehicle Detector",
+
+  "block.littlelogistics.junction_rail": "Junction Rail",
+  "block.littlelogistics.switch_rail": "Switch Rail",
+  "block.littlelogistics.automatic_switch_rail": "Automatic Switch Rail",
+  "block.littlelogistics.tee_junction_rail": "T-Junction Rail",
+  "block.littlelogistics.automatic_tee_junction_rail": "Automatic T-Junction Rail",
+  "block.littlelogistics.locomotive_dock_rail": "Locomotive Docking Rail",
+  "block.littlelogistics.car_dock_rail": "Train Car Docking Rail",
 
   "screen.littlelogistics.tug": "Remorqueur à Vapeur",
   "screen.littlelogistics.fishing_barge": "Barge de Pêche",
   "screen.littlelogistics.energy_tug": "Remorqueur Électrique",
   "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
 
+  "screen.littlelogistics.tug_route": "Tug Route Configurator",
+  "screen.littlelogistics.tug_route.rename_button": "Rename node",
+  "screen.littlelogistics.tug_route.up_button": "Move node up",
+  "screen.littlelogistics.tug_route.down_button": "Move node down",
+  "screen.littlelogistics.tug_route.delete_button": "Remove node",
+  "screen.littlelogistics.tug_route.rename": "Renaming %s",
+  "screen.littlelogistics.tug_route.confirm": "Save",
+
+  "screen.littlelogistics.locomotive.route": "Visited:",
+  "screen.littlelogistics.locomotive.on": "Start Engine",
+  "screen.littlelogistics.locomotive.off": "Halt Engine",
+  "screen.littlelogistics.locomotive.register": "Register",
+  "screen.littlelogistics.locomotive.registration": "Registration",
+  "screen.littlelogistics.locomotive.register_info": "Registered vehicles can travel without chunkloaders",
+  "screen.littlelogistics.locomotive.frozen": "As per server config, this vehicle is frozen as the owner is offline",
+
+  "global.littlelogistics.locomotive.register_success": "Maximum number of registered vehicles reached: %s",
+  "global.littlelogistics.locomotive.register_fail": "Successfully registered the vehicle, vehicles registered: %s/%s",
+
+  "global.littlelogistics.no_connected_inventory_barge": "This barge requires a connected inventory behind it but none was provided. Link additional barges that provide inventory behind this one, such as a Chest Barge.",
+  "global.littlelogistics.no_connected_inventory_car": "This barge requires a connected inventory behind it but none was provided. Link additional barges that provide inventory behind this one, such as a Chest Car.",
+  "global.littlelogistics.connected_inventory": "This barge has %s connected inventories",
+
   "item.littlelogistics.tug_route.description": "Clic droit pour ajouter une balise, clic droit sur une balise existante pour la supprimer. Les nouvelles balises sont ajoutés à la fin du guide.",
+  "item.littlelogistics.tug_route.num_nodes": "Route Nodes: %s",
   "item.littlelogistics.tug_route.added": "Balise de guidage ajoutée á X:%s Z:%s",
   "item.littlelogistics.tug_route.removed": "Balise de guidage supprimée à X:%s Z:%s",
   "item.littlelogistics.tug_route.node": "Balise",
+  "item.littlelogistics.tug_route.node_named": "%s. %s",
+  "item.littlelogistics.tug_route.node_line": "Node %s: %s, %s",
+
+  "item.littlelogistics.conductors_wrench.description": "Can be used to rotate vanilla rails and configure Little Logistics blocks.",
+
+  "item.littlelogistics.locomotive_route.description": "Right click on a rail to add or remove it from the route.",
+  "item.littlelogistics.locomotive_route.num_nodes": "Route Nodes: %s",
+  "item.littlelogistics.locomotive_route.added": "Added Route Node X:%s Y:%s Z:%s",
+  "item.littlelogistics.locomotive_route.removed": "Removed Route Node X:%s Y:%s Z:%s",
+
   "item.littlelogistics.spring.description": "Utilisé pour connecter des barges et des remorqueurs",
   "item.littlelogistics.spring.notToSelf": "Impossible de connecter un bateau à elle-même",
   "item.littlelogistics.spring.noTwoTugs": "Impossible de connecter deux remorqueurs",
+  "item.littlelogistics.spring.noTwoLoco": "Can't link two locomotives",
   "item.littlelogistics.spring.tooFar": "Les bateaux sont trop loin pour la connexion",
   "item.littlelogistics.spring.noLoops": "Impossible de connecter des bateaux en cercle",
+  "item.littlelogistics.spring.badTypes": "Can't link these types of vehicles together!",
   "item.littlelogistics.fishing_barge.description": "Pour de meilleurs résultats, utilisez-le lors de longs voyages en eau profonde et libre.",
 
   "item.littlelogistics.creative_capacitor": "Condensateur Créatif",
@@ -48,5 +110,9 @@
   "block.littlelogistics.fluid_hopper.capacity": "%s %s/%s mB",
   "block.littlelogistics.fluid_hopper.capacity_empty": "Vide 0/%s mB",
   "entity.littlelogistics.fluid_barge.capacity": "%s %s/%s mB",
-  "entity.littlelogistics.fluid_barge.capacity_empty": "Vide 0/%s mB"
+  "entity.littlelogistics.fluid_barge.capacity_empty": "Vide 0/%s mB",
+
+  "subtitle.littlelogistics.steam_tug_whistle": "Steam tug whistles",
+  "subtitle.littlelogistics.tug_docking": "Tug boat docks",
+  "subtitle.littlelogistics.tug_undocking": "Tug boat undocks"
 }

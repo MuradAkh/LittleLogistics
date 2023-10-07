@@ -3,10 +3,12 @@ package dev.murad.shipping.entity.custom.vessel.barge;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.entity.container.FishingBargeContainer;
+import dev.murad.shipping.entity.custom.TrainInventoryProvider;
+import dev.murad.shipping.util.InventoryUtils;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
-import dev.murad.shipping.util.InventoryUtils;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -29,7 +31,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -47,10 +48,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.IntStream;
 
-public class FishingBargeEntity extends AbstractBargeEntity implements Container, WorldlyContainer {
-    protected final ItemStackHandler itemHandler = createHandler();
-    protected final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
-    protected boolean contentsChanged = false;
+public class FishingBargeEntity extends AbstractBargeEntity {
     private int ticksDeployable = 0;
     private int fishCooldown = 0;
     private final Set<Pair<Integer, Integer>> overFishedCoords = new HashSet<>();
@@ -75,38 +73,21 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
 
 
     @Override
+    // Only called on the server side
     protected void doInteract(Player player) {
-        NetworkHooks.openScreen((ServerPlayer) player, createContainerProvider(), buffer -> buffer.writeInt(this.getId()));
+        var size = getConnectedInventories().size();
 
-    }
-
-    protected MenuProvider createContainerProvider() {
-        return new MenuProvider() {
-            @Override
-            public @NotNull Component getDisplayName() {
-                return Component.translatable("screen.littlelogistics.fishing_barge");
-            }
-
-            @Override
-            public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player Player) {
-                return new FishingBargeContainer(i, level(), getId(), playerInventory, Player);
-            }
-        };
+        player.displayClientMessage(
+                switch (size) {
+                    case 0 -> Component.translatable("global.littlelogistics.no_connected_inventory_barge");
+                    default -> Component.translatable("global.littlelogistics.connected_inventory", size);
+                }, false);
     }
 
     @Override
     public void remove(RemovalReason r) {
-        if (!this.level().isClientSide) {
-            Containers.dropContents(this.level(), this, this);
-        }
         super.remove(r);
     }
-
-
-    private ItemStackHandler createHandler() {
-        return new ItemStackHandler(27);
-    }
-
 
     @Override
     public void tick(){
@@ -139,6 +120,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
         return ((double) count) / 20.0;
     }
 
+    // Only called on server side
     private void tickFish(){
         double overFishPenalty = isOverFished() ? 0.05 : 1;
         double shallowPenalty = computeDepthPenalty();
@@ -161,14 +143,26 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
                     .getLootTable(r < treasure_chance ? BuiltInLootTables.FISHING_TREASURE : FISHING_LOOT_TABLE);
 
             List<ItemStack> list = loottable.getRandomItems(params);
+
+            var inventoryProviders = getConnectedInventories();
+
             for (ItemStack stack : list) {
-                int slot = InventoryUtils.findSlotFotItem(this, stack);
-                if (slot != -1) {
-                    itemHandler.insertItem(slot, stack, false);
+                var leftOver = stack;
+                for (var provider : inventoryProviders) {
+                    if (leftOver.isEmpty()) {
+                        break;
+                    }
+
+                    var itemHandler = provider.getTrainInventoryHandler();
+                    if (itemHandler.isPresent()) {
+                        leftOver = InventoryUtils.moveItemStackIntoHandler(itemHandler.get(), leftOver);
+                    }
                 }
-                if(!isOverFished()) {
-                    addOverFish();
-                }
+                // void the stack if we end up not being able to put it in any connected inventory.
+            }
+
+            if(!isOverFished()) {
+                addOverFish();
             }
         }
     }
@@ -187,33 +181,24 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
     }
 
     @Override
-    public void readAdditionalSaveData(@NotNull CompoundTag compound) {
-        //backwards compat
-        CompoundTag inv = compound.getCompound("inv");
-        inv.remove("Size");
-
-        itemHandler.deserializeNBT(inv);
-
-
-        populateOverfish(compound.getString("overfish"));
-        super.readAdditionalSaveData(compound);
-    }
-
-    @Override
     public void addAdditionalSaveData(@NotNull CompoundTag compound) {
-        compound.put("inv", itemHandler.serializeNBT());
         compound.putString("overfish", overFishedString());
         super.addAdditionalSaveData(compound);
     }
-
-    private void addOverFish(){
+    private void addOverFish() {
         int x = (int) Math.floor(this.getX());
         int z = (int) Math.floor(this.getZ());
         overFishedCoords.add(new Pair<>(x, z));
         overFishedQueue.add(new Pair<>(x, z));
-        if(overFishedQueue.size() > 30){
+        if (overFishedQueue.size() > 30) {
             overFishedCoords.remove(overFishedQueue.poll());
         }
+    }
+
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag compound) {
+        populateOverfish(compound.getString("overfish"));
+        super.readAdditionalSaveData(compound);
     }
 
     private boolean isOverFished(){
@@ -225,81 +210,6 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
     @Override
     public Item getDropItem() {
         return ModItems.FISHING_BARGE.get();
-    }
-
-    @Override
-    public int[] getSlotsForFace(Direction p_180463_1_) {
-        return IntStream.range(0, getContainerSize()).toArray();
-    }
-
-    @Override
-    public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
-        return false;
-    }
-
-    @Override
-    public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack p_180461_2_, Direction p_180461_3_) {
-        return isDockable();
-    }
-
-    @Override
-    public boolean canPlaceItem(int p_94041_1_, ItemStack p_94041_2_) {
-        return false;
-    }
-
-    @Override
-    public int getContainerSize() {
-        return itemHandler.getSlots();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        for (int i = 0; i < itemHandler.getSlots(); i++){
-            if(!itemHandler.getStackInSlot(i).isEmpty() && !itemHandler.getStackInSlot(i).getItem().equals(Items.AIR)){
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public ItemStack getItem(int p_70301_1_) {
-        return itemHandler.getStackInSlot(p_70301_1_);
-    }
-
-    @Override
-    public ItemStack removeItem(int p_70298_1_, int p_70298_2_) {
-       return itemHandler.extractItem(p_70298_1_, p_70298_2_, false);
-    }
-
-    @Override
-    public ItemStack removeItemNoUpdate(int p_70304_1_) {
-        ItemStack itemstack = itemHandler.getStackInSlot(p_70304_1_);
-        if (itemstack.isEmpty()) {
-            return ItemStack.EMPTY;
-        } else {
-            this.itemHandler.setStackInSlot(p_70304_1_, ItemStack.EMPTY);
-            return itemstack;
-        }
-    }
-
-    @Override
-    public void setItem(int p_70299_1_, ItemStack p_70299_2_) {
-        itemHandler.setStackInSlot(p_70299_1_, p_70299_2_);
-    }
-
-    @Override
-    public void setChanged() {
-        contentsChanged = true;
-    }
-
-    @Override
-    public boolean stillValid(Player p_70300_1_) {
-        if (this.dead) {
-            return false;
-        } else {
-            return !(p_70300_1_.distanceToSqr(this) > 64.0D);
-        }
     }
 
     public Status getStatus(){
@@ -319,16 +229,7 @@ public class FishingBargeEntity extends AbstractBargeEntity implements Container
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER) {
-            return handler.cast();
-        }
-
         return super.getCapability(cap, side);
-    }
-
-    @Override
-    public void clearContent() {
-
     }
 
     public enum Status {

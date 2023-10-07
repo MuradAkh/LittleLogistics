@@ -68,8 +68,8 @@ public abstract class AbstractVesselRenderer<T extends VesselEntity> extends Ent
     }
 
     private void getAndRenderChain(T bargeEntity, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
-        if(bargeEntity.getDominant().isPresent()) {
-            double dist = bargeEntity.getDominant().get().distanceTo(bargeEntity);
+        if(bargeEntity.getLeader().isPresent()) {
+            double dist = bargeEntity.getLeader().get().distanceTo(bargeEntity);
             VertexConsumer ivertexbuilderChain = buffer.getBuffer(chainModel.renderType(CHAIN_TEXTURE));
             int segments = (int) Math.ceil(dist * 4);
             matrixStack.pushPose();
@@ -97,11 +97,11 @@ public abstract class AbstractVesselRenderer<T extends VesselEntity> extends Ent
 
     @Override
     public boolean shouldRender(T p_225626_1_, Frustum p_225626_2_, double p_225626_3_, double p_225626_5_, double p_225626_7_) {
-        if(p_225626_1_.getDominant().isPresent()){
-            if(p_225626_1_.getDominant().get().shouldRender(p_225626_3_, p_225626_5_, p_225626_7_)){
+        if(p_225626_1_.getLeader().isPresent()){
+            if(p_225626_1_.getLeader().get().shouldRender(p_225626_3_, p_225626_5_, p_225626_7_)){
                 return true;
             }
-            if(p_225626_1_.getDominant().get().shouldRender(p_225626_3_, p_225626_5_, p_225626_7_)){
+            if(p_225626_1_.getLeader().get().shouldRender(p_225626_3_, p_225626_5_, p_225626_7_)){
                 return true;
             }
         }

@@ -7,6 +7,7 @@ import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModSounds;
+import dev.murad.shipping.util.FuelItemStackHandler;
 import dev.murad.shipping.util.ItemHandlerVanillaContainerWrapper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,8 +23,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
-import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
@@ -34,34 +34,19 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Random;
 
 public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements ItemHandlerVanillaContainerWrapper, WorldlyContainer {
-    private final ItemStackHandler itemHandler = createHandler();
-    private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
-    private static final int FURNACE_FUEL_MULTIPLIER= ShippingConfig.Server.STEAM_LOCO_FUEL_MULTIPLIER.get();
+    private final FuelItemStackHandler fuelItemHandler = new FuelItemStackHandler();
+    private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> fuelItemHandler);
 
+    // This has to remain as ConfigValue as the class isn't reloaded when changing worlds
+    private static final ForgeConfigSpec.ConfigValue<Double> FURNACE_FUEL_MULTIPLIER = ShippingConfig.Server.STEAM_LOCO_FUEL_MULTIPLIER;
+
+    // How many ticks left on this fuel
     protected int burnTime = 0;
+
+    // Max number of ticks for this fuel
     protected int burnCapacity = 0;
-
-    private ItemStackHandler createHandler() {
-        return new ItemStackHandler(1) {
-            @Override
-            public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-                return FurnaceBlockEntity.isFuel(stack);
-            }
-
-            @Nonnull
-            @Override
-            public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-                if (!isItemValid(slot, stack)) {
-                    return stack;
-                }
-
-                return super.insertItem(slot, stack, simulate);
-            }
-        };
-    }
 
     public boolean isLit() {
         return burnTime > 0;
@@ -96,17 +81,11 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
             burnTime--;
             return true;
         } else {
-            ItemStack stack = itemHandler.getStackInSlot(0);
-            if (!stack.isEmpty()) {
-                burnCapacity = (ForgeHooks.getBurnTime(stack, null) * FURNACE_FUEL_MULTIPLIER) - 1;
-                burnTime = burnCapacity - 1;
-                stack.shrink(1);
-                return true;
-            } else {
-                burnCapacity = 0;
-                burnTime = 0;
-                return false;
-            }
+            int burnTime = fuelItemHandler.tryConsumeFuel();
+            int adjustedBurnTime = (int) Math.ceil(burnTime * FURNACE_FUEL_MULTIPLIER.get());
+            this.burnCapacity = adjustedBurnTime;
+            this.burnTime = adjustedBurnTime;
+            return adjustedBurnTime > 0;
         }
     }
 
@@ -149,12 +128,12 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
         return super.getCapability(cap, side);
     }
 
-    public SteamLocomotiveEntity(EntityType<?> type, Level p_38088_) {
-        super(type, p_38088_);
+    public SteamLocomotiveEntity(EntityType<?> type, Level level) {
+        super(type, level);
     }
 
-    public SteamLocomotiveEntity(Level level, Double aDouble, Double aDouble1, Double aDouble2) {
-        super(ModEntityTypes.STEAM_LOCOMOTIVE.get(), level, aDouble, aDouble1, aDouble2);
+    public SteamLocomotiveEntity(Level level, Double x, Double y, Double z) {
+        super(ModEntityTypes.STEAM_LOCOMOTIVE.get(), level, x, y, z);
     }
 
 
@@ -192,12 +171,12 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
 
     @Override
     public ItemStackHandler getRawHandler() {
-        return itemHandler;
+        return fuelItemHandler;
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag compound) {
-        itemHandler.deserializeNBT(compound.getCompound("inv"));
+        fuelItemHandler.deserializeNBT(compound.getCompound("fuelItems"));
         burnTime = compound.contains("burn") ? compound.getInt("burn") : 0;
         burnCapacity = compound.contains("burn_capacity") ? compound.getInt("burn_capacity") : 0;
         super.readAdditionalSaveData(compound);
@@ -205,7 +184,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag compound) {
-        compound.put("inv", itemHandler.serializeNBT());
+        compound.put("fuelItems", fuelItemHandler.serializeNBT());
         compound.putInt("burn", burnTime);
         compound.putInt("burn_capacity", burnCapacity);
         super.addAdditionalSaveData(compound);

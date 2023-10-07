@@ -13,7 +13,7 @@
     {
       "type": "patchouli:crafting",
       "recipe": "littlelogistics:fishing_barge",
-      "text": "Needs to be in open water for nets to be deployed. Use on long routes in open oceans to avoid \"shallow water\" and \"overfishing\" penalties."
+      "text": "Needs to be in open water for nets to be deployed. Use on long routes in open oceans to avoid \"shallow water\" and \"overfishing\" penalties. Connect a Chest Barge behind the Auto-Fishing Barge, as the Auto-Fishing Barge does not provide an inventory of its own."
     }
   ]
 }

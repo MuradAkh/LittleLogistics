@@ -42,6 +42,7 @@ minecraft {
     runs {
         client {
             workingDirectory project.file('run')
+            jvmArg "-XX:+AllowEnhancedClassRedefinition"
 
             // Recommended logging data for a userdev environment
             // The markers can be changed as needed.

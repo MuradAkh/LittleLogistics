@@ -68,6 +68,17 @@
   "screen.littlelogistics.locomotive.route": "已到访：",
   "screen.littlelogistics.locomotive.on": "启动发动机",
   "screen.littlelogistics.locomotive.off": "停止发动机",
+  "screen.littlelogistics.locomotive.register": "Register",
+  "screen.littlelogistics.locomotive.registration": "Registration",
+  "screen.littlelogistics.locomotive.register_info": "Registered vehicles can travel without chunkloaders",
+  "screen.littlelogistics.locomotive.frozen": "As per server config, this vehicle is frozen as the owner is offline",
+
+  "global.littlelogistics.locomotive.register_success": "Maximum number of registered vehicles reached: %s",
+  "global.littlelogistics.locomotive.register_fail": "Successfully registered the vehicle, vehicles registered: %s/%s",
+
+  "global.littlelogistics.no_connected_inventory_barge": "This barge requires a connected inventory behind it but none was provided. Link additional barges that provide inventory behind this one, such as a Chest Barge.",
+  "global.littlelogistics.no_connected_inventory_car": "This barge requires a connected inventory behind it but none was provided. Link additional barges that provide inventory behind this one, such as a Chest Car.",
+  "global.littlelogistics.connected_inventory": "This barge has %s connected inventories",
 
   "item.littlelogistics.tug_route.description": "右击在线路末尾添加节点，再次右击同一位置可删除。潜行右击打开菜单。",
   "item.littlelogistics.tug_route.num_nodes": "线路节点：%s",
@@ -76,6 +87,8 @@
   "item.littlelogistics.tug_route.node": "%s. 节点",
   "item.littlelogistics.tug_route.node_named": "%s. %s",
   "item.littlelogistics.tug_route.node_line": "节点%s：%s, %s",
+
+  "item.littlelogistics.conductors_wrench.description": "Can be used to rotate vanilla rails and configure Little Logistics blocks.",
 
   "item.littlelogistics.locomotive_route.description": "右击铁轨来在线路上添加或移除。",
   "item.littlelogistics.locomotive_route.num_nodes": "线路节点：%s",

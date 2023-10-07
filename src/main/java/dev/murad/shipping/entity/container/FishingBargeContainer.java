@@ -9,6 +9,7 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.SlotItemHandler;
 import org.jetbrains.annotations.NotNull;
 
+// Unused
 public class FishingBargeContainer extends AbstractItemHandlerContainer {
     private final FishingBargeEntity fishingBargeEntity;
 
@@ -36,6 +37,7 @@ public class FishingBargeContainer extends AbstractItemHandlerContainer {
 
     @Override
     public boolean stillValid(@NotNull Player player) {
-        return fishingBargeEntity.stillValid(player);
+        return true;
+//        return fishingBargeEntity.stillValid(player);
     }
 }

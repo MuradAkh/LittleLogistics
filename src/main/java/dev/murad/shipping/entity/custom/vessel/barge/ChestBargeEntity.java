@@ -1,7 +1,9 @@
 package dev.murad.shipping.entity.custom.vessel.barge;
 
+import dev.murad.shipping.entity.custom.TrainInventoryProvider;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import dev.murad.shipping.util.InventoryUtils;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -14,13 +16,15 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
-public class ChestBargeEntity extends AbstractBargeEntity implements Container, MenuProvider, WorldlyContainer {
-    protected final NonNullList<ItemStack> itemStacks = createItemStacks();
+public class ChestBargeEntity extends AbstractBargeEntity implements Container, MenuProvider, WorldlyContainer, TrainInventoryProvider {
+    protected final ItemStackHandler itemHandler = createHandler();
 
     public ChestBargeEntity(EntityType<? extends ChestBargeEntity> type, Level world) {
         super(type, world);
@@ -30,8 +34,8 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
         super(ModEntityTypes.CHEST_BARGE.get(), worldIn, x, y, z);
     }
 
-    protected NonNullList<ItemStack> createItemStacks(){
-        return NonNullList.withSize(36, ItemStack.EMPTY);
+    private ItemStackHandler createHandler() {
+        return new ItemStackHandler(27);
     }
 
     @Override
@@ -55,47 +59,38 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
 
     @Override
     public int getContainerSize() {
-        return 27;
+        return this.itemHandler.getSlots();
     }
 
     @Override
     public boolean isEmpty() {
-        for(ItemStack itemstack : this.itemStacks) {
-            if (!itemstack.isEmpty()) {
-                return false;
-            }
-        }
-
-        return true;
+        return InventoryUtils.isEmpty(this.itemHandler);
     }
 
     @Override
-    public ItemStack getItem(int slot) {
-        return this.itemStacks.get(slot);
+    public @NotNull ItemStack getItem(int slot) {
+        return this.itemHandler.getStackInSlot(slot);
     }
 
     @Override
-    public ItemStack removeItem(int slot, int count) {
-        return ContainerHelper.removeItem(this.itemStacks, slot, count);
+    public @NotNull ItemStack removeItem(int slot, int count) {
+        return itemHandler.extractItem(slot, count, false);
     }
 
     @Override
-    public ItemStack removeItemNoUpdate(int slot) {
-        ItemStack itemstack = this.itemStacks.get(slot);
+    public @NotNull ItemStack removeItemNoUpdate(int slot) {
+        ItemStack itemstack = itemHandler.getStackInSlot(slot);
         if (itemstack.isEmpty()) {
             return ItemStack.EMPTY;
         } else {
-            this.itemStacks.set(slot, ItemStack.EMPTY);
+            this.itemHandler.setStackInSlot(slot, ItemStack.EMPTY);
             return itemstack;
         }
     }
 
     @Override
-    public void setItem(int slot, ItemStack stack) {
-        this.itemStacks.set(slot, stack);
-        if (!stack.isEmpty() && stack.getCount() > this.getMaxStackSize()) {
-            stack.setCount(this.getMaxStackSize());
-        }
+    public void setItem(int slot, @NotNull ItemStack stack) {
+        itemHandler.setStackInSlot(slot, stack);
     }
 
     @Override
@@ -114,7 +109,7 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
 
     @Override
     public void clearContent() {
-        this.itemStacks.clear();
+
     }
 
     @Nullable
@@ -129,13 +124,13 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
-        ContainerHelper.saveAllItems(tag, this.itemStacks);
+        tag.put("Items", itemHandler.serializeNBT());
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        ContainerHelper.loadAllItems(tag, this.itemStacks);
+        itemHandler.deserializeNBT(tag.getCompound("Items"));
     }
 
     @Override
@@ -144,12 +139,17 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
     }
 
     @Override
-    public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
+    public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack item, @Nullable Direction p_180462_3_) {
         return isDockable();
     }
 
     @Override
-    public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack p_180461_2_, Direction p_180461_3_) {
+    public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack item, Direction p_180461_3_) {
         return isDockable();
+    }
+
+    @Override
+    public Optional<ItemStackHandler> getTrainInventoryHandler() {
+        return Optional.of(itemHandler);
     }
 }

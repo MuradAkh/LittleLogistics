@@ -12,8 +12,8 @@ import java.util.stream.Stream;
 
 public interface LinkableEntity<V extends LinkableEntity<V>> {
 
-    Optional<V> getDominated();
-    Optional<V> getDominant();
+    Optional<V> getFollower();
+    Optional<V> getLeader();
     void setDominated(V entity);
     void setDominant(V entity);
     void removeDominated();
@@ -25,16 +25,16 @@ public interface LinkableEntity<V extends LinkableEntity<V>> {
     boolean hasWaterOnSides();
 
     default void handleLinkableKill(){
-        this.getDominated().ifPresent(LinkableEntity::removeDominant);
-        this.getDominant().ifPresent(LinkableEntity::removeDominated);
+        this.getFollower().ifPresent(LinkableEntity::removeDominant);
+        this.getLeader().ifPresent(LinkableEntity::removeDominated);
     }
 
     default boolean checkNoLoopsDominated(){
-        return checkNoLoopsHelper(this, (LinkableEntity::getDominated), new HashSet<>());
+        return checkNoLoopsHelper(this, (LinkableEntity::getFollower), new HashSet<>());
     }
 
     default boolean checkNoLoopsDominant(){
-        return checkNoLoopsHelper(this, (LinkableEntity::getDominant), new HashSet<>());
+        return checkNoLoopsHelper(this, (LinkableEntity::getLeader), new HashSet<>());
     }
 
     default boolean checkNoLoopsHelper(LinkableEntity<V> entity, Function<LinkableEntity<V>, Optional<V>> next, Set<LinkableEntity<V>> set){
@@ -53,7 +53,7 @@ public interface LinkableEntity<V extends LinkableEntity<V>> {
     default<U> Stream<U> applyWithDominant(Function<LinkableEntity<V>, U> function){
         Stream<U> ofThis = Stream.of(function.apply(this));
 
-        return checkNoLoopsDominant() ? ofThis : this.getDominant().map(dom ->
+        return checkNoLoopsDominant() ? ofThis : this.getLeader().map(dom ->
                 Stream.concat(ofThis, dom.applyWithDominant(function))
         ).orElse(ofThis);
 
@@ -62,7 +62,7 @@ public interface LinkableEntity<V extends LinkableEntity<V>> {
     default<U> Stream<U> applyWithDominated(Function<LinkableEntity<V>, U> function){
         Stream<U> ofThis = Stream.of(function.apply(this));
 
-        return checkNoLoopsDominated() ? ofThis : this.getDominated().map(dom ->
+        return checkNoLoopsDominated() ? ofThis : this.getFollower().map(dom ->
                 Stream.concat(ofThis, dom.applyWithDominated(function))
         ).orElse(ofThis);
 

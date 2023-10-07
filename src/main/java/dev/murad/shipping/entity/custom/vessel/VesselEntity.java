@@ -1,6 +1,8 @@
 package dev.murad.shipping.entity.custom.vessel;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.entity.custom.TrainInventoryProvider;
+import dev.murad.shipping.entity.custom.vessel.barge.ChestBargeEntity;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.LinkingHandler;
@@ -54,7 +56,9 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -184,13 +188,12 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     public abstract Item getDropItem();
 
     @Override
-    public Optional<VesselEntity> getDominated() {
+    public Optional<VesselEntity> getFollower() {
         return this.linkingHandler.follower;
     }
 
-
     @Override
-    public Optional<VesselEntity> getDominant() {
+    public Optional<VesselEntity> getLeader() {
         return this.linkingHandler.leader;
     }
 
@@ -666,4 +669,38 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     protected double swimSpeed() {
         return this.getAttribute(ForgeMod.SWIM_SPEED.get()).getValue();
     }
+
+    /**
+     * Grabs a list of connected vessels that provides inventory to this vessel
+     * For Example:
+     * Tug F F F C C C -- All F barges are linked to all C barges
+     * Tug F C F C F C -- Each F barge is linked to 1 C barge
+     */
+    public List<TrainInventoryProvider> getConnectedInventories() {
+        List<TrainInventoryProvider> result = new ArrayList<>();
+
+        var vessel = getFollower();
+        while (vessel.isPresent()) {
+            // TODO generalize this to all inventory providers
+            if (vessel.get() instanceof TrainInventoryProvider) {
+                break;
+            }
+
+            vessel = vessel.get().getFollower();
+        }
+
+        // vessel is either empty or is a chest barge
+        while (vessel.isPresent()) {
+            if (vessel.get() instanceof TrainInventoryProvider e) {
+                result.add(e);
+            } else {
+                break;
+            }
+
+            vessel = vessel.get().getFollower();
+        }
+
+        return result;
+    }
+
 }

@@ -124,7 +124,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     public abstract DataAccessor getDataAccessor();
 
     private ItemStackHandler createRouteItemHandler() {
-        return new ItemStackHandler(1) {
+        return new ItemStackHandler() {
             @Override
             protected int getStackLimit(int slot, @Nonnull ItemStack stack) {
                 return 1;
@@ -138,16 +138,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             @Override
             public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
                 return stack.getItem() instanceof TugRouteItem;
-            }
-
-            @Nonnull
-            @Override
-            public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-                if (!isItemValid(slot, stack)) {
-                    return stack;
-                }
-
-                return super.insertItem(slot, stack, simulate);
             }
         };
     }
