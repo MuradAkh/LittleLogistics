@@ -5,6 +5,7 @@ import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.custom.vessel.VesselEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.util.Train;
+import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -15,6 +16,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -110,7 +113,7 @@ public abstract class AbstractBargeEntity extends VesselEntity {
 
     // hack to disable hoppers
     public boolean isDockable() {
-        return this.linkingHandler.leader.map(dom -> this.distanceToSqr((Entity) dom) < 1.1).orElse(true);
+        return this.linkingHandler.leader.map(dom -> this.distanceToSqr(dom) < 1.1).orElse(true);
     }
 
     public boolean allowDockInterface(){
@@ -125,12 +128,10 @@ public abstract class AbstractBargeEntity extends VesselEntity {
 
         @Override
         public void dock(double x, double y, double z) {
-            delegate().ifPresent(s -> s.dock(x, y, z));
         }
 
         @Override
         public void undock() {
-            delegate().ifPresent(StallingCapability::undock);
         }
 
         @Override
@@ -173,12 +174,12 @@ public abstract class AbstractBargeEntity extends VesselEntity {
 
     private final LazyOptional<StallingCapability> capabilityOpt = LazyOptional.of(() -> capability);
 
-    @Nonnull
+    @NotNull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
         if (cap == StallingCapability.STALLING_CAPABILITY) {
             return capabilityOpt.cast();
         }
-        return super.getCapability(cap);
+        return super.getCapability(cap, side);
     }
 }

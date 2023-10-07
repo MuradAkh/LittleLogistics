@@ -31,41 +31,38 @@ public abstract class AbstractHeadDockTileEntity<T extends Entity & LinkableEnti
         return InventoryUtils.mayMoveIntoInventory((Container) tugEntity, hopper);
     }
 
-
+    /**
+     * Hold determines if we should start dock or keep docking entire train
+     * Checks:
+     * 1. If itself needs to hold, or
+     * 2. Any tail needs to hold
+     */
     public boolean hold(T tug, Direction direction){
         if (!(tug instanceof LinkableEntityHead) || checkBadDirCondition(tug, direction)){
             return false;
         }
 
         // force tug to be docked when powered
-        // todo: add UI for inverted mode toggle?
         if (getBlockState().getValue(DockingBlockStates.POWERED)) {
             return true;
         }
 
-        for (BlockPos p : getTargetBlockPos()) {
-            if (getHopper(p).map(hopper -> handleItemHopper(tug, hopper))
-                    .orElse(getVesselLoader(p).map(l -> l.hold(tug, IVesselLoader.Mode.EXPORT)).orElse(false))) {
-                return true;
-            }
-        }
-
+        // TODO: replace with item/fluid/energy transfer cooldown check
 
         List<Pair<T, AbstractTailDockTileEntity<T>>> barges = getTailDockPairs(tug);
-
 
         if (barges.stream().map(pair -> pair.getSecond().hold(pair.getFirst(), direction)).reduce(false, Boolean::logicalOr)){
             return true;
         }
 
-        return false;
+        return true;
     }
 
     protected abstract boolean checkBadDirCondition(T tug, Direction direction);
 
     protected abstract Direction getRowDirection(Direction facing);
 
-    private List<Pair<T, AbstractTailDockTileEntity<T>>> getTailDockPairs(T tug){
+    public List<Pair<T, AbstractTailDockTileEntity<T>>> getTailDockPairs(T tug){
         List<T> barges = tug.getTrain().asListOfTugged();
         List<AbstractTailDockTileEntity<T>> docks = getTailDocks();
         return IntStream.range(0, Math.min(barges.size(), docks.size()))
@@ -73,7 +70,10 @@ public abstract class AbstractHeadDockTileEntity<T extends Entity & LinkableEnti
                 .collect(Collectors.toList());
     }
 
-    private List<AbstractTailDockTileEntity<T>> getTailDocks(){
+    /**
+     * Get list of adjacent tail docks
+     */
+    public List<AbstractTailDockTileEntity<T>> getTailDocks(){
         Direction facing = this.getBlockState().getValue(DockingBlockStates.FACING);
         Direction rowDirection = getRowDirection(facing);
         List<AbstractTailDockTileEntity<T>> docks = new ArrayList<>();

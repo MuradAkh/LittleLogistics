@@ -57,7 +57,7 @@ public class ShippingConfig {
 
         public static final ForgeConfigSpec.ConfigValue<Double> TUG_BASE_SPEED;
 
-        public static final ForgeConfigSpec.ConfigValue<Integer> STEAM_TUG_FUEL_MULTIPLIER;
+        public static final ForgeConfigSpec.ConfigValue<Double> STEAM_TUG_FUEL_MULTIPLIER;
 
         public static final ForgeConfigSpec.ConfigValue<Integer> TUG_PATHFINDING_MULTIPLIER;
         public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_CAPACITY;
@@ -67,7 +67,7 @@ public class ShippingConfig {
         public static final ForgeConfigSpec.ConfigValue<Double> TRAIN_MAX_SPEED;
         public static final ForgeConfigSpec.ConfigValue<Double> LOCO_BASE_SPEED;
 
-        public static final ForgeConfigSpec.ConfigValue<Integer> STEAM_LOCO_FUEL_MULTIPLIER;
+        public static final ForgeConfigSpec.ConfigValue<Double> STEAM_LOCO_FUEL_MULTIPLIER;
         public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_CAPACITY;
         public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_ENERGY_USAGE;
         public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_MAX_CHARGE_RATE;
@@ -137,8 +137,8 @@ public class ShippingConfig {
                                 .defineInRange("tugPathfindMult", 1, 1, 10);
 
                 STEAM_TUG_FUEL_MULTIPLIER =
-                        BUILDER.comment("Increases the burn duration of Steam tug fuel by N times when compared to furnace, must be an integer >= 1. Default 4.")
-                                .defineInRange("steamTugFuelMultiplier", 4, 1, Integer.MAX_VALUE);
+                        BUILDER.comment("Increases the burn duration of Steam tug fuel by N times when compared to furnace, must be >= 0.01. Default 4.0.")
+                                .defineInRange("steamTugFuelMultiplier", 4.0, 0.01, Double.MAX_VALUE);
 
                 ENERGY_TUG_BASE_CAPACITY =
                         BUILDER.comment("Base maximum capacity of the Energy tug in FE, must be an integer >= 1. Default 10000.")
@@ -185,8 +185,8 @@ public class ShippingConfig {
                                 .defineInRange("locoBaseSpeed", 0.5, 0.01, 0.9);
 
                 STEAM_LOCO_FUEL_MULTIPLIER =
-                        BUILDER.comment("Increases the burn duration of Steam locomotive fuel by N times when compared to furnace, must be an integer >= 1. Default 4.")
-                                .defineInRange("steamLocoFuelMultiplier", 4, 1, Integer.MAX_VALUE);
+                        BUILDER.comment("Increases the burn duration of Steam locomotive fuel by N times when compared to furnace, must be >= 0.01. Default 4.0.")
+                                .defineInRange("steamLocoFuelMultiplier", 4.0, 0.01, Double.MAX_VALUE);
 
                 ENERGY_LOCO_BASE_CAPACITY =
                         BUILDER.comment("Base maximum capacity of the Energy locomotive in FE, must be an integer >= 1. Default 10000.")

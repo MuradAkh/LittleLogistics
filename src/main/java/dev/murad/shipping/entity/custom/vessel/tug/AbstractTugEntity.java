@@ -166,13 +166,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag compound) {
-        if(compound.contains("inv")){
-            ItemStackHandler old = new ItemStackHandler();
-            old.deserializeNBT(compound.getCompound("inv"));
-            routeItemHandler.setStackInSlot(0, old.getStackInSlot(0));
-        }else{
-            routeItemHandler.deserializeNBT(compound.getCompound("routeHandler"));
-        }
+        routeItemHandler.deserializeNBT(compound.getCompound("routeHandler"));
+
         nextStop = compound.contains("next_stop") ? compound.getInt("next_stop") : 0;
         engineOn = !compound.contains("engineOn") || compound.getBoolean("engineOn");
         contentsChanged = true;
@@ -241,7 +236,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
                 return;
             }
 
-            // Check docks
+            // Check if any docks in the chain needs to hold
             boolean shouldDock = this.getSideDirections()
                     .stream()
                     .map((curr) ->
@@ -689,10 +684,10 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction dir) {
         if (cap == StallingCapability.STALLING_CAPABILITY) {
             return stallingOpt.cast();
         }
-        return super.getCapability(cap);
+        return super.getCapability(cap, dir);
     }
 }

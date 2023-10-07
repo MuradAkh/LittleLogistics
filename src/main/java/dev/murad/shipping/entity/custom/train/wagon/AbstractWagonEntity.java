@@ -1,14 +1,18 @@
 package dev.murad.shipping.entity.custom.train.wagon;
 
+import dev.murad.shipping.block.dock.AbstractDockTileEntity;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.util.Train;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -92,12 +96,10 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
 
         @Override
         public void dock(double x, double y, double z) {
-            delegate().ifPresent(s -> s.dock(x, y, z));
         }
 
         @Override
         public void undock() {
-            delegate().ifPresent(StallingCapability::undock);
         }
 
         @Override
@@ -140,12 +142,11 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
 
     private final LazyOptional<StallingCapability> capabilityOpt = LazyOptional.of(() -> capability);
 
-    @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
         if (cap == StallingCapability.STALLING_CAPABILITY) {
             return capabilityOpt.cast();
         }
-        return super.getCapability(cap);
+        return super.getCapability(cap, side);
     }
 }

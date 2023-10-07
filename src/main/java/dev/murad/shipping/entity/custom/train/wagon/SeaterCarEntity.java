@@ -4,6 +4,7 @@ import dev.murad.shipping.compatibility.create.CapabilityInjector;
 import dev.murad.shipping.compatibility.create.CreateCompatibility;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -122,13 +123,13 @@ public class SeaterCarEntity extends AbstractWagonEntity {
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction face) {
         if (CreateCompatibility.enabled() &&
                 createCompatMinecartControllerCapability != null
                 && CapabilityInjector.isMinecartControllerCapability(cap)
         ) {
             return createCompatMinecartControllerCapability.cast();
         }
-        return super.getCapability(cap);
+        return super.getCapability(cap, face);
     }
 }

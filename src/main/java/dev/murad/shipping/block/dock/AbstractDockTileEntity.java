@@ -1,6 +1,5 @@
 package dev.murad.shipping.block.dock;
 
-import dev.murad.shipping.block.IVesselLoader;
 import dev.murad.shipping.util.LinkableEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -8,15 +7,32 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
+import org.apache.commons.lang3.mutable.MutableObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Optional;
 
 
 public abstract class AbstractDockTileEntity<T extends Entity & LinkableEntity<T>> extends BlockEntity {
-    public AbstractDockTileEntity(BlockEntityType<?> p_i48289_1_, BlockPos pos, BlockState s) {
-        super(p_i48289_1_, pos, s);
+
+    private static final ItemStackHandler EMPTY_ITEM_HANDLER = new ItemStackHandler(0);
+
+    private final MutableObject<Entity> dockedEntity;
+
+    private LazyOptional<IItemHandler> itemCapability;
+
+    public AbstractDockTileEntity(BlockEntityType<?> entityType, BlockPos pos, BlockState s) {
+        super(entityType, pos, s);
+        dockedEntity = new MutableObject<>(null);
+        itemCapability = LazyOptional.of(() -> EMPTY_ITEM_HANDLER);
     }
 
     public abstract boolean hold(T vessel, Direction direction);
@@ -29,14 +45,42 @@ public abstract class AbstractDockTileEntity<T extends Entity & LinkableEntity<T
         else return Optional.empty();
     }
 
-    public Optional<IVesselLoader> getVesselLoader(BlockPos p){
-        BlockEntity mayBeHopper = this.level.getBlockEntity(p);
-        if (mayBeHopper instanceof IVesselLoader l) {
-            return Optional.of(l);
+    @Override
+    public @NotNull <C> LazyOptional<C> getCapability(@NotNull Capability<C> cap, @Nullable Direction side) {
+        if (cap == ForgeCapabilities.ITEM_HANDLER) {
+            return itemCapability.cast();
         }
-        else return Optional.empty();
+
+        // TODO: fluids and energy
+        return super.getCapability(cap, side);
     }
 
-    protected abstract List<BlockPos> getTargetBlockPos();
+    public void setDockedEntity(Entity e) {
+        dockedEntity.setValue(e);
 
+        itemCapability.invalidate();
+        itemCapability = LazyOptional.of(() -> {
+            System.out.println("Item Capability");
+            if (dockedEntity.getValue() != null && dockedEntity.getValue().isRemoved()) {
+                resetDockedEntity();
+            }
+
+            // needs to be below the above block
+            var entity = dockedEntity.getValue();
+
+            // Delegate to docked entity
+            if (entity != null) {
+                var opt = entity.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve();
+                if (opt.isPresent()) {
+                    return opt.get();
+                }
+            }
+
+            return EMPTY_ITEM_HANDLER;
+        });
+    }
+
+    public void resetDockedEntity() {
+        setDockedEntity(null);
+    }
 }

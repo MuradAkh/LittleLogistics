@@ -73,8 +73,12 @@
   "screen.littlelogistics.locomotive.register_info": "Registered vehicles can travel without chunkloaders",
   "screen.littlelogistics.locomotive.frozen": "As per server config, this vehicle is frozen as the owner is offline",
 
-  "global.littlelogistics.locomotive.register_success": "Maximim number of registered vehicles reached: %s",
+  "global.littlelogistics.locomotive.register_success": "Maximum number of registered vehicles reached: %s",
   "global.littlelogistics.locomotive.register_fail": "Successfully registered the vehicle, vehicles registered: %s/%s",
+
+  "global.littlelogistics.no_connected_inventory_barge": "This barge requires a connected inventory behind it but none was provided. Link additional barges that provide inventory behind this one, such as a Chest Barge.",
+  "global.littlelogistics.no_connected_inventory_car": "This barge requires a connected inventory behind it but none was provided. Link additional barges that provide inventory behind this one, such as a Chest Car.",
+  "global.littlelogistics.connected_inventory": "This barge has %s connected inventories",
 
   "item.littlelogistics.tug_route.description": "Right click to add node at the end of the route, right click at the same location to remove. Shift right click to bring up menu.",
   "item.littlelogistics.tug_route.num_nodes": "Route Nodes: %s",

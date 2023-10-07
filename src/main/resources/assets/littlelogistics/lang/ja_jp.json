@@ -18,7 +18,6 @@
 
   "item.littlelogistics.receiver_component": "ワイヤレス受信部品",
   "item.littlelogistics.transmitter_component": "ワイヤレス送信部品",
-
   "item.littlelogistics.conductors_wrench": "コンダクターレンチ",
 
   "entity.littlelogistics.tug": "蒸気曳船",
@@ -69,6 +68,17 @@
   "screen.littlelogistics.locomotive.route": "目的地:",
   "screen.littlelogistics.locomotive.on": "動力起動",
   "screen.littlelogistics.locomotive.off": "動力停止",
+  "screen.littlelogistics.locomotive.register": "Register",
+  "screen.littlelogistics.locomotive.registration": "Registration",
+  "screen.littlelogistics.locomotive.register_info": "Registered vehicles can travel without chunkloaders",
+  "screen.littlelogistics.locomotive.frozen": "As per server config, this vehicle is frozen as the owner is offline",
+
+  "global.littlelogistics.locomotive.register_success": "Maximum number of registered vehicles reached: %s",
+  "global.littlelogistics.locomotive.register_fail": "Successfully registered the vehicle, vehicles registered: %s/%s",
+
+  "global.littlelogistics.no_connected_inventory_barge": "This barge requires a connected inventory behind it but none was provided. Link additional barges that provide inventory behind this one, such as a Chest Barge.",
+  "global.littlelogistics.no_connected_inventory_car": "This barge requires a connected inventory behind it but none was provided. Link additional barges that provide inventory behind this one, such as a Chest Car.",
+  "global.littlelogistics.connected_inventory": "This barge has %s connected inventories",
 
   "item.littlelogistics.tug_route.description": "右クリックで立っている地点にノードを追加でき、既にあるノードの地点で右クリックすることによりノードを削除できます。Shiftキーを押しながら右クリックでメニューを表示します。",
   "item.littlelogistics.tug_route.num_nodes": "ルートノード: %s",
@@ -77,6 +87,8 @@
   "item.littlelogistics.tug_route.node": "%s.ノード",
   "item.littlelogistics.tug_route.node_named": "%s. %s",
   "item.littlelogistics.tug_route.node_line": "ノード %s: %s, %s",
+
+  "item.littlelogistics.conductors_wrench.description": "Can be used to rotate vanilla rails and configure Little Logistics blocks.",
 
   "item.littlelogistics.locomotive_route.description": "線路に向かって右クリックでその地点をルートに追加でき、追加済みの地点で再び右クリックすることによりその地点をルートから削除できます",
   "item.littlelogistics.locomotive_route.num_nodes": "ルートノード: %s",

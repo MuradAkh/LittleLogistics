@@ -1,6 +1,7 @@
 package dev.murad.shipping.entity.custom.train.locomotive;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.block.dock.AbstractDockTileEntity;
 import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
 import dev.murad.shipping.capability.StallingCapability;
@@ -53,7 +54,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity implements LinkableEntityHead<AbstractTrainCarEntity>, ItemHandlerVanillaContainerWrapper, HeadVehicle {
+public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity implements LinkableEntityHead<AbstractTrainCarEntity>, HeadVehicle {
     @Setter
     protected boolean engineOn = false;
 
@@ -380,7 +381,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     private void tickDockCheck() {
         getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(cap -> {
             int x = (int) Math.floor(this.getX());
-            int y = (int) Math.floor(this.getY());
             int z = (int) Math.floor(this.getZ());
 
             boolean docked = cap.isDocked();
@@ -403,22 +403,36 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
 
             // Check docks
-            boolean shouldDock = Optional.ofNullable(level().getBlockEntity(getOnPos().above()))
-                                    .filter(entity -> entity instanceof LocomotiveDockTileEntity)
-                                    .map(entity -> (LocomotiveDockTileEntity) entity)
-                                    .map(dock -> dock.hold(this, getDirection()))
-                                    .orElse(false);
+            var rail = (LocomotiveDockTileEntity) Optional.ofNullable(level().getBlockEntity(getOnPos().above()))
+                    .filter(entity -> entity instanceof LocomotiveDockTileEntity).orElse(null);
 
-            boolean changedDock = !docked && shouldDock;
-            boolean changedUndock = docked && !shouldDock;
+            boolean shouldDock;
 
-            if(shouldDock) {
+            if (rail != null) {
+                shouldDock = rail.hold(this, getDirection());
+            } else {
+                shouldDock = false;
+            }
+
+            if (shouldDock) {
                 dockCheckCooldown = 20; // todo: magic number
-                cap.dock(x + 0.5 ,getY(),z + 0.5);
+                cap.dock(x + 0.5, getY(),z + 0.5);
+                rail.setDockedEntity(this);
+
+                // dock each tail member as well
+                rail.getTailDockPairs(this).forEach(p -> p.getSecond().setDockedEntity(p.getFirst()));
             } else {
                 dockCheckCooldown = 0;
                 cap.undock();
+
+                if (rail != null) {
+                    rail.resetDockedEntity();
+                    rail.getTailDocks().forEach(AbstractDockTileEntity::resetDockedEntity);
+                }
             }
+
+            boolean changedDock = !docked && shouldDock;
+            boolean changedUndock = docked && !shouldDock;
 
             if (changedDock) onDock();
             if (changedUndock) onUndock();
@@ -564,11 +578,11 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction dir) {
         if (cap == StallingCapability.STALLING_CAPABILITY) {
             return stallingOpt.cast();
         }
-        return super.getCapability(cap);
+        return super.getCapability(cap, dir);
     }
 
     private void updateNavigatorFromItem() {
@@ -612,12 +626,4 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         }
     }
 
-    @Override
-    public boolean stillValid(Player pPlayer) {
-        if (this.isRemoved()) {
-            return false;
-        } else {
-            return !(this.distanceToSqr(pPlayer) > 64D);
-        }
-    }
 }

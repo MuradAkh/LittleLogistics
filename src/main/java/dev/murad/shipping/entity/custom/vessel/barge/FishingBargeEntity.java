@@ -71,11 +71,16 @@ public class FishingBargeEntity extends AbstractBargeEntity {
         super(ModEntityTypes.FISHING_BARGE.get(), worldIn, x, y, z);
     }
 
-
     @Override
     protected void doInteract(Player player) {
         // TODO: check status of connected inventories and print to chat
-        System.out.println(getConnectedInventories().size());
+        var inventories = getConnectedInventories().size();
+
+        if (inventories == 0) {
+            player.displayClientMessage(Component.translatable("global.littlelogistics.no_connected_inventory_barge"), false);
+        } else {
+            player.displayClientMessage(Component.translatable("global.littlelogistics.connected_inventory", inventories), false);
+        }
     }
 
     @Override

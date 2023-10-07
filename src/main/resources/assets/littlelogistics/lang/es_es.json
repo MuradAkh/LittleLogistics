@@ -68,6 +68,17 @@
   "screen.littlelogistics.locomotive.route": "Visitado:",
   "screen.littlelogistics.locomotive.on": "Encender motor",
   "screen.littlelogistics.locomotive.off": "Detener motor",
+  "screen.littlelogistics.locomotive.register": "Register",
+  "screen.littlelogistics.locomotive.registration": "Registration",
+  "screen.littlelogistics.locomotive.register_info": "Registered vehicles can travel without chunkloaders",
+  "screen.littlelogistics.locomotive.frozen": "As per server config, this vehicle is frozen as the owner is offline",
+
+  "global.littlelogistics.locomotive.register_success": "Maximum number of registered vehicles reached: %s",
+  "global.littlelogistics.locomotive.register_fail": "Successfully registered the vehicle, vehicles registered: %s/%s",
+
+  "global.littlelogistics.no_connected_inventory_barge": "This barge requires a connected inventory behind it but none was provided. Link additional barges that provide inventory behind this one, such as a Chest Barge.",
+  "global.littlelogistics.no_connected_inventory_car": "This barge requires a connected inventory behind it but none was provided. Link additional barges that provide inventory behind this one, such as a Chest Car.",
+  "global.littlelogistics.connected_inventory": "This barge has %s connected inventories",
 
   "item.littlelogistics.tug_route.description": "Haga click derecho para agregar un nodo al final de la ruta, haga clic con el botón derecho en la misma ubicación para eliminarlo. Shift + click derecho para abrir el menú.",
   "item.littlelogistics.tug_route.num_nodes": "Nodos en la ruta: %s",
@@ -76,12 +87,14 @@
   "item.littlelogistics.tug_route.node": "%s. Nodo",
   "item.littlelogistics.tug_route.node_named": "%s. %s",
   "item.littlelogistics.tug_route.node_line": "Nodo %s: %s, %s",
-  
+
+  "item.littlelogistics.conductors_wrench.description": "Can be used to rotate vanilla rails and configure Little Logistics blocks.",
+
   "item.littlelogistics.locomotive_route.description": "Haga clic con el botón derecho en un carril para agregarlo o eliminarlo de la ruta.",
   "item.littlelogistics.locomotive_route.num_nodes": "Nodos en la ruta: %s",
   "item.littlelogistics.locomotive_route.added": "Nodo de ruta agregado en X:%s Y:%s Z:%s",
   "item.littlelogistics.locomotive_route.removed": "Nodo de ruta eliminado en X:%s Y:%s Z:%s",
- 
+
   "item.littlelogistics.spring.description": "Se utiliza para vincular vehículos.",
   "item.littlelogistics.spring.notToSelf": "No se pueden vincular vehículos a uno mismo",
   "item.littlelogistics.spring.noTwoTugs": "No se pueden vincular dos remolcadores",

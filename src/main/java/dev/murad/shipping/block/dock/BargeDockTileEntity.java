@@ -14,15 +14,6 @@ public class BargeDockTileEntity extends AbstractTailDockTileEntity<VesselEntity
     }
 
     @Override
-    protected List<BlockPos> getTargetBlockPos(){
-        if (isExtract()) {
-            return List.of(this.getBlockPos()
-                    .below()
-                    .relative(this.getBlockState().getValue(DockingBlockStates.FACING)));
-        } else return List.of(this.getBlockPos().above());
-    }
-
-    @Override
     protected boolean checkBadDirCondition(Direction direction) {
         return !getBlockState().getValue(DockingBlockStates.FACING).getOpposite().equals(direction);
     }

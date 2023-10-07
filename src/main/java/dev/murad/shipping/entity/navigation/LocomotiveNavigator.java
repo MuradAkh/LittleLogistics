@@ -42,7 +42,7 @@ public class LocomotiveNavigator {
         this.decisionCache.clear();
     }
 
-    public LocomotiveNavigator(AbstractLocomotiveEntity locomotive) {
+    public  LocomotiveNavigator(AbstractLocomotiveEntity locomotive) {
         this.locomotive = locomotive;
         this.decisionCache = new HashMap<>();
         this.visitedNodes = new HashSet<>();

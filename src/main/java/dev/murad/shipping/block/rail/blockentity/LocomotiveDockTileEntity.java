@@ -17,12 +17,6 @@ public class LocomotiveDockTileEntity extends AbstractHeadDockTileEntity<Abstrac
     }
 
     @Override
-    protected List<BlockPos> getTargetBlockPos() {
-        var facing =  getBlockState().getValue(DockingBlockStates.FACING);
-        return List.of(getBlockPos().relative(facing.getCounterClockWise()), getBlockPos().relative(facing.getClockWise()));
-    }
-
-    @Override
     protected boolean checkBadDirCondition(AbstractTrainCarEntity tug, Direction direction) {
         return !tug.getDirection().equals(getBlockState().getValue(DockingBlockStates.FACING));
     }
