@@ -56,7 +56,7 @@ public class FluidTankCarEntity extends AbstractWagonEntity {
     }
 
     @Override
-    public ItemStack getPickResult() {
+    public @NotNull ItemStack getPickResult() {
         return new ItemStack(ModItems.FLUID_CAR.get());
     }
 

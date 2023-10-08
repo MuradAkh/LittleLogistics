@@ -138,7 +138,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
 
 
     @Override
-    public ItemStack getPickResult() {
+    public @NotNull ItemStack getPickResult() {
         return new ItemStack(ModItems.STEAM_LOCOMOTIVE.get());
     }
 

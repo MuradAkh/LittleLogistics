@@ -42,7 +42,7 @@ public class SeaterCarEntity extends AbstractWagonEntity {
     }
 
     @Override
-    public ItemStack getPickResult() {
+    public @NotNull ItemStack getPickResult() {
         return new ItemStack(ModItems.SEATER_CAR.get());
     }
 

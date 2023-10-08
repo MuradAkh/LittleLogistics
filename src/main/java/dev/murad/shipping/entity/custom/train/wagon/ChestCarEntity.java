@@ -49,7 +49,7 @@ public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVa
     }
 
     @Override
-    public ItemStack getPickResult() {
+    public @NotNull ItemStack getPickResult() {
         return new ItemStack(ModItems.CHEST_CAR.get());
     }
 

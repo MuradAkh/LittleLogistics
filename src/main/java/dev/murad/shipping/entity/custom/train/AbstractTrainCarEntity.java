@@ -11,6 +11,7 @@ import dev.murad.shipping.util.LinkingHandler;
 import dev.murad.shipping.util.RailHelper;
 import dev.murad.shipping.util.Train;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -62,7 +63,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     @Setter
     private boolean frozen = false;
 
-    private static final Map<RailShape, Pair<Vec3i, Vec3i>> EXITS = Util.make(Maps.newEnumMap(RailShape.class), (p_38135_) -> {
+    private static final Map<RailShape, Pair<Vec3i, Vec3i>> EXITS = Util.make(Maps.newEnumMap(RailShape.class), (enumMap) -> {
         Vec3i west = Direction.WEST.getNormal();
         Vec3i east = Direction.EAST.getNormal();
         Vec3i north = Direction.NORTH.getNormal();
@@ -71,16 +72,16 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         Vec3i eastUnder = east.below();
         Vec3i northUnder = north.below();
         Vec3i southUnder = south.below();
-        p_38135_.put(RailShape.NORTH_SOUTH, Pair.of(north, south));
-        p_38135_.put(RailShape.EAST_WEST, Pair.of(west, east));
-        p_38135_.put(RailShape.ASCENDING_EAST, Pair.of(westUnder, east));
-        p_38135_.put(RailShape.ASCENDING_WEST, Pair.of(west, eastUnder));
-        p_38135_.put(RailShape.ASCENDING_NORTH, Pair.of(north, southUnder));
-        p_38135_.put(RailShape.ASCENDING_SOUTH, Pair.of(northUnder, south));
-        p_38135_.put(RailShape.SOUTH_EAST, Pair.of(south, east));
-        p_38135_.put(RailShape.SOUTH_WEST, Pair.of(south, west));
-        p_38135_.put(RailShape.NORTH_WEST, Pair.of(north, west));
-        p_38135_.put(RailShape.NORTH_EAST, Pair.of(north, east));
+        enumMap.put(RailShape.NORTH_SOUTH, Pair.of(north, south));
+        enumMap.put(RailShape.EAST_WEST, Pair.of(west, east));
+        enumMap.put(RailShape.ASCENDING_EAST, Pair.of(westUnder, east));
+        enumMap.put(RailShape.ASCENDING_WEST, Pair.of(west, eastUnder));
+        enumMap.put(RailShape.ASCENDING_NORTH, Pair.of(north, southUnder));
+        enumMap.put(RailShape.ASCENDING_SOUTH, Pair.of(northUnder, south));
+        enumMap.put(RailShape.SOUTH_EAST, Pair.of(south, east));
+        enumMap.put(RailShape.SOUTH_WEST, Pair.of(south, west));
+        enumMap.put(RailShape.NORTH_WEST, Pair.of(north, west));
+        enumMap.put(RailShape.NORTH_EAST, Pair.of(north, east));
     });
 
     private static Pair<Vec3i, Vec3i> exits(RailShape pShape) {
@@ -91,10 +92,11 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         super(entityType, level);
         linkingHandler.train = new Train<>(this);
         railHelper = new RailHelper(this);
+        resetAttributes();
     }
 
-    public AbstractTrainCarEntity(EntityType<?> p_38087_, Level level, double x, double y, double z) {
-        super(p_38087_, level, x, y, z);
+    public AbstractTrainCarEntity(EntityType<?> entityType, Level level, double x, double y, double z) {
+        super(entityType, level, x, y, z);
         var pos = BlockPos.containing(x, y, z);
         var state = level().getBlockState(pos);
         if (state.getBlock() instanceof BaseRailBlock railBlock) {
@@ -104,6 +106,11 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         }
         linkingHandler.train = new Train<>(this);
         railHelper = new RailHelper(this);
+        resetAttributes();
+    }
+
+    private void resetAttributes() {
+        setCustomNameVisible(true);
     }
 
     protected Optional<RailShape> getRailShape() {
@@ -454,7 +461,13 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         int i = (int) Stream.of(linkingHandler.leader, linkingHandler.follower).filter(Optional::isPresent).count();
         this.remove(Entity.RemovalReason.KILLED);
         if (this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-            this.spawnAtLocation(this.getPickResult());
+            var stack = this.getPickResult();
+
+            if (this.hasCustomName()) {
+                stack.setHoverName(this.getCustomName());
+            }
+
+            this.spawnAtLocation(stack);
             for (int j = 0; j < i; j++) {
                 spawnChain();
             }
@@ -684,6 +697,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     }
 
     @Override
+    @NonNull
     public abstract ItemStack getPickResult();
 
 

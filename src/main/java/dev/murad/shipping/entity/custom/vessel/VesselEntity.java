@@ -2,7 +2,6 @@ package dev.murad.shipping.entity.custom.vessel;
 
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.entity.custom.TrainInventoryProvider;
-import dev.murad.shipping.entity.custom.vessel.barge.ChestBargeEntity;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.LinkingHandler;
@@ -35,6 +34,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.NameTagItem;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -63,6 +63,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public abstract class VesselEntity extends WaterAnimal implements LinkableEntity<VesselEntity> {
+
+    private final static double NAMETAG_RENDERING_DISTANCE = 15;
+
     @Getter
     @Setter
     private boolean frozen = false;
@@ -73,8 +76,8 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     protected VesselEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
         stuckCounter = 0;
-        resetSpeedAttributes();
-        setSpeedAttributes(ShippingConfig.Server.TUG_BASE_SPEED.get());
+
+        resetAttributes(ShippingConfig.Server.TUG_BASE_SPEED.get());
     }
 
     private int stuckCounter;
@@ -134,6 +137,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 20.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.0D)
+                .add(ForgeMod.NAMETAG_DISTANCE.get(), NAMETAG_RENDERING_DISTANCE)
                 .add(ForgeMod.SWIM_SPEED.get(), 0.0D);
     }
 
@@ -166,22 +170,23 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
 
 
     // reset speed to 1
-    private void resetSpeedAttributes() {
+    private void resetAttributes(double newSpeed) {
         this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0);
         this.getAttribute(ForgeMod.SWIM_SPEED.get()).setBaseValue(0);
-    }
 
-    private void setSpeedAttributes(double speed) {
         this.getAttribute(Attributes.MOVEMENT_SPEED)
                 .addTransientModifier(
-                        new AttributeModifier("movementspeed_mult", speed, AttributeModifier.Operation.ADDITION));
+                        new AttributeModifier("movementspeed_mult", newSpeed, AttributeModifier.Operation.ADDITION));
         this.getAttribute(ForgeMod.SWIM_SPEED.get())
                 .addTransientModifier(
-                        new AttributeModifier("swimspeed_mult", speed, AttributeModifier.Operation.ADDITION));
+                        new AttributeModifier("swimspeed_mult", newSpeed, AttributeModifier.Operation.ADDITION));
+
+        setCustomNameVisible(true);
+        this.getAttribute(ForgeMod.NAMETAG_DISTANCE.get()).setBaseValue(NAMETAG_RENDERING_DISTANCE);
     }
 
     @Override
-    protected void handleAirSupply(int p_209207_1_) {
+    protected void handleAirSupply(int airSupply) {
         this.setAirSupply(300);
     }
 
@@ -517,9 +522,9 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
 
     // LivingEntity override, to avoid jumping out of water
     @Override
-    public void travel(Vec3 p_213352_1_) {
+    public void travel(Vec3 relative) {
         if (this.isEffectiveAi() || this.isControlledByLocalInstance()) {
-            double d0 = 0.08D;
+            double d0;
             AttributeInstance gravity = this.getAttribute(net.minecraftforge.common.ForgeMod.ENTITY_GRAVITY.get());
             boolean flag = this.getDeltaMovement().y <= 0.0D;
             d0 = gravity.getValue();
@@ -548,7 +553,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
                 }
 
                 f6 *= (float) swimSpeed();
-                this.moveRelative(f6, p_213352_1_);
+                this.moveRelative(f6, relative);
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 Vec3 vector3d6 = this.getDeltaMovement();
                 if (this.horizontalCollision && this.onClimbable()) {
@@ -580,7 +585,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
                 }
             } else if (this.isInLava() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidstate)) {
                 double d7 = this.getY();
-                this.moveRelative(0.02F, p_213352_1_);
+                this.moveRelative(0.02F, relative);
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 if (this.getFluidHeight(FluidTags.LAVA) <= this.getFluidJumpThreshold()) {
                     this.setDeltaMovement(this.getDeltaMovement().multiply(0.5D, (double) 0.8F, 0.5D));
@@ -644,7 +649,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
                 BlockPos blockpos = this.getBlockPosBelowThatAffectsMyMovement();
                 float f3 = this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getFriction(level(), this.getBlockPosBelowThatAffectsMyMovement(), this);
                 float f4 = this.onGround() ? f3 * 0.91F : 0.91F;
-                Vec3 vector3d5 = this.handleRelativeFrictionAndCalculateMovement(p_213352_1_, f3);
+                Vec3 vector3d5 = this.handleRelativeFrictionAndCalculateMovement(relative, f3);
                 double d2 = vector3d5.y;
                 if (this.hasEffect(MobEffects.LEVITATION)) {
                     d2 += (0.05D * (double) (this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1) - vector3d5.y) * 0.2D;

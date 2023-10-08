@@ -13,10 +13,7 @@ import dev.murad.shipping.network.client.EntityPosition;
 import dev.murad.shipping.network.client.VehicleTrackerPacketHandler;
 import dev.murad.shipping.setup.EntityItemMap;
 import dev.murad.shipping.setup.ModItems;
-import dev.murad.shipping.util.LocoRoute;
-import dev.murad.shipping.util.LocoRouteNode;
-import dev.murad.shipping.util.RailHelper;
-import dev.murad.shipping.util.TugRouteNode;
+import dev.murad.shipping.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -26,6 +23,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -43,7 +41,9 @@ import net.minecraftforge.fml.common.Mod;
 import org.joml.Matrix4f;
 import org.joml.Vector2d;
 
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.stream.Collectors;
 
@@ -141,8 +141,8 @@ public class ForgeClientEventHandler {
             var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
             var camPos = camera.getPosition();
 
-            MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-            List<TugRouteNode> route = TugRouteItem.getRoute(stack);
+            var renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            TugRoute route = TugRouteItem.getRoute(stack);
             for (int i = 0, routeSize = route.size(); i < routeSize; i++) {
                 TugRouteNode node = route.get(i);
 
@@ -152,19 +152,17 @@ public class ForgeClientEventHandler {
                         .normalize(0.5);
 
                 PoseStack matrixStack = event.getPoseStack();
-
+                matrixStack.pushPose();
                 {
-                    matrixStack.pushPose();
                     matrixStack.translate(node.getX() - camPos.x, 0, node.getZ() - camPos.z);
 
                     BeaconRenderer.renderBeaconBeam(matrixStack, renderTypeBuffer, BEAM_LOCATION, event.getPartialTick(),
                             1F, player.level().getGameTime(), player.level().getMinBuildHeight(), 1024,
                             DyeColor.ORANGE.getTextureDiffuseColors(), 0.1F, 0.2F);
-                    matrixStack.popPose();
                 }
-
+                matrixStack.popPose();
+                matrixStack.pushPose();
                 {
-                    matrixStack.pushPose();
 
                     Vec3 nodePos = new Vec3(node.getX() + 0.5 - playerDir.x, camPos.y, node.getZ() + 0.5 - playerDir.y);
                     Vec3 textRenderPos = computeFixedDistance(nodePos, camPos, 1.0);
@@ -174,19 +172,12 @@ public class ForgeClientEventHandler {
                     matrixStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
                     matrixStack.scale(-0.025F, -0.025F, -0.025F);
 
-//                    matrixStack.translate(node.getX() - camPos.x - playerDir.x + 0.5, 0, node.getZ() - camPos.z - playerDir.y + 0.5);
-//                    matrixStack.scale(-0.025F, -0.025F, -0.025F);
-//
-//                    matrixStack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
-
-                    Matrix4f matrix4f = matrixStack.last().pose();
-
                     Font fontRenderer = Minecraft.getInstance().font;
                     String text = node.getDisplayName(i);
                     float width = (-fontRenderer.width(text) / (float) 2);
-                    fontRenderer.drawInBatch(text, width, 0.0F, -1, true, matrix4f, renderTypeBuffer, Font.DisplayMode.NORMAL, 0, 15728880);
-                    matrixStack.popPose();
+                    fontRenderer.drawInBatch(text, width, 0.0F, -1, true, matrixStack.last().pose(), renderTypeBuffer, Font.DisplayMode.NORMAL, 0, 15728880);
                 }
+                matrixStack.popPose();
             }
             renderTypeBuffer.endBatch();
         } else {
@@ -217,6 +208,7 @@ public class ForgeClientEventHandler {
             Vec3 camPos = camera.getPosition();
 
             for(EntityPosition position : VehicleTrackerPacketHandler.toRender){
+                @Nullable
                 Entity entity = player.level().getEntity(position.id());
 
                 Vec3 entityPos = entity != null ? entity.getPosition(event.getPartialTick()) : position.pos();
@@ -248,11 +240,27 @@ public class ForgeClientEventHandler {
                     matrixStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
 
                     matrixStack.scale(-0.025F, -0.025F, -0.025F);
-                    Matrix4f matrix4f = matrixStack.last().pose();
+
                     Font fontRenderer = Minecraft.getInstance().font;
                     String text = String.format("%.1fm", position.pos().distanceTo(player.position()));
-                    float width = (-fontRenderer.width(text) / (float) 2);
-                    fontRenderer.drawInBatch(text, width, 0.0F, -1, true, matrix4f, renderTypeBuffer, Font.DisplayMode.NORMAL, 0, 15728880);
+
+                    fontRenderer.drawInBatch(text,
+                            (-fontRenderer.width(text) / (float) 2), 0.0F,
+                            -1, true,
+                            matrixStack.last().pose(), renderTypeBuffer,
+                            Font.DisplayMode.NORMAL,
+                            0, 15728880);
+
+                    if (entity != null && entity.hasCustomName()) {
+                        var name = entity.getCustomName();
+                        matrixStack.translate(0, -20, 0);
+                        fontRenderer.drawInBatch(name,
+                                (-fontRenderer.width(name) / (float) 2), 0.0F,
+                                -1, true,
+                                matrixStack.last().pose(), renderTypeBuffer,
+                                Font.DisplayMode.NORMAL,
+                                0, 15728880);
+                    }
                 }
                 matrixStack.popPose();
             }
