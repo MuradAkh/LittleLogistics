@@ -102,32 +102,33 @@ public class ForgeClientEventHandler {
                 double baseY = (shape.getName().contains("ascending") ? 0.1 : 0);
                 double baseX = 0;
                 double baseZ = 0;
-                Runnable mulPose = () -> {};
+                var rotation = Axis.ZP.rotationDegrees(0);
                 switch (shape){
                     case ASCENDING_EAST -> {
                         baseX = 0.2;
-                        mulPose = () -> pose.mulPose(Axis.ZP.rotationDegrees(45));
+                        rotation = Axis.ZP.rotationDegrees(45);
                     }
                     case ASCENDING_WEST -> {
                         baseX = 0.1;
                         baseY += 0.7;
-                        mulPose = (() -> pose.mulPose(Axis.ZP.rotationDegrees(-45)));
+                        rotation = Axis.ZP.rotationDegrees(-45);
 
                     }
                     case ASCENDING_NORTH -> {
                         baseZ = 0.1;
                         baseY += 0.7;
-                        mulPose = () -> pose.mulPose(Axis.XP.rotationDegrees(45));
+                        rotation = Axis.XP.rotationDegrees(45);
                     }
                     case ASCENDING_SOUTH -> {
                         baseZ = 0.2;
-                        mulPose = () -> pose.mulPose(Axis.XP.rotationDegrees(-45));
+                        rotation = Axis.XP.rotationDegrees(-45);
                     }
                 }
 
                 pose.translate(block.getX() + baseX - cameraOff.x, block.getY() + baseY - cameraOff.y, block.getZ() + baseZ - cameraOff.z);
-                AABB a = new AABB(0, 0, 0, 1, 0.2, 1);//.deflate(0.2, 0, 0.2);
-                mulPose.run();
+                pose.mulPose(rotation);
+
+                AABB a = new AABB(0, 0, 0, 1, 0.2, 1);
                 LevelRenderer.renderLineBox(pose, buffer.getBuffer(ModRenderType.LINES), a, 1.0f, 1.0f, 0.3f, 0.5f);
                 pose.popPose();
             }
@@ -137,7 +138,9 @@ public class ForgeClientEventHandler {
             if(ShippingConfig.Client.DISABLE_TUG_ROUTE_BEACONS.get()){
                 return false;
             }
-            Vec3 camPos = Minecraft.getInstance().getEntityRenderDispatcher().camera.getPosition();
+
+            var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
+            var camPos = camera.getPosition();
 
             MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
             List<TugRouteNode> route = TugRouteItem.getRoute(stack);
@@ -163,10 +166,19 @@ public class ForgeClientEventHandler {
 
                 {
                     matrixStack.pushPose();
-                    matrixStack.translate(node.getX() - camPos.x - playerDir.x + 0.5, 0, node.getZ() - camPos.z - playerDir.y + 0.5);
+
+                    Vec3 nodePos = new Vec3(node.getX() + 0.5 - playerDir.x, camPos.y, node.getZ() + 0.5 - playerDir.y);
+                    Vec3 textRenderPos = computeFixedDistance(nodePos, camPos, 1.0);
+
+                    matrixStack.translate(textRenderPos.x - camPos.x, textRenderPos.y  - camPos.y, textRenderPos.z - camPos.z);
+                    matrixStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
+                    matrixStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
                     matrixStack.scale(-0.025F, -0.025F, -0.025F);
 
-                    matrixStack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
+//                    matrixStack.translate(node.getX() - camPos.x - playerDir.x + 0.5, 0, node.getZ() - camPos.z - playerDir.y + 0.5);
+//                    matrixStack.scale(-0.025F, -0.025F, -0.025F);
+//
+//                    matrixStack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
 
                     Matrix4f matrix4f = matrixStack.last().pose();
 
