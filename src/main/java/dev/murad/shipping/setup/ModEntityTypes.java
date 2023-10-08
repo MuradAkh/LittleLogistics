@@ -24,6 +24,13 @@ public class ModEntityTypes {
                             .clientTrackingRange(8)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "barge").toString()));
 
+    public static final RegistryObject<EntityType<ChestBargeEntity>> BARREL_BARGE =
+            Registration.ENTITIES.register("barrel_barge",
+                    () -> EntityType.Builder.<ChestBargeEntity>of(ChestBargeEntity::new,
+                                    MobCategory.MISC).sized(0.6f, 0.9f)
+                            .clientTrackingRange(8)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "barrel_barge").toString()));
+
     public static final RegistryObject<EntityType<ChunkLoaderBargeEntity>> CHUNK_LOADER_BARGE =
             Registration.ENTITIES.register("chunk_loader_barge",
                     () -> EntityType.Builder.<ChunkLoaderBargeEntity>of(ChunkLoaderBargeEntity::new,

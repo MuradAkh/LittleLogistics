@@ -60,7 +60,16 @@ public class ModItems {
      */
 
     public static final RegistryObject<Item> CHEST_BARGE = register("barge",
-            () -> new VesselItem(new Item.Properties(), ChestBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new VesselItem(
+                    new Item.Properties(),
+                    (level, x, y, z) -> new ChestBargeEntity(ModEntityTypes.CHEST_BARGE.get(), level, x, y, z)),
+            ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+
+    public static final RegistryObject<Item> BARREL_BARGE = register("barrel_barge",
+            () -> new VesselItem(
+                    new Item.Properties(),
+                    (level, x, y, z) -> new ChestBargeEntity(ModEntityTypes.BARREL_BARGE.get(), level, x, y, z)),
+            ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
 //    public static final RegistryObject<Item> CHUNK_LOADER_BARGE = register("chunk_loader_barge",
 //            () -> new VesselItem(new Item.Properties(), ChunkLoaderBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));

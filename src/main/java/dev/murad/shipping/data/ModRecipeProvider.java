@@ -202,6 +202,15 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.CHEST))
                 .save(consumer);
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.BARREL_BARGE.get())
+                .define('_', Items.BARREL)
+                .define('#', Items.STICK)
+                .define('$', Items.IRON_INGOT)
+                .pattern("#_#")
+                .pattern("$$$")
+                .unlockedBy("has_item", has(Items.BARREL))
+                .save(consumer);
+
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.SEATER_BARGE.get())
                 .define('_', ItemTags.WOODEN_STAIRS)
                 .define('#', ItemTags.SIGNS)

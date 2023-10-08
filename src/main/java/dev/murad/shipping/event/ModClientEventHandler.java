@@ -2,11 +2,7 @@ package dev.murad.shipping.event;
 
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.fluid.render.FluidHopperTileEntityRenderer;
-import dev.murad.shipping.entity.container.AbstractHeadVehicleContainer;
-import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
-import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.entity.models.*;
-import dev.murad.shipping.entity.render.*;
 import dev.murad.shipping.entity.render.train.FluidTankCarRenderer;
 import dev.murad.shipping.entity.render.train.TrainCarRenderer;
 import dev.murad.shipping.entity.render.barge.FishingBargeRenderer;
@@ -21,7 +17,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -61,6 +56,9 @@ public class ModClientEventHandler {
     public static void onRegisterEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
         // Barges
         event.registerEntityRenderer(ModEntityTypes.CHEST_BARGE.get(),
+                (ctx) -> new StaticVesselRenderer<>(ctx, ChestBargeModel::new, ChestBargeModel.LAYER_LOCATION,
+                        new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/barge.png")));
+        event.registerEntityRenderer(ModEntityTypes.BARREL_BARGE.get(),
                 (ctx) -> new StaticVesselRenderer<>(ctx, ChestBargeModel::new, ChestBargeModel.LAYER_LOCATION,
                         new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/barge.png")));
         event.registerEntityRenderer(ModEntityTypes.CHUNK_LOADER_BARGE.get(),

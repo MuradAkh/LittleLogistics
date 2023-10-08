@@ -30,8 +30,8 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
         super(type, world);
     }
 
-    public ChestBargeEntity(Level worldIn, double x, double y, double z) {
-        super(ModEntityTypes.CHEST_BARGE.get(), worldIn, x, y, z);
+    public ChestBargeEntity(EntityType<? extends ChestBargeEntity> type, Level world, double x, double y, double z) {
+        super(type, world, x, y, z);
     }
 
     private ItemStackHandler createHandler() {
@@ -48,7 +48,11 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
 
     @Override
     public Item getDropItem() {
-        return ModItems.CHEST_BARGE.get();
+        if (this.getType().equals(ModEntityTypes.BARREL_BARGE.get())) {
+            return ModItems.BARREL_BARGE.get();
+        } else {
+            return ModItems.CHEST_BARGE.get();
+        }
     }
 
 
