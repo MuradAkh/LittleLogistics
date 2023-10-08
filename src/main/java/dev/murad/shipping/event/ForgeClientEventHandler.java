@@ -77,59 +77,58 @@ public class ForgeClientEventHandler {
     private static boolean renderRouteOnStack(RenderLevelStageEvent event, Player player, ItemStack stack) {
 
         if (stack.getItem().equals(ModItems.LOCO_ROUTE.get())) {
-            MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-            PoseStack pose = event.getPoseStack();
-            Vec3 cameraOff = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+            var buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            var pose = event.getPoseStack();
+            var cameraOff = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
 
-            LocoRoute route = LocoRouteItem.getRoute(stack);
-            var list = route.stream().map(LocoRouteNode::toBlockPos).collect(Collectors.toList());
-            for (BlockPos block : list) {
+            // Render Beacon Beams
+            for (var node : LocoRouteItem.getRoute(stack)) {
+                var block = node.toBlockPos();
                 pose.pushPose();
-                pose.translate(block.getX() - cameraOff.x, 1 - cameraOff.y, block.getZ() - cameraOff.z);
-                BeaconRenderer.renderBeaconBeam(pose, buffer, BEAM_LOCATION, event.getPartialTick(),
-                        1F, player.level().getGameTime(), player.level().getMinBuildHeight() + 1, 1024,
-                        DyeColor.YELLOW.getTextureDiffuseColors(), 0.1F, 0.2F);
-
-                pose.popPose();
-            }
-
-            for (BlockPos block : list) {
-                pose.pushPose();
-                // handling for removed blocks and blocks out of distance
-                var shape = RailHelper.getRail(block, player.level())
-                        .map(pos -> RailHelper.getShape(pos, player.level()))
-                        .orElse(RailShape.EAST_WEST);
-                double baseY = (shape.getName().contains("ascending") ? 0.1 : 0);
-                double baseX = 0;
-                double baseZ = 0;
-                var rotation = Axis.ZP.rotationDegrees(0);
-                switch (shape){
-                    case ASCENDING_EAST -> {
-                        baseX = 0.2;
-                        rotation = Axis.ZP.rotationDegrees(45);
-                    }
-                    case ASCENDING_WEST -> {
-                        baseX = 0.1;
-                        baseY += 0.7;
-                        rotation = Axis.ZP.rotationDegrees(-45);
-
-                    }
-                    case ASCENDING_NORTH -> {
-                        baseZ = 0.1;
-                        baseY += 0.7;
-                        rotation = Axis.XP.rotationDegrees(45);
-                    }
-                    case ASCENDING_SOUTH -> {
-                        baseZ = 0.2;
-                        rotation = Axis.XP.rotationDegrees(-45);
-                    }
+                {
+                    pose.translate(block.getX() - cameraOff.x, 1 - cameraOff.y, block.getZ() - cameraOff.z);
+                    BeaconRenderer.renderBeaconBeam(pose, buffer, BEAM_LOCATION, event.getPartialTick(),
+                            1F, player.level().getGameTime(), player.level().getMinBuildHeight() + 1, 1024,
+                            DyeColor.YELLOW.getTextureDiffuseColors(), 0.1F, 0.2F);
                 }
+                pose.popPose();
+                pose.pushPose();
+                {
+                    // handling for removed blocks and blocks out of distance
+                    var shape = RailHelper.getRail(block, player.level())
+                            .map(pos -> RailHelper.getShape(pos, player.level()))
+                            .orElse(RailShape.EAST_WEST);
+                    double baseY = (shape.isAscending() ? 0.1 : 0);
+                    double baseX = 0;
+                    double baseZ = 0;
+                    var rotation = Axis.ZP.rotationDegrees(0);
+                    switch (shape) {
+                        case ASCENDING_EAST -> {
+                            baseX = 0.2;
+                            rotation = Axis.ZP.rotationDegrees(45);
+                        }
+                        case ASCENDING_WEST -> {
+                            baseX = 0.1;
+                            baseY += 0.7;
+                            rotation = Axis.ZP.rotationDegrees(-45);
+                        }
+                        case ASCENDING_NORTH -> {
+                            baseZ = 0.1;
+                            baseY += 0.7;
+                            rotation = Axis.XP.rotationDegrees(45);
+                        }
+                        case ASCENDING_SOUTH -> {
+                            baseZ = 0.2;
+                            rotation = Axis.XP.rotationDegrees(-45);
+                        }
+                    }
 
-                pose.translate(block.getX() + baseX - cameraOff.x, block.getY() + baseY - cameraOff.y, block.getZ() + baseZ - cameraOff.z);
-                pose.mulPose(rotation);
+                    pose.translate(block.getX() + baseX - cameraOff.x, block.getY() + baseY - cameraOff.y, block.getZ() + baseZ - cameraOff.z);
+                    pose.mulPose(rotation);
 
-                AABB a = new AABB(0, 0, 0, 1, 0.2, 1);
-                LevelRenderer.renderLineBox(pose, buffer.getBuffer(ModRenderType.LINES), a, 1.0f, 1.0f, 0.3f, 0.5f);
+                    AABB a = new AABB(0, 0, 0, 1, 0.2, 1);
+                    LevelRenderer.renderLineBox(pose, buffer.getBuffer(ModRenderType.LINES), a, 1.0f, 1.0f, 0.3f, 0.5f);
+                }
                 pose.popPose();
             }
 
