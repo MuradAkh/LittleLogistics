@@ -21,12 +21,6 @@ public class FluidTankCarRenderer extends TrainCarRenderer<FluidTankCarEntity>{
         super(context, baseModel, layerLocation, baseTexture);
     }
 
-    @Override
-    public void render(@NotNull FluidTankCarEntity entity, float yaw, float partialTicks, @NotNull PoseStack matrixStack, @NotNull MultiBufferSource buffer, int p_225623_6_) {
-        super.render(entity, yaw, partialTicks, matrixStack, buffer, p_225623_6_);
-
-    }
-
     protected void renderAdditional(FluidTankCarEntity entity, float pEntityYaw, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int pPackedLight) {
         FluidStack fluid = entity.getFluidStack();
         if (fluid == null) return;

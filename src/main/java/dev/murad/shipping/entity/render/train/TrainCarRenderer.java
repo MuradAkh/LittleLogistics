@@ -21,6 +21,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RenderNameTagEvent;
 
 import java.util.function.Function;
 
@@ -74,8 +75,8 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
                 pose.popPose();
 
                 attachmentPoints = newAttachmentPoints;
-
             }
+
             t = nextT;
         }
 
@@ -179,6 +180,10 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
         this.entityModel.renderToBuffer(pose, vertexconsumer, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
         renderAdditional(car, yaw, partialTicks, pose, buffer, packedLight);
         pose.popPose();
+
+        if (car.hasCustomName()) {
+            this.renderNameTag(car, car.getCustomName(), pose, buffer, packedLight);
+        }
 
         return attach;
     }
