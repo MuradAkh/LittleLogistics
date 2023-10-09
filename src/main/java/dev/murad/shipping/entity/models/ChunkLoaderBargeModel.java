@@ -3,6 +3,7 @@ package dev.murad.shipping.entity.models;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.entity.custom.vessel.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.vessel.barge.ChunkLoaderBargeEntity;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -11,7 +12,7 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
 
-public class ChunkLoaderBargeModel extends EntityModel<ChunkLoaderBargeEntity> {
+public class ChunkLoaderBargeModel extends EntityModel<AbstractBargeEntity> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "chunkloaderbargemodel"), "main");
     private final ModelPart bb_main;
@@ -50,7 +51,7 @@ public class ChunkLoaderBargeModel extends EntityModel<ChunkLoaderBargeEntity> {
     }
 
     @Override
-    public void setupAnim(ChunkLoaderBargeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+    public void setupAnim(AbstractBargeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 
     }
 

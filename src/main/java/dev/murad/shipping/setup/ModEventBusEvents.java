@@ -21,5 +21,6 @@ public class ModEventBusEvents {
         event.put(ModEntityTypes.CHEST_BARGE.get(), VesselEntity.setCustomAttributes().build());
         event.put(ModEntityTypes.BARREL_BARGE.get(), VesselEntity.setCustomAttributes().build());
         event.put(ModEntityTypes.SEATER_BARGE.get(), VesselEntity.setCustomAttributes().build());
+        event.put(ModEntityTypes.VACUUM_BARGE.get(), VesselEntity.setCustomAttributes().build());
     }
 }

@@ -83,6 +83,9 @@ public class ModItems {
     public static final RegistryObject<Item> SEATER_BARGE = register("seater_barge",
             () -> new VesselItem(new Item.Properties(), SeaterBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
+    public static final RegistryObject<Item> VACUUM_BARGE = register("vacuum_barge",
+            () -> new VesselItem(new Item.Properties(), VacuumBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+
     public static final RegistryObject<Item> STEAM_TUG = register("tug",
             () -> new VesselItem(new Item.Properties(), SteamTugEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 

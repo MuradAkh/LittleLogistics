@@ -59,6 +59,13 @@ public class ModEntityTypes {
                             .clientTrackingRange(8)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "seater_barge").toString()));
 
+    public static final RegistryObject<EntityType<VacuumBargeEntity>> VACUUM_BARGE =
+            Registration.ENTITIES.register("vacuum_barge",
+                    () -> EntityType.Builder.<VacuumBargeEntity>of(VacuumBargeEntity::new,
+                                    MobCategory.MISC).sized(0.6f, 0.9f)
+                            .clientTrackingRange(8)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "vacuum_barge").toString()));
+
     public static final RegistryObject<EntityType<SteamTugEntity>> STEAM_TUG =
             Registration.ENTITIES.register("tug",
                     () -> EntityType.Builder.<SteamTugEntity>of(SteamTugEntity::new,

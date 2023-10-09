@@ -58,6 +58,8 @@ public class ModClientEventHandler {
         event.registerEntityRenderer(ModEntityTypes.CHEST_BARGE.get(),
                 (ctx) -> new StaticVesselRenderer<>(ctx, ChestBargeModel::new, ChestBargeModel.LAYER_LOCATION,
                         new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/barge.png")));
+
+        // TODO: textures and models for barrel
         event.registerEntityRenderer(ModEntityTypes.BARREL_BARGE.get(),
                 (ctx) -> new StaticVesselRenderer<>(ctx, ChestBargeModel::new, ChestBargeModel.LAYER_LOCATION,
                         new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/barge.png")));
@@ -68,6 +70,11 @@ public class ModClientEventHandler {
         event.registerEntityRenderer(ModEntityTypes.SEATER_BARGE.get(),
                 (ctx) -> new StaticVesselRenderer<>(ctx, SeaterBargeModel::new, SeaterBargeModel.LAYER_LOCATION,
                         new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/seater_barge.png")));
+
+        // TODO: properly set up the model
+        event.registerEntityRenderer(ModEntityTypes.VACUUM_BARGE.get(),
+                (ctx) -> new StaticVesselRenderer<>(ctx, ChunkLoaderBargeModel::new, ChunkLoaderBargeModel.LAYER_LOCATION,
+                        new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/chunk_loader_barge.png")));
 
         event.registerEntityRenderer(ModEntityTypes.FISHING_BARGE.get(), FishingBargeRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.FLUID_TANK_BARGE.get(), FluidTankBargeRenderer::new);
