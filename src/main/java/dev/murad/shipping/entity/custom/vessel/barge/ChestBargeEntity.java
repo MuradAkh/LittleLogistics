@@ -51,11 +51,9 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
         }
     }
 
-
     protected void doInteract(Player player) {
         player.openMenu(this);
     }
-
 
     @Override
     public int getContainerSize() {
@@ -95,7 +93,6 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
 
     @Override
     public void setChanged() {
-
     }
 
     @Override
@@ -109,7 +106,6 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
 
     @Override
     public void clearContent() {
-
     }
 
     @Nullable

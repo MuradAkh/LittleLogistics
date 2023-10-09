@@ -10,6 +10,7 @@ import dev.murad.shipping.setup.ModItemModelProperties;
 import dev.murad.shipping.setup.ModMenuTypes;
 import dev.murad.shipping.setup.Registration;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -51,5 +52,9 @@ public class ShippingMod
         MenuScreens.register(ModMenuTypes.TUG_ROUTE_CONTAINER.get(), TugRouteScreen::new);
 
         event.enqueueWork(ModItemModelProperties::register);
+    }
+
+    public static ResourceLocation entityTexture(String suffix) {
+        return new ResourceLocation(ShippingMod.MOD_ID, String.format("textures/entity/%s", suffix));
     }
 }

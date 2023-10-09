@@ -52,11 +52,11 @@ public abstract class AbstractVesselRenderer<T extends VesselEntity> extends Ent
 
     }
 
-    private void renderModel(T vesselEntity, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
+    protected void renderModel(T vesselEntity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {
         VertexConsumer ivertexbuilder = buffer.getBuffer(getModel(vesselEntity).renderType(this.getTextureLocation(vesselEntity)));
         int overlay = LivingEntityRenderer.getOverlayCoords(vesselEntity, 0);
 
-        getModel(vesselEntity).renderToBuffer(matrixStack, ivertexbuilder, p_225623_6_, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
+        getModel(vesselEntity).renderToBuffer(matrixStack, ivertexbuilder, packedLight, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     protected double getModelYoffset() {

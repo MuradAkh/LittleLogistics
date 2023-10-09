@@ -28,7 +28,8 @@ public class ChestBargeModel extends EntityModel<ChestBargeEntity> {
 				.texOffs(38, 5).addBox(-8.0F, -29.0F, -7.0F, 2.0F, 4.0F, 14.0F, new CubeDeformation(0.0F))
 				.texOffs(28, 43).addBox(-6.0F, -29.0F, -9.0F, 12.0F, 4.0F, 2.0F, new CubeDeformation(0.0F))
 				.texOffs(26, 25).addBox(6.0F, -29.0F, -7.0F, 2.0F, 4.0F, 14.0F, new CubeDeformation(0.0F))
-				.texOffs(0, 41).addBox(-6.0F, -29.0F, 7.0F, 12.0F, 4.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 23.0F, 0.0F));
+				.texOffs(0, 41).addBox(-6.0F, -29.0F, 7.0F, 12.0F, 4.0F, 2.0F, new CubeDeformation(0.0F)),
+					PartPose.offset(0.0F, 23.0F, 0.0F));
 
 		PartDefinition cube_r1 = bb_main.addOrReplaceChild("cube_r1", CubeListBuilder.create().texOffs(0, 19).addBox(-5.0F, -35.0F, -5.0F, 10.0F, 10.0F, 10.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
 
