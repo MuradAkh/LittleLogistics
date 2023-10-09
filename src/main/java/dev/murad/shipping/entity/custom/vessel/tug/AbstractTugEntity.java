@@ -515,7 +515,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     @Override
     public void remove(RemovalReason r) {
         if (!this.level().isClientSide) {
-            this.spawnAtLocation(this.getDropItem());
+            var stack = new ItemStack(this.getDropItem());
+            if (this.hasCustomName()) {
+                stack.setHoverName(this.getCustomName());
+            }
+            this.spawnAtLocation(stack);
             Containers.dropContents(this.level(), this, this);
             this.spawnAtLocation(routeItemHandler.getStackInSlot(0));
         }

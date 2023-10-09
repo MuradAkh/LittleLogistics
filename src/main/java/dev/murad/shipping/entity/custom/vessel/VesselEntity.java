@@ -503,7 +503,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     }
 
     @Override
-    public boolean hurt(DamageSource damageSource, float p_70097_2_) {
+    public boolean hurt(DamageSource damageSource, float amount) {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         } else if (!this.level().isClientSide && !this.isRemoved() && damageSource.getEntity() instanceof Player) {
@@ -516,7 +516,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
             this.remove(RemovalReason.KILLED);
             return true;
         } else {
-            return super.hurt(damageSource, p_70097_2_);
+            return super.hurt(damageSource, amount);
         }
     }
 

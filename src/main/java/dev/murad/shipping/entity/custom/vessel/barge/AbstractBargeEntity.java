@@ -11,6 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
@@ -103,7 +104,11 @@ public abstract class AbstractBargeEntity extends VesselEntity {
     @Override
     public void remove(RemovalReason r){
         if (!this.level().isClientSide) {
-            this.spawnAtLocation(this.getDropItem());
+            var stack = new ItemStack(this.getDropItem());
+            if (this.hasCustomName()) {
+                stack.setHoverName(this.getCustomName());
+            }
+            this.spawnAtLocation(stack);
         }
         super.remove(r);
     }
