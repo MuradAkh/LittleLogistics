@@ -2,6 +2,7 @@ package dev.murad.shipping.entity.custom.vessel;
 
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.entity.custom.TrainInventoryProvider;
+import dev.murad.shipping.entity.custom.vessel.barge.AbstractBargeEntity;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.LinkingHandler;
@@ -12,6 +13,7 @@ import lombok.Setter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -63,6 +65,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public abstract class VesselEntity extends WaterAnimal implements LinkableEntity<VesselEntity> {
+    public static final EntityDataAccessor<Integer> COLOR_DATA = SynchedEntityData.defineId(VesselEntity.class, EntityDataSerializers.INT);
 
     private final static double NAMETAG_RENDERING_DISTANCE = 15;
 
@@ -144,19 +147,28 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag compound) {
         linkingHandler.readAdditionalSaveData(compound);
+        if (compound.contains("Color", Tag.TAG_INT)) {
+            setColor(compound.getInt("Color"));
+        }
         super.readAdditionalSaveData(compound);
     }
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         linkingHandler.addAdditionalSaveData(compound);
+
+        Integer color = getColor();
+        if (color != null) {
+            compound.putInt("Color", color);
+        }
+
         super.addAdditionalSaveData(compound);
     }
-
 
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
+        this.getEntityData().define(COLOR_DATA, -1);
         LinkingHandler.defineSynchedData(this, DOMINANT_ID, DOMINATED_ID);
     }
 
@@ -168,6 +180,16 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
         }
     }
 
+    @Nullable
+    public Integer getColor() {
+        int color = this.getEntityData().get(COLOR_DATA);
+        return color == -1 ? null : color;
+    }
+
+    public void setColor(Integer color) {
+        if (color == null) color = -1;
+        this.getEntityData().set(COLOR_DATA, color);
+    }
 
     // reset speed to 1
     private void resetAttributes(double newSpeed) {

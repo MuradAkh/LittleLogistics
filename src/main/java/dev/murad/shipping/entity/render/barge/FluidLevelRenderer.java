@@ -2,45 +2,31 @@ package dev.murad.shipping.entity.render.barge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.entity.custom.vessel.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.vessel.barge.FluidTankBargeEntity;
-import dev.murad.shipping.entity.models.FluidTankBargeModel;
 import dev.murad.shipping.util.FluidRenderUtil;
+import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
-public class FluidTankBargeRenderer extends AbstractVesselRenderer<FluidTankBargeEntity> {
-    private static final ResourceLocation BARGE_TEXTURE =
-            new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/fluid_barge.png");
+public class FluidLevelRenderer<T extends FluidTankBargeEntity> extends MultipartVesselRenderer<T> {
 
-    private final EntityModel<FluidTankBargeEntity> model;
-
-    public FluidTankBargeRenderer(EntityRendererProvider.Context context) {
-        super(context);
-        model = new FluidTankBargeModel(context.bakeLayer(FluidTankBargeModel.LAYER_LOCATION));
+    public FluidLevelRenderer(EntityRendererProvider.Context context,
+                              ModelSupplier<T> baseModelSupplier, ModelLayerLocation baseModelLocation, ResourceLocation baseTexture,
+                              ModelSupplier<T> insertModelSupplier, ModelLayerLocation insertModelLocation, ResourceLocation insertTexture,
+                              ModelSupplier<T> trimModelSupplier, ModelLayerLocation trimModelLocation, ResourceLocation trimTexture) {
+        super(context, baseModelSupplier, baseModelLocation, baseTexture, insertModelSupplier, insertModelLocation, insertTexture, trimModelSupplier, trimModelLocation, trimTexture);
     }
 
     @Override
-    EntityModel<FluidTankBargeEntity> getModel(FluidTankBargeEntity entity) {
-        return model;
+    public void render(@NotNull T entity, float yaw, float partialTick, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {
+        super.render(entity, yaw, partialTick, matrixStack, buffer, packedLight);
+        renderFluid(entity, yaw, partialTick, matrixStack, buffer, 0, packedLight);
     }
-
-    @Override
-    public @NotNull ResourceLocation getTextureLocation(@NotNull FluidTankBargeEntity entity) {
-        return BARGE_TEXTURE;
-    }
-
-    @Override
-    public void render(@NotNull FluidTankBargeEntity entity, float yaw, float partialTick, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
-        super.render(entity, yaw, partialTick, matrixStack, buffer, p_225623_6_);
-        renderFluid(entity, yaw, partialTick, matrixStack, buffer, 0, p_225623_6_);
-    }
-
 
     public void renderFluid(FluidTankBargeEntity entity, float yaw, float partialTicks, PoseStack matrixStackIn,
                             MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlayIn) {

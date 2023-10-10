@@ -6,7 +6,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
-import dev.murad.shipping.entity.models.ChainModel;
+import dev.murad.shipping.entity.models.train.ChainModel;
 import dev.murad.shipping.entity.render.RenderWithAttachmentPoints;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
@@ -21,7 +21,6 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderNameTagEvent;
 
 import java.util.function.Function;
 

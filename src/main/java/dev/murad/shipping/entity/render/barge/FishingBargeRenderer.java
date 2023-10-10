@@ -2,9 +2,9 @@ package dev.murad.shipping.entity.render.barge;
 
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.vessel.barge.FishingBargeEntity;
-import dev.murad.shipping.entity.models.FishingBargeDeployedModel;
-import dev.murad.shipping.entity.models.FishingBargeModel;
-import dev.murad.shipping.entity.models.FishingBargeTransitionModel;
+import dev.murad.shipping.entity.models.vessel.FishingBargeDeployedModel;
+import dev.murad.shipping.entity.models.vessel.FishingBargeModel;
+import dev.murad.shipping.entity.models.vessel.FishingBargeTransitionModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;

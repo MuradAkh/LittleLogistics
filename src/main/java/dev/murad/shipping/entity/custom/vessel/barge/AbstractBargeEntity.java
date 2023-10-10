@@ -9,11 +9,15 @@ import lombok.Getter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -30,15 +34,10 @@ import java.util.Optional;
 
 public abstract class AbstractBargeEntity extends VesselEntity {
 
-    @Getter
-    @Nullable
-    private Integer color;
-
     public AbstractBargeEntity(EntityType<? extends AbstractBargeEntity> type, Level world) {
         super(type, world);
         this.blocksBuilding = true;
         linkingHandler.train = new Train<>(this);
-        this.color = null;
     }
 
     public AbstractBargeEntity(EntityType<? extends AbstractBargeEntity> type, Level worldIn, double x, double y, double z) {
@@ -48,7 +47,6 @@ public abstract class AbstractBargeEntity extends VesselEntity {
         this.xo = x;
         this.yo = y;
         this.zo = z;
-        this.color = null;
     }
 
     @Override
@@ -60,36 +58,24 @@ public abstract class AbstractBargeEntity extends VesselEntity {
 
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
-        var color = DyeColor.getColor(player.getItemInHand(hand));
-        if (color != null) {
-            this.color = color.getId();
-        } else {
-            if (!this.level().isClientSide) {
+        if (!this.level().isClientSide) {
+            var color = DyeColor.getColor(player.getItemInHand(hand));
+
+            if (color != null) {
+                this.getEntityData().set(COLOR_DATA, color.getId());
+            } else {
                 doInteract(player);
             }
         }
 
-
         // don't interact *and* use current item
-        return InteractionResult.CONSUME;
+        return InteractionResult.sidedSuccess(this.level().isClientSide);
     }
 
     abstract protected void doInteract(Player player);
 
     public boolean hasWaterOnSides(){
         return super.hasWaterOnSides();
-    }
-
-    @Override
-    public void addAdditionalSaveData(@NotNull CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
-        if (color != null) tag.putInt("Color", color);
-    }
-
-    @Override
-    public void readAdditionalSaveData(@NotNull CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        color = tag.contains("Color", Tag.TAG_INT) ? tag.getInt("Color") : null;
     }
 
     @Override

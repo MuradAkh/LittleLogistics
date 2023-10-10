@@ -1,4 +1,4 @@
-package dev.murad.shipping.entity.models;// Made with Blockbench 4.1.1
+package dev.murad.shipping.entity.models.train;// Made with Blockbench 4.1.1
 // Exported for Minecraft version 1.17 with Mojang mappings
 // Paste this class into your mod and generate all required imports
 

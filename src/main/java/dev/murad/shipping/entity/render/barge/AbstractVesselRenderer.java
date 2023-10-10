@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.vessel.VesselEntity;
-import dev.murad.shipping.entity.models.ChainModel;
+import dev.murad.shipping.entity.models.train.ChainModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;

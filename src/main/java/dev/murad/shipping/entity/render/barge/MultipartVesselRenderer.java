@@ -1,7 +1,6 @@
 package dev.murad.shipping.entity.render.barge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.murad.shipping.entity.custom.vessel.VesselEntity;
 import dev.murad.shipping.entity.custom.vessel.barge.AbstractBargeEntity;
 import lombok.Getter;
@@ -13,6 +12,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
+import org.jetbrains.annotations.NotNull;
 
 public class MultipartVesselRenderer<T extends AbstractBargeEntity> extends AbstractVesselRenderer<T> {
 
@@ -22,10 +22,10 @@ public class MultipartVesselRenderer<T extends AbstractBargeEntity> extends Abst
     @Getter
     private final ResourceLocation baseTextureLocation, insertTextureLocation, trimTextureLocation;
 
-    private MultipartVesselRenderer(EntityRendererProvider.Context context,
-                                   ModelSupplier<T> baseModelSupplier,
-                                   ModelLayerLocation baseModelLocation,
-                                   ResourceLocation baseTexture,
+    protected MultipartVesselRenderer(EntityRendererProvider.Context context,
+                                    ModelSupplier<T> baseModelSupplier,
+                                    ModelLayerLocation baseModelLocation,
+                                    ResourceLocation baseTexture,
                                     ModelSupplier<T> insertModelSupplier,
                                     ModelLayerLocation insertModelLocation,
                                     ResourceLocation insertTexture,
@@ -48,7 +48,7 @@ public class MultipartVesselRenderer<T extends AbstractBargeEntity> extends Abst
      */
     @Override
     @Deprecated
-    EntityModel getModel(T entity) {
+    EntityModel<T> getModel(T entity) {
         return baseModel;
     }
 
@@ -57,7 +57,7 @@ public class MultipartVesselRenderer<T extends AbstractBargeEntity> extends Abst
      */
     @Override
     @Deprecated
-    public ResourceLocation getTextureLocation(T pEntity) {
+    public @NotNull ResourceLocation getTextureLocation(@NotNull T pEntity) {
         return baseTextureLocation;
     }
 
@@ -142,6 +142,5 @@ public class MultipartVesselRenderer<T extends AbstractBargeEntity> extends Abst
                     insertModelSupplier, insertModelLocation, insertModelTexture,
                     trimModelSupplier, trimModelLocation, trimModelTexture);
         }
-
     }
 }
