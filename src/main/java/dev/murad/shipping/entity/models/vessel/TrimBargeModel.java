@@ -3,6 +3,7 @@ package dev.murad.shipping.entity.models.vessel;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.entity.Colorable;
 import dev.murad.shipping.entity.custom.vessel.barge.AbstractBargeEntity;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -13,8 +14,9 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 
-public class TrimBargeModel<T extends AbstractBargeEntity> extends EntityModel<T> {
+public class TrimBargeModel<T extends Entity & Colorable> extends EntityModel<T> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation CLOSED_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "trim_barge_model_closed"), "main");
 	public static final ModelLayerLocation OPEN_FRONT_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "trim_barge_model_open_front"), "main");
@@ -49,7 +51,7 @@ public class TrimBargeModel<T extends AbstractBargeEntity> extends EntityModel<T
 	}
 
 	@Override
-	public void setupAnim(AbstractBargeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 
 	}
 

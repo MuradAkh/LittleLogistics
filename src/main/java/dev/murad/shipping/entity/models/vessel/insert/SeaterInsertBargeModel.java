@@ -3,6 +3,7 @@ package dev.murad.shipping.entity.models.vessel.insert;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.entity.Colorable;
 import dev.murad.shipping.entity.custom.vessel.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.vessel.barge.SeaterBargeEntity;
 import net.minecraft.client.model.EntityModel;
@@ -11,8 +12,9 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 
-public class SeaterInsertBargeModel extends EntityModel<AbstractBargeEntity> {
+public class SeaterInsertBargeModel<T extends Entity & Colorable> extends EntityModel<T> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "seater_insert_barge_model"), "main");
 	private final ModelPart bb_main;
@@ -43,7 +45,7 @@ public class SeaterInsertBargeModel extends EntityModel<AbstractBargeEntity> {
 	}
 
 	@Override
-	public void setupAnim(AbstractBargeEntity pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
+	public void setupAnim(T pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
 
 	}
 }

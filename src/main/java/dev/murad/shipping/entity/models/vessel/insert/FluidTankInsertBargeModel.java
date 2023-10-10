@@ -3,6 +3,7 @@ package dev.murad.shipping.entity.models.vessel.insert;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.entity.Colorable;
 import dev.murad.shipping.entity.custom.vessel.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.vessel.barge.FluidTankBargeEntity;
 import net.minecraft.client.model.EntityModel;
@@ -11,8 +12,9 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 
-public class FluidTankInsertBargeModel<T extends AbstractBargeEntity> extends EntityModel<T> {
+public class FluidTankInsertBargeModel<T extends Entity & Colorable> extends EntityModel<T> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "fluid_tank_insert_barge_model"), "main");
 	private final ModelPart bb_main;
@@ -47,7 +49,7 @@ public class FluidTankInsertBargeModel<T extends AbstractBargeEntity> extends En
 	}
 
 	@Override
-	public void setupAnim(AbstractBargeEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 
 	}
 

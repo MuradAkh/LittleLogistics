@@ -126,36 +126,57 @@ public class ModClientEventHandler {
                         .build());
 
         // Tugs
+//        event.registerEntityRenderer(ModEntityTypes.ENERGY_TUG.get(),
+//                (ctx) -> new StaticVesselRenderer<>(ctx, EnergyTugModel::new, EnergyTugModel.LAYER_LOCATION,
+//                        new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/energy_tug.png")) {
+//                    // todo: fix in models itself
+//                    @Override
+//                    protected double getModelYoffset() {
+//                        return 1.55D;
+//                    }
+//
+//                    @Override
+//                    protected float getModelYrot() {
+//                        return 0.0F;
+//                    }
+//                });
+
+
+//        event.registerEntityRenderer(ModEntityTypes.STEAM_TUG.get(),
+//                (ctx) -> new StaticVesselRenderer<>(ctx, SteamTugModel::new, SteamTugModel.LAYER_LOCATION,
+//                        new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/tug.png")) {
+//                    // todo: fix in models itself
+//                    @Override
+//                    protected double getModelYoffset() {
+//                        return 1.45D;
+//                    }
+//
+//                    @Override
+//                    protected float getModelYrot() {
+//                        return 0;
+//                    }
+//                });
+
         event.registerEntityRenderer(ModEntityTypes.ENERGY_TUG.get(),
-                (ctx) -> new StaticVesselRenderer<>(ctx, EnergyTugModel::new, EnergyTugModel.LAYER_LOCATION,
-                        new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/energy_tug.png")) {
-                    // todo: fix in models itself
-                    @Override
-                    protected double getModelYoffset() {
-                        return 1.55D;
-                    }
-
-                    @Override
-                    protected float getModelYrot() {
-                        return 0.0F;
-                    }
-                });
-
+                (ctx) -> new MultipartVesselRenderer.Builder<>(ctx)
+                        .baseModel(EnergyTugModel::new, EnergyTugModel.LAYER_LOCATION,
+                                ShippingMod.entityTexture("barge/energy_tug_base.png"))
+                        .emptyInsert()
+                        .trimModel(EnergyTugModel::new, EnergyTugModel.LAYER_LOCATION,
+                                ShippingMod.entityTexture("barge/energy_tug_trim.png"))
+                        .build()
+                        // TODO: this is a hack
+                        .derotate());
 
         event.registerEntityRenderer(ModEntityTypes.STEAM_TUG.get(),
-                (ctx) -> new StaticVesselRenderer<>(ctx, SteamTugModel::new, SteamTugModel.LAYER_LOCATION,
-                        new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/tug.png")) {
-                    // todo: fix in models itself
-                    @Override
-                    protected double getModelYoffset() {
-                        return 1.45D;
-                    }
-
-                    @Override
-                    protected float getModelYrot() {
-                        return 0;
-                    }
-                });
+                (ctx) -> new MultipartVesselRenderer.Builder<>(ctx)
+                        .baseModel(SteamTugModel::new, SteamTugModel.LAYER_LOCATION,
+                                ShippingMod.entityTexture("barge/steam_tug_base.png"))
+                        .emptyInsert()
+                        .trimModel(SteamTugModel::new, SteamTugModel.LAYER_LOCATION,
+                                ShippingMod.entityTexture("barge/steam_tug_trim.png"))
+                        .build()
+                        .derotate());
 
         event.registerEntityRenderer(ModEntityTypes.STEAM_LOCOMOTIVE.get(), ctx -> new TrainCarRenderer<>(ctx,
                 SteamLocomotiveModel::new,

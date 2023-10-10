@@ -1,10 +1,11 @@
 package dev.murad.shipping.entity.render.barge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.murad.shipping.entity.custom.vessel.barge.AbstractBargeEntity;
+import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.entity.custom.vessel.VesselEntity;
+import dev.murad.shipping.entity.models.vessel.EmptyModel;
 import lombok.Getter;
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -15,7 +16,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.NotNull;
 
-public class MultipartVesselRenderer<T extends AbstractBargeEntity> extends AbstractVesselRenderer<T> {
+public class MultipartVesselRenderer<T extends VesselEntity> extends AbstractVesselRenderer<T> {
+
+    // TODO: de-uglify
+    private float rotation = 90f;
 
     @Getter
     private final EntityModel<T> baseModel, insertModel, trimModel;
@@ -88,6 +92,15 @@ public class MultipartVesselRenderer<T extends AbstractBargeEntity> extends Abst
                 color[0], color[1], color[2], 1.0F);
     }
 
+    public MultipartVesselRenderer<T> derotate() {
+        this.rotation = 0;
+        return this;
+    }
+
+    protected float getModelYrot() {
+        return rotation;
+    }
+
     @FunctionalInterface
     public interface ModelSupplier<T extends Entity> {
         EntityModel<T> supply(ModelPart root);
@@ -99,7 +112,7 @@ public class MultipartVesselRenderer<T extends AbstractBargeEntity> extends Abst
             ResourceLocation texture) {
     }
 
-    public static class Builder<T extends AbstractBargeEntity> {
+    public static class Builder<T extends VesselEntity> {
         protected final EntityRendererProvider.Context context;
 
         protected ModelPack<T> baseModelPack;
@@ -124,6 +137,12 @@ public class MultipartVesselRenderer<T extends AbstractBargeEntity> extends Abst
             this.insertModelPack = new ModelPack<>(supplier, location, texture);
             return this;
         }
+
+        public Builder<T> emptyInsert() {
+            insertModel(EmptyModel::new, EmptyModel.LAYER_LOCATION, ShippingMod.entityTexture("emptytexture.png"));
+            return this;
+        }
+
 
         public Builder<T> trimModel(ModelSupplier<T> supplier,
                                       ModelLayerLocation location,
