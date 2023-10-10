@@ -113,19 +113,17 @@ public class ModClientEventHandler {
 
         event.registerEntityRenderer(ModEntityTypes.FISHING_BARGE.get(),
                 (ctx) -> new FishingBargeRenderer.Builder<>(ctx)
-                        .baseModel(BaseBargeModel::new, BaseBargeModel.OPEN_SIDES_LOCATION,
-                                ShippingMod.entityTexture("barge/base.png"))
-                        .stashedInsertModel(FishingInsertBargeModel::new, FishingInsertBargeModel.STASHED_LOCATION,
-                                ShippingMod.entityTexture("barge/fishing_insert.png"))
                         .transitionInsertModel(FishingInsertBargeModel::new, FishingInsertBargeModel.TRANSITION_LOCATION,
                                 ShippingMod.entityTexture("barge/fishing_insert.png"))
                         .deployedInsertModel(FishingInsertBargeModel::new, FishingInsertBargeModel.DEPLOYED_LOCATION,
                                 ShippingMod.entityTexture("barge/fishing_insert.png"))
+                        .baseModel(BaseBargeModel::new, BaseBargeModel.OPEN_SIDES_LOCATION,
+                                ShippingMod.entityTexture("barge/base.png"))
+                        .insertModel(FishingInsertBargeModel::new, FishingInsertBargeModel.STASHED_LOCATION,
+                                ShippingMod.entityTexture("barge/fishing_insert.png"))
                         .trimModel(TrimBargeModel::new, TrimBargeModel.OPEN_SIDES_LOCATION,
                                 ShippingMod.entityTexture("barge/trim.png"))
                         .build());
-
-//        event.registerEntityRenderer(ModEntityTypes.FISHING_BARGE.get(), FishingBargeRenderer::new);
 
         // Tugs
         event.registerEntityRenderer(ModEntityTypes.ENERGY_TUG.get(),

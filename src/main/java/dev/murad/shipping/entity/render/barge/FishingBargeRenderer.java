@@ -52,32 +52,13 @@ public class FishingBargeRenderer<T extends FishingBargeEntity> extends Multipar
                 1.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    public static class Builder<T extends FishingBargeEntity> {
-        private final EntityRendererProvider.Context context;
-
-        private ModelPack<T> baseModelPack;
-        private ModelPack<T> stashedInsertModelPack;
+    public static class Builder<T extends FishingBargeEntity> extends MultipartVesselRenderer.Builder<T> {
         private ModelPack<T> transitionInsertModelPack;
         private ModelPack<T> deployedInsertModelPack;
-        private ModelPack<T> trimModelPack;
 
 
         public Builder(EntityRendererProvider.Context context) {
-            this.context = context;
-        }
-
-        public Builder<T> baseModel(ModelSupplier<T> supplier,
-                                   ModelLayerLocation location,
-                                   ResourceLocation texture) {
-            this.baseModelPack = new ModelPack<>(supplier, location, texture);
-            return this;
-        }
-
-        public Builder<T> stashedInsertModel(ModelSupplier<T> supplier,
-                                             ModelLayerLocation location,
-                                             ResourceLocation texture) {
-            this.stashedInsertModelPack = new ModelPack<>(supplier, location, texture);
-            return this;
+            super(context);
         }
 
         public Builder<T> transitionInsertModel(ModelSupplier<T> supplier,
@@ -94,15 +75,8 @@ public class FishingBargeRenderer<T extends FishingBargeEntity> extends Multipar
             return this;
         }
 
-        public Builder<T> trimModel(ModelSupplier<T> supplier,
-                                   ModelLayerLocation location,
-                                   ResourceLocation texture) {
-            this.trimModelPack = new ModelPack<>(supplier, location, texture);
-            return this;
-        }
-
         public FishingBargeRenderer<T> build() {
-            return new FishingBargeRenderer<>(context, baseModelPack, stashedInsertModelPack, transitionInsertModelPack, deployedInsertModelPack, trimModelPack);
+            return new FishingBargeRenderer<>(context, baseModelPack, insertModelPack, transitionInsertModelPack, deployedInsertModelPack, trimModelPack);
         }
     }
 

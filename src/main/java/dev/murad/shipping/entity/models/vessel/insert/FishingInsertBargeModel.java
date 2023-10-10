@@ -33,56 +33,76 @@ public class FishingInsertBargeModel<T extends AbstractBargeEntity> extends Enti
 		MeshDefinition meshdefinition = new MeshDefinition();
 		PartDefinition partdefinition = meshdefinition.getRoot();
 
+		// TODO: most of this is duplicated
 		if (status == FishingBargeEntity.Status.STASHED) {
 			PartDefinition bone = partdefinition.addOrReplaceChild("bone", CubeListBuilder.create().texOffs(6, 0).addBox(-6.0F, -10.0F, -1.0F, 1.0F, 9.0F, 2.0F)
-					.texOffs(0, 0).addBox(5.0F, -10.0F, -1.0F, 1.0F, 9.0F, 2.0F), PartPose.offset(0.0F, -3.0F, -4.0F));
+					.texOffs(0, 0).addBox(5.0F, -10.0F, -1.0F, 1.0F, 9.0F, 2.0F),
+					PartPose.offset(0.0F, -3.0F, -4.0F));
 
 			PartDefinition bone2 = bone.addOrReplaceChild("bone2", CubeListBuilder.create().texOffs(36, 19).addBox(-5.0F, -1.0F, -4.0F, 10.0F, 4.0F, 7.0F)
-					.texOffs(38, 8).addBox(-5.0F, -1.0F, -1.0F, 1.0F, 4.0F, 2.0F), PartPose.offset(0.0F, -7.0F, 0.0F));
+					.texOffs(38, 8).addBox(-5.0F, -1.0F, -1.0F, 1.0F, 4.0F, 2.0F),
+					PartPose.offset(0.0F, -7.0F, 0.0F));
 
-			PartDefinition cube_r1 = bone2.addOrReplaceChild("cube_r1", CubeListBuilder.create().texOffs(38, 8).addBox(-0.5F, -2.0F, -1.0F, 1.0F, 4.0F, 2.0F), PartPose.offsetAndRotation(4.5F, 1.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
+			PartDefinition cube_r1 = bone2.addOrReplaceChild("cube_r1", CubeListBuilder.create().texOffs(38, 8).addBox(-0.5F, -2.0F, -1.0F, 1.0F, 4.0F, 2.0F),
+					PartPose.offsetAndRotation(4.5F, 1.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
 
 			PartDefinition bone3 = partdefinition.addOrReplaceChild("bone3", CubeListBuilder.create().texOffs(6, 0).addBox(-6.0F, -10.0F, -1.0F, 1.0F, 9.0F, 2.0F)
-					.texOffs(0, 0).addBox(5.0F, -10.0F, -1.0F, 1.0F, 9.0F, 2.0F), PartPose.offset(0.0F, -3.0F, 4.0F));
+					.texOffs(0, 0).addBox(5.0F, -10.0F, -1.0F, 1.0F, 9.0F, 2.0F),
+					PartPose.offset(0.0F, -3.0F, 4.0F));
 
 			PartDefinition bone4 = bone3.addOrReplaceChild("bone4", CubeListBuilder.create().texOffs(36, 19).addBox(-5.0F, -1.0F, -3.0F, 10.0F, 4.0F, 7.0F)
-					.texOffs(38, 8).addBox(-5.0F, -1.0F, -1.0F, 1.0F, 4.0F, 2.0F), PartPose.offset(0.0F, -7.0F, 0.0F));
+					.texOffs(38, 8).addBox(-5.0F, -1.0F, -1.0F, 1.0F, 4.0F, 2.0F),
+					PartPose.offset(0.0F, -7.0F, 0.0F));
 
-			PartDefinition cube_r2 = bone4.addOrReplaceChild("cube_r2", CubeListBuilder.create().texOffs(38, 8).addBox(-0.5F, -2.0F, -1.0F, 1.0F, 4.0F, 2.0F), PartPose.offsetAndRotation(4.5F, 1.0F, 0.0F, 0.0F, -3.1416F, 0.0F));
+			PartDefinition cube_r2 = bone4.addOrReplaceChild("cube_r2", CubeListBuilder.create().texOffs(38, 8).addBox(-0.5F, -2.0F, -1.0F, 1.0F, 4.0F, 2.0F),
+					PartPose.offsetAndRotation(4.5F, 1.0F, 0.0F, 0.0F, -3.1416F, 0.0F));
 
 		} else if (status == FishingBargeEntity.Status.TRANSITION) {
 			PartDefinition bone = partdefinition.addOrReplaceChild("bone", CubeListBuilder.create().texOffs(6, 0).addBox(-6.0F, -9.8192F, -0.4264F, 1.0F, 9.0F, 2.0F)
-					.texOffs(0, 0).addBox(5.0F, -9.8192F, -0.4264F, 1.0F, 9.0F, 2.0F), PartPose.offsetAndRotation(0.0F, -3.0F, -4.0F, 0.6109F, 0.0F, 0.0F));
+					.texOffs(0, 0).addBox(5.0F, -9.8192F, -0.4264F, 1.0F, 9.0F, 2.0F),
+					PartPose.offsetAndRotation(0.0F, -3.0F, -4.0F, 0.6109F, 0.0F, 0.0F));
 
 			PartDefinition bone2 = bone.addOrReplaceChild("bone2", CubeListBuilder.create().texOffs(36, 19).addBox(-5.0F, -1.0F, -4.0F, 10.0F, 4.0F, 7.0F)
-					.texOffs(38, 8).addBox(-5.0F, -1.0F, -1.0F, 1.0F, 4.0F, 2.0F), PartPose.offsetAndRotation(0.0F, -7.0F, 0.0F, -0.6109F, 0.0F, 0.0F));
+					.texOffs(38, 8).addBox(-5.0F, -1.0F, -1.0F, 1.0F, 4.0F, 2.0F),
+					PartPose.offsetAndRotation(0.0F, -7.0F, 0.0F, -0.6109F, 0.0F, 0.0F));
 
-			PartDefinition cube_r1 = bone2.addOrReplaceChild("cube_r1", CubeListBuilder.create().texOffs(44, 8).mirror().addBox(-0.5F, -3.0F, -1.0F, 1.0F, 4.0F, 2.0F).mirror(false), PartPose.offsetAndRotation(4.5F, 2.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
+			PartDefinition cube_r1 = bone2.addOrReplaceChild("cube_r1", CubeListBuilder.create().texOffs(44, 8).mirror().addBox(-0.5F, -3.0F, -1.0F, 1.0F, 4.0F, 2.0F).mirror(false),
+					PartPose.offsetAndRotation(4.5F, 2.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
 
 			PartDefinition bone3 = partdefinition.addOrReplaceChild("bone3", CubeListBuilder.create().texOffs(6, 0).addBox(-6.0F, -9.8192F, -1.5736F, 1.0F, 9.0F, 2.0F)
-					.texOffs(0, 0).addBox(5.0F, -9.8192F, -1.5736F, 1.0F, 9.0F, 2.0F), PartPose.offsetAndRotation(0.0F, -3.0F, 4.0F, -0.6109F, 0.0F, 0.0F));
+					.texOffs(0, 0).addBox(5.0F, -9.8192F, -1.5736F, 1.0F, 9.0F, 2.0F),
+					PartPose.offsetAndRotation(0.0F, -3.0F, 4.0F, -0.6109F, 0.0F, 0.0F));
 
 			PartDefinition bone4 = bone3.addOrReplaceChild("bone4", CubeListBuilder.create().texOffs(36, 19).addBox(-5.0F, -1.0F, -3.0F, 10.0F, 4.0F, 7.0F)
-					.texOffs(38, 8).addBox(-5.0F, -1.0F, -1.0F, 1.0F, 4.0F, 2.0F), PartPose.offsetAndRotation(0.0F, -7.0F, 0.0F, 0.6109F, 0.0F, 0.0F));
+					.texOffs(38, 8).addBox(-5.0F, -1.0F, -1.0F, 1.0F, 4.0F, 2.0F),
+					PartPose.offsetAndRotation(0.0F, -7.0F, 0.0F, 0.6109F, 0.0F, 0.0F));
 
-			PartDefinition cube_r2 = bone4.addOrReplaceChild("cube_r2", CubeListBuilder.create().texOffs(38, 8).addBox(-0.5F, -3.0F, -1.0F, 1.0F, 4.0F, 2.0F), PartPose.offsetAndRotation(4.5F, 2.0F, 0.0F, 0.0F, -3.1416F, 0.0F));
+			PartDefinition cube_r2 = bone4.addOrReplaceChild("cube_r2", CubeListBuilder.create().texOffs(38, 8).addBox(-0.5F, -3.0F, -1.0F, 1.0F, 4.0F, 2.0F),
+					PartPose.offsetAndRotation(4.5F, 2.0F, 0.0F, 0.0F, -3.1416F, 0.0F));
 
 		} else {
 			PartDefinition bone = partdefinition.addOrReplaceChild("bone", CubeListBuilder.create().texOffs(6, 0).addBox(-6.0F, -9.0F, 0.0F, 1.0F, 9.0F, 2.0F)
-					.texOffs(0, 0).addBox(5.0F, -9.0F, 0.0F, 1.0F, 9.0F, 2.0F), PartPose.offsetAndRotation(0.0F, -3.0F, -4.0F, 1.5708F, 0.0F, 0.0F));
+					.texOffs(0, 0).addBox(5.0F, -9.0F, 0.0F, 1.0F, 9.0F, 2.0F),
+					PartPose.offsetAndRotation(0.0F, -3.0F, -4.0F, 1.5708F, 0.0F, 0.0F));
 
 			PartDefinition bone2 = bone.addOrReplaceChild("bone2", CubeListBuilder.create().texOffs(36, 19).addBox(-5.0F, -1.0F, -4.0F, 10.0F, 4.0F, 7.0F)
-					.texOffs(38, 8).addBox(-5.0F, -1.0F, -1.0F, 1.0F, 4.0F, 2.0F), PartPose.offsetAndRotation(0.0F, -7.0F, -1.0F, -1.5708F, 0.0F, 0.0F));
+					.texOffs(38, 8).addBox(-5.0F, -1.0F, -1.0F, 1.0F, 4.0F, 2.0F),
+					PartPose.offsetAndRotation(0.0F, -7.0F, -1.0F, -1.5708F, 0.0F, 0.0F));
 
-			PartDefinition cube_r1 = bone2.addOrReplaceChild("cube_r1", CubeListBuilder.create().texOffs(44, 8).mirror().addBox(-0.5F, -3.0F, -1.0F, 1.0F, 4.0F, 2.0F).mirror(false), PartPose.offsetAndRotation(4.5F, 2.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
+			PartDefinition cube_r1 = bone2.addOrReplaceChild("cube_r1", CubeListBuilder.create()
+							.texOffs(44, 8).mirror().addBox(-0.5F, -3.0F, -1.0F, 1.0F, 4.0F, 2.0F).mirror(false),
+					PartPose.offsetAndRotation(4.5F, 2.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
 
 			PartDefinition bone3 = partdefinition.addOrReplaceChild("bone3", CubeListBuilder.create().texOffs(6, 0).addBox(-6.0F, -9.0F, -2.0F, 1.0F, 9.0F, 2.0F)
-					.texOffs(0, 0).addBox(5.0F, -9.0F, -2.0F, 1.0F, 9.0F, 2.0F), PartPose.offsetAndRotation(0.0F, -3.0F, 4.0F, -1.5708F, 0.0F, 0.0F));
+					.texOffs(0, 0).addBox(5.0F, -9.0F, -2.0F, 1.0F, 9.0F, 2.0F),
+					PartPose.offsetAndRotation(0.0F, -3.0F, 4.0F, -1.5708F, 0.0F, 0.0F));
 
 			PartDefinition bone4 = bone3.addOrReplaceChild("bone4", CubeListBuilder.create().texOffs(36, 19).addBox(-5.0F, -1.0F, -3.0F, 10.0F, 4.0F, 7.0F)
-					.texOffs(38, 8).addBox(-5.0F, -1.0F, -1.0F, 1.0F, 4.0F, 2.0F), PartPose.offsetAndRotation(0.0F, -7.0F, 1.0F, 1.5708F, 0.0F, 0.0F));
+					.texOffs(38, 8).addBox(-5.0F, -1.0F, -1.0F, 1.0F, 4.0F, 2.0F),
+					PartPose.offsetAndRotation(0.0F, -7.0F, 1.0F, 1.5708F, 0.0F, 0.0F));
 
-			PartDefinition cube_r2 = bone4.addOrReplaceChild("cube_r2", CubeListBuilder.create().texOffs(38, 8).addBox(-0.5F, -3.0F, -1.0F, 1.0F, 4.0F, 2.0F), PartPose.offsetAndRotation(4.5F, 2.0F, 0.0F, 0.0F, -3.1416F, 0.0F));
+			PartDefinition cube_r2 = bone4.addOrReplaceChild("cube_r2", CubeListBuilder.create().texOffs(38, 8).addBox(-0.5F, -3.0F, -1.0F, 1.0F, 4.0F, 2.0F),
+					PartPose.offsetAndRotation(4.5F, 2.0F, 0.0F, 0.0F, -3.1416F, 0.0F));
 
 		}
 

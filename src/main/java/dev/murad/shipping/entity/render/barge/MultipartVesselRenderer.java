@@ -100,11 +100,11 @@ public class MultipartVesselRenderer<T extends AbstractBargeEntity> extends Abst
     }
 
     public static class Builder<T extends AbstractBargeEntity> {
-        private final EntityRendererProvider.Context context;
+        protected final EntityRendererProvider.Context context;
 
-        private ModelPack<T> baseModelPack;
-        private ModelPack<T> insertModelPack;
-        private ModelPack<T> trimModelPack;
+        protected ModelPack<T> baseModelPack;
+        protected ModelPack<T> insertModelPack;
+        protected ModelPack<T> trimModelPack;
 
 
         public Builder(EntityRendererProvider.Context context) {

@@ -46,37 +46,10 @@ public class FluidTankBargeRenderer<T extends FluidTankBargeEntity> extends Mult
         matrixStackIn.popPose();
     }
 
-    public static class Builder<T extends FluidTankBargeEntity> {
-        private final EntityRendererProvider.Context context;
-
-        private ModelPack<T> baseModelPack;
-        private ModelPack<T> insertModelPack;
-        private ModelPack<T> trimModelPack;
-
+    public static class Builder<T extends FluidTankBargeEntity> extends MultipartVesselRenderer.Builder<T> {
 
         public Builder(EntityRendererProvider.Context context) {
-            this.context = context;
-        }
-
-        public Builder<T> baseModel(ModelSupplier<T> supplier,
-                                                            ModelLayerLocation location,
-                                                            ResourceLocation texture) {
-            this.baseModelPack = new ModelPack<>(supplier, location, texture);
-            return this;
-        }
-
-        public Builder<T> insertModel(ModelSupplier<T> supplier,
-                                                              ModelLayerLocation location,
-                                                              ResourceLocation texture) {
-            this.insertModelPack = new ModelPack<>(supplier, location, texture);
-            return this;
-        }
-
-        public  Builder<T> trimModel(ModelSupplier<T> supplier,
-                                                            ModelLayerLocation location,
-                                                            ResourceLocation texture) {
-            this.trimModelPack = new ModelPack<>(supplier, location, texture);
-            return this;
+            super(context);
         }
 
         public FluidTankBargeRenderer<T> build() {
