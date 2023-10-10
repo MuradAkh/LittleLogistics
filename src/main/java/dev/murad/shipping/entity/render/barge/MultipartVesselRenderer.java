@@ -1,16 +1,17 @@
 package dev.murad.shipping.entity.render.barge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.murad.shipping.entity.custom.vessel.VesselEntity;
 import dev.murad.shipping.entity.custom.vessel.barge.AbstractBargeEntity;
 import lombok.Getter;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,24 +24,18 @@ public class MultipartVesselRenderer<T extends AbstractBargeEntity> extends Abst
     private final ResourceLocation baseTextureLocation, insertTextureLocation, trimTextureLocation;
 
     protected MultipartVesselRenderer(EntityRendererProvider.Context context,
-                                    ModelSupplier<T> baseModelSupplier,
-                                    ModelLayerLocation baseModelLocation,
-                                    ResourceLocation baseTexture,
-                                    ModelSupplier<T> insertModelSupplier,
-                                    ModelLayerLocation insertModelLocation,
-                                    ResourceLocation insertTexture,
-                                    ModelSupplier<T> trimModelSupplier,
-                                    ModelLayerLocation trimModelLocation,
-                                    ResourceLocation trimTexture) {
+                                      ModelPack<T> baseModelPack,
+                                      ModelPack<T> insertModelPack,
+                                      ModelPack<T> trimModelPack) {
         super(context);
-        this.baseModel = baseModelSupplier.supply(context.bakeLayer(baseModelLocation));
-        this.baseTextureLocation = baseTexture;
+        this.baseModel = baseModelPack.supplier.supply(context.bakeLayer(baseModelPack.location));
+        this.baseTextureLocation = baseModelPack.texture;
 
-        this.insertModel = insertModelSupplier.supply(context.bakeLayer(insertModelLocation));
-        this.insertTextureLocation = insertTexture;
+        this.insertModel = insertModelPack.supplier.supply(context.bakeLayer(insertModelPack.location));
+        this.insertTextureLocation = insertModelPack.texture;
 
-        this.trimModel = trimModelSupplier.supply(context.bakeLayer(trimModelLocation));
-        this.trimTextureLocation = trimTexture;
+        this.trimModel = trimModelPack.supplier.supply(context.bakeLayer(trimModelPack.location));
+        this.trimTextureLocation = trimModelPack.texture;
     }
 
     /**
@@ -64,19 +59,28 @@ public class MultipartVesselRenderer<T extends AbstractBargeEntity> extends Abst
     @Override
     protected void renderModel(T vesselEntity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {
         int overlay = LivingEntityRenderer.getOverlayCoords(vesselEntity, 0);
+        renderBaseModel(vesselEntity, matrixStack, buffer, packedLight, overlay);
+        renderInsertModel(vesselEntity, matrixStack, buffer, packedLight, overlay);
+        renderTrimModel(vesselEntity, matrixStack, buffer, packedLight, overlay);
+    }
 
-        var colorId = vesselEntity.getColor();
-        var color = (colorId == null ? DyeColor.RED : DyeColor.byId(colorId)).getTextureDiffuseColors();
-
+    protected void renderBaseModel(T vesselEntity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
         baseModel.renderToBuffer(matrixStack,
                 buffer.getBuffer(baseModel.renderType(baseTextureLocation)),
                 packedLight, overlay,
                 1.0F, 1.0F, 1.0F, 1.0F);
+    }
 
+    protected void renderInsertModel(T vesselEntity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
         insertModel.renderToBuffer(matrixStack,
                 buffer.getBuffer(insertModel.renderType(insertTextureLocation)),
                 packedLight, overlay,
                 1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    protected void renderTrimModel(T vesselEntity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
+        var colorId = vesselEntity.getColor();
+        var color = (colorId == null ? DyeColor.RED : DyeColor.byId(colorId)).getTextureDiffuseColors();
 
         trimModel.renderToBuffer(matrixStack,
                 buffer.getBuffer(trimModel.renderType(trimTextureLocation)),
@@ -85,24 +89,22 @@ public class MultipartVesselRenderer<T extends AbstractBargeEntity> extends Abst
     }
 
     @FunctionalInterface
-    public interface ModelSupplier<T extends VesselEntity> {
+    public interface ModelSupplier<T extends Entity> {
         EntityModel<T> supply(ModelPart root);
+    }
+
+    public record ModelPack<T extends Entity>(
+            ModelSupplier<T> supplier,
+            ModelLayerLocation location,
+            ResourceLocation texture) {
     }
 
     public static class Builder<T extends AbstractBargeEntity> {
         private final EntityRendererProvider.Context context;
 
-        private ModelSupplier<T> baseModelSupplier;
-        private ModelLayerLocation baseModelLocation;
-        private ResourceLocation baseModelTexture;
-
-        private ModelSupplier<T> insertModelSupplier;
-        private ModelLayerLocation insertModelLocation;
-        private ResourceLocation insertModelTexture;
-
-        private ModelSupplier<T> trimModelSupplier;
-        private ModelLayerLocation trimModelLocation;
-        private ResourceLocation trimModelTexture;
+        private ModelPack<T> baseModelPack;
+        private ModelPack<T> insertModelPack;
+        private ModelPack<T> trimModelPack;
 
 
         public Builder(EntityRendererProvider.Context context) {
@@ -112,35 +114,26 @@ public class MultipartVesselRenderer<T extends AbstractBargeEntity> extends Abst
         public Builder<T> baseModel(ModelSupplier<T> supplier,
                                     ModelLayerLocation location,
                                     ResourceLocation texture) {
-            this.baseModelSupplier = supplier;
-            this.baseModelLocation = location;
-            this.baseModelTexture = texture;
+            this.baseModelPack = new ModelPack<>(supplier, location, texture);
             return this;
         }
 
         public Builder<T> insertModel(ModelSupplier<T> supplier,
                                       ModelLayerLocation location,
                                       ResourceLocation texture) {
-            this.insertModelSupplier = supplier;
-            this.insertModelLocation = location;
-            this.insertModelTexture = texture;
+            this.insertModelPack = new ModelPack<>(supplier, location, texture);
             return this;
         }
 
         public Builder<T> trimModel(ModelSupplier<T> supplier,
                                       ModelLayerLocation location,
                                       ResourceLocation texture) {
-            this.trimModelSupplier = supplier;
-            this.trimModelLocation = location;
-            this.trimModelTexture = texture;
+            this.trimModelPack = new ModelPack<>(supplier, location, texture);
             return this;
         }
 
         public MultipartVesselRenderer<T> build() {
-            return new MultipartVesselRenderer<>(context,
-                    baseModelSupplier, baseModelLocation, baseModelTexture,
-                    insertModelSupplier, insertModelLocation, insertModelTexture,
-                    trimModelSupplier, trimModelLocation, trimModelTexture);
+            return new MultipartVesselRenderer<>(context, baseModelPack, insertModelPack, trimModelPack);
         }
     }
 }

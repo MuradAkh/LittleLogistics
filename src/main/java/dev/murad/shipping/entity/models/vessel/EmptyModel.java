@@ -14,36 +14,20 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.ResourceLocation;
 
-public class TrimBargeModel<T extends AbstractBargeEntity> extends EntityModel<T> {
+public class EmptyModel<T extends AbstractBargeEntity> extends EntityModel<T> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-	public static final ModelLayerLocation CLOSED_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "trim_barge_model_closed"), "main");
-	public static final ModelLayerLocation OPEN_FRONT_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "trim_barge_model_open_front"), "main");
-	public static final ModelLayerLocation OPEN_SIDES_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "trim_barge_model_open_sides"), "main");
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "base_barge_model_closed"), "main");
 	private final ModelPart bb_main;
 
-	public TrimBargeModel(ModelPart root) {
+	public EmptyModel(ModelPart root) {
 		this.bb_main = root.getChild("bb_main");
 	}
 
-	public static LayerDefinition createBodyLayer(boolean closedFront, boolean closedSides) {
+	public static LayerDefinition createBodyLayer() {
 		MeshDefinition meshdefinition = new MeshDefinition();
 		PartDefinition partdefinition = meshdefinition.getRoot();
 
-		var listBuilder = CubeListBuilder.create()
-				// Long Side
-				.texOffs(0, 0).addBox(-8.0F, -29.0F, -7.0F, 2.0F, 2.0F, 14.0F);
-
-		if (closedFront) {
-			listBuilder.texOffs(0, 0).addBox(6.0F, -29.0F, -7.0F, 2.0F, 2.0F, 14.0F);
-		}
-
-		if (closedSides) {
-			// Short Side
-			listBuilder.texOffs(19, 2).addBox(-6.0F, -29.0F, -9.0F, 12.0F, 2.0F, 2.0F)
-					.texOffs(19, 2).addBox(-6.0F, -29.0F, 7.0F, 12.0F, 2.0F, 2.0F);
-		}
-
-		PartDefinition bb_main = partdefinition.addOrReplaceChild("bb_main", listBuilder, PartPose.offset(0.0F, 23.0F, 0.0F));
+		PartDefinition bb_main = partdefinition.addOrReplaceChild("bb_main",  CubeListBuilder.create(), PartPose.offset(0.0F, 23.0F, 0.0F));
 
 		return LayerDefinition.create(meshdefinition, 64, 64);
 	}
@@ -55,6 +39,6 @@ public class TrimBargeModel<T extends AbstractBargeEntity> extends EntityModel<T
 
 	@Override
 	public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-		bb_main.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+
 	}
 }

@@ -2,17 +2,15 @@ package dev.murad.shipping.event;
 
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.fluid.render.FluidHopperTileEntityRenderer;
+import dev.murad.shipping.entity.custom.vessel.barge.FishingBargeEntity;
 import dev.murad.shipping.entity.models.train.*;
 import dev.murad.shipping.entity.models.vessel.*;
-import dev.murad.shipping.entity.models.vessel.insert.CubeInsertBargeModel;
-import dev.murad.shipping.entity.models.vessel.insert.FluidTankInsertBargeModel;
-import dev.murad.shipping.entity.models.vessel.insert.RingsInsertBargeModel;
-import dev.murad.shipping.entity.models.vessel.insert.SeaterInsertBargeModel;
-import dev.murad.shipping.entity.render.barge.FluidLevelRenderer;
+import dev.murad.shipping.entity.models.vessel.insert.*;
+import dev.murad.shipping.entity.render.barge.FishingBargeRenderer;
+import dev.murad.shipping.entity.render.barge.FluidTankBargeRenderer;
 import dev.murad.shipping.entity.render.barge.MultipartVesselRenderer;
 import dev.murad.shipping.entity.render.train.FluidTankCarRenderer;
 import dev.murad.shipping.entity.render.train.TrainCarRenderer;
-import dev.murad.shipping.entity.render.barge.FishingBargeRenderer;
 import dev.murad.shipping.entity.render.barge.StaticVesselRenderer;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModEntityTypes;
@@ -55,65 +53,79 @@ public class ModClientEventHandler {
         // Barges
         event.registerEntityRenderer(ModEntityTypes.CHEST_BARGE.get(),
                 (ctx) -> new MultipartVesselRenderer.Builder<>(ctx)
-                        .baseModel(BaseBargeModel::new, BaseBargeModel.LAYER_LOCATION,
+                        .baseModel(BaseBargeModel::new, BaseBargeModel.CLOSED_LOCATION,
                                 ShippingMod.entityTexture("barge/base.png"))
                         .insertModel(CubeInsertBargeModel::new, CubeInsertBargeModel.LAYER_LOCATION,
                                 ShippingMod.entityTexture("barge/chest_insert.png"))
-                        .trimModel(TrimBargeModel::new, TrimBargeModel.LAYER_LOCATION,
+                        .trimModel(TrimBargeModel::new, TrimBargeModel.CLOSED_LOCATION,
                                 ShippingMod.entityTexture("barge/trim.png"))
                         .build());
 
         event.registerEntityRenderer(ModEntityTypes.BARREL_BARGE.get(),
                 (ctx) -> new MultipartVesselRenderer.Builder<>(ctx)
-                        .baseModel(BaseBargeModel::new, BaseBargeModel.LAYER_LOCATION,
+                        .baseModel(BaseBargeModel::new, BaseBargeModel.CLOSED_LOCATION,
                                 ShippingMod.entityTexture("barge/base.png"))
                         .insertModel(CubeInsertBargeModel::new, CubeInsertBargeModel.LAYER_LOCATION,
                                 ShippingMod.entityTexture("barge/barrel_insert.png"))
-                        .trimModel(TrimBargeModel::new, TrimBargeModel.LAYER_LOCATION,
+                        .trimModel(TrimBargeModel::new, TrimBargeModel.CLOSED_LOCATION,
                                 ShippingMod.entityTexture("barge/trim.png"))
                         .build());
 
         event.registerEntityRenderer(ModEntityTypes.CHUNK_LOADER_BARGE.get(),
                 (ctx) -> new MultipartVesselRenderer.Builder<>(ctx)
-                        .baseModel(BaseBargeModel::new, BaseBargeModel.LAYER_LOCATION,
+                        .baseModel(BaseBargeModel::new, BaseBargeModel.CLOSED_LOCATION,
                                 ShippingMod.entityTexture("barge/base.png"))
                         .insertModel(RingsInsertBargeModel::new, RingsInsertBargeModel.LAYER_LOCATION,
                                 ShippingMod.entityTexture("barge/chunk_loader_insert.png"))
-                        .trimModel(TrimBargeModel::new, TrimBargeModel.LAYER_LOCATION,
+                        .trimModel(TrimBargeModel::new, TrimBargeModel.CLOSED_LOCATION,
                                 ShippingMod.entityTexture("barge/trim.png"))
                         .build());
 
         event.registerEntityRenderer(ModEntityTypes.SEATER_BARGE.get(),
                 (ctx) -> new MultipartVesselRenderer.Builder<>(ctx)
-                        .baseModel(BaseBargeModel::new, BaseBargeModel.LAYER_LOCATION_OPEN,
+                        .baseModel(BaseBargeModel::new, BaseBargeModel.OPEN_FRONT_LOCATION,
                                 ShippingMod.entityTexture("barge/base.png"))
                         .insertModel(SeaterInsertBargeModel::new, SeaterInsertBargeModel.LAYER_LOCATION,
                                 ShippingMod.entityTexture("barge/seater_insert.png"))
-                        .trimModel(TrimBargeModel::new, TrimBargeModel.LAYER_LOCATION_OPEN,
+                        .trimModel(TrimBargeModel::new, TrimBargeModel.OPEN_FRONT_LOCATION,
                                 ShippingMod.entityTexture("barge/trim.png"))
                         .build());
 
         event.registerEntityRenderer(ModEntityTypes.VACUUM_BARGE.get(),
                 (ctx) -> new MultipartVesselRenderer.Builder<>(ctx)
-                        .baseModel(BaseBargeModel::new, BaseBargeModel.LAYER_LOCATION,
+                        .baseModel(BaseBargeModel::new, BaseBargeModel.CLOSED_LOCATION,
                                 ShippingMod.entityTexture("barge/base.png"))
                         .insertModel(RingsInsertBargeModel::new, RingsInsertBargeModel.LAYER_LOCATION,
                                 ShippingMod.entityTexture("barge/vacuum_insert.png"))
-                        .trimModel(TrimBargeModel::new, TrimBargeModel.LAYER_LOCATION,
+                        .trimModel(TrimBargeModel::new, TrimBargeModel.CLOSED_LOCATION,
                                 ShippingMod.entityTexture("barge/trim.png"))
                         .build());
 
-        // TODO: generalize for cars as well
         event.registerEntityRenderer(ModEntityTypes.FLUID_TANK_BARGE.get(),
-                (ctx) -> new FluidLevelRenderer<>(ctx,
-                        BaseBargeModel::new, BaseBargeModel.LAYER_LOCATION,
-                                ShippingMod.entityTexture("barge/base.png"),
-                        FluidTankInsertBargeModel::new, FluidTankInsertBargeModel.LAYER_LOCATION,
-                                ShippingMod.entityTexture("barge/fluid_tank_insert.png"),
-                        TrimBargeModel::new, TrimBargeModel.LAYER_LOCATION,
-                                ShippingMod.entityTexture("barge/trim.png")));
+                (ctx) -> new FluidTankBargeRenderer.Builder<>(ctx)
+                        .baseModel(BaseBargeModel::new, BaseBargeModel.CLOSED_LOCATION,
+                                ShippingMod.entityTexture("barge/base.png"))
+                        .insertModel(FluidTankInsertBargeModel::new, FluidTankInsertBargeModel.LAYER_LOCATION,
+                                ShippingMod.entityTexture("barge/fluid_tank_insert.png"))
+                        .trimModel(TrimBargeModel::new, TrimBargeModel.CLOSED_LOCATION,
+                                ShippingMod.entityTexture("barge/trim.png"))
+                        .build());
 
-        event.registerEntityRenderer(ModEntityTypes.FISHING_BARGE.get(), FishingBargeRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.FISHING_BARGE.get(),
+                (ctx) -> new FishingBargeRenderer.Builder<>(ctx)
+                        .baseModel(BaseBargeModel::new, BaseBargeModel.OPEN_SIDES_LOCATION,
+                                ShippingMod.entityTexture("barge/base.png"))
+                        .stashedInsertModel(FishingInsertBargeModel::new, FishingInsertBargeModel.STASHED_LOCATION,
+                                ShippingMod.entityTexture("barge/fishing_insert.png"))
+                        .transitionInsertModel(FishingInsertBargeModel::new, FishingInsertBargeModel.TRANSITION_LOCATION,
+                                ShippingMod.entityTexture("barge/fishing_insert.png"))
+                        .deployedInsertModel(FishingInsertBargeModel::new, FishingInsertBargeModel.DEPLOYED_LOCATION,
+                                ShippingMod.entityTexture("barge/fishing_insert.png"))
+                        .trimModel(TrimBargeModel::new, TrimBargeModel.OPEN_SIDES_LOCATION,
+                                ShippingMod.entityTexture("barge/trim.png"))
+                        .build());
+
+//        event.registerEntityRenderer(ModEntityTypes.FISHING_BARGE.get(), FishingBargeRenderer::new);
 
         // Tugs
         event.registerEntityRenderer(ModEntityTypes.ENERGY_TUG.get(),
@@ -180,20 +192,24 @@ public class ModClientEventHandler {
         event.registerLayerDefinition(ChainExtendedModel.LAYER_LOCATION, ChainExtendedModel::createBodyLayer);
         event.registerLayerDefinition(ChainModel.LAYER_LOCATION, ChainModel::createBodyLayer);
 
-        event.registerLayerDefinition(BaseBargeModel.LAYER_LOCATION, () -> BaseBargeModel.createBodyLayer(true));
-        event.registerLayerDefinition(BaseBargeModel.LAYER_LOCATION_OPEN, () -> BaseBargeModel.createBodyLayer(false));
-        event.registerLayerDefinition(TrimBargeModel.LAYER_LOCATION, () -> TrimBargeModel.createBodyLayer(true));
-        event.registerLayerDefinition(TrimBargeModel.LAYER_LOCATION_OPEN, () -> TrimBargeModel.createBodyLayer(false));
+        event.registerLayerDefinition(EmptyModel.LAYER_LOCATION, EmptyModel::createBodyLayer);
+
+        event.registerLayerDefinition(BaseBargeModel.CLOSED_LOCATION, () -> BaseBargeModel.createBodyLayer(true, true));
+        event.registerLayerDefinition(BaseBargeModel.OPEN_FRONT_LOCATION, () -> BaseBargeModel.createBodyLayer(false, true));
+        event.registerLayerDefinition(BaseBargeModel.OPEN_SIDES_LOCATION, () -> BaseBargeModel.createBodyLayer(true, false));
+
+        event.registerLayerDefinition(TrimBargeModel.CLOSED_LOCATION, () -> TrimBargeModel.createBodyLayer(true, true));
+        event.registerLayerDefinition(TrimBargeModel.OPEN_FRONT_LOCATION, () -> TrimBargeModel.createBodyLayer(false, true));
+        event.registerLayerDefinition(TrimBargeModel.OPEN_SIDES_LOCATION, () -> TrimBargeModel.createBodyLayer(true, false));
 
         event.registerLayerDefinition(CubeInsertBargeModel.LAYER_LOCATION, CubeInsertBargeModel::createBodyLayer);
         event.registerLayerDefinition(RingsInsertBargeModel.LAYER_LOCATION, RingsInsertBargeModel::createBodyLayer);
         event.registerLayerDefinition(SeaterInsertBargeModel.LAYER_LOCATION, SeaterInsertBargeModel::createBodyLayer);
-
         event.registerLayerDefinition(FluidTankInsertBargeModel.LAYER_LOCATION, FluidTankInsertBargeModel::createBodyLayer);
 
-        event.registerLayerDefinition(FishingBargeDeployedModel.LAYER_LOCATION, FishingBargeDeployedModel::createBodyLayer);
-        event.registerLayerDefinition(FishingBargeModel.LAYER_LOCATION, FishingBargeModel::createBodyLayer);
-        event.registerLayerDefinition(FishingBargeTransitionModel.LAYER_LOCATION, FishingBargeTransitionModel::createBodyLayer);
+        event.registerLayerDefinition(FishingInsertBargeModel.STASHED_LOCATION, () -> FishingInsertBargeModel.createBodyLayer(FishingBargeEntity.Status.STASHED));
+        event.registerLayerDefinition(FishingInsertBargeModel.TRANSITION_LOCATION, () -> FishingInsertBargeModel.createBodyLayer(FishingBargeEntity.Status.TRANSITION));
+        event.registerLayerDefinition(FishingInsertBargeModel.DEPLOYED_LOCATION, () -> FishingInsertBargeModel.createBodyLayer(FishingBargeEntity.Status.DEPLOYED));
 
         event.registerLayerDefinition(EnergyTugModel.LAYER_LOCATION, EnergyTugModel::createBodyLayer);
         event.registerLayerDefinition(SteamTugModel.LAYER_LOCATION, SteamTugModel::createBodyLayer);
