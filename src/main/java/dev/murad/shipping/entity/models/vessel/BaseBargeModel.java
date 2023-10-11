@@ -31,19 +31,19 @@ public class BaseBargeModel<T extends Entity & Colorable> extends EntityModel<T>
 
 		var listBuilder = CubeListBuilder.create()
 				// Main
-				.texOffs(0, 0).addBox(-6.0F, -5F, -7.0F, 12.0F, 5.0F, 14.0F)
+				.texOffs(0, 0).addBox(-6.0F, -4F, -7.0F, 12.0F, 5.0F, 14.0F)
 				// Back Side
-				.texOffs(0, 19).addBox(-8.0F, -5F, -7.0F, 2.0F, 2.0F, 14.0F);
+				.texOffs(0, 19).addBox(-8.0F, -4F, -7.0F, 2.0F, 2.0F, 14.0F);
 
 		if (closedFront) {
 			// Front Side
-			listBuilder.texOffs(0, 19).addBox(6.0F, -5F, -7.0F, 2.0F, 2.0F, 14.0F);
+			listBuilder.texOffs(0, 19).addBox(6.0F, -4F, -7.0F, 2.0F, 2.0F, 14.0F);
 		}
 
 		if (closedSides) {
 			// Short Sides
-			listBuilder.texOffs(19, 21).addBox(-6.0F, -5F, -9.0F, 12.0F, 2.0F, 2.0F)
-					.texOffs(19, 21).addBox(-6.0F, -5F, 7.0F, 12.0F, 2.0F, 2.0F);
+			listBuilder.texOffs(19, 21).addBox(-6.0F, -4F, -9.0F, 12.0F, 2.0F, 2.0F)
+					.texOffs(19, 21).addBox(-6.0F, -4F, 7.0F, 12.0F, 2.0F, 2.0F);
 		}
 
 		PartDefinition bb_main = partdefinition.addOrReplaceChild("bb_main", listBuilder, PartPose.ZERO);
