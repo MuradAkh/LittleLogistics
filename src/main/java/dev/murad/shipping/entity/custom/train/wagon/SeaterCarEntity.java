@@ -49,6 +49,7 @@ public class SeaterCarEntity extends AbstractWagonEntity {
     public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
         InteractionResult ret = super.interact(pPlayer, pHand);
         if (ret.consumesAction()) return ret;
+
         if (pPlayer.isSecondaryUseActive()) {
             return InteractionResult.PASS;
         } else if (this.isVehicle()) {

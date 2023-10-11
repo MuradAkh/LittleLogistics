@@ -55,6 +55,9 @@ public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVa
 
     @Override
     public InteractionResult interact(Player player, InteractionHand hand){
+        InteractionResult ret = super.interact(player, hand);
+        if (ret.consumesAction()) return ret;
+
         if(!this.level().isClientSide){
             player.openMenu(this);
         }

@@ -1,4 +1,4 @@
-package dev.murad.shipping.entity.models.vessel;
+package dev.murad.shipping.entity.models.vessel.base;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;

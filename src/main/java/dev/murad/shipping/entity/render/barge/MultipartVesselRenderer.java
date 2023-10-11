@@ -4,15 +4,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.vessel.VesselEntity;
 import dev.murad.shipping.entity.models.vessel.EmptyModel;
+import dev.murad.shipping.entity.render.ModelPack;
+import dev.murad.shipping.entity.render.ModelSupplier;
 import lombok.Getter;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,14 +32,14 @@ public class MultipartVesselRenderer<T extends VesselEntity> extends AbstractVes
                                       ModelPack<T> insertModelPack,
                                       ModelPack<T> trimModelPack) {
         super(context);
-        this.baseModel = baseModelPack.supplier.supply(context.bakeLayer(baseModelPack.location));
-        this.baseTextureLocation = baseModelPack.texture;
+        this.baseModel = baseModelPack.supplier().supply(context.bakeLayer(baseModelPack.location()));
+        this.baseTextureLocation = baseModelPack.texture();
 
-        this.insertModel = insertModelPack.supplier.supply(context.bakeLayer(insertModelPack.location));
-        this.insertTextureLocation = insertModelPack.texture;
+        this.insertModel = insertModelPack.supplier().supply(context.bakeLayer(insertModelPack.location()));
+        this.insertTextureLocation = insertModelPack.texture();
 
-        this.trimModel = trimModelPack.supplier.supply(context.bakeLayer(trimModelPack.location));
-        this.trimTextureLocation = trimModelPack.texture;
+        this.trimModel = trimModelPack.supplier().supply(context.bakeLayer(trimModelPack.location()));
+        this.trimTextureLocation = trimModelPack.texture();
     }
 
     /**
@@ -99,17 +99,6 @@ public class MultipartVesselRenderer<T extends VesselEntity> extends AbstractVes
 
     protected float getModelYrot() {
         return rotation;
-    }
-
-    @FunctionalInterface
-    public interface ModelSupplier<T extends Entity> {
-        EntityModel<T> supply(ModelPart root);
-    }
-
-    public record ModelPack<T extends Entity>(
-            ModelSupplier<T> supplier,
-            ModelLayerLocation location,
-            ResourceLocation texture) {
     }
 
     public static class Builder<T extends VesselEntity> {

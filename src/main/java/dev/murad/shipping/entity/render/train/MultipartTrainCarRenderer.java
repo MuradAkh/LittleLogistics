@@ -7,12 +7,14 @@ import com.mojang.math.Axis;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.entity.models.train.ChainModel;
+import dev.murad.shipping.entity.models.vessel.EmptyModel;
+import dev.murad.shipping.entity.render.ModelPack;
+import dev.murad.shipping.entity.render.ModelSupplier;
 import dev.murad.shipping.entity.render.RenderWithAttachmentPoints;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -20,34 +22,40 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.function.Function;
 
+public class MultipartTrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRenderer<T> implements RenderWithAttachmentPoints<T> {
 
-public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRenderer<T> implements RenderWithAttachmentPoints<T> {
-    private final EntityModel<T> entityModel;
-    private final ResourceLocation texture;
+    @Getter
+    private final EntityModel<T> baseModel, insertModel, trimModel;
+
+    @Getter
+    private final ResourceLocation baseTextureLocation, insertTextureLocation, trimTextureLocation;
+
+    protected MultipartTrainCarRenderer(EntityRendererProvider.Context context,
+                                      ModelPack<T> baseModelPack,
+                                      ModelPack<T> insertModelPack,
+                                      ModelPack<T> trimModelPack) {
+        super(context);
+        this.baseModel = baseModelPack.supplier().supply(context.bakeLayer(baseModelPack.location()));
+        this.baseTextureLocation = baseModelPack.texture();
+
+        this.insertModel = insertModelPack.supplier().supply(context.bakeLayer(insertModelPack.location()));
+        this.insertTextureLocation = insertModelPack.texture();
+
+        this.trimModel = trimModelPack.supplier().supply(context.bakeLayer(trimModelPack.location()));
+        this.trimTextureLocation = trimModelPack.texture();
+
+        chainModel = new ChainModel(context.bakeLayer(ChainModel.LAYER_LOCATION));
+    }
 
     private static final ResourceLocation CHAIN_TEXTURE =
             new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/chain.png");
 
     private final ChainModel chainModel;
 
-    public TrainCarRenderer(EntityRendererProvider.Context context,
-                            Function<ModelPart, EntityModel<T>> baseModel,
-                            ModelLayerLocation layerLocation, String baseTexture) {
-        this(context, baseModel, layerLocation, new ResourceLocation(ShippingMod.MOD_ID, baseTexture));
-    }
-
-    public TrainCarRenderer(EntityRendererProvider.Context context,
-                            Function<ModelPart, EntityModel<T>> baseModel,
-                            ModelLayerLocation layerLocation, ResourceLocation baseTexture) {
-        super(context);
-        chainModel = new ChainModel(context.bakeLayer(ChainModel.LAYER_LOCATION));
-        entityModel = baseModel.apply(context.bakeLayer(layerLocation));
-        texture = baseTexture;
-    }
 
     public void render(T car, float yaw, float pPartialTicks, PoseStack pose, MultiBufferSource buffer, int pPackedLight) {
         //getAndRenderChain(car, pose, buffer, pPackedLight);
@@ -182,10 +190,13 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
         pose.translate(0, 1.1, 0);
 
         pose.scale(-1.0F, -1.0F, 1.0F);
-        this.entityModel.setupAnim(car, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-        VertexConsumer vertexconsumer = buffer.getBuffer(this.entityModel.renderType(this.getTextureLocation(car)));
-        this.entityModel.renderToBuffer(pose, vertexconsumer, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-        renderAdditional(car, yaw, partialTicks, pose, buffer, packedLight);
+
+        int overlay = OverlayTexture.NO_OVERLAY;
+
+        renderBaseModel(car, pose, buffer, packedLight, overlay);
+        renderInsertModel(car, pose, buffer, packedLight, overlay);
+        renderTrimModel(car, pose, buffer, packedLight, overlay);
+
         pose.popPose();
 
         if (car.hasCustomName()) {
@@ -195,12 +206,78 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
         return attach;
     }
 
-    protected void renderAdditional(T pEntity, float pEntityYaw, float pPartialTicks, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPackedLight) {
-
+    protected void renderBaseModel(T entity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
+        baseModel.renderToBuffer(matrixStack,
+                buffer.getBuffer(baseModel.renderType(baseTextureLocation)),
+                packedLight, overlay,
+                1.0F, 1.0F, 1.0F, 1.0F);
     }
 
+    protected void renderInsertModel(T entity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
+        insertModel.renderToBuffer(matrixStack,
+                buffer.getBuffer(insertModel.renderType(insertTextureLocation)),
+                packedLight, overlay,
+                1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    protected void renderTrimModel(T entity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
+        var colorId = entity.getColor();
+        var color = (colorId == null ? DyeColor.RED : DyeColor.byId(colorId)).getTextureDiffuseColors();
+
+        trimModel.renderToBuffer(matrixStack,
+                buffer.getBuffer(trimModel.renderType(trimTextureLocation)),
+                packedLight, overlay,
+                color[0], color[1], color[2], 1.0F);
+    }
+
+    // Do not use these directly
+    @Deprecated
     @Override
     public ResourceLocation getTextureLocation(T entity) {
-        return texture;
+        return baseTextureLocation;
+    }
+
+    public static class Builder<T extends AbstractTrainCarEntity> {
+        protected final EntityRendererProvider.Context context;
+
+        protected ModelPack<T> baseModelPack;
+        protected ModelPack<T> insertModelPack;
+        protected ModelPack<T> trimModelPack;
+
+
+        public Builder(EntityRendererProvider.Context context) {
+            this.context = context;
+        }
+
+        public Builder<T> baseModel(ModelSupplier<T> supplier,
+                                    ModelLayerLocation location,
+                                    ResourceLocation texture) {
+            this.baseModelPack = new ModelPack<>(supplier, location, texture);
+            return this;
+        }
+
+        public Builder<T> insertModel(ModelSupplier<T> supplier,
+                                                              ModelLayerLocation location,
+                                                              ResourceLocation texture) {
+            this.insertModelPack = new ModelPack<>(supplier, location, texture);
+            return this;
+        }
+
+        public Builder<T> emptyInsert() {
+            insertModel(EmptyModel::new, EmptyModel.LAYER_LOCATION, ShippingMod.entityTexture("emptytexture.png"));
+            return this;
+        }
+
+
+        public Builder<T> trimModel(ModelSupplier<T> supplier,
+                                                            ModelLayerLocation location,
+                                                            ResourceLocation texture) {
+            this.trimModelPack = new ModelPack<>(supplier, location, texture);
+            return this;
+        }
+
+        public MultipartTrainCarRenderer<T> build() {
+            return new MultipartTrainCarRenderer<>(context, baseModelPack, insertModelPack, trimModelPack);
+        }
     }
 }

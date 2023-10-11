@@ -126,6 +126,10 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     @Override
     public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
+
+        InteractionResult ret = super.interact(pPlayer, pHand);
+        if (ret.consumesAction()) return ret;
+
         if(!pHand.equals(InteractionHand.MAIN_HAND)){
             return InteractionResult.PASS;
         }

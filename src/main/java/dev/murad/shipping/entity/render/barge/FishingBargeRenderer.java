@@ -2,6 +2,8 @@ package dev.murad.shipping.entity.render.barge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.murad.shipping.entity.custom.vessel.barge.FishingBargeEntity;
+import dev.murad.shipping.entity.render.ModelPack;
+import dev.murad.shipping.entity.render.ModelSupplier;
 import lombok.Getter;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -62,8 +64,8 @@ public class FishingBargeRenderer<T extends FishingBargeEntity> extends Multipar
         }
 
         public Builder<T> transitionInsertModel(ModelSupplier<T> supplier,
-                                             ModelLayerLocation location,
-                                             ResourceLocation texture) {
+                                                ModelLayerLocation location,
+                                                ResourceLocation texture) {
             this.transitionInsertModelPack = new ModelPack<>(supplier, location, texture);
             return this;
         }

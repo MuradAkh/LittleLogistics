@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.murad.shipping.entity.custom.vessel.barge.AbstractBargeEntity;
 import dev.murad.shipping.entity.custom.vessel.barge.FluidTankBargeEntity;
+import dev.murad.shipping.entity.render.ModelPack;
 import dev.murad.shipping.util.FluidRenderUtil;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.MultiBufferSource;
