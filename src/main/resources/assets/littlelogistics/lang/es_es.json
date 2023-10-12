@@ -1,6 +1,8 @@
 {
   "item.littlelogistics.tug": "Remolcador de vapor",
   "item.littlelogistics.barge": "Barca con cofre",
+  "item.littlelogistics.barrel_barge": "Barrel Barge",
+  "item.littlelogistics.vacuum_barge": "Item Collection Barge",
   "item.littlelogistics.chunk_loader_barge": "Barca con cargador de Chunks",
   "item.littlelogistics.seater_barge": "Barca con asiento",
   "item.littlelogistics.fishing_barge": "Barca de auto-pesca",
@@ -11,6 +13,7 @@
   "item.littlelogistics.fluid_barge": "Barca con tanque de fluidos",
   "item.littlelogistics.fluid_car": "Vagón con tanque de fluidos",
   "item.littlelogistics.chest_car": "Vagón con core",
+  "item.littlelogistics.barrel_car": "Barrel Train Car",
   "item.littlelogistics.chunk_loader_car": "Vagón con cargador de Chunks",
   "item.littlelogistics.seater_car": "Vagón con asiento",
   "item.littlelogistics.steam_locomotive": "Locomotora de vapor",

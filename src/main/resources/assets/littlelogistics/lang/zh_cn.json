@@ -1,6 +1,8 @@
 {
   "item.littlelogistics.tug": "蒸汽拖船",
   "item.littlelogistics.barge": "运输驳船",
+  "item.littlelogistics.barrel_barge": "Barrel Barge",
+  "item.littlelogistics.vacuum_barge": "Item Collection Barge",
   "item.littlelogistics.chunk_loader_barge": "加载驳船",
   "item.littlelogistics.seater_barge": "载人驳船",
   "item.littlelogistics.fishing_barge": "捕鱼驳船",
@@ -11,6 +13,7 @@
   "item.littlelogistics.fluid_barge": "流体驳船",
   "item.littlelogistics.fluid_car": "流体车厢",
   "item.littlelogistics.chest_car": "运输车厢",
+  "item.littlelogistics.barrel_car": "Barrel Train Car",
   "item.littlelogistics.chunk_loader_car": "加载车厢",
   "item.littlelogistics.seater_car": "车厢",
   "item.littlelogistics.steam_locomotive": "蒸汽车头",

@@ -1,6 +1,8 @@
 {
   "item.littlelogistics.tug": "蒸気曳船",
   "item.littlelogistics.barge": "チェスト付き艀",
+  "item.littlelogistics.barrel_barge": "Barrel Barge",
+  "item.littlelogistics.vacuum_barge": "Item Collection Barge",
   "item.littlelogistics.chunk_loader_barge": "チャンクローダー付き艀",
   "item.littlelogistics.seater_barge": "座席付き艀",
   "item.littlelogistics.fishing_barge": "自動釣り機付き艀",
@@ -11,6 +13,7 @@
   "item.littlelogistics.fluid_barge": "液体タンク付き艀",
   "item.littlelogistics.fluid_car": "液体タンク付き貨両",
   "item.littlelogistics.chest_car": "チェスト付き貨車",
+  "item.littlelogistics.barrel_car": "Barrel Train Car",
   "item.littlelogistics.chunk_loader_car": "チャンクローダー付き貨車",
   "item.littlelogistics.seater_car": "貨車",
   "item.littlelogistics.steam_locomotive": "蒸気機関車",

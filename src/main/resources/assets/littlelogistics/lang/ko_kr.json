@@ -1,6 +1,8 @@
 {
     "item.littlelogistics.tug": "증기 예인선",
     "item.littlelogistics.barge": "상자 바지선",
+    "item.littlelogistics.barrel_barge": "Barrel Barge",
+    "item.littlelogistics.vacuum_barge": "Item Collection Barge",
     "item.littlelogistics.chunk_loader_barge": "청크 로드 바지선",
     "item.littlelogistics.seater_barge": "좌석 바지선",
     "item.littlelogistics.fishing_barge": "자동 낚시 바지선",
@@ -11,6 +13,7 @@
     "item.littlelogistics.fluid_barge": "유체 탱크 바지선",
     "item.littlelogistics.fluid_car": "유체 탱크 철도 차량",
     "item.littlelogistics.chest_car": "상자 철도 차량",
+    "item.littlelogistics.barrel_car": "Barrel Train Car",
     "item.littlelogistics.chunk_loader_car": "청크 로더 철도 차량",
     "item.littlelogistics.seater_car": "철도 차량",
     "item.littlelogistics.steam_locomotive": "증기 기관차",
