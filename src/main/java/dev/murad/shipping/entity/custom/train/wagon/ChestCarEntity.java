@@ -27,13 +27,12 @@ import java.util.stream.IntStream;
 public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVanillaContainerWrapper, WorldlyContainer, MenuProvider {
     protected final ItemStackHandler itemHandler = createHandler();
     protected final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
-    public ChestCarEntity(EntityType<ChestCarEntity> p_38087_, Level p_38088_) {
-        super(p_38087_, p_38088_);
+    public ChestCarEntity(EntityType<ChestCarEntity> type, Level level) {
+        super(type, level);
     }
 
-    public ChestCarEntity(Level level, Double aDouble, Double aDouble1, Double aDouble2) {
-        super(ModEntityTypes.CHEST_CAR.get(), level, aDouble, aDouble1, aDouble2);
-
+    public ChestCarEntity(EntityType<ChestCarEntity> type, Level level, Double x, Double y, Double z) {
+        super(type, level, x, y, z);
     }
 
     @Override
@@ -50,7 +49,11 @@ public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVa
 
     @Override
     public @NotNull ItemStack getPickResult() {
-        return new ItemStack(ModItems.CHEST_CAR.get());
+        if (this.getType().equals(ModEntityTypes.BARREL_CAR.get())) {
+            return new ItemStack(ModItems.BARREL_CAR.get());
+        } else {
+            return new ItemStack(ModItems.CHEST_CAR.get());
+        }
     }
 
     @Override

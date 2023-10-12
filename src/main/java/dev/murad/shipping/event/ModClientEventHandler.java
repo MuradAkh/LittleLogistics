@@ -166,6 +166,12 @@ public class ModClientEventHandler {
                 .insertModel(CubeInsertCarModel::new, CubeInsertCarModel.LAYER_LOCATION, ShippingMod.entityTexture("car/chest_insert.png"))
                 .build());
 
+        event.registerEntityRenderer(ModEntityTypes.BARREL_CAR.get(), ctx -> new MultipartCarRenderer.Builder<>(ctx)
+                .baseModel(BaseCarModel::new, BaseCarModel.LAYER_LOCATION, ShippingMod.entityTexture("car/base.png"))
+                .trimModel(TrimCarModel::new, TrimCarModel.LAYER_LOCATION, ShippingMod.entityTexture("car/trim.png"))
+                .insertModel(CubeInsertCarModel::new, CubeInsertCarModel.LAYER_LOCATION, ShippingMod.entityTexture("car/barrel_insert.png"))
+                .build());
+
         event.registerEntityRenderer(ModEntityTypes.FLUID_CAR.get(), ctx -> new MultipartCarRenderer.Builder<>(ctx)
                 .baseModel(BaseCarModel::new, BaseCarModel.LAYER_LOCATION, ShippingMod.entityTexture("car/base.png"))
                 .trimModel(TrimCarModel::new, TrimCarModel.LAYER_LOCATION, ShippingMod.entityTexture("car/trim.png"))

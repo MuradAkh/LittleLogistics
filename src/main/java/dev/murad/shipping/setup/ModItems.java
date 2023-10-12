@@ -100,7 +100,16 @@ public class ModItems {
             () -> new TugRouteItem(new Item.Properties().stacksTo(16)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
     public static final RegistryObject<Item> CHEST_CAR = register("chest_car",
-            () -> new TrainCarItem(ChestCarEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new TrainCarItem((level, x, y, z) ->
+                    new ChestCarEntity(ModEntityTypes.CHEST_CAR.get(), level, x, y, z),
+                    new Item.Properties().stacksTo(64)),
+            ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+
+    public static final RegistryObject<Item> BARREL_CAR = register("barrel_car",
+            () -> new TrainCarItem((level, x, y, z) ->
+                    new ChestCarEntity(ModEntityTypes.BARREL_CAR.get(), level, x, y, z),
+                    new Item.Properties().stacksTo(64)),
+            ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
     public static final RegistryObject<Item> FLUID_CAR = register("fluid_car",
             () -> new TrainCarItem(FluidTankCarEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));

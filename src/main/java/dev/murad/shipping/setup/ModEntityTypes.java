@@ -88,6 +88,14 @@ public class ModEntityTypes {
                             .setShouldReceiveVelocityUpdates(true)
                             .build(new ResourceLocation(ShippingMod.MOD_ID, "chest_car").toString()));
 
+    public static final RegistryObject<EntityType<ChestCarEntity>> BARREL_CAR =
+            Registration.ENTITIES.register("barrel_car",
+                    () -> EntityType.Builder.<ChestCarEntity>of(ChestCarEntity::new,
+                                    MobCategory.MISC).sized(0.7f, 0.9f)
+                            .clientTrackingRange(8)
+                            .setShouldReceiveVelocityUpdates(true)
+                            .build(new ResourceLocation(ShippingMod.MOD_ID, "barrel_car").toString()));
+
     public static final RegistryObject<EntityType<SeaterCarEntity>> SEATER_CAR =
             Registration.ENTITIES.register("seater_car",
                     () -> EntityType.Builder.<SeaterCarEntity>of(SeaterCarEntity::new,

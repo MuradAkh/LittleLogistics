@@ -142,7 +142,6 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         return getPickResult().getItem();
     }
 
-
     @Nullable
     public Integer getColor() {
         int color = this.getEntityData().get(COLOR_DATA);
