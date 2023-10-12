@@ -25,6 +25,8 @@
 
     "entity.littlelogistics.tug": "증기 예인선",
     "entity.littlelogistics.barge": "상자 바지선",
+    "entity.littlelogistics.barrel_barge": "Barrel Barge",
+    "entity.littlelogistics.vacuum_barge": "Item Collection Barge",
     "entity.littlelogistics.chunk_loader_barge": "청크 로더 바지선",
     "entity.littlelogistics.fishing_barge": "자동 낚시 바지선",
     "entity.littlelogistics.spring": "선박 사슬",
@@ -33,6 +35,7 @@
     "entity.littlelogistics.seater_barge": "좌석 바지선",
     "entity.littlelogistics.fluid_car": "유체 탱크 철도 차량",
     "entity.littlelogistics.chest_car": "상자 철도 차량",
+    "entity.littlelogistics.barrel_car": "Barrel Train Car",
     "entity.littlelogistics.chunk_loader_car": "청크 로더 철도 차량",
     "entity.littlelogistics.seater_car": "철도 차량",
     "entity.littlelogistics.steam_locomotive": "증기 기관차",

@@ -25,6 +25,8 @@
 
   "entity.littlelogistics.tug": "Stoom Sleepboot",
   "entity.littlelogistics.barge": "Sleepaak met Kist",
+  "entity.littlelogistics.barrel_barge": "Barrel Barge",
+  "entity.littlelogistics.vacuum_barge": "Item Collection Barge",
   "entity.littlelogistics.chunk_loader_barge": "Sleepaak met Chunk Lader",
   "entity.littlelogistics.fishing_barge": "Auto-Vis Sleepaak",
   "entity.littlelogistics.spring": "Sleepkabel",
@@ -33,6 +35,7 @@
   "entity.littlelogistics.seater_barge": "Sleepaak met Zitting",
   "entity.littlelogistics.fluid_car": "Wagon met Vloeistof Tank",
   "entity.littlelogistics.chest_car": "Wagon met Kist",
+  "entity.littlelogistics.barrel_car": "Barrel Train Car",
   "entity.littlelogistics.chunk_loader_car": "Wagon met Chunk Lader",
   "entity.littlelogistics.seater_car": "Wagon",
   "entity.littlelogistics.steam_locomotive": "Stoomlocomotief",

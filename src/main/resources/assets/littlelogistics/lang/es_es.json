@@ -25,6 +25,8 @@
 
   "entity.littlelogistics.tug": "Remolcador de vapor",
   "entity.littlelogistics.barge": "Barca con cofre",
+  "entity.littlelogistics.barrel_barge": "Barrel Barge",
+  "entity.littlelogistics.vacuum_barge": "Item Collection Barge",
   "entity.littlelogistics.chunk_loader_barge": "Barca con cargador de Chunks",
   "entity.littlelogistics.fishing_barge": "Barca de auto-pesca",
   "entity.littlelogistics.spring": "Vinculador",
@@ -33,6 +35,7 @@
   "entity.littlelogistics.seater_barge": "Barca con asiento",
   "entity.littlelogistics.fluid_car": "Vagón con tanque de fluidos",
   "entity.littlelogistics.chest_car": "Vagón con cofre",
+  "entity.littlelogistics.barrel_car": "Barrel Train Car",
   "entity.littlelogistics.chunk_loader_car": "Vagón con cargador de Chunks",
   "entity.littlelogistics.seater_car": "Vagón con asiento",
   "entity.littlelogistics.steam_locomotive": "Locomotora de vapor",

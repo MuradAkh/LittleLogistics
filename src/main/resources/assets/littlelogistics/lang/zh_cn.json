@@ -25,6 +25,8 @@
 
   "entity.littlelogistics.tug": "蒸汽拖船",
   "entity.littlelogistics.barge": "运输驳船",
+  "entity.littlelogistics.barrel_barge": "Barrel Barge",
+  "entity.littlelogistics.vacuum_barge": "Item Collection Barge",
   "entity.littlelogistics.chunk_loader_barge": "加载驳船",
   "entity.littlelogistics.fishing_barge": "捕鱼驳船",
   "entity.littlelogistics.spring": "船舶锁链",
@@ -33,6 +35,7 @@
   "entity.littlelogistics.seater_barge": "载人驳船",
   "entity.littlelogistics.fluid_car": "流体车厢",
   "entity.littlelogistics.chest_car": "运输车厢",
+  "entity.littlelogistics.barrel_car": "Barrel Train Car",
   "entity.littlelogistics.chunk_loader_car": "加载车厢",
   "entity.littlelogistics.seater_car": "车厢",
   "entity.littlelogistics.steam_locomotive": "蒸汽车头",

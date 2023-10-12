@@ -25,6 +25,8 @@
 
   "entity.littlelogistics.tug": "Steam Tug",
   "entity.littlelogistics.barge": "Chest Barge",
+  "entity.littlelogistics.barrel_barge": "Barrel Barge",
+  "entity.littlelogistics.vacuum_barge": "Item Collection Barge",
   "entity.littlelogistics.chunk_loader_barge": "Chunk Loader Barge",
   "entity.littlelogistics.fishing_barge": "Auto-Fishing Barge",
   "entity.littlelogistics.spring": "Vessel Chain",
@@ -33,6 +35,7 @@
   "entity.littlelogistics.seater_barge": "Seater Barge",
   "entity.littlelogistics.fluid_car": "Fluid Tank Train Car",
   "entity.littlelogistics.chest_car": "Chest Train Car",
+  "entity.littlelogistics.barrel_car": "Barrel Train Car",
   "entity.littlelogistics.chunk_loader_car": "Chunk Loader Train Car",
   "entity.littlelogistics.seater_car": "Train Car",
   "entity.littlelogistics.steam_locomotive": "Steam Locomotive",
