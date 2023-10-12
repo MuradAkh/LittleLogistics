@@ -229,9 +229,10 @@ public class ModClientEventHandler {
         event.registerLayerDefinition(BaseCarModel.LAYER_LOCATION, BaseCarModel::createBodyLayer);
         event.registerLayerDefinition(FluidTankInsertCarModel.LAYER_LOCATION, FluidTankInsertCarModel::createBodyLayer);
 
-        // LEGACY
         event.registerLayerDefinition(SteamLocomotiveModel.LAYER_LOCATION, SteamLocomotiveModel::createBodyLayer);
         event.registerLayerDefinition(EnergyLocomotiveModel.LAYER_LOCATION, EnergyLocomotiveModel::createBodyLayer);
+
+        // LEGACY
         event.registerLayerDefinition(ChunkLoaderCarModel.LAYER_LOCATION, ChunkLoaderCarModel::createBodyLayer);
     }
 
