@@ -211,6 +211,15 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.BARREL))
                 .save(consumer);
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.VACUUM_BARGE.get())
+                .define('_', Items.HOPPER)
+                .define('#', Items.ENDER_EYE)
+                .define('$', Items.IRON_INGOT)
+                .pattern("#_#")
+                .pattern("$$$")
+                .unlockedBy("has_item", has(Items.HOPPER))
+                .save(consumer);
+
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.SEATER_BARGE.get())
                 .define('_', ItemTags.WOODEN_STAIRS)
                 .define('#', ItemTags.SIGNS)
@@ -257,6 +266,15 @@ public class ModRecipeProvider extends RecipeProvider {
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.CHEST_CAR.get())
                 .define('#', Items.CHEST)
+                .define('$', ModItems.SEATER_CAR.get())
+                .pattern("   ")
+                .pattern(" # ")
+                .pattern(" $ ")
+                .unlockedBy("has_item", has(ModItems.SEATER_CAR.get()))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.BARREL_CAR.get())
+                .define('#', Items.BARREL)
                 .define('$', ModItems.SEATER_CAR.get())
                 .pattern("   ")
                 .pattern(" # ")
