@@ -31,15 +31,15 @@ public class ChainExtendedModel extends EntityModel<AbstractBargeEntity> {
 
         PartDefinition cube_r1 = bb_main.addOrReplaceChild("cube_r1", CubeListBuilder.create(), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
 
-        PartDefinition bone3 = cube_r1.addOrReplaceChild("bone3", CubeListBuilder.create().texOffs(3, 7).addBox(0.0F, -25.0F, -22.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(6, 6).addBox(0.0F, -25.0F, -18.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(6, 4).addBox(-1.0F, -25.0F, -20.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(6, 2).addBox(0.0F, -25.0F, -14.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(6, 0).addBox(-1.0F, -25.0F, -16.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(0, 6).addBox(0.0F, -25.0F, -10.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(3, 5).addBox(-1.0F, -25.0F, -12.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(0, 15).addBox(-1.0F, -26.0F, -22.0F, 2.0F, 1.0F, 14.0F, new CubeDeformation(0.0F))
-                .texOffs(0, 0).addBox(-1.0F, -24.0F, -22.0F, 2.0F, 1.0F, 14.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, -12.0F));
+        PartDefinition bone3 = cube_r1.addOrReplaceChild("bone3", CubeListBuilder.create().texOffs(3, 7).addBox(0.0F, -25.0F, -22.0F, 1.0F, 1.0F, 1.0F)
+                .texOffs(6, 6).addBox(0.0F, -25.0F, -18.0F, 1.0F, 1.0F, 1.0F)
+                .texOffs(6, 4).addBox(-1.0F, -25.0F, -20.0F, 1.0F, 1.0F, 1.0F)
+                .texOffs(6, 2).addBox(0.0F, -25.0F, -14.0F, 1.0F, 1.0F, 1.0F)
+                .texOffs(6, 0).addBox(-1.0F, -25.0F, -16.0F, 1.0F, 1.0F, 1.0F)
+                .texOffs(0, 6).addBox(0.0F, -25.0F, -10.0F, 1.0F, 1.0F, 1.0F)
+                .texOffs(3, 5).addBox(-1.0F, -25.0F, -12.0F, 1.0F, 1.0F, 1.0F)
+                .texOffs(0, 15).addBox(-1.0F, -26.0F, -22.0F, 2.0F, 1.0F, 14.0F)
+                .texOffs(0, 0).addBox(-1.0F, -24.0F, -22.0F, 2.0F, 1.0F, 14.0F), PartPose.offset(0.0F, 0.0F, -12.0F));
 
         return LayerDefinition.create(meshdefinition, 64, 64);
     }

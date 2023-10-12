@@ -23,14 +23,14 @@ public class CubeInsertCarModel<T extends Entity & Colorable> extends EntityMode
 
 	public static LayerDefinition createBodyLayer() {
 		MeshDefinition meshdefinition = new MeshDefinition();
-		PartDefinition partdefinition = meshdefinition.getRoot();
+		PartDefinition bb_main = meshdefinition.getRoot()
+				.addOrReplaceChild("bb_main",
+					CubeListBuilder.create()
+						.texOffs(0, 0)
+							.addBox(-5.0F, 8.0F, -4.0F, 10.0F, 10.0F, 10.0F),
+				PartPose.ZERO);
 
-		PartDefinition bb_main = partdefinition.addOrReplaceChild("bb_main", CubeListBuilder.create()
-						.texOffs(0, 0).addBox(-5.0F, -16.0F, -4.0F, 10.0F, 10.0F, 10.0F),
-
-				PartPose.offset(0.0F, 24.0F, 0.0F));
-
-		return LayerDefinition.create(meshdefinition, 128, 128);
+		return LayerDefinition.create(meshdefinition, 64, 64);
 	}
 
 	@Override

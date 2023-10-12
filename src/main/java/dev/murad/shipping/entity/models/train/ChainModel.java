@@ -32,10 +32,10 @@ public class ChainModel extends EntityModel<AbstractBargeEntity> {
 
 		PartDefinition cube_r1 = bb_main.addOrReplaceChild("cube_r1", CubeListBuilder.create(), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
 
-		PartDefinition bone2 = cube_r1.addOrReplaceChild("bone2", CubeListBuilder.create().texOffs(0, 2).addBox(1.0F, -25.0F, -11.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-				.texOffs(0, 0).addBox(0.0F, -25.0F, -13.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-				.texOffs(3, 8).addBox(0.0F, -26.0F, -13.0F, 2.0F, 1.0F, 4.0F, new CubeDeformation(0.0F))
-				.texOffs(4, 4).addBox(0.0F, -24.0F, -13.0F, 2.0F, 1.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(-1.0F, 0.0F, 1.0F));
+		PartDefinition bone2 = cube_r1.addOrReplaceChild("bone2", CubeListBuilder.create().texOffs(0, 2).addBox(1.0F, -25.0F, -11.0F, 1.0F, 1.0F, 1.0F)
+				.texOffs(0, 0).addBox(0.0F, -25.0F, -13.0F, 1.0F, 1.0F, 1.0F)
+				.texOffs(3, 8).addBox(0.0F, -26.0F, -13.0F, 2.0F, 1.0F, 4.0F)
+				.texOffs(4, 4).addBox(0.0F, -24.0F, -13.0F, 2.0F, 1.0F, 4.0F), PartPose.offset(-1.0F, 0.0F, 1.0F));
 
 		return LayerDefinition.create(meshdefinition, 16, 16);
 	}

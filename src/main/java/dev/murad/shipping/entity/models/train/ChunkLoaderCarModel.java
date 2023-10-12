@@ -30,32 +30,32 @@ public class ChunkLoaderCarModel extends EntityModel<ChunkLoaderCarEntity> {
 		MeshDefinition meshdefinition = new MeshDefinition();
 		PartDefinition partdefinition = meshdefinition.getRoot();
 
-		PartDefinition bb_main = partdefinition.addOrReplaceChild("bb_main", CubeListBuilder.create().texOffs(64, 37).addBox(-2.0F, -33.0F, -1.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 43.0F, 0.0F));
+		PartDefinition bb_main = partdefinition.addOrReplaceChild("bb_main", CubeListBuilder.create().texOffs(64, 37).addBox(-2.0F, -33.0F, -1.0F, 4.0F, 4.0F, 4.0F), PartPose.offset(0.0F, 43.0F, 0.0F));
 
-		PartDefinition ring = bb_main.addOrReplaceChild("ring", CubeListBuilder.create().texOffs(102, 0).addBox(-5.0F, -29.0F, -4.0F, 10.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
-				.texOffs(100, 31).addBox(-5.0F, -29.0F, 4.0F, 10.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
-				.texOffs(74, 41).addBox(3.0F, -29.0F, -2.0F, 2.0F, 2.0F, 6.0F, new CubeDeformation(0.0F))
-				.texOffs(102, 4).addBox(-5.0F, -29.0F, -2.0F, 2.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+		PartDefinition ring = bb_main.addOrReplaceChild("ring", CubeListBuilder.create().texOffs(102, 0).addBox(-5.0F, -29.0F, -4.0F, 10.0F, 2.0F, 2.0F)
+				.texOffs(100, 31).addBox(-5.0F, -29.0F, 4.0F, 10.0F, 2.0F, 2.0F)
+				.texOffs(74, 41).addBox(3.0F, -29.0F, -2.0F, 2.0F, 2.0F, 6.0F)
+				.texOffs(102, 4).addBox(-5.0F, -29.0F, -2.0F, 2.0F, 2.0F, 6.0F), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-		PartDefinition ring2 = bb_main.addOrReplaceChild("ring2", CubeListBuilder.create().texOffs(102, 0).addBox(-5.0F, -29.0F, -4.0F, 10.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
-				.texOffs(100, 31).addBox(-5.0F, -29.0F, 4.0F, 10.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
-				.texOffs(74, 41).addBox(3.0F, -29.0F, -2.0F, 2.0F, 2.0F, 6.0F, new CubeDeformation(0.0F))
-				.texOffs(102, 4).addBox(-5.0F, -29.0F, -2.0F, 2.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -3.0F, 0.0F));
+		PartDefinition ring2 = bb_main.addOrReplaceChild("ring2", CubeListBuilder.create().texOffs(102, 0).addBox(-5.0F, -29.0F, -4.0F, 10.0F, 2.0F, 2.0F)
+				.texOffs(100, 31).addBox(-5.0F, -29.0F, 4.0F, 10.0F, 2.0F, 2.0F)
+				.texOffs(74, 41).addBox(3.0F, -29.0F, -2.0F, 2.0F, 2.0F, 6.0F)
+				.texOffs(102, 4).addBox(-5.0F, -29.0F, -2.0F, 2.0F, 2.0F, 6.0F), PartPose.offset(0.0F, -3.0F, 0.0F));
 
-		PartDefinition ring3 = bb_main.addOrReplaceChild("ring3", CubeListBuilder.create().texOffs(102, 0).addBox(-5.0F, -29.0F, -4.0F, 10.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
-				.texOffs(100, 31).addBox(-5.0F, -29.0F, 4.0F, 10.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
-				.texOffs(74, 41).addBox(3.0F, -29.0F, -2.0F, 2.0F, 2.0F, 6.0F, new CubeDeformation(0.0F))
-				.texOffs(102, 4).addBox(-5.0F, -29.0F, -2.0F, 2.0F, 2.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -7.0F, 0.0F));
+		PartDefinition ring3 = bb_main.addOrReplaceChild("ring3", CubeListBuilder.create().texOffs(102, 0).addBox(-5.0F, -29.0F, -4.0F, 10.0F, 2.0F, 2.0F)
+				.texOffs(100, 31).addBox(-5.0F, -29.0F, 4.0F, 10.0F, 2.0F, 2.0F)
+				.texOffs(74, 41).addBox(3.0F, -29.0F, -2.0F, 2.0F, 2.0F, 6.0F)
+				.texOffs(102, 4).addBox(-5.0F, -29.0F, -2.0F, 2.0F, 2.0F, 6.0F), PartPose.offset(0.0F, -7.0F, 0.0F));
 
-		PartDefinition bb_main2 = partdefinition.addOrReplaceChild("bb_main2", CubeListBuilder.create().texOffs(0, 0).addBox(-7.0F, -14.0F, -8.0F, 2.0F, 12.0F, 16.0F, new CubeDeformation(0.0F))
-				.texOffs(0, 0).addBox(5.0F, -14.0F, -8.0F, 2.0F, 12.0F, 16.0F, new CubeDeformation(0.0F))
-				.texOffs(0, 28).addBox(-5.0F, -14.0F, -8.0F, 10.0F, 12.0F, 2.0F, new CubeDeformation(0.0F))
-				.texOffs(0, 28).addBox(-5.0F, -14.0F, 6.0F, 10.0F, 12.0F, 2.0F, new CubeDeformation(0.0F))
-				.texOffs(20, 0).addBox(-5.0F, -6.0F, -6.0F, 10.0F, 4.0F, 12.0F, new CubeDeformation(0.0F))
-				.texOffs(0, 0).addBox(-6.0F, -2.0F, 4.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
-				.texOffs(0, 0).addBox(-6.0F, -2.0F, -6.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
-				.texOffs(0, 0).addBox(5.0F, -2.0F, 4.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
-				.texOffs(0, 0).addBox(5.0F, -2.0F, -6.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 24.0F, 0.0F));
+		PartDefinition bb_main2 = partdefinition.addOrReplaceChild("bb_main2", CubeListBuilder.create().texOffs(0, 0).addBox(-7.0F, -14.0F, -8.0F, 2.0F, 12.0F, 16.0F)
+				.texOffs(0, 0).addBox(5.0F, -14.0F, -8.0F, 2.0F, 12.0F, 16.0F)
+				.texOffs(0, 28).addBox(-5.0F, -14.0F, -8.0F, 10.0F, 12.0F, 2.0F)
+				.texOffs(0, 28).addBox(-5.0F, -14.0F, 6.0F, 10.0F, 12.0F, 2.0F)
+				.texOffs(20, 0).addBox(-5.0F, -6.0F, -6.0F, 10.0F, 4.0F, 12.0F)
+				.texOffs(0, 0).addBox(-6.0F, -2.0F, 4.0F, 1.0F, 2.0F, 2.0F)
+				.texOffs(0, 0).addBox(-6.0F, -2.0F, -6.0F, 1.0F, 2.0F, 2.0F)
+				.texOffs(0, 0).addBox(5.0F, -2.0F, 4.0F, 1.0F, 2.0F, 2.0F)
+				.texOffs(0, 0).addBox(5.0F, -2.0F, -6.0F, 1.0F, 2.0F, 2.0F), PartPose.offset(0.0F, 24.0F, 0.0F));
 
 		return LayerDefinition.create(meshdefinition, 128, 64);
 	}

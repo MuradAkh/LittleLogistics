@@ -12,7 +12,7 @@ import dev.murad.shipping.entity.render.barge.FishingBargeRenderer;
 import dev.murad.shipping.entity.render.barge.FluidTankBargeRenderer;
 import dev.murad.shipping.entity.render.barge.MultipartVesselRenderer;
 import dev.murad.shipping.entity.render.train.FluidTankCarRenderer;
-import dev.murad.shipping.entity.render.train.MultipartTrainCarRenderer;
+import dev.murad.shipping.entity.render.train.MultipartCarRenderer;
 import dev.murad.shipping.entity.render.train.TrainCarRenderer;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModEntityTypes;
@@ -20,7 +20,6 @@ import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.SheepRenderer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -128,37 +127,6 @@ public class ModClientEventHandler {
                         .build());
 
         // Tugs
-//        event.registerEntityRenderer(ModEntityTypes.ENERGY_TUG.get(),
-//                (ctx) -> new StaticVesselRenderer<>(ctx, EnergyTugModel::new, EnergyTugModel.LAYER_LOCATION,
-//                        new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/energy_tug.png")) {
-//                    // todo: fix in models itself
-//                    @Override
-//                    protected double getModelYoffset() {
-//                        return 1.55D;
-//                    }
-//
-//                    @Override
-//                    protected float getModelYrot() {
-//                        return 0.0F;
-//                    }
-//                });
-
-
-//        event.registerEntityRenderer(ModEntityTypes.STEAM_TUG.get(),
-//                (ctx) -> new StaticVesselRenderer<>(ctx, SteamTugModel::new, SteamTugModel.LAYER_LOCATION,
-//                        new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/tug.png")) {
-//                    // todo: fix in models itself
-//                    @Override
-//                    protected double getModelYoffset() {
-//                        return 1.45D;
-//                    }
-//
-//                    @Override
-//                    protected float getModelYrot() {
-//                        return 0;
-//                    }
-//                });
-
         event.registerEntityRenderer(ModEntityTypes.ENERGY_TUG.get(),
                 (ctx) -> new MultipartVesselRenderer.Builder<>(ctx)
                         .baseModel(EnergyTugModel::new, EnergyTugModel.LAYER_LOCATION,
@@ -180,37 +148,36 @@ public class ModClientEventHandler {
                         .build()
                         .derotate());
 
-        event.registerEntityRenderer(ModEntityTypes.STEAM_LOCOMOTIVE.get(), ctx -> new TrainCarRenderer<>(ctx,
-                SteamLocomotiveModel::new,
-                SteamLocomotiveModel.LAYER_LOCATION,
-                "textures/entity/steam_locomotive.png"));
-        event.registerEntityRenderer(ModEntityTypes.ENERGY_LOCOMOTIVE.get(), ctx -> new TrainCarRenderer<>(ctx,
-                EnergyLocomotiveModel::new,
-                EnergyLocomotiveModel.LAYER_LOCATION,
-                "textures/entity/energy_locomotive.png"));
+        event.registerEntityRenderer(ModEntityTypes.STEAM_LOCOMOTIVE.get(), ctx -> new MultipartCarRenderer.Builder<>(ctx)
+                .baseModel(SteamLocomotiveModel::new, SteamLocomotiveModel.LAYER_LOCATION, ShippingMod.entityTexture("car/steam_locomotive_base.png"))
+                .trimModel(SteamLocomotiveModel::new, SteamLocomotiveModel.LAYER_LOCATION, ShippingMod.entityTexture("car/steam_locomotive_trim.png"))
+                .emptyInsert()
+                .build());
 
-        event.registerEntityRenderer(ModEntityTypes.CHEST_CAR.get(), ctx -> new MultipartTrainCarRenderer.Builder<>(ctx)
+        event.registerEntityRenderer(ModEntityTypes.ENERGY_LOCOMOTIVE.get(), ctx -> new MultipartCarRenderer.Builder<>(ctx)
+                .baseModel(EnergyLocomotiveModel::new, EnergyLocomotiveModel.LAYER_LOCATION, ShippingMod.entityTexture("car/energy_locomotive_base.png"))
+                .trimModel(EnergyLocomotiveModel::new, EnergyLocomotiveModel.LAYER_LOCATION, ShippingMod.entityTexture("car/energy_locomotive_trim.png"))
+                .emptyInsert()
+                .build());
+
+        event.registerEntityRenderer(ModEntityTypes.CHEST_CAR.get(), ctx -> new MultipartCarRenderer.Builder<>(ctx)
                 .baseModel(BaseCarModel::new, BaseCarModel.LAYER_LOCATION, ShippingMod.entityTexture("car/base.png"))
                 .trimModel(TrimCarModel::new, TrimCarModel.LAYER_LOCATION, ShippingMod.entityTexture("car/trim.png"))
                 .insertModel(CubeInsertCarModel::new, CubeInsertCarModel.LAYER_LOCATION, ShippingMod.entityTexture("car/chest_insert.png"))
                 .build());
 
-        event.registerEntityRenderer(ModEntityTypes.FLUID_CAR.get(), ctx -> new FluidTankCarRenderer(ctx,
-                FluidTankCarModel::new,
-                FluidTankCarModel.LAYER_LOCATION,
-                "textures/entity/fluid_car.png"));
+        event.registerEntityRenderer(ModEntityTypes.FLUID_CAR.get(), ctx -> new MultipartCarRenderer.Builder<>(ctx)
+                .baseModel(BaseCarModel::new, BaseCarModel.LAYER_LOCATION, ShippingMod.entityTexture("car/base.png"))
+                .trimModel(TrimCarModel::new, TrimCarModel.LAYER_LOCATION, ShippingMod.entityTexture("car/trim.png"))
+                .insertModel(FluidTankInsertCarModel::new, FluidTankInsertCarModel.LAYER_LOCATION, ShippingMod.entityTexture("car/fluid_tank_insert.png"))
+                .build());
 
         event.registerEntityRenderer(ModEntityTypes.CHUNK_LOADER_CAR.get(), ctx -> new TrainCarRenderer<>(ctx,
                 ChunkLoaderCarModel::new,
                 ChunkLoaderCarModel.LAYER_LOCATION,
                 "textures/entity/chunk_loader_car.png"));
 
-//        event.registerEntityRenderer(ModEntityTypes.SEATER_CAR.get(), ctx -> new TrainCarRenderer<>(ctx,
-//                TrimCarModel::new,
-//                TrimCarModel.LAYER_LOCATION,
-//                ShippingMod.entityTexture("car/trim.png")));
-
-        event.registerEntityRenderer(ModEntityTypes.SEATER_CAR.get(), ctx -> new MultipartTrainCarRenderer.Builder<>(ctx)
+        event.registerEntityRenderer(ModEntityTypes.SEATER_CAR.get(), ctx -> new MultipartCarRenderer.Builder<>(ctx)
                 .baseModel(BaseCarModel::new, BaseCarModel.LAYER_LOCATION, ShippingMod.entityTexture("car/base.png"))
                 .trimModel(TrimCarModel::new, TrimCarModel.LAYER_LOCATION, ShippingMod.entityTexture("car/trim.png"))
                 .emptyInsert()
@@ -254,14 +221,12 @@ public class ModClientEventHandler {
         // CAR
         event.registerLayerDefinition(TrimCarModel.LAYER_LOCATION, TrimCarModel::createBodyLayer);
         event.registerLayerDefinition(BaseCarModel.LAYER_LOCATION, BaseCarModel::createBodyLayer);
+        event.registerLayerDefinition(FluidTankInsertCarModel.LAYER_LOCATION, FluidTankInsertCarModel::createBodyLayer);
 
         // LEGACY
         event.registerLayerDefinition(SteamLocomotiveModel.LAYER_LOCATION, SteamLocomotiveModel::createBodyLayer);
         event.registerLayerDefinition(EnergyLocomotiveModel.LAYER_LOCATION, EnergyLocomotiveModel::createBodyLayer);
-        event.registerLayerDefinition(ChestCarModel.LAYER_LOCATION, ChestCarModel::createBodyLayer);
-        event.registerLayerDefinition(FluidTankCarModel.LAYER_LOCATION, FluidTankCarModel::createBodyLayer);
         event.registerLayerDefinition(ChunkLoaderCarModel.LAYER_LOCATION, ChunkLoaderCarModel::createBodyLayer);
-        event.registerLayerDefinition(SeaterCarModel.LAYER_LOCATION, SeaterCarModel::createBodyLayer);
     }
 
     /**

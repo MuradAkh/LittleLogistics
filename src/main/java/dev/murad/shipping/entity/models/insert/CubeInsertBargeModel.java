@@ -25,10 +25,10 @@ public class CubeInsertBargeModel<T extends Entity & Colorable> extends EntityMo
 		MeshDefinition meshdefinition = new MeshDefinition();
 		PartDefinition bb_main = meshdefinition.getRoot()
 				.addOrReplaceChild("bb_main",
-						CubeListBuilder.create().texOffs(0, 0)
-								.addBox(-5.0F, -12.0F, -5.0F, 10.0F, 10.0F, 10.0F,
-										new CubeDeformation(0.0F)),
-						PartPose.ZERO);
+					CubeListBuilder.create()
+						.texOffs(0, 0)
+							.addBox(-5.0F, -12.0F, -5.0F, 10.0F, 10.0F, 10.0F),
+					PartPose.ZERO);
 
 		return LayerDefinition.create(meshdefinition, 64, 64);
 	}

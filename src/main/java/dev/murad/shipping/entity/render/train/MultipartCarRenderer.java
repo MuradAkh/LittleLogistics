@@ -26,7 +26,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.Vec3;
 
 
-public class MultipartTrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRenderer<T> implements RenderWithAttachmentPoints<T> {
+public class MultipartCarRenderer<T extends AbstractTrainCarEntity> extends EntityRenderer<T> implements RenderWithAttachmentPoints<T> {
 
     @Getter
     private final EntityModel<T> baseModel, insertModel, trimModel;
@@ -34,10 +34,10 @@ public class MultipartTrainCarRenderer<T extends AbstractTrainCarEntity> extends
     @Getter
     private final ResourceLocation baseTextureLocation, insertTextureLocation, trimTextureLocation;
 
-    protected MultipartTrainCarRenderer(EntityRendererProvider.Context context,
-                                      ModelPack<T> baseModelPack,
-                                      ModelPack<T> insertModelPack,
-                                      ModelPack<T> trimModelPack) {
+    protected MultipartCarRenderer(EntityRendererProvider.Context context,
+                                   ModelPack<T> baseModelPack,
+                                   ModelPack<T> insertModelPack,
+                                   ModelPack<T> trimModelPack) {
         super(context);
         this.baseModel = baseModelPack.supplier().supply(context.bakeLayer(baseModelPack.location()));
         this.baseTextureLocation = baseModelPack.texture();
@@ -194,7 +194,7 @@ public class MultipartTrainCarRenderer<T extends AbstractTrainCarEntity> extends
         int overlay = OverlayTexture.NO_OVERLAY;
 
         renderBaseModel(car, pose, buffer, packedLight, overlay);
-        renderInsertModel(car, pose, buffer, packedLight, overlay);
+        renderInsertModel(car, pose, buffer, partialTicks, packedLight, overlay);
         renderTrimModel(car, pose, buffer, packedLight, overlay);
 
         pose.popPose();
@@ -205,7 +205,6 @@ public class MultipartTrainCarRenderer<T extends AbstractTrainCarEntity> extends
 
         return attach;
     }
-
     protected void renderBaseModel(T entity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
         baseModel.renderToBuffer(matrixStack,
                 buffer.getBuffer(baseModel.renderType(baseTextureLocation)),
@@ -213,7 +212,7 @@ public class MultipartTrainCarRenderer<T extends AbstractTrainCarEntity> extends
                 1.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    protected void renderInsertModel(T entity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
+    protected void renderInsertModel(T entity, PoseStack matrixStack, MultiBufferSource buffer, float partialTicks, int packedLight, int overlay) {
         insertModel.renderToBuffer(matrixStack,
                 buffer.getBuffer(insertModel.renderType(insertTextureLocation)),
                 packedLight, overlay,
@@ -276,8 +275,8 @@ public class MultipartTrainCarRenderer<T extends AbstractTrainCarEntity> extends
             return this;
         }
 
-        public MultipartTrainCarRenderer<T> build() {
-            return new MultipartTrainCarRenderer<>(context, baseModelPack, insertModelPack, trimModelPack);
+        public MultipartCarRenderer<T> build() {
+            return new MultipartCarRenderer<>(context, baseModelPack, insertModelPack, trimModelPack);
         }
     }
 }

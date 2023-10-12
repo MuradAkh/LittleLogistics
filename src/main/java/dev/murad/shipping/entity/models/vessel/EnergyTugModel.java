@@ -26,16 +26,16 @@ public class EnergyTugModel<T extends Entity & Colorable> extends EntityModel<T>
 		MeshDefinition meshdefinition = new MeshDefinition();
 		PartDefinition partdefinition = meshdefinition.getRoot();
 
-		PartDefinition bb_main = partdefinition.addOrReplaceChild("bb_main", CubeListBuilder.create().texOffs(0, 30).addBox(-7.0F, -9.0F, -19.0F, 14.0F, 6.0F, 24.0F, new CubeDeformation(0.0F))
-				.texOffs(58, 53).addBox(-9.0F, -11.0F, -19.0F, 2.0F, 5.0F, 18.0F, new CubeDeformation(0.0F))
-				.texOffs(52, 17).addBox(-7.0F, -11.0F, -21.0F, 14.0F, 5.0F, 2.0F, new CubeDeformation(0.0F))
-				.texOffs(52, 30).addBox(7.0F, -11.0F, -19.0F, 2.0F, 5.0F, 18.0F, new CubeDeformation(0.0F))
+		PartDefinition bb_main = partdefinition.addOrReplaceChild("bb_main", CubeListBuilder.create().texOffs(0, 30).addBox(-7.0F, -9.0F, -19.0F, 14.0F, 6.0F, 24.0F)
+				.texOffs(58, 53).addBox(-9.0F, -11.0F, -19.0F, 2.0F, 5.0F, 18.0F)
+				.texOffs(52, 17).addBox(-7.0F, -11.0F, -21.0F, 14.0F, 5.0F, 2.0F)
+				.texOffs(52, 30).addBox(7.0F, -11.0F, -19.0F, 2.0F, 5.0F, 18.0F)
 				.texOffs(0, 60).addBox(-9.0F, -10.0F, -21.0F, 18.0F, 2.0F, 6.0F, new CubeDeformation(0.25F))
-				.texOffs(52, 0).addBox(-6.0F, -14.0F, -17.0F, 12.0F, 5.0F, 12.0F, new CubeDeformation(0.0F))
-				.texOffs(0, 0).addBox(-3.0F, -20.0F, -14.0F, 6.0F, 6.0F, 6.0F, new CubeDeformation(0.0F))
-				.texOffs(40, 60).addBox(-4.0F, -21.0F, -15.0F, 8.0F, 1.0F, 8.0F, new CubeDeformation(0.0F))
+				.texOffs(52, 0).addBox(-6.0F, -14.0F, -17.0F, 12.0F, 5.0F, 12.0F)
+				.texOffs(0, 0).addBox(-3.0F, -20.0F, -14.0F, 6.0F, 6.0F, 6.0F)
+				.texOffs(40, 60).addBox(-4.0F, -21.0F, -15.0F, 8.0F, 1.0F, 8.0F)
 				.texOffs(0, 0).addBox(-7.0F, -9.0F, -19.0F, 14.0F, 6.0F, 24.0F, new CubeDeformation(0.25F))
-				.texOffs(52, 42).addBox(-0.5F, -27.0F, -11.0F, 1.0F, 6.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 6.0F, 0.0F));
+				.texOffs(52, 42).addBox(-0.5F, -27.0F, -11.0F, 1.0F, 6.0F, 0.0F), PartPose.offset(0.0F, 6.0F, 0.0F));
 
 		return LayerDefinition.create(meshdefinition, 128, 128);
 	}
