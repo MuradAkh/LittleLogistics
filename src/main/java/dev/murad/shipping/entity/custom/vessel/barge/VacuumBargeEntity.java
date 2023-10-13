@@ -60,6 +60,14 @@ public class VacuumBargeEntity extends AbstractBargeEntity {
             return;
         }
 
+        var level = ((ServerLevel) level());
+
+        // Render fire particles
+        level.sendParticles(ParticleTypes.FLAME,
+                getX(), getY() + 0.85, getZ(),
+                6,
+                0.1, 0.1, 0.1, 0.0);
+
         // perform item check
         AABB searchBox = new AABB(getX(), getY(), getZ(), getX(), getY(), getZ())
                 .inflate(PICK_RADIUS, PICK_HEIGHT / 2.0, PICK_RADIUS);
@@ -86,7 +94,7 @@ public class VacuumBargeEntity extends AbstractBargeEntity {
 
                 if (!initial.equals(leftOver)) {
                     // spawn particles
-                    ((ServerLevel) level()).sendParticles(
+                    level.sendParticles(
                             ParticleTypes.PORTAL,
                             item.getX(), item.getY(), item.getZ(), 15,
                             0.2, 0.2, 0.2, 0.0);
