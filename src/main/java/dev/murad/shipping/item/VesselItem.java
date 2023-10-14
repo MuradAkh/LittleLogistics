@@ -1,41 +1,32 @@
 package dev.murad.shipping.item;
 
-import com.mojang.datafixers.util.Function3;
-import com.mojang.datafixers.util.Function4;
-import net.minecraft.network.chat.Component;
+import net.minecraft.stats.Stats;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.stats.Stats;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
-import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.BiFunction;
 
 public class VesselItem extends Item {
 
-    private final Function4<Level, Double, Double, Double, Entity> addEntity;
-    private Optional<String> tooltipLocation = Optional.empty();
-
-    public VesselItem(Properties p_i48526_2_, Function4<Level, Double, Double, Double, Entity> addEntity, String tooltip) {
-        super( p_i48526_2_);
-        this.addEntity = addEntity;
-        this.tooltipLocation = Optional.of(tooltip);
+    @FunctionalInterface
+    public interface AddEntityFunction {
+        Entity apply(Level level, double x, double y, double z);
     }
 
-    public VesselItem(Properties p_i48526_2_, Function4<Level, Double, Double, Double, Entity> addEntity) {
-        super( p_i48526_2_);
+    private final AddEntityFunction addEntity;
+
+    public VesselItem(Properties props, AddEntityFunction addEntity) {
+        super(props);
         this.addEntity = addEntity;
     }
 
@@ -46,14 +37,13 @@ public class VesselItem extends Item {
             return InteractionResultHolder.pass(itemstack);
         } else {
             Vec3 vector3d = player.getViewVector(1.0F);
-            double d0 = 5.0D;
             List<Entity> list = world.getEntities(player, player.getBoundingBox().expandTowards(vector3d.scale(5.0D)).inflate(1.0D),
                     EntitySelector.NO_SPECTATORS.and(Entity::isPickable));
             if (!list.isEmpty()) {
                 Vec3 vector3d1 = player.getEyePosition(1.0F);
 
                 for(Entity entity : list) {
-                    AABB axisalignedbb = entity.getBoundingBox().inflate((double)entity.getPickRadius());
+                    AABB axisalignedbb = entity.getBoundingBox().inflate(entity.getPickRadius());
                     if (axisalignedbb.contains(vector3d1)) {
                         return InteractionResultHolder.pass(itemstack);
                     }
@@ -61,7 +51,7 @@ public class VesselItem extends Item {
             }
 
             if (raytraceresult.getType() == BlockHitResult.Type.BLOCK) {
-                Entity entity = getEntity(world, raytraceresult);
+                Entity entity = getEntity(world, itemstack, raytraceresult);
                 entity.setYRot(player.getYRot());
                 if (!world.noCollision(entity, entity.getBoundingBox().inflate(-0.1D))) {
                     return InteractionResultHolder.fail(itemstack);
@@ -82,16 +72,11 @@ public class VesselItem extends Item {
         }
     }
 
-    protected Entity getEntity(Level world, BlockHitResult raytraceresult) {
-        return addEntity.apply(world, raytraceresult.getLocation().x, raytraceresult.getLocation().y, raytraceresult.getLocation().z);
+    protected Entity getEntity(Level world, ItemStack stack, BlockHitResult raytraceresult) {
+        Entity e = addEntity.apply(world, raytraceresult.getLocation().x, raytraceresult.getLocation().y, raytraceresult.getLocation().z);
+        if (stack.hasCustomHoverName()) {
+            e.setCustomName(stack.getHoverName());
+        }
+        return e;
     }
-
-    @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-        super.appendHoverText(stack, worldIn, tooltip, flagIn);
-        tooltipLocation.ifPresent(loc ->
-                tooltip.add(Component.translatable(loc))
-        );
-    }
-
 }

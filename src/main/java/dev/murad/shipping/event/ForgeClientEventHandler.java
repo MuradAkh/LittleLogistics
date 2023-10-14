@@ -13,10 +13,7 @@ import dev.murad.shipping.network.client.EntityPosition;
 import dev.murad.shipping.network.client.VehicleTrackerPacketHandler;
 import dev.murad.shipping.setup.EntityItemMap;
 import dev.murad.shipping.setup.ModItems;
-import dev.murad.shipping.util.LocoRoute;
-import dev.murad.shipping.util.LocoRouteNode;
-import dev.murad.shipping.util.RailHelper;
-import dev.murad.shipping.util.TugRouteNode;
+import dev.murad.shipping.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -25,7 +22,6 @@ import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -38,14 +34,13 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.joml.Matrix4f;
 import org.joml.Vector2d;
 
-import java.util.List;
+import javax.annotation.Nullable;
 import java.util.OptionalDouble;
-import java.util.stream.Collectors;
 
 /**
  * Forge-wide event bus
@@ -71,64 +66,69 @@ public class ForgeClientEventHandler {
         }
     }
 
+    @SubscribeEvent
+    public static void onWorldUnload(LevelEvent.Unload event) {
+        VehicleTrackerPacketHandler.flush();
+    }
+
     /**
      * Returns whether we rendered a route here. Empty route also returns true
      */
     private static boolean renderRouteOnStack(RenderLevelStageEvent event, Player player, ItemStack stack) {
 
         if (stack.getItem().equals(ModItems.LOCO_ROUTE.get())) {
-            MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-            PoseStack pose = event.getPoseStack();
-            Vec3 cameraOff = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+            var buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            var pose = event.getPoseStack();
+            var cameraOff = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
 
-            LocoRoute route = LocoRouteItem.getRoute(stack);
-            var list = route.stream().map(LocoRouteNode::toBlockPos).collect(Collectors.toList());
-            for (BlockPos block : list) {
+            // Render Beacon Beams
+            for (var node : LocoRouteItem.getRoute(stack)) {
+                var block = node.toBlockPos();
                 pose.pushPose();
-                pose.translate(block.getX() - cameraOff.x, 1 - cameraOff.y, block.getZ() - cameraOff.z);
-                BeaconRenderer.renderBeaconBeam(pose, buffer, BEAM_LOCATION, event.getPartialTick(),
-                        1F, player.level().getGameTime(), player.level().getMinBuildHeight() + 1, 1024,
-                        DyeColor.YELLOW.getTextureDiffuseColors(), 0.1F, 0.2F);
-
-                pose.popPose();
-            }
-
-            for (BlockPos block : list) {
-                pose.pushPose();
-                // handling for removed blocks and blocks out of distance
-                var shape = RailHelper.getRail(block, player.level())
-                        .map(pos -> RailHelper.getShape(pos, player.level()))
-                        .orElse(RailShape.EAST_WEST);
-                double baseY = (shape.getName().contains("ascending") ? 0.1 : 0);
-                double baseX = 0;
-                double baseZ = 0;
-                Runnable mulPose = () -> {};
-                switch (shape){
-                    case ASCENDING_EAST -> {
-                        baseX = 0.2;
-                        mulPose = () -> pose.mulPose(Axis.ZP.rotationDegrees(45));
-                    }
-                    case ASCENDING_WEST -> {
-                        baseX = 0.1;
-                        baseY += 0.7;
-                        mulPose = (() -> pose.mulPose(Axis.ZP.rotationDegrees(-45)));
-
-                    }
-                    case ASCENDING_NORTH -> {
-                        baseZ = 0.1;
-                        baseY += 0.7;
-                        mulPose = () -> pose.mulPose(Axis.XP.rotationDegrees(45));
-                    }
-                    case ASCENDING_SOUTH -> {
-                        baseZ = 0.2;
-                        mulPose = () -> pose.mulPose(Axis.XP.rotationDegrees(-45));
-                    }
+                {
+                    pose.translate(block.getX() - cameraOff.x, 1 - cameraOff.y, block.getZ() - cameraOff.z);
+                    BeaconRenderer.renderBeaconBeam(pose, buffer, BEAM_LOCATION, event.getPartialTick(),
+                            1F, player.level().getGameTime(), player.level().getMinBuildHeight() + 1, 1024,
+                            DyeColor.YELLOW.getTextureDiffuseColors(), 0.1F, 0.2F);
                 }
+                pose.popPose();
+                pose.pushPose();
+                {
+                    // handling for removed blocks and blocks out of distance
+                    var shape = RailHelper.getRail(block, player.level())
+                            .map(pos -> RailHelper.getShape(pos, player.level()))
+                            .orElse(RailShape.EAST_WEST);
+                    double baseY = (shape.isAscending() ? 0.1 : 0);
+                    double baseX = 0;
+                    double baseZ = 0;
+                    var rotation = Axis.ZP.rotationDegrees(0);
+                    switch (shape) {
+                        case ASCENDING_EAST -> {
+                            baseX = 0.2;
+                            rotation = Axis.ZP.rotationDegrees(45);
+                        }
+                        case ASCENDING_WEST -> {
+                            baseX = 0.1;
+                            baseY += 0.7;
+                            rotation = Axis.ZP.rotationDegrees(-45);
+                        }
+                        case ASCENDING_NORTH -> {
+                            baseZ = 0.1;
+                            baseY += 0.7;
+                            rotation = Axis.XP.rotationDegrees(45);
+                        }
+                        case ASCENDING_SOUTH -> {
+                            baseZ = 0.2;
+                            rotation = Axis.XP.rotationDegrees(-45);
+                        }
+                    }
 
-                pose.translate(block.getX() + baseX - cameraOff.x, block.getY() + baseY - cameraOff.y, block.getZ() + baseZ - cameraOff.z);
-                AABB a = new AABB(0, 0, 0, 1, 0.2, 1);//.deflate(0.2, 0, 0.2);
-                mulPose.run();
-                LevelRenderer.renderLineBox(pose, buffer.getBuffer(ModRenderType.LINES), a, 1.0f, 1.0f, 0.3f, 0.5f);
+                    pose.translate(block.getX() + baseX - cameraOff.x, block.getY() + baseY - cameraOff.y, block.getZ() + baseZ - cameraOff.z);
+                    pose.mulPose(rotation);
+
+                    AABB a = new AABB(0, 0, 0, 1, 0.2, 1);
+                    LevelRenderer.renderLineBox(pose, buffer.getBuffer(ModRenderType.LINES), a, 1.0f, 1.0f, 0.3f, 0.5f);
+                }
                 pose.popPose();
             }
 
@@ -137,10 +137,12 @@ public class ForgeClientEventHandler {
             if(ShippingConfig.Client.DISABLE_TUG_ROUTE_BEACONS.get()){
                 return false;
             }
-            Vec3 camPos = Minecraft.getInstance().getEntityRenderDispatcher().camera.getPosition();
 
-            MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-            List<TugRouteNode> route = TugRouteItem.getRoute(stack);
+            var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
+            var camPos = camera.getPosition();
+
+            var renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            TugRoute route = TugRouteItem.getRoute(stack);
             for (int i = 0, routeSize = route.size(); i < routeSize; i++) {
                 TugRouteNode node = route.get(i);
 
@@ -150,32 +152,32 @@ public class ForgeClientEventHandler {
                         .normalize(0.5);
 
                 PoseStack matrixStack = event.getPoseStack();
-
+                matrixStack.pushPose();
                 {
-                    matrixStack.pushPose();
                     matrixStack.translate(node.getX() - camPos.x, 0, node.getZ() - camPos.z);
 
                     BeaconRenderer.renderBeaconBeam(matrixStack, renderTypeBuffer, BEAM_LOCATION, event.getPartialTick(),
                             1F, player.level().getGameTime(), player.level().getMinBuildHeight(), 1024,
                             DyeColor.ORANGE.getTextureDiffuseColors(), 0.1F, 0.2F);
-                    matrixStack.popPose();
                 }
-
+                matrixStack.popPose();
+                matrixStack.pushPose();
                 {
-                    matrixStack.pushPose();
-                    matrixStack.translate(node.getX() - camPos.x - playerDir.x + 0.5, 0, node.getZ() - camPos.z - playerDir.y + 0.5);
+
+                    Vec3 nodePos = new Vec3(node.getX() + 0.5 - playerDir.x, camPos.y, node.getZ() + 0.5 - playerDir.y);
+                    Vec3 textRenderPos = computeFixedDistance(nodePos, camPos, 1.0);
+
+                    matrixStack.translate(textRenderPos.x - camPos.x, textRenderPos.y  - camPos.y, textRenderPos.z - camPos.z);
+                    matrixStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
+                    matrixStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
                     matrixStack.scale(-0.025F, -0.025F, -0.025F);
-
-                    matrixStack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
-
-                    Matrix4f matrix4f = matrixStack.last().pose();
 
                     Font fontRenderer = Minecraft.getInstance().font;
                     String text = node.getDisplayName(i);
                     float width = (-fontRenderer.width(text) / (float) 2);
-                    fontRenderer.drawInBatch(text, width, 0.0F, -1, true, matrix4f, renderTypeBuffer, Font.DisplayMode.NORMAL, 0, 15728880);
-                    matrixStack.popPose();
+                    fontRenderer.drawInBatch(text, width, 0.0F, -1, true, matrixStack.last().pose(), renderTypeBuffer, Font.DisplayMode.NORMAL, 0, 15728880);
                 }
+                matrixStack.popPose();
             }
             renderTypeBuffer.endBatch();
         } else {
@@ -206,6 +208,7 @@ public class ForgeClientEventHandler {
             Vec3 camPos = camera.getPosition();
 
             for(EntityPosition position : VehicleTrackerPacketHandler.toRender){
+                @Nullable
                 Entity entity = player.level().getEntity(position.id());
 
                 Vec3 entityPos = entity != null ? entity.getPosition(event.getPartialTick()) : position.pos();
@@ -237,11 +240,27 @@ public class ForgeClientEventHandler {
                     matrixStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
 
                     matrixStack.scale(-0.025F, -0.025F, -0.025F);
-                    Matrix4f matrix4f = matrixStack.last().pose();
+
                     Font fontRenderer = Minecraft.getInstance().font;
                     String text = String.format("%.1fm", position.pos().distanceTo(player.position()));
-                    float width = (-fontRenderer.width(text) / (float) 2);
-                    fontRenderer.drawInBatch(text, width, 0.0F, -1, true, matrix4f, renderTypeBuffer, Font.DisplayMode.NORMAL, 0, 15728880);
+
+                    fontRenderer.drawInBatch(text,
+                            (-fontRenderer.width(text) / (float) 2), 0.0F,
+                            -1, true,
+                            matrixStack.last().pose(), renderTypeBuffer,
+                            Font.DisplayMode.NORMAL,
+                            0, 15728880);
+
+                    if (entity != null && entity.hasCustomName()) {
+                        var name = entity.getCustomName();
+                        matrixStack.translate(0, -20, 0);
+                        fontRenderer.drawInBatch(name,
+                                (-fontRenderer.width(name) / (float) 2), 0.0F,
+                                -1, true,
+                                matrixStack.last().pose(), renderTypeBuffer,
+                                Font.DisplayMode.NORMAL,
+                                0, 15728880);
+                    }
                 }
                 matrixStack.popPose();
             }

@@ -24,18 +24,14 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 public class ChestBargeEntity extends AbstractBargeEntity implements Container, MenuProvider, WorldlyContainer, TrainInventoryProvider {
-    protected final ItemStackHandler itemHandler = createHandler();
+    protected final ItemStackHandler itemHandler = new ItemStackHandler(27);
 
     public ChestBargeEntity(EntityType<? extends ChestBargeEntity> type, Level world) {
         super(type, world);
     }
 
-    public ChestBargeEntity(Level worldIn, double x, double y, double z) {
-        super(ModEntityTypes.CHEST_BARGE.get(), worldIn, x, y, z);
-    }
-
-    private ItemStackHandler createHandler() {
-        return new ItemStackHandler(27);
+    public ChestBargeEntity(EntityType<? extends ChestBargeEntity> type, Level world, double x, double y, double z) {
+        super(type, world, x, y, z);
     }
 
     @Override
@@ -48,14 +44,16 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
 
     @Override
     public Item getDropItem() {
-        return ModItems.CHEST_BARGE.get();
+        if (this.getType().equals(ModEntityTypes.BARREL_BARGE.get())) {
+            return ModItems.BARREL_BARGE.get();
+        } else {
+            return ModItems.CHEST_BARGE.get();
+        }
     }
-
 
     protected void doInteract(Player player) {
         player.openMenu(this);
     }
-
 
     @Override
     public int getContainerSize() {
@@ -95,7 +93,6 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
 
     @Override
     public void setChanged() {
-
     }
 
     @Override
@@ -109,7 +106,6 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
 
     @Override
     public void clearContent() {
-
     }
 
     @Nullable

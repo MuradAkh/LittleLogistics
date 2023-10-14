@@ -36,6 +36,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -304,11 +305,17 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
-        if (!player.level().isClientSide()) {
+        if (!this.level().isClientSide) {
+            var color = DyeColor.getColor(player.getItemInHand(hand));
 
-            NetworkHooks.openScreen((ServerPlayer) player, createContainerProvider(), getDataAccessor()::write);
+            if (color != null) {
+                this.getEntityData().set(COLOR_DATA, color.getId());
+            } else {
+                NetworkHooks.openScreen((ServerPlayer) player, createContainerProvider(), getDataAccessor()::write);
+            }
         }
-        return InteractionResult.CONSUME;
+
+        return InteractionResult.sidedSuccess(this.level().isClientSide);
     }
 
     @Override
@@ -515,7 +522,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     @Override
     public void remove(RemovalReason r) {
         if (!this.level().isClientSide) {
-            this.spawnAtLocation(this.getDropItem());
+            var stack = new ItemStack(this.getDropItem());
+            if (this.hasCustomName()) {
+                stack.setHoverName(this.getCustomName());
+            }
+            this.spawnAtLocation(stack);
             Containers.dropContents(this.level(), this, this);
             this.spawnAtLocation(routeItemHandler.getStackInSlot(0));
         }

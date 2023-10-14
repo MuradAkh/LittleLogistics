@@ -186,4 +186,10 @@ public class TeeJunctionRail extends BaseRailBlock implements MultiShapeRail {
     public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, @javax.annotation.Nullable Direction side) {
         return true;
     }
+
+    @Deprecated
+    @Override
+    public boolean isValidRailShape(RailShape shape) {
+        return RAIL_SHAPE.getPossibleValues().contains(shape);
+    }
 }

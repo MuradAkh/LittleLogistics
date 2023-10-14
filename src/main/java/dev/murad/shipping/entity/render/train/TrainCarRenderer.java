@@ -6,7 +6,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
-import dev.murad.shipping.entity.models.ChainModel;
+import dev.murad.shipping.entity.models.train.ChainModel;
 import dev.murad.shipping.entity.render.RenderWithAttachmentPoints;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
@@ -34,11 +34,19 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
 
     private final ChainModel chainModel;
 
-    public TrainCarRenderer(EntityRendererProvider.Context context, Function<ModelPart, EntityModel<T>> baseModel, ModelLayerLocation layerLocation, String baseTexture) {
+    public TrainCarRenderer(EntityRendererProvider.Context context,
+                            Function<ModelPart, EntityModel<T>> baseModel,
+                            ModelLayerLocation layerLocation, String baseTexture) {
+        this(context, baseModel, layerLocation, new ResourceLocation(ShippingMod.MOD_ID, baseTexture));
+    }
+
+    public TrainCarRenderer(EntityRendererProvider.Context context,
+                            Function<ModelPart, EntityModel<T>> baseModel,
+                            ModelLayerLocation layerLocation, ResourceLocation baseTexture) {
         super(context);
         chainModel = new ChainModel(context.bakeLayer(ChainModel.LAYER_LOCATION));
         entityModel = baseModel.apply(context.bakeLayer(layerLocation));
-        texture = new ResourceLocation(ShippingMod.MOD_ID, baseTexture);
+        texture = baseTexture;
     }
 
     public void render(T car, float yaw, float pPartialTicks, PoseStack pose, MultiBufferSource buffer, int pPackedLight) {
@@ -74,8 +82,8 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
                 pose.popPose();
 
                 attachmentPoints = newAttachmentPoints;
-
             }
+
             t = nextT;
         }
 
@@ -180,16 +188,16 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
         renderAdditional(car, yaw, partialTicks, pose, buffer, packedLight);
         pose.popPose();
 
+        if (car.hasCustomName()) {
+            this.renderNameTag(car, car.getCustomName(), pose, buffer, packedLight);
+        }
+
         return attach;
     }
 
     protected void renderAdditional(T pEntity, float pEntityYaw, float pPartialTicks, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPackedLight) {
 
     }
-
-    protected Model getModel(T entity){
-        return entityModel;
-    };
 
     @Override
     public ResourceLocation getTextureLocation(T entity) {

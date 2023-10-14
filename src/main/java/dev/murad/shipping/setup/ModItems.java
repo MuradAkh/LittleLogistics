@@ -60,7 +60,16 @@ public class ModItems {
      */
 
     public static final RegistryObject<Item> CHEST_BARGE = register("barge",
-            () -> new VesselItem(new Item.Properties(), ChestBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new VesselItem(
+                    new Item.Properties(),
+                    (level, x, y, z) -> new ChestBargeEntity(ModEntityTypes.CHEST_BARGE.get(), level, x, y, z)),
+            ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+
+    public static final RegistryObject<Item> BARREL_BARGE = register("barrel_barge",
+            () -> new VesselItem(
+                    new Item.Properties(),
+                    (level, x, y, z) -> new ChestBargeEntity(ModEntityTypes.BARREL_BARGE.get(), level, x, y, z)),
+            ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
 //    public static final RegistryObject<Item> CHUNK_LOADER_BARGE = register("chunk_loader_barge",
 //            () -> new VesselItem(new Item.Properties(), ChunkLoaderBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
@@ -73,6 +82,9 @@ public class ModItems {
 
     public static final RegistryObject<Item> SEATER_BARGE = register("seater_barge",
             () -> new VesselItem(new Item.Properties(), SeaterBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+
+    public static final RegistryObject<Item> VACUUM_BARGE = register("vacuum_barge",
+            () -> new VesselItem(new Item.Properties(), VacuumBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
     public static final RegistryObject<Item> STEAM_TUG = register("tug",
             () -> new VesselItem(new Item.Properties(), SteamTugEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
@@ -88,7 +100,16 @@ public class ModItems {
             () -> new TugRouteItem(new Item.Properties().stacksTo(16)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
     public static final RegistryObject<Item> CHEST_CAR = register("chest_car",
-            () -> new TrainCarItem(ChestCarEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new TrainCarItem((level, x, y, z) ->
+                    new ChestCarEntity(ModEntityTypes.CHEST_CAR.get(), level, x, y, z),
+                    new Item.Properties().stacksTo(64)),
+            ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+
+    public static final RegistryObject<Item> BARREL_CAR = register("barrel_car",
+            () -> new TrainCarItem((level, x, y, z) ->
+                    new ChestCarEntity(ModEntityTypes.BARREL_CAR.get(), level, x, y, z),
+                    new Item.Properties().stacksTo(64)),
+            ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
     public static final RegistryObject<Item> FLUID_CAR = register("fluid_car",
             () -> new TrainCarItem(FluidTankCarEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));

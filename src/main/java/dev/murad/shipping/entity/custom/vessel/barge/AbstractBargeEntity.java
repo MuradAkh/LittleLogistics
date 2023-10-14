@@ -5,21 +5,35 @@ import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.custom.vessel.VesselEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.util.Train;
+import lombok.Getter;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 public abstract class AbstractBargeEntity extends VesselEntity {
+
     public AbstractBargeEntity(EntityType<? extends AbstractBargeEntity> type, Level world) {
         super(type, world);
         this.blocksBuilding = true;
@@ -40,17 +54,22 @@ public abstract class AbstractBargeEntity extends VesselEntity {
         return false;
     }
 
-
     public abstract Item getDropItem();
-
 
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (!this.level().isClientSide) {
-            doInteract(player);
+            var color = DyeColor.getColor(player.getItemInHand(hand));
+
+            if (color != null) {
+                this.getEntityData().set(COLOR_DATA, color.getId());
+            } else {
+                doInteract(player);
+            }
         }
+
         // don't interact *and* use current item
-        return InteractionResult.CONSUME;
+        return InteractionResult.sidedSuccess(this.level().isClientSide);
     }
 
     abstract protected void doInteract(Player player);
@@ -103,7 +122,11 @@ public abstract class AbstractBargeEntity extends VesselEntity {
     @Override
     public void remove(RemovalReason r){
         if (!this.level().isClientSide) {
-            this.spawnAtLocation(this.getDropItem());
+            var stack = new ItemStack(this.getDropItem());
+            if (this.hasCustomName()) {
+                stack.setHoverName(this.getCustomName());
+            }
+            this.spawnAtLocation(stack);
         }
         super.remove(r);
     }

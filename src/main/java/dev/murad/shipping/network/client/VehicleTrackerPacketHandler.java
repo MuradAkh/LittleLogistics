@@ -32,7 +32,6 @@ public class VehicleTrackerPacketHandler {
 
     private static int id = 0;
     public static void register() {
-        // int index, Class<MSG> messageType, BiConsumer<MSG, PacketBuffer> encoder, Function<PacketBuffer, MSG> decoder, BiConsumer<MSG, Supplier<NetworkEvent.Context>> messageConsumer
         INSTANCE.registerMessage(id++, VehicleTrackerClientPacket.class, VehicleTrackerClientPacket::encode, VehicleTrackerClientPacket::new, VehicleTrackerPacketHandler::handleData);
     }
 
@@ -44,5 +43,9 @@ public class VehicleTrackerPacketHandler {
         });
 
         ctx.get().setPacketHandled(true);
+    }
+
+    public static void flush() {
+        toRender.clear();
     }
 }

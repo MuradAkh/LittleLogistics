@@ -1,8 +1,8 @@
 package dev.murad.shipping.entity.custom.vessel;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.entity.Colorable;
 import dev.murad.shipping.entity.custom.TrainInventoryProvider;
-import dev.murad.shipping.entity.custom.vessel.barge.ChestBargeEntity;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.LinkingHandler;
@@ -13,6 +13,7 @@ import lombok.Setter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -62,7 +63,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public abstract class VesselEntity extends WaterAnimal implements LinkableEntity<VesselEntity> {
+public abstract class VesselEntity extends WaterAnimal implements LinkableEntity<VesselEntity>, Colorable {
+    public static final EntityDataAccessor<Integer> COLOR_DATA = SynchedEntityData.defineId(VesselEntity.class, EntityDataSerializers.INT);
+
+    private final static double NAMETAG_RENDERING_DISTANCE = 15;
+
     @Getter
     @Setter
     private boolean frozen = false;
@@ -73,8 +78,8 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     protected VesselEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
         stuckCounter = 0;
-        resetSpeedAttributes();
-        setSpeedAttributes(ShippingConfig.Server.TUG_BASE_SPEED.get());
+
+        resetAttributes(ShippingConfig.Server.TUG_BASE_SPEED.get());
     }
 
     private int stuckCounter;
@@ -134,25 +139,35 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 20.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.0D)
+                .add(ForgeMod.NAMETAG_DISTANCE.get(), NAMETAG_RENDERING_DISTANCE)
                 .add(ForgeMod.SWIM_SPEED.get(), 0.0D);
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag compound) {
         linkingHandler.readAdditionalSaveData(compound);
+        if (compound.contains("Color", Tag.TAG_INT)) {
+            setColor(compound.getInt("Color"));
+        }
         super.readAdditionalSaveData(compound);
     }
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         linkingHandler.addAdditionalSaveData(compound);
+
+        Integer color = getColor();
+        if (color != null) {
+            compound.putInt("Color", color);
+        }
+
         super.addAdditionalSaveData(compound);
     }
-
 
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
+        this.getEntityData().define(COLOR_DATA, -1);
         LinkingHandler.defineSynchedData(this, DOMINANT_ID, DOMINATED_ID);
     }
 
@@ -164,24 +179,35 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
         }
     }
 
-
-    // reset speed to 1
-    private void resetSpeedAttributes() {
-        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0);
-        this.getAttribute(ForgeMod.SWIM_SPEED.get()).setBaseValue(0);
+    @Nullable
+    public Integer getColor() {
+        int color = this.getEntityData().get(COLOR_DATA);
+        return color == -1 ? null : color;
     }
 
-    private void setSpeedAttributes(double speed) {
+    public void setColor(Integer color) {
+        if (color == null) color = -1;
+        this.getEntityData().set(COLOR_DATA, color);
+    }
+
+    // reset speed to 1
+    private void resetAttributes(double newSpeed) {
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0);
+        this.getAttribute(ForgeMod.SWIM_SPEED.get()).setBaseValue(0);
+
         this.getAttribute(Attributes.MOVEMENT_SPEED)
                 .addTransientModifier(
-                        new AttributeModifier("movementspeed_mult", speed, AttributeModifier.Operation.ADDITION));
+                        new AttributeModifier("movementspeed_mult", newSpeed, AttributeModifier.Operation.ADDITION));
         this.getAttribute(ForgeMod.SWIM_SPEED.get())
                 .addTransientModifier(
-                        new AttributeModifier("swimspeed_mult", speed, AttributeModifier.Operation.ADDITION));
+                        new AttributeModifier("swimspeed_mult", newSpeed, AttributeModifier.Operation.ADDITION));
+
+        setCustomNameVisible(true);
+        this.getAttribute(ForgeMod.NAMETAG_DISTANCE.get()).setBaseValue(NAMETAG_RENDERING_DISTANCE);
     }
 
     @Override
-    protected void handleAirSupply(int p_209207_1_) {
+    protected void handleAirSupply(int airSupply) {
         this.setAirSupply(300);
     }
 
@@ -498,7 +524,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     }
 
     @Override
-    public boolean hurt(DamageSource damageSource, float p_70097_2_) {
+    public boolean hurt(DamageSource damageSource, float amount) {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         } else if (!this.level().isClientSide && !this.isRemoved() && damageSource.getEntity() instanceof Player) {
@@ -511,15 +537,15 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
             this.remove(RemovalReason.KILLED);
             return true;
         } else {
-            return super.hurt(damageSource, p_70097_2_);
+            return super.hurt(damageSource, amount);
         }
     }
 
     // LivingEntity override, to avoid jumping out of water
     @Override
-    public void travel(Vec3 p_213352_1_) {
+    public void travel(Vec3 relative) {
         if (this.isEffectiveAi() || this.isControlledByLocalInstance()) {
-            double d0 = 0.08D;
+            double d0;
             AttributeInstance gravity = this.getAttribute(net.minecraftforge.common.ForgeMod.ENTITY_GRAVITY.get());
             boolean flag = this.getDeltaMovement().y <= 0.0D;
             d0 = gravity.getValue();
@@ -548,7 +574,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
                 }
 
                 f6 *= (float) swimSpeed();
-                this.moveRelative(f6, p_213352_1_);
+                this.moveRelative(f6, relative);
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 Vec3 vector3d6 = this.getDeltaMovement();
                 if (this.horizontalCollision && this.onClimbable()) {
@@ -580,7 +606,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
                 }
             } else if (this.isInLava() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidstate)) {
                 double d7 = this.getY();
-                this.moveRelative(0.02F, p_213352_1_);
+                this.moveRelative(0.02F, relative);
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 if (this.getFluidHeight(FluidTags.LAVA) <= this.getFluidJumpThreshold()) {
                     this.setDeltaMovement(this.getDeltaMovement().multiply(0.5D, (double) 0.8F, 0.5D));
@@ -644,7 +670,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
                 BlockPos blockpos = this.getBlockPosBelowThatAffectsMyMovement();
                 float f3 = this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getFriction(level(), this.getBlockPosBelowThatAffectsMyMovement(), this);
                 float f4 = this.onGround() ? f3 * 0.91F : 0.91F;
-                Vec3 vector3d5 = this.handleRelativeFrictionAndCalculateMovement(p_213352_1_, f3);
+                Vec3 vector3d5 = this.handleRelativeFrictionAndCalculateMovement(relative, f3);
                 double d2 = vector3d5.y;
                 if (this.hasEffect(MobEffects.LEVITATION)) {
                     d2 += (0.05D * (double) (this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1) - vector3d5.y) * 0.2D;

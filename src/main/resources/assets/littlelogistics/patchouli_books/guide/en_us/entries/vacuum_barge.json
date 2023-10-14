@@ -1,0 +1,19 @@
+{
+  "name": "Item Collection Barge Barge",
+  "icon": "littlelogistics:vacuum_barge",
+  "category": "littlelogistics:vessels",
+  "pages": [
+    {
+      "type": "patchouli:entity",
+      "entity": "littlelogistics:vacuum_barge",
+      "scale": 0.6,
+      "offset": 0.5,
+      "text": "Automatically collects items in a radius"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:vacuum_barge",
+      "text": "Connect a Chest Barge behind the Item Collection Barge, as the Item Collection Barge does not provide an inventory of its own."
+    }
+  ]
+}

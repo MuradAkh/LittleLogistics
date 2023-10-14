@@ -142,7 +142,7 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
 
 
     @Override
-    public ItemStack getPickResult() {
+    public @NotNull ItemStack getPickResult() {
         return new ItemStack(ModItems.ENERGY_LOCOMOTIVE.get());
     }
 
