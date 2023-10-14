@@ -1,0 +1,16 @@
+{
+  "name": "Conductor's Wrench",
+  "icon": "littlelogistics:conductors_wrench",
+  "category": "littlelogistics:items",
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:conductors_wrench",
+      "text": "Held in the hand, the Conductor's wrench will display the locations of currently registered locomotives and tugs."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Right clicking any rails will cycle it through various rail shapes."
+    }
+  ]
+}

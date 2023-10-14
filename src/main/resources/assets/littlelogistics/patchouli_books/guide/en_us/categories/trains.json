@@ -1,5 +1,5 @@
 {
   "name": "Trains",
-  "description": "Train cars are similar to minecarts, but can be linked with $(l:spring)Vehicle Chains$(). Each train should have exactly one locomotive.",
+  "description": "Train cars are similar to minecarts, but can be linked with $(l:spring)Vehicle Chains$(). Connect a locomotive to pull the train along.",
   "icon": "littlelogistics:steam_locomotive"
 }

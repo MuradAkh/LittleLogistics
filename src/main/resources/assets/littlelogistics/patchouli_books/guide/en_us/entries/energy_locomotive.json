@@ -13,7 +13,7 @@
     {
       "type": "patchouli:crafting",
       "recipe": "littlelogistics:energy_locomotive",
-      "text": "The locomotive has an extra slot for a capacitor, this is useful if the locomotive ran out of energy mid-way and needs to be recharged."
+      "text": "The locomotive has an extra slot for an energy item, this is useful if the locomotive ran out of energy mid-way and needs to be recharged."
     }
   ]
 }
