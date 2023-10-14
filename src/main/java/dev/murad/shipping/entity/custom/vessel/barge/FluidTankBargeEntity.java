@@ -31,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class FluidTankBargeEntity extends AbstractBargeEntity{
+public class FluidTankBargeEntity extends AbstractBargeEntity {
     public static int CAPACITY = FluidType.BUCKET_VOLUME * 10;
     protected FluidTank tank = new FluidTank(CAPACITY){
         @Override

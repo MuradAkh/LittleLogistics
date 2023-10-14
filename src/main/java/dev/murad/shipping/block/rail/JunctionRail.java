@@ -121,4 +121,10 @@ public class JunctionRail extends BaseRailBlock implements MultiShapeRail {
     public boolean isAutomaticSwitching() {
         return false;
     }
+
+    @Deprecated
+    @Override
+    public boolean isValidRailShape(RailShape shape) {
+        return RAIL_SHAPE.getPossibleValues().contains(shape);
+    }
 }

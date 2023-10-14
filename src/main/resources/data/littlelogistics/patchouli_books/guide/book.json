@@ -1,7 +1,7 @@
 {
   "name": "Little Logistics Guide",
   "landing_text": "A short tutorial on Little Logistics! Visit the $(l:https://littlelogistics.murad.dev)online guide$() for video instructions.",
-  "version": 2,
+  "version": 3,
   "creative_tab": "transportation",
   "show_toasts ": false,
   "show_progress": false,

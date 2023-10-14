@@ -56,7 +56,7 @@ public class FluidTankCarEntity extends AbstractWagonEntity {
     }
 
     @Override
-    public ItemStack getPickResult() {
+    public @NotNull ItemStack getPickResult() {
         return new ItemStack(ModItems.FLUID_CAR.get());
     }
 
@@ -69,6 +69,9 @@ public class FluidTankCarEntity extends AbstractWagonEntity {
 
     @Override
     public InteractionResult interact(Player player, InteractionHand hand){
+        InteractionResult ret = super.interact(player, hand);
+        if (ret.consumesAction()) return ret;
+
         if(!this.level().isClientSide){
             FluidUtil.interactWithFluidHandler(player, InteractionHand.MAIN_HAND, tank);
             player.displayClientMessage(FluidDisplayUtil.getFluidDisplay(tank), false);

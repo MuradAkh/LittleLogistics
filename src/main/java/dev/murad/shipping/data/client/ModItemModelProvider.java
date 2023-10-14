@@ -28,6 +28,8 @@ public class ModItemModelProvider extends ItemModelProvider {
         withExistingParent("vessel_charger", modLoc("block/vessel_charger"));
 
         builder(itemGenerated, "barge");
+        builder(itemGenerated, "barrel_barge");
+        builder(itemGenerated, "vacuum_barge");
         builder(itemGenerated, "chunk_loader_barge");
         builder(itemGenerated, "fishing_barge");
         builder(itemGenerated, "fluid_barge");
@@ -37,6 +39,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "steam_locomotive");
         builder(itemGenerated, "energy_locomotive");
         builder(itemGenerated, "chest_car");
+        builder(itemGenerated, "barrel_car");
         builder(itemGenerated, "chunk_loader_car");
         builder(itemGenerated, "fluid_car");
         builder(itemGenerated, "seater_car");

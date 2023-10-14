@@ -4,30 +4,29 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.murad.shipping.entity.custom.vessel.barge.FluidTankBargeEntity;
 import dev.murad.shipping.entity.custom.train.wagon.FluidTankCarEntity;
+import dev.murad.shipping.entity.render.ModelPack;
+import dev.murad.shipping.entity.render.barge.MultipartVesselRenderer;
 import dev.murad.shipping.util.FluidRenderUtil;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
-
-public class FluidTankCarRenderer extends TrainCarRenderer<FluidTankCarEntity>{
-    public FluidTankCarRenderer(EntityRendererProvider.Context context, Function<ModelPart, EntityModel<FluidTankCarEntity>> baseModel, ModelLayerLocation layerLocation, String baseTexture) {
-        super(context, baseModel, layerLocation, baseTexture);
+public class FluidTankCarRenderer<T extends FluidTankCarEntity> extends MultipartCarRenderer<T>{
+    protected FluidTankCarRenderer(EntityRendererProvider.Context context,
+                                   ModelPack<T> baseModelPack,
+                                   ModelPack<T> insertModelPack,
+                                   ModelPack<T> trimModelPack) {
+        super(context, baseModelPack, insertModelPack, trimModelPack);
     }
 
     @Override
-    public void render(@NotNull FluidTankCarEntity entity, float yaw, float partialTicks, @NotNull PoseStack matrixStack, @NotNull MultiBufferSource buffer, int p_225623_6_) {
-        super.render(entity, yaw, partialTicks, matrixStack, buffer, p_225623_6_);
-
+    protected void renderInsertModel(T entity, PoseStack matrixStack, MultiBufferSource buffer, float partialTicks, int packedLight, int overlay) {
+        super.renderInsertModel(entity, matrixStack, buffer, partialTicks, packedLight, overlay);
+        renderFluid(entity, partialTicks, matrixStack, buffer, packedLight);
     }
 
-    protected void renderAdditional(FluidTankCarEntity entity, float pEntityYaw, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int pPackedLight) {
+    protected void renderFluid(FluidTankCarEntity entity, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int pPackedLight) {
         FluidStack fluid = entity.getFluidStack();
         if (fluid == null) return;
 
@@ -41,5 +40,18 @@ public class FluidTankCarRenderer extends TrainCarRenderer<FluidTankCarEntity>{
         FluidRenderUtil.renderCubeUsingQuads(FluidTankBargeEntity.CAPACITY, fluid, partialTicks, matrixStackIn, bufferIn, pPackedLight, pPackedLight);
 
         matrixStackIn.popPose();
+    }
+
+
+    public static class Builder<T extends FluidTankCarEntity> extends MultipartCarRenderer.Builder<T> {
+
+        public Builder(EntityRendererProvider.Context context) {
+            super(context);
+        }
+
+        @Override
+        public FluidTankCarRenderer<T> build() {
+            return new FluidTankCarRenderer<>(context, baseModelPack, insertModelPack, trimModelPack);
+        }
     }
 }

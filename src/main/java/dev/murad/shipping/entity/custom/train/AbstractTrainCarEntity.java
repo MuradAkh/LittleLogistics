@@ -4,31 +4,38 @@ import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.capability.StallingCapability;
+import dev.murad.shipping.entity.Colorable;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
+import dev.murad.shipping.entity.custom.vessel.VesselEntity;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.LinkingHandler;
 import dev.murad.shipping.util.RailHelper;
 import dev.murad.shipping.util.Train;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
@@ -49,7 +56,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public abstract class AbstractTrainCarEntity extends AbstractMinecart implements IForgeAbstractMinecart, LinkableEntity<AbstractTrainCarEntity> {
+public abstract class AbstractTrainCarEntity extends AbstractMinecart implements IForgeAbstractMinecart, LinkableEntity<AbstractTrainCarEntity>, Colorable {
+
+    public static final EntityDataAccessor<Integer> COLOR_DATA = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
 
     public static final EntityDataAccessor<Integer> DOMINANT_ID = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
     public static final EntityDataAccessor<Integer> DOMINATED_ID = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
@@ -62,7 +71,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     @Setter
     private boolean frozen = false;
 
-    private static final Map<RailShape, Pair<Vec3i, Vec3i>> EXITS = Util.make(Maps.newEnumMap(RailShape.class), (p_38135_) -> {
+    private static final Map<RailShape, Pair<Vec3i, Vec3i>> EXITS = Util.make(Maps.newEnumMap(RailShape.class), (enumMap) -> {
         Vec3i west = Direction.WEST.getNormal();
         Vec3i east = Direction.EAST.getNormal();
         Vec3i north = Direction.NORTH.getNormal();
@@ -71,16 +80,16 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         Vec3i eastUnder = east.below();
         Vec3i northUnder = north.below();
         Vec3i southUnder = south.below();
-        p_38135_.put(RailShape.NORTH_SOUTH, Pair.of(north, south));
-        p_38135_.put(RailShape.EAST_WEST, Pair.of(west, east));
-        p_38135_.put(RailShape.ASCENDING_EAST, Pair.of(westUnder, east));
-        p_38135_.put(RailShape.ASCENDING_WEST, Pair.of(west, eastUnder));
-        p_38135_.put(RailShape.ASCENDING_NORTH, Pair.of(north, southUnder));
-        p_38135_.put(RailShape.ASCENDING_SOUTH, Pair.of(northUnder, south));
-        p_38135_.put(RailShape.SOUTH_EAST, Pair.of(south, east));
-        p_38135_.put(RailShape.SOUTH_WEST, Pair.of(south, west));
-        p_38135_.put(RailShape.NORTH_WEST, Pair.of(north, west));
-        p_38135_.put(RailShape.NORTH_EAST, Pair.of(north, east));
+        enumMap.put(RailShape.NORTH_SOUTH, Pair.of(north, south));
+        enumMap.put(RailShape.EAST_WEST, Pair.of(west, east));
+        enumMap.put(RailShape.ASCENDING_EAST, Pair.of(westUnder, east));
+        enumMap.put(RailShape.ASCENDING_WEST, Pair.of(west, eastUnder));
+        enumMap.put(RailShape.ASCENDING_NORTH, Pair.of(north, southUnder));
+        enumMap.put(RailShape.ASCENDING_SOUTH, Pair.of(northUnder, south));
+        enumMap.put(RailShape.SOUTH_EAST, Pair.of(south, east));
+        enumMap.put(RailShape.SOUTH_WEST, Pair.of(south, west));
+        enumMap.put(RailShape.NORTH_WEST, Pair.of(north, west));
+        enumMap.put(RailShape.NORTH_EAST, Pair.of(north, east));
     });
 
     private static Pair<Vec3i, Vec3i> exits(RailShape pShape) {
@@ -91,10 +100,11 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         super(entityType, level);
         linkingHandler.train = new Train<>(this);
         railHelper = new RailHelper(this);
+        resetAttributes();
     }
 
-    public AbstractTrainCarEntity(EntityType<?> p_38087_, Level level, double x, double y, double z) {
-        super(p_38087_, level, x, y, z);
+    public AbstractTrainCarEntity(EntityType<?> entityType, Level level, double x, double y, double z) {
+        super(entityType, level, x, y, z);
         var pos = BlockPos.containing(x, y, z);
         var state = level().getBlockState(pos);
         if (state.getBlock() instanceof BaseRailBlock railBlock) {
@@ -104,6 +114,11 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         }
         linkingHandler.train = new Train<>(this);
         railHelper = new RailHelper(this);
+        resetAttributes();
+    }
+
+    private void resetAttributes() {
+        setCustomNameVisible(true);
     }
 
     protected Optional<RailShape> getRailShape() {
@@ -127,48 +142,56 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         return getPickResult().getItem();
     }
 
+    @Nullable
+    public Integer getColor() {
+        int color = this.getEntityData().get(COLOR_DATA);
+        return color == -1 ? null : color;
+    }
+
+    public void setColor(Integer color) {
+        if (color == null) color = -1;
+        this.getEntityData().set(COLOR_DATA, color);
+    }
+
+    @Override
+    public InteractionResult interact(Player player, InteractionHand hand) {
+        InteractionResult ret = super.interact(player, hand);
+        if (ret.consumesAction()) return ret;
+
+        var color = DyeColor.getColor(player.getItemInHand(hand));
+
+        if (color != null) {
+            if (!level().isClientSide) {
+                this.getEntityData().set(COLOR_DATA, color.getId());
+            }
+            // don't interact *and* use current item
+            return InteractionResult.sidedSuccess(this.level().isClientSide);
+        }
+
+        return InteractionResult.PASS;
+    }
+
     @Override
     protected void readAdditionalSaveData(@NotNull CompoundTag compound) {
         super.readAdditionalSaveData(compound);
+
+        if (compound.contains("Color", Tag.TAG_INT)) {
+            setColor(compound.getInt("Color"));
+        }
+
         linkingHandler.readAdditionalSaveData(compound);
     }
 
     @Override
     protected void addAdditionalSaveData(@NotNull CompoundTag compound) {
         super.addAdditionalSaveData(compound);
-        linkingHandler.addAdditionalSaveData(compound);
 
-    }
-
-    private Optional<AbstractTrainCarEntity> tryToLoadFromNBT(CompoundTag compound) {
-        try {
-            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-            pos.set(compound.getInt("X"), compound.getInt("Y"), compound.getInt("Z"));
-            String uuid = compound.getString("UUID");
-            AABB searchBox = new AABB(
-                    pos.getX() - 2,
-                    pos.getY() - 2,
-                    pos.getZ() - 2,
-                    pos.getX() + 2,
-                    pos.getY() + 2,
-                    pos.getZ() + 2
-            );
-            List<Entity> entities = level().getEntities(this, searchBox, e -> e.getStringUUID().equals(uuid));
-            return entities.stream().findFirst().map(e -> (AbstractTrainCarEntity) e);
-        } catch (Exception e) {
-            return Optional.empty();
+        Integer color = getColor();
+        if (color != null) {
+            compound.putInt("Color", color);
         }
-    }
 
-    private void writeNBT(Entity entity, CompoundTag globalCompound) {
-        CompoundTag compound = new CompoundTag();
-        compound.putInt("X", (int) Math.floor(entity.getX()));
-        compound.putInt("Y", (int) Math.floor(entity.getY()));
-        compound.putInt("Z", (int) Math.floor(entity.getZ()));
-
-        compound.putString("UUID", entity.getUUID().toString());
-
-        globalCompound.put("dominant", compound);
+        linkingHandler.addAdditionalSaveData(compound);
     }
 
     @Override
@@ -176,6 +199,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         super.defineSynchedData();
         getEntityData().define(DOMINANT_ID, -1);
         getEntityData().define(DOMINATED_ID, -1);
+        getEntityData().define(COLOR_DATA, -1);
     }
 
 
@@ -454,7 +478,13 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         int i = (int) Stream.of(linkingHandler.leader, linkingHandler.follower).filter(Optional::isPresent).count();
         this.remove(Entity.RemovalReason.KILLED);
         if (this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-            this.spawnAtLocation(this.getPickResult());
+            var stack = this.getPickResult();
+
+            if (this.hasCustomName()) {
+                stack.setHoverName(this.getCustomName());
+            }
+
+            this.spawnAtLocation(stack);
             for (int j = 0; j < i; j++) {
                 spawnChain();
             }
@@ -684,6 +714,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     }
 
     @Override
+    @NonNull
     public abstract ItemStack getPickResult();
 
 

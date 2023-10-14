@@ -42,13 +42,14 @@ public class SeaterCarEntity extends AbstractWagonEntity {
     }
 
     @Override
-    public ItemStack getPickResult() {
+    public @NotNull ItemStack getPickResult() {
         return new ItemStack(ModItems.SEATER_CAR.get());
     }
 
     public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
         InteractionResult ret = super.interact(pPlayer, pHand);
         if (ret.consumesAction()) return ret;
+
         if (pPlayer.isSecondaryUseActive()) {
             return InteractionResult.PASS;
         } else if (this.isVehicle()) {
