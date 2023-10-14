@@ -45,7 +45,6 @@ public class ForgeEventHandler {
         // Don't do anything client side
         if (event.level instanceof ServerLevel serverLevel) {
             TrainChunkManagerManager.get(serverLevel.getServer()).getManagers(event.level.dimension()).forEach(PlayerTrainChunkManager::tick);
-
         }
     }
 
