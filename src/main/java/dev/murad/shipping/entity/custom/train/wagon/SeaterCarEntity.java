@@ -4,6 +4,7 @@ import dev.murad.shipping.compatibility.create.CapabilityInjector;
 import dev.murad.shipping.compatibility.create.CreateCompatibility;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -16,10 +17,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class SeaterCarEntity extends AbstractWagonEntity {
     @Nullable
@@ -89,7 +90,7 @@ public class SeaterCarEntity extends AbstractWagonEntity {
     }
 
     @Override
-    protected void positionRider(@NotNull Entity passenger, Entity.@NotNull MoveFunction pCallback) {
+    protected void positionRider(@Nonnull Entity passenger, Entity.@NotNull MoveFunction pCallback) {
         if (this.hasPassenger(passenger)) {
             if (passenger instanceof Player) {
                 // Position player differently than all other entities
@@ -123,7 +124,7 @@ public class SeaterCarEntity extends AbstractWagonEntity {
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
         if (CreateCompatibility.enabled() &&
                 createCompatMinecartControllerCapability != null
                 && CapabilityInjector.isMinecartControllerCapability(cap)

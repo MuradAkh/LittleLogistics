@@ -690,7 +690,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
         if (cap == StallingCapability.STALLING_CAPABILITY) {
             return stallingOpt.cast();
         }
