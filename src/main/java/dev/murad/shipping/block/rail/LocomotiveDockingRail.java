@@ -13,9 +13,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import org.jetbrains.annotations.Nullable;
 
-public class LocomotiveDockingRail extends AbstractDockingRail{
+public class LocomotiveDockingRail extends AbstractDockingRail {
     public LocomotiveDockingRail(Properties pProperties) {
         super(pProperties);
     }

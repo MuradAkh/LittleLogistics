@@ -203,6 +203,6 @@ public abstract class AbstractBargeEntity extends VesselEntity {
         if (cap == StallingCapability.STALLING_CAPABILITY) {
             return capabilityOpt.cast();
         }
-        return super.getCapability(cap);
+        return super.getCapability(cap, side);
     }
 }

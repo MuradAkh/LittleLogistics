@@ -2,13 +2,16 @@ package dev.murad.shipping.util;
 
 import lombok.NonNull;
 import net.minecraft.world.Container;
+import net.minecraft.world.Containers;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nullable;
@@ -25,7 +28,7 @@ public class InventoryUtils {
         List<Integer> airList = new ArrayList<>();
         for (int i = 0; i < target.getContainerSize(); i++) {
             ItemStack stack = target.getItem(i);
-            if((stack.isEmpty() || stack.getItem().equals(Items.AIR)) && target.canPlaceItem(i, stack)){
+            if (stack.isEmpty() && target.canPlaceItem(i, stack)) {
                 airList.add(i);
             }
             else if (stack.getMaxStackSize() != stack.getCount() && target.canPlaceItem(i, stack)) {
@@ -44,8 +47,7 @@ public class InventoryUtils {
                     if (canMergeItems(targetStack, stack))
                         return true;
                 }
-            } else if (!airList.isEmpty() && target instanceof Entity){
-                Entity e = (Entity) target;
+            } else if (!airList.isEmpty() && target instanceof Entity e){
                 boolean validSlot = e.getCapability(ForgeCapabilities.ITEM_HANDLER)
                         .map(itemHandler -> airList.stream()
                                 .map(j -> itemHandler.isItemValid(j, stack))

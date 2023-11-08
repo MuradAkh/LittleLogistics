@@ -18,16 +18,7 @@ public class TrainCarDockTileEntity extends AbstractTailDockTileEntity<AbstractT
     }
 
     @Override
-    protected List<BlockPos> getTargetBlockPos() {
-        if(this.isExtract()){
-            return List.of(getBlockPos().below());
-        }
-        var facing = getBlockState().getValue(AbstractDockingRail.RAIL_SHAPE).equals(RailShape.EAST_WEST) ? Direction.EAST : Direction.NORTH;
-        return List.of(getBlockPos().relative(facing.getCounterClockWise()), getBlockPos().relative(facing.getClockWise()));
-    }
-
-    @Override
-    protected boolean checkBadDirCondition(Direction direction) {
-        return false;
+    protected boolean canDockFacingDirection(AbstractTrainCarEntity tug, Direction direction) {
+        return true;
     }
 }

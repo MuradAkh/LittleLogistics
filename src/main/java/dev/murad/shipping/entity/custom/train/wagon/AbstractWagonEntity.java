@@ -148,6 +148,6 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
         if (cap == StallingCapability.STALLING_CAPABILITY) {
             return capabilityOpt.cast();
         }
-        return super.getCapability(cap);
+        return super.getCapability(cap, side);
     }
 }

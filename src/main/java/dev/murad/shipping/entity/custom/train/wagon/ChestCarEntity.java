@@ -2,6 +2,7 @@ package dev.murad.shipping.entity.custom.train.wagon;
 
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import dev.murad.shipping.util.InventoryUtils;
 import dev.murad.shipping.util.ItemHandlerVanillaContainerWrapper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -24,7 +25,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.stream.IntStream;
 
-public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVanillaContainerWrapper, WorldlyContainer, MenuProvider {
+public class ChestCarEntity extends AbstractWagonEntity implements MenuProvider, ItemHandlerVanillaContainerWrapper {
     protected final ItemStackHandler itemHandler = createHandler();
     protected final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
     public ChestCarEntity(EntityType<ChestCarEntity> type, Level level) {
@@ -85,12 +86,6 @@ public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVa
         }
     }
 
-
-    @Override
-    public ItemStackHandler getRawHandler() {
-        return itemHandler;
-    }
-
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag t) {
         super.addAdditionalSaveData(t);
@@ -113,20 +108,8 @@ public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVa
         return super.getCapability(cap, side);
     }
 
-    // hack to disable hoppers before docking complete
-
     @Override
-    public int @NotNull [] getSlotsForFace(@NotNull Direction p_180463_1_) {
-        return IntStream.range(0, getContainerSize()).toArray();
-    }
-
-    @Override
-    public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
-        return isDockable();
-    }
-
-    @Override
-    public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack p_180461_2_, Direction p_180461_3_) {
-        return isDockable();
+    public ItemStackHandler getRawHandler() {
+        return itemHandler;
     }
 }

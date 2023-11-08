@@ -33,12 +33,14 @@ import javax.annotation.Nullable;
 
 public class FluidTankBargeEntity extends AbstractBargeEntity {
     public static int CAPACITY = FluidType.BUCKET_VOLUME * 10;
+
     protected FluidTank tank = new FluidTank(CAPACITY){
         @Override
         protected void onContentsChanged(){
             sendInfoToClient();
         }
     };
+
     private static final EntityDataAccessor<Integer> VOLUME = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<String> FLUID_TYPE = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.STRING);
     private Fluid clientCurrFluid = Fluids.EMPTY;

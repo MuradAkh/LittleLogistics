@@ -20,6 +20,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
@@ -34,11 +35,11 @@ import javax.annotation.Nullable;
 public class EnergyTugEntity extends AbstractTugEntity {
     private final ItemStackHandler itemHandler = createHandler();
     private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
-    private static final int MAX_ENERGY = ShippingConfig.Server.ENERGY_TUG_BASE_CAPACITY.get();
-    private static final int MAX_TRANSFER = ShippingConfig.Server.ENERGY_TUG_BASE_MAX_CHARGE_RATE.get();
-    private static final int ENERGY_USAGE = ShippingConfig.Server.ENERGY_TUG_BASE_ENERGY_USAGE.get();
+    private static final ForgeConfigSpec.ConfigValue<Integer> MAX_ENERGY = ShippingConfig.Server.ENERGY_TUG_BASE_CAPACITY;
+    private static final ForgeConfigSpec.ConfigValue<Integer> MAX_TRANSFER = ShippingConfig.Server.ENERGY_TUG_BASE_MAX_CHARGE_RATE;
+    private static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_USAGE = ShippingConfig.Server.ENERGY_TUG_BASE_ENERGY_USAGE;
 
-    private final ReadWriteEnergyStorage internalBattery = new ReadWriteEnergyStorage(MAX_ENERGY, MAX_TRANSFER, Integer.MAX_VALUE);
+    private final ReadWriteEnergyStorage internalBattery = new ReadWriteEnergyStorage(MAX_ENERGY.get(), MAX_TRANSFER.get(), Integer.MAX_VALUE);
     private final LazyOptional<IEnergyStorage> holder = LazyOptional.of(() -> internalBattery);
 
     public EnergyTugEntity(EntityType<? extends WaterAnimal> type, Level world) {
@@ -147,7 +148,7 @@ public class EnergyTugEntity extends AbstractTugEntity {
             IEnergyStorage capability = InventoryUtils.getEnergyCapabilityInSlot(0, itemHandler);
             if (capability != null) {
                 // simulate first
-                int toExtract = capability.extractEnergy(MAX_TRANSFER, true);
+                int toExtract = capability.extractEnergy(MAX_TRANSFER.get(), true);
                 toExtract = internalBattery.receiveEnergy(toExtract, false);
                 capability.extractEnergy(toExtract, false);
             }
@@ -158,7 +159,7 @@ public class EnergyTugEntity extends AbstractTugEntity {
 
     @Override
     protected boolean tickFuel() {
-        return internalBattery.extractEnergy(ENERGY_USAGE, false) > 0;
+        return internalBattery.extractEnergy(ENERGY_USAGE.get(), false) > 0;
     }
 
     @Override
@@ -167,19 +168,19 @@ public class EnergyTugEntity extends AbstractTugEntity {
     }
 
     @Override
-    public ItemStack getItem(int p_70301_1_) {
-        return itemHandler.getStackInSlot(p_70301_1_);
+    public ItemStack getItem(int slot) {
+        return itemHandler.getStackInSlot(slot);
     }
 
 
     @Override
-    public void setItem(int p_70299_1_, ItemStack p_70299_2_) {
-        if (!this.itemHandler.isItemValid(p_70299_1_, p_70299_2_)){
+    public void setItem(int slot, ItemStack item) {
+        if (!this.itemHandler.isItemValid(slot, item)){
             return;
         }
-        this.itemHandler.insertItem(p_70299_1_, p_70299_2_, false);
-        if (!p_70299_2_.isEmpty() && p_70299_2_.getCount() > this.getMaxStackSize()) {
-            p_70299_2_.setCount(this.getMaxStackSize());
+        this.itemHandler.insertItem(slot, item, false);
+        if (!item.isEmpty() && item.getCount() > this.getMaxStackSize()) {
+            item.setCount(this.getMaxStackSize());
         }
     }
 

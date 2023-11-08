@@ -165,6 +165,8 @@ dependencies {
     // create
     runtimeOnly fg.deobf("curse.maven:create-328085:${rootProject.create_version}")
     compileOnly fg.deobf("curse.maven:create-328085:${rootProject.create_version}")
+
+    runtimeOnly fg.deobf("curse.maven:the-one-probe-245211:${rootProject.theoneprobe_version}")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..

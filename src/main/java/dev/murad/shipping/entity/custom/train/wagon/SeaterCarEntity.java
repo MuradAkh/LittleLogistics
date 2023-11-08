@@ -131,6 +131,6 @@ public class SeaterCarEntity extends AbstractWagonEntity {
         ) {
             return createCompatMinecartControllerCapability.cast();
         }
-        return super.getCapability(cap);
+        return super.getCapability(cap, side);
     }
 }

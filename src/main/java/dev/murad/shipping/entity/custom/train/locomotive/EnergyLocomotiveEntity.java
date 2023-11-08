@@ -31,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements ItemHandlerVanillaContainerWrapper, WorldlyContainer {
+public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements ItemHandlerVanillaContainerWrapper {
     private final ItemStackHandler energyItemHandler = createHandler();
     private final LazyOptional<IItemHandler> energyItemHandlerOpt = LazyOptional.of(() -> energyItemHandler);
     private static final int MAX_ENERGY = ShippingConfig.Server.ENERGY_LOCO_BASE_CAPACITY.get();
@@ -149,21 +149,6 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
     @Override
     public ItemStackHandler getRawHandler() {
         return energyItemHandler;
-    }
-
-    @Override
-    public int @NotNull [] getSlotsForFace(@NotNull Direction dir) {
-        return new int[]{0};
-    }
-
-    @Override
-    public boolean canPlaceItemThroughFace(int index, @NotNull ItemStack itemStack, @Nullable Direction dir) {
-        return stalling.isDocked();
-    }
-
-    @Override
-    public boolean canTakeItemThroughFace(int index, @NotNull ItemStack itemStack, @NotNull Direction dir) {
-        return false;
     }
 
     @Override

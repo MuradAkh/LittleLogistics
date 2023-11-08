@@ -1,6 +1,7 @@
 package dev.murad.shipping.entity.custom.train.locomotive;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.block.dock.AbstractDockTileEntity;
 import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
 import dev.murad.shipping.capability.StallingCapability;
@@ -58,8 +59,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     protected boolean engineOn = false;
 
     protected final ChunkManagerEnrollmentHandler enrollmentHandler;
-    @Setter
-    private boolean doflip = false;
     private boolean independentMotion = false;
     private boolean docked = false;
     private final VehicleFrontPart frontHitbox;
@@ -87,6 +86,10 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractLocomotiveEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(AbstractLocomotiveEntity.class, EntityDataSerializers.STRING);
     private int dockCheckCooldown = 0;
+
+    @Getter
+    @Setter
+    private BlockPos dockBlockPosition;
 
 
     public AbstractLocomotiveEntity(EntityType<?> type, Level world) {
@@ -327,7 +330,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         }).isEmpty();
     }
 
-    // to avoid deadlock for stopsign, you only care about incoming "heads"
+    // to avoid deadlock for stop sign, you only care about incoming "heads"
     private boolean checkLocoCollision(BlockPos pos) {
         AABB aabb = new AABB(pos);
         return !this.level().getEntitiesOfClass(Entity.class, aabb, e -> {
@@ -342,7 +345,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     @Override
     public PartEntity<?>[] getParts()
     {
-        return new PartEntity<?>[]{frontHitbox};
+        return new PartEntity<?>[]{ frontHitbox };
     }
 
     @Override
@@ -357,11 +360,10 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     @Override
-    public void recreateFromPacket(ClientboundAddEntityPacket p_149572_) {
-        super.recreateFromPacket(p_149572_);
-        frontHitbox.setId(p_149572_.getId());
+    public void recreateFromPacket(ClientboundAddEntityPacket packet) {
+        super.recreateFromPacket(packet);
+        frontHitbox.setId(packet.getId());
     }
-
 
     protected void onDock() {
         this.playSound(ModSounds.TUG_DOCKING.get(), 0.6f, 1.0f);
@@ -374,7 +376,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     private void tickDockCheck() {
         getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(cap -> {
             int x = (int) Math.floor(this.getX());
-            int y = (int) Math.floor(this.getY());
             int z = (int) Math.floor(this.getZ());
 
             boolean docked = cap.isDocked();
@@ -395,29 +396,50 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                 return;
             }
 
-
             // Check docks
-            boolean shouldDock = Optional.ofNullable(level().getBlockEntity(getOnPos().above()))
-                                    .filter(entity -> entity instanceof LocomotiveDockTileEntity)
-                                    .map(entity -> (LocomotiveDockTileEntity) entity)
-                                    .map(dock -> dock.hold(this, getDirection()))
-                                    .orElse(false);
+            var rail = (LocomotiveDockTileEntity) Optional.ofNullable(level().getBlockEntity(getOnPos().above()))
+                    .filter(entity -> entity instanceof LocomotiveDockTileEntity).orElse(null);
+
+            boolean shouldDock;
+
+            if (rail != null) {
+                shouldDock = rail.shouldHoldEntireTrain(this, getDirection());
+            } else {
+                shouldDock = false;
+            }
+
+            if (shouldDock) {
+                dockTrain(cap, rail, x + 0.5, getY(),z + 0.5, rail.getBlockPos());
+            } else {
+                undockTrain(cap, rail);
+            }
 
             boolean changedDock = !docked && shouldDock;
             boolean changedUndock = docked && !shouldDock;
 
-            if(shouldDock) {
-                dockCheckCooldown = 20; // todo: magic number
-                cap.dock(x + 0.5 ,getY(),z + 0.5);
-            } else {
-                dockCheckCooldown = 0;
-                cap.undock();
-            }
-
             if (changedDock) onDock();
             if (changedUndock) onUndock();
         });
+    }
 
+    private void dockTrain(StallingCapability cap, LocomotiveDockTileEntity te,
+                           double x, double y, double z, BlockPos headDockPos) {
+        dockCheckCooldown = 20; // todo: magic number
+        cap.dock(x, y, z, headDockPos);
+        te.dockEntity(this);
+
+        // dock each tail member as well
+        te.getTailDockPairs(this).forEach(p -> p.getSecond().dockEntity(p.getFirst()));
+    }
+
+    private void undockTrain(StallingCapability cap, @Nullable LocomotiveDockTileEntity te) {
+        dockCheckCooldown = 0;
+        cap.undock();
+
+        if (te != null) {
+            te.undockEntity();
+            te.getTailDocks().forEach(AbstractDockTileEntity::undockEntity);
+        }
     }
 
     private double getSpeedModifier(){
@@ -483,10 +505,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     @Override
-    public void setDominant(AbstractTrainCarEntity entity) {
-    }
-
-
+    public void setDominant(AbstractTrainCarEntity entity) { }
 
     @Override
     public void removeDominated() {
@@ -511,7 +530,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         }
 
         @Override
-        public void dock(double x, double y, double z) {
+        public void dock(double x, double y, double z, BlockPos headDockPos) {
             docked = true;
             setDeltaMovement(Vec3.ZERO);
             moveTo(x, y, z);
@@ -562,7 +581,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         if (cap == StallingCapability.STALLING_CAPABILITY) {
             return stallingOpt.cast();
         }
-        return super.getCapability(cap);
+        return super.getCapability(cap, side);
     }
 
     private void updateNavigatorFromItem() {
@@ -607,7 +626,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     @Override
-    public boolean stillValid(Player pPlayer) {
+    public boolean stillValid(@NotNull Player pPlayer) {
         if (this.isRemoved()) {
             return false;
         } else {

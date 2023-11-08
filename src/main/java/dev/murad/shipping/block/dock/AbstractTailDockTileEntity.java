@@ -10,7 +10,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractTailDockTileEntity<T extends Entity & LinkableEntity<T>> extends AbstractDockTileEntity<T> {
     public AbstractTailDockTileEntity(BlockEntityType<?> t, BlockPos pos, BlockState state) {
@@ -34,26 +37,13 @@ public abstract class AbstractTailDockTileEntity<T extends Entity & LinkableEnti
 
 
     @Override
-    public boolean hold(T vessel, Direction direction) {
-        if (checkBadDirCondition(direction))
-        {
+    protected boolean shouldHoldEntity(T entity, Direction direction) {
+        if (!canDockFacingDirection(entity, direction)) {
             return false;
         }
 
-        for (BlockPos p : getTargetBlockPos()) {
-            if (checkInterface(vessel, p)){
-                return true;
-            }
-        }
-        return false;
-    }
+        // TODO: Check dock's capability transfer cooldown
 
-    @NotNull
-    private Boolean checkInterface(T vessel, BlockPos p) {
-        return getHopper(p).map(h -> handleItemHopper(vessel, h))
-                .orElse(getVesselLoader(p).map(l -> l.hold(vessel, isExtract() ? IVesselLoader.Mode.IMPORT : IVesselLoader.Mode.EXPORT))
-                        .orElse(false));
+        return true;
     }
-
-    protected abstract boolean checkBadDirCondition(Direction direction);
 }

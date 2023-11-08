@@ -14,15 +14,9 @@ public class TugDockTileEntity extends AbstractHeadDockTileEntity<VesselEntity> 
     }
 
     @Override
-    protected List<BlockPos> getTargetBlockPos() {
-        return List.of(this.getBlockPos().above());
-    }
-
-    @Override
-    protected boolean checkBadDirCondition(VesselEntity tug, Direction direction) {
-        return !getBlockState().getValue(DockingBlockStates.FACING).getOpposite().equals(direction)
-                ||
-                tug.getDirection().equals(getRowDirection(getBlockState().getValue(DockingBlockStates.FACING)));
+    protected boolean canDockFacingDirection(VesselEntity tug, Direction direction) {
+        return getBlockState().getValue(DockingBlockStates.FACING).getOpposite().equals(direction) &&
+            !tug.getDirection().equals(getRowDirection(getBlockState().getValue(DockingBlockStates.FACING)));
     }
 
     @Override

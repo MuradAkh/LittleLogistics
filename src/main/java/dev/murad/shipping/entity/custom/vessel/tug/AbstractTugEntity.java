@@ -1,6 +1,7 @@
 package dev.murad.shipping.entity.custom.vessel.tug;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.block.dock.AbstractDockTileEntity;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.capability.StallingCapability;
@@ -18,7 +19,6 @@ import lombok.Setter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -51,14 +51,10 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 
-public abstract class AbstractTugEntity extends VesselEntity implements LinkableEntityHead<VesselEntity>, Container, WorldlyContainer, HeadVehicle {
+public abstract class AbstractTugEntity extends VesselEntity implements LinkableEntityHead<VesselEntity>, Container, HeadVehicle {
 
     protected final ChunkManagerEnrollmentHandler enrollmentHandler;
 
@@ -78,7 +74,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private int dockCheckCooldown = 0;
     private boolean independentMotion = false;
     private int pathfindCooldown = 0;
-    private VehicleFrontPart frontHitbox;
+    private final VehicleFrontPart frontHitbox;
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.STRING);
 
@@ -233,26 +229,40 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             }
 
             // Check docks
-            boolean shouldDock = this.getSideDirections()
-                    .stream()
-                    .map((curr) ->
-                            Optional.ofNullable(level().getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
-                                    .filter(entity -> entity instanceof TugDockTileEntity)
-                                    .map(entity -> (TugDockTileEntity) entity)
-                                    .map(dock -> dock.hold(this, curr))
-                                    .orElse(false))
-                    .reduce(false, (acc, curr) -> acc || curr);
+            @Nullable Direction dir = null;
+            @Nullable TugDockTileEntity dock = null;
 
-            boolean changedDock = !docked && shouldDock;
-            boolean changedUndock = docked && !shouldDock;
+            for (var side : this.getSideDirections()) {
+                var e = level().getBlockEntity(new BlockPos(x + side.getStepX(), y, z + side.getStepZ()));
+                if (e instanceof TugDockTileEntity te) {
+                    dock = te;
+                    dir = side;
+                    break;
+                }
+            }
 
-            if(shouldDock) {
+            boolean shouldDock = dock != null && dock.shouldHoldEntireTrain(this, dir);
+
+            if (shouldDock) {
                 dockCheckCooldown = 20; // todo: magic number
                 cap.dock(x + 0.5 ,getY(),z + 0.5);
+                dock.dockEntity(this);
+
+                // dock each tail member as well
+                dock.getTailDockPairs(this).forEach(p -> p.getSecond().dockEntity(p.getFirst()));
             } else {
                 dockCheckCooldown = 0;
                 cap.undock();
+
+                if (dock != null) {
+                    dock.undockEntity();
+                    dock.getTailDocks().forEach(AbstractDockTileEntity::undockEntity);
+                }
             }
+
+
+            boolean changedDock = !docked && shouldDock;
+            boolean changedUndock = docked && !shouldDock;
 
             if (changedDock) onDock();
             if (changedUndock) onUndock();
@@ -555,20 +565,20 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Override
-    public boolean isValid(Player p_70300_1_) {
+    public boolean isValid(Player player) {
         if (this.isRemoved()) {
             return false;
         } else {
-            return !(p_70300_1_.distanceToSqr(this) > 64.0D);
+            return !(player.distanceToSqr(this) > 64.0D);
         }
     }
 
     @Override
-    public boolean stillValid(Player p_70300_1_) {
+    public boolean stillValid(Player player) {
         if (this.isRemoved()) {
             return false;
         } else {
-            return !(p_70300_1_.distanceToSqr(this) > 64.0D);
+            return !(player.distanceToSqr(this) > 64.0D);
         }
     }
 
@@ -578,26 +588,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Override
-    public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack p_180461_2_, Direction p_180461_3_) {
-        return false;
-    }
-
-    @Override
-    public int[] getSlotsForFace(Direction p_180463_1_) {
-        return IntStream.range(0, getContainerSize()).toArray();
-    }
-
-    @Override
-    public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
-        return isDocked();
-    }
-    @Override
     public int getContainerSize() {
         return 1;
     }
 
     @Override
-    public boolean canBeLeashed(Player p_184652_1_) {
+    public boolean canBeLeashed(Player player) {
         return true;
     }
 
@@ -694,6 +690,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         if (cap == StallingCapability.STALLING_CAPABILITY) {
             return stallingOpt.cast();
         }
-        return super.getCapability(cap);
+        return super.getCapability(cap, side);
     }
 }

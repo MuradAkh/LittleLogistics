@@ -8,6 +8,7 @@ import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -17,14 +18,8 @@ public class LocomotiveDockTileEntity extends AbstractHeadDockTileEntity<Abstrac
     }
 
     @Override
-    protected List<BlockPos> getTargetBlockPos() {
-        var facing =  getBlockState().getValue(DockingBlockStates.FACING);
-        return List.of(getBlockPos().relative(facing.getCounterClockWise()), getBlockPos().relative(facing.getClockWise()));
-    }
-
-    @Override
-    protected boolean checkBadDirCondition(AbstractTrainCarEntity tug, Direction direction) {
-        return !tug.getDirection().equals(getBlockState().getValue(DockingBlockStates.FACING));
+    protected boolean canDockFacingDirection(@NotNull AbstractTrainCarEntity tug, Direction direction) {
+        return tug.getDirection().equals(getBlockState().getValue(DockingBlockStates.FACING));
     }
 
     @Override

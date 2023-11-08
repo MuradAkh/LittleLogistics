@@ -31,9 +31,18 @@ public abstract class AbstractHeadDockTileEntity<T extends Entity & LinkableEnti
         return InventoryUtils.mayMoveIntoInventory((Container) tugEntity, hopper);
     }
 
+    public boolean shouldHoldEntireTrain(T headEntity, Direction direction) {
+        // Check head should hold entity
+        if (shouldHoldEntity(headEntity, direction)) {
+            return true;
+        }
 
-    public boolean hold(T tug, Direction direction){
-        if (!(tug instanceof LinkableEntityHead) || checkBadDirCondition(tug, direction)){
+        return getTailDockPairs(headEntity).stream()
+                .anyMatch(pair -> pair.getSecond().shouldHoldEntity(pair.getFirst(), direction));
+    }
+
+    protected boolean shouldHoldEntity(T entity, Direction direction){
+        if (!(entity instanceof LinkableEntityHead) || !canDockFacingDirection(entity, direction)) {
             return false;
         }
 
@@ -43,29 +52,17 @@ public abstract class AbstractHeadDockTileEntity<T extends Entity & LinkableEnti
             return true;
         }
 
-        for (BlockPos p : getTargetBlockPos()) {
-            if (getHopper(p).map(hopper -> handleItemHopper(tug, hopper))
-                    .orElse(getVesselLoader(p).map(l -> l.hold(tug, IVesselLoader.Mode.EXPORT)).orElse(false))) {
-                return true;
-            }
-        }
+        // TODO: Check dock's capability transfer cooldown
 
-
-        List<Pair<T, AbstractTailDockTileEntity<T>>> barges = getTailDockPairs(tug);
-
-
-        if (barges.stream().map(pair -> pair.getSecond().hold(pair.getFirst(), direction)).reduce(false, Boolean::logicalOr)){
-            return true;
-        }
 
         return false;
     }
 
-    protected abstract boolean checkBadDirCondition(T tug, Direction direction);
+    protected abstract boolean canDockFacingDirection(T tug, Direction direction);
 
     protected abstract Direction getRowDirection(Direction facing);
 
-    private List<Pair<T, AbstractTailDockTileEntity<T>>> getTailDockPairs(T tug){
+    public List<Pair<T, AbstractTailDockTileEntity<T>>> getTailDockPairs(T tug){
         List<T> barges = tug.getTrain().asListOfTugged();
         List<AbstractTailDockTileEntity<T>> docks = getTailDocks();
         return IntStream.range(0, Math.min(barges.size(), docks.size()))
@@ -73,7 +70,7 @@ public abstract class AbstractHeadDockTileEntity<T extends Entity & LinkableEnti
                 .collect(Collectors.toList());
     }
 
-    private List<AbstractTailDockTileEntity<T>> getTailDocks(){
+    public List<AbstractTailDockTileEntity<T>> getTailDocks(){
         Direction facing = this.getBlockState().getValue(DockingBlockStates.FACING);
         Direction rowDirection = getRowDirection(facing);
         List<AbstractTailDockTileEntity<T>> docks = new ArrayList<>();

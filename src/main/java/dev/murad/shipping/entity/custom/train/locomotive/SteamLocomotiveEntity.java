@@ -35,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements ItemHandlerVanillaContainerWrapper, WorldlyContainer {
+public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements ItemHandlerVanillaContainerWrapper {
     private final FuelItemStackHandler fuelItemHandler = new FuelItemStackHandler();
     private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> fuelItemHandler);
 
@@ -152,21 +152,6 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
                 AbstractTugEntity.makeParticles(level, blockpos, this);
             }
         }
-    }
-
-    @Override
-    public boolean canTakeItemThroughFace(int index, @NotNull ItemStack itemStack, @NotNull Direction dir) {
-        return false;
-    }
-
-    @Override
-    public int @NotNull [] getSlotsForFace(@NotNull Direction dir) {
-        return new int[]{0};
-    }
-
-    @Override
-    public boolean canPlaceItemThroughFace(int index, @NotNull ItemStack itemStack, @Nullable Direction dir) {
-        return stalling.isDocked();
     }
 
     @Override

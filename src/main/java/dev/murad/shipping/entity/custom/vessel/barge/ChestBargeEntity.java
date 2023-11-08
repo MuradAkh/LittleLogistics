@@ -16,6 +16,10 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,8 +27,9 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-public class ChestBargeEntity extends AbstractBargeEntity implements Container, MenuProvider, WorldlyContainer, TrainInventoryProvider {
+public class ChestBargeEntity extends AbstractBargeEntity implements Container, MenuProvider, TrainInventoryProvider {
     protected final ItemStackHandler itemHandler = new ItemStackHandler(27);
+    protected final LazyOptional<IItemHandler> itemCapability = LazyOptional.of(() -> itemHandler);
 
     public ChestBargeEntity(EntityType<? extends ChestBargeEntity> type, Level world) {
         super(type, world);
@@ -130,22 +135,16 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
     }
 
     @Override
-    public int[] getSlotsForFace(Direction face) {
-        return IntStream.range(0, getContainerSize()).toArray();
-    }
-
-    @Override
-    public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack item, @Nullable Direction p_180462_3_) {
-        return isDockable();
-    }
-
-    @Override
-    public boolean canTakeItemThroughFace(int p_180461_1_, ItemStack item, Direction p_180461_3_) {
-        return isDockable();
-    }
-
-    @Override
     public Optional<ItemStackHandler> getTrainInventoryHandler() {
         return Optional.of(itemHandler);
+    }
+
+    @NotNull
+    @Override
+    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+        if (cap == ForgeCapabilities.ITEM_HANDLER) {
+            return this.itemCapability.cast();
+        }
+        return super.getCapability(cap, side);
     }
 }

@@ -12,7 +12,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
-public class SeaterBargeEntity extends AbstractBargeEntity{
+public class SeaterBargeEntity extends AbstractBargeEntity {
     public SeaterBargeEntity(EntityType<? extends SeaterBargeEntity> type, Level world) {
         super(type, world);
     }
@@ -32,13 +32,13 @@ public class SeaterBargeEntity extends AbstractBargeEntity{
         return this.getPassengers().size() < 1;
     }
 
-    private void clampRotation(Entity p_184454_1_) {
-        p_184454_1_.setYBodyRot(this.getYRot());
-        float f = Mth.wrapDegrees(p_184454_1_.getYRot() - this.getYRot());
+    private void clampRotation(Entity passenger) {
+        passenger.setYBodyRot(this.getYRot());
+        float f = Mth.wrapDegrees(passenger.getYRot() - this.getYRot());
         float f1 = Mth.clamp(f, -105.0F, 105.0F);
-        p_184454_1_.yRotO += f1 - f;
-        p_184454_1_.setYRot(p_184454_1_.getYRot() + f1 - f);
-        p_184454_1_.setYHeadRot(p_184454_1_.getYRot());
+        passenger.yRotO += f1 - f;
+        passenger.setYRot(passenger.getYRot() + f1 - f);
+        passenger.setYHeadRot(passenger.getYRot());
     }
 
     public void onPassengerTurned(@NotNull Entity passenger) {

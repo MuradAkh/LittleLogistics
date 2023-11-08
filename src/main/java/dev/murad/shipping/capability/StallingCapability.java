@@ -1,5 +1,6 @@
 package dev.murad.shipping.capability;
 
+import net.minecraft.core.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
@@ -12,7 +13,7 @@ public interface StallingCapability {
     }
 
     boolean isDocked();
-    void dock(double x, double y, double z);
+    void dock(double x, double y, double z, BlockPos headDockPos);
     void undock();
 
     boolean isStalled();
