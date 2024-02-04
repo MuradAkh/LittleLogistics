@@ -1,0 +1,16 @@
+{
+  "name": "船舶用コーナーガイドレール",
+  "icon": "littlelogistics:guide_rail_corner",
+  "category": "littlelogistics:blocks",
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:guide_rail_corner",
+      "text": "角での船舶の動きを補助します。急な曲がり角や狭い水路(ドックなど)の入り口付近では必ず使用することをお勧めします。曳船と艀の両方に効果があり、shift+右クリックで向きを変えられます。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "完全な固体ブロックを上に置かないでください。(だめな例:石、板材など / 問題ない例:フェンス、看板など)"
+    }
+  ]
+}

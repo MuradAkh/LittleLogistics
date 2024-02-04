@@ -1,0 +1,12 @@
+{
+  "name": "船舶用鎖",
+  "icon": "littlelogistics:spring",
+  "category": "littlelogistics:items",
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:spring",
+      "text": "船舶や鉄道車両を連結するために使用できます。列を作成するには、車両を右クリックしてください。列車はタグボート/機関車を1台のみ保有でき、ループを設けることはできません。車両間の距離が離れ過ぎた場合、破壊されます。"
+    }
+  ]
+}

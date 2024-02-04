@@ -1,0 +1,19 @@
+{
+  "name": "アイテム回収艀",
+  "icon": "littlelogistics:vacuum_barge",
+  "category": "littlelogistics:vessels",
+  "pages": [
+    {
+      "type": "patchouli:entity",
+      "entity": "littlelogistics:vacuum_barge",
+      "scale": 0.6,
+      "offset": 0.5,
+      "text": "範囲内のアイテムを自動で回収します。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:vacuum_barge",
+      "text": "アイテム回収艀自身は内部ストレージを持たないため、この艀の後方にはチェスト付き艀を追加してください。"
+    }
+  ]
+}

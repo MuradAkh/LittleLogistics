@@ -1,0 +1,19 @@
+{
+  "name": "チェスト付き艀",
+  "icon": "littlelogistics:barge",
+  "category": "littlelogistics:vessels",
+  "pages": [
+    {
+      "type": "patchouli:entity",
+      "entity": "littlelogistics:barge",
+      "scale": 0.6,
+      "offset": 0.5,
+      "text": "チェスト付きトロッコのようにアイテムを積載する、シンプルな艀。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:barge",
+      "text": "ホッパーでアイテムの積み下ろしを行うには、曳船列の一部としてドックに接続する必要があります。"
+    }
+  ]
+}

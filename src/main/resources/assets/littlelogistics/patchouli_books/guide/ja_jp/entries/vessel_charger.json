@@ -1,0 +1,12 @@
+{
+  "name": "車両用充電器",
+  "icon": "littlelogistics:vessel_charger",
+  "category": "littlelogistics:blocks",
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:vessel_charger",
+      "text": "$(l:energy_tug)電気曳船$()および$(l:energy_locomotive)電気機関車$()のための充電器です。任意のForge Energyケーブルを接続して、充電器に電力を貯めることができます。船舶を充電するにはドックの上に、車両を充電するにはドックレールの横に充電器を置いてください。"
+    }
+  ]
+}

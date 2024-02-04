@@ -1,0 +1,19 @@
+{
+  "name": "自動釣り機付き艀",
+  "icon": "littlelogistics:fishing_barge",
+  "category": "littlelogistics:vessels",
+  "pages": [
+    {
+      "type": "patchouli:entity",
+      "entity": "littlelogistics:fishing_barge",
+      "scale": 0.6,
+      "offset": 0.5,
+      "text": "受動的に釣りを行います。釣果には、バニラの釣り竿ルートテーブルが使用されます。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:fishing_barge",
+      "text": "網を展開するには外水域にいる必要があります。「浅瀬」や「乱獲」のペナルティを避けるために、外洋の長い航路で使用してください。 自動釣り機付き艀自身は内部ストレージを持たないため、この艀の後方にはチェスト付き艀を追加してください。"
+    }
+  ]
+}

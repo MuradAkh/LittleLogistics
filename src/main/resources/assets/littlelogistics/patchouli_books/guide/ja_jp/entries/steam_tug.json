@@ -1,0 +1,19 @@
+{
+  "name": "蒸気曳船",
+  "icon": "littlelogistics:tug",
+  "category": "littlelogistics:vessels",
+  "pages": [
+    {
+      "type": "patchouli:entity",
+      "entity": "littlelogistics:tug",
+      "scale": 0.4,
+      "offset": 0.5,
+      "text": "あらゆるかまど用燃料を動力源とする、基本的な曳船です。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:tug",
+      "text": "ドックの横に置いたホッパーから、燃料を補給できます。"
+    }
+  ]
+}

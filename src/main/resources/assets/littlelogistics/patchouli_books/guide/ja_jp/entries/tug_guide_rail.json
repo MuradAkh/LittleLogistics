@@ -1,0 +1,12 @@
+{
+  "name": "曳船用ガイドレール",
+  "icon": "littlelogistics:guide_rail_tug",
+  "category": "littlelogistics:blocks",
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:guide_rail_tug",
+      "text": "水源の下に設置すると、バニラのパワードレールと同様に機能します。タグボートを強制的に特定のルートに誘導するために使用でき、艀には影響しません。shift+右クリックで向きを変えられます。"
+    }
+  ]
+}

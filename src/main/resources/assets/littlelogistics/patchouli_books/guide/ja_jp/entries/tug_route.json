@@ -1,0 +1,16 @@
+{
+  "name": "航路指定機",
+  "icon": "littlelogistics:tug_route",
+  "category": "littlelogistics:items",
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:tug_route",
+      "text": "機関車のための経路を保存します。 曳船の航路スロットに入れると、曳船はノード0から順番にルートを辿ります。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "任意の座標で右クリックして、ルートの配列の最後尾にノードを追加します(間には追加できません)。 既存のノードがある場所で右クリックすると、ノードを削除できます。 アイテムをメインハンドに持っている場合、既存のノードがビーム状に表示されます。"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "切替レール",
+  "icon": "littlelogistics:switch_rail",
+  "category": "littlelogistics:blocks",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "このタイプの切替レールは、レッドストーン信号入力を受けると切り替わります。ディテクターレールとの併用もおすすめです。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "title": "切替レール",
+      "recipe": "littlelogistics:switch_rail",
+      "text": "直進と右左折を切り替えます。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "title": "T字切替レール",
+      "recipe": "littlelogistics:tee_junction_rail",
+      "text": "右折と左折を切り替えます。"
+    }
+  ]
+}
