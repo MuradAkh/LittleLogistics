@@ -1,0 +1,16 @@
+{
+  "name": "運行指定機",
+  "icon": "littlelogistics:locomotive_route",
+  "category": "littlelogistics:items",
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:locomotive_route",
+      "text": "機関車のための目的地と経由地を保存します。機関車は、指定された運行ループ内でまだ訪れていない、最も近いルートノードを目指します。$(l:auto_switch_rails)自動切替レール$()と組み合わせて使用する必要があります。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "レールを右クリックして、ノードを追加/削除します。 クラフトグリッドでコピーまたはリセットができます。"
+    }
+  ]
+}

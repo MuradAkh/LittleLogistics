@@ -1,0 +1,18 @@
+{
+  "name": "座席付き艀",
+  "icon": "littlelogistics:seater_barge",
+  "category": "littlelogistics:vessels",
+  "pages": [
+    {
+      "type": "patchouli:entity",
+      "entity": "littlelogistics:seater_barge",
+      "scale": 0.6,
+      "offset": 0.5,
+      "text": "プレイヤー一人が座れる座席の付いた、シンプルな艀。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:seater_barge"
+    }
+  ]
+}

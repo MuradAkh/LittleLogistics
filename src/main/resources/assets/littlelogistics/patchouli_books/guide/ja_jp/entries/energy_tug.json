@@ -1,0 +1,19 @@
+{
+  "name": "電気曳船",
+  "icon": "littlelogistics:energy_tug",
+  "category": "littlelogistics:vessels",
+  "pages": [
+    {
+      "type": "patchouli:entity",
+      "entity": "littlelogistics:energy_tug",
+      "scale": 0.4,
+      "offset": 0.5,
+      "text": "Forge Energy を動力源とする曳船です。$(l:vessel_charger)車両用充電器$()に接続することで充電できます。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:energy_tug",
+      "text": "曳船には、エネルギーアイテム用の追加スロットがあります。これは、曳船が途中でエネルギーを使い果たし、再充電する必要がある場合に役立ちます。"
+    }
+  ]
+}

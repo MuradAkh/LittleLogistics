@@ -1,0 +1,16 @@
+{
+  "name": "コンダクターレンチ",
+  "icon": "littlelogistics:conductors_wrench",
+  "category": "littlelogistics:items",
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:conductors_wrench",
+      "text": "レンチを手に持っている場合、登録済みの機関車や曳船の位置が表示されます。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "レールを右クリックすることで、レールの形状を変えられます。"
+    }
+  ]
+}

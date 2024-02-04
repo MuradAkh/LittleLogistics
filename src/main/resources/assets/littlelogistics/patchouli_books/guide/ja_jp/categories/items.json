@@ -1,0 +1,5 @@
+{
+  "name": "アイテム",
+  "description": "アイテムの使い方についての動画は$(l:https://littlelogistics.murad.dev)オンラインガイド$()を参照してください。",
+  "icon": "littlelogistics:tug_route"
+}

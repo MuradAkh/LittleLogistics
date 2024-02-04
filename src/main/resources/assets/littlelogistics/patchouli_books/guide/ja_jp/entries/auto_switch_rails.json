@@ -1,0 +1,23 @@
+{
+  "name": "自動切替レール",
+  "icon": "littlelogistics:automatic_switch_rail",
+  "category": "littlelogistics:blocks",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "このタイプの切替レールは、機関車が近づくと自動的に方向が切り替わります。転轍方向は、$(l:loco_route)運行指定機$()で指定された運行ループ内で訪れていない、最も近いルートノードへの道筋に応じます。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "title": "Automatic Switch Rail",
+      "recipe": "littlelogistics:automatic_switch_rail",
+      "text": "直進と右左折を切り替えます。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "title": "Automatic T-Junction rail",
+      "recipe": "littlelogistics:automatic_tee_junction_rail",
+      "text": "右折と左折を切り替えます。"
+    }
+  ]
+}

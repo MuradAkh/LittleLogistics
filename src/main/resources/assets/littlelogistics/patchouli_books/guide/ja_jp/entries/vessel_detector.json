@@ -1,0 +1,12 @@
+{
+  "name": "車両検知器",
+  "icon": "littlelogistics:vessel_detector",
+  "category": "littlelogistics:blocks",
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:vessel_detector",
+      "text": "目の前の3ブロック以内に船舶がいる場合、レッドストーン信号を発します。範囲内は、連続した水源である必要があります。"
+    }
+  ]
+}

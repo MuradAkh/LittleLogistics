@@ -1,0 +1,12 @@
+{
+  "name": "高速ホッパー",
+  "icon": "littlelogistics:rapid_hopper",
+  "category": "littlelogistics:blocks",
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:rapid_hopper",
+      "text": "バニラのホッパーと同じですが、より速くアイテムを輸送できます！"
+    }
+  ]
+}

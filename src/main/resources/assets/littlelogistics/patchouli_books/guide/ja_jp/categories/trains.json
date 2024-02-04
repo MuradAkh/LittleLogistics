@@ -1,0 +1,5 @@
+{
+  "name": "列車",
+  "description": "貨車はトロッコに似ていますが、$(l:spring)船舶用鎖$()を使うことで連結ができます。列車を牽引するには、機関車を連結してください。",
+  "icon": "littlelogistics:steam_locomotive"
+}

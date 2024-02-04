@@ -1,0 +1,19 @@
+{
+  "name": "蒸気機関車",
+  "icon": "littlelogistics:steam_locomotive",
+  "category": "littlelogistics:trains",
+  "pages": [
+    {
+      "type": "patchouli:entity",
+      "entity": "littlelogistics:steam_locomotive",
+      "scale": 0.4,
+      "offset": 0.5,
+      "text": "あらゆるかまど用燃料を動力源とする、基本的な機関車です。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:steam_locomotive",
+      "text": "ドックレールの横に置いたホッパーから、燃料を補給できます。"
+    }
+  ]
+}

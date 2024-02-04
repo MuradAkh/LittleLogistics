@@ -1,0 +1,12 @@
+{
+  "name": "液体ホッパー",
+  "icon": "littlelogistics:fluid_hopper",
+  "category": "littlelogistics:blocks",
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "littlelogistics:fluid_hopper",
+      "text": "液体用のホッパーです。上方から搬入し、側方へ搬出します。バケツで右クリックすることで、液体を入れられます。艀および貨車への積み下ろしに使用できます。"
+    }
+  ]
+}
