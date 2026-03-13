@@ -6,7 +6,6 @@ import dev.murad.shipping.capability.ReadWriteEnergyStorage;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.LinkableEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -15,19 +14,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.IEnergyStorage;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class VesselChargerTileEntity extends BlockEntity implements IVesselLoader {
     private static final int MAX_TRANSFER = ShippingConfig.Server.VESSEL_CHARGER_BASE_MAX_TRANSFER.get();
     private static final int MAX_CAPACITY = ShippingConfig.Server.VESSEL_CHARGER_BASE_CAPACITY.get();
     private final ReadWriteEnergyStorage internalBattery = new ReadWriteEnergyStorage(MAX_CAPACITY, MAX_TRANSFER, MAX_TRANSFER);
-    private final LazyOptional<IEnergyStorage> holder = LazyOptional.of(() -> internalBattery);
     private int cooldownTime = 0;
 
     public VesselChargerTileEntity(BlockPos pos, BlockState state) {
@@ -35,14 +28,9 @@ public class VesselChargerTileEntity extends BlockEntity implements IVesselLoade
         internalBattery.setEnergy(0);
     }
 
-    @Override
-    @Nonnull
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        if (capability == ForgeCapabilities.ENERGY)
-            return holder.cast();
-        return super.getCapability(capability, facing);
+    public ReadWriteEnergyStorage getInternalBattery() {
+        return internalBattery;
     }
-
 
     private void serverTickInternal() {
         if (this.level != null) {

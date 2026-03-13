@@ -1,7 +1,8 @@
 package dev.murad.shipping.setup;
 
 import dev.murad.shipping.entity.accessor.*;
-import dev.murad.shipping.entity.container.*;
+import dev.murad.shipping.entity.container.EnergyHeadVehicleContainer;
+import dev.murad.shipping.entity.container.SteamHeadVehicleContainer;
 import dev.murad.shipping.entity.custom.train.locomotive.EnergyLocomotiveEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.SteamLocomotiveEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.EnergyTugEntity;
@@ -47,12 +48,6 @@ public class ModMenuTypes {
                     () -> IMenuTypeExtension.create(
                             (windowId, inv, data) ->
                                     new EnergyHeadVehicleContainer<>(windowId, inv.player.level(), new EnergyHeadVehicleDataAccessor(makeIntArray(data)), inv, inv.player)));
-
-    public static final DeferredHolder<MenuType<?>, MenuType<FishingBargeContainer>> FISHING_BARGE_CONTAINER =
-            Registration.CONTAINERS.register("fishing_barge_container",
-                    () -> IMenuTypeExtension.create(
-                            (windowId, inv, data) ->
-                                    new FishingBargeContainer(windowId, inv.player.level(), data.readInt(), inv, inv.player)));
 
     public static final DeferredHolder<MenuType<?>, MenuType<TugRouteContainer>> TUG_ROUTE_CONTAINER =
             Registration.CONTAINERS.register("tug_route_container",

@@ -2,7 +2,6 @@ package dev.murad.shipping.entity.custom.vessel.barge;
 
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingConfig;
-import dev.murad.shipping.entity.container.FishingBargeContainer;
 import dev.murad.shipping.entity.custom.TrainInventoryProvider;
 import dev.murad.shipping.util.InventoryUtils;
 import dev.murad.shipping.util.LinkableEntity;
@@ -10,7 +9,6 @@ import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 
@@ -35,16 +33,8 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -224,12 +214,6 @@ public class FishingBargeEntity extends AbstractBargeEntity {
                     .reduce(true, Boolean::logicalAnd)
                     ? Status.DEPLOYED : Status.TRANSITION;
         }
-    }
-
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        return super.getCapability(cap, side);
     }
 
     public enum Status {
