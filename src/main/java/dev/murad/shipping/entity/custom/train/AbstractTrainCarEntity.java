@@ -45,7 +45,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.extensions.IForgeAbstractMinecart;
+import net.neoforged.neoforge.common.extensions.IAbstractMinecartExtension;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -56,7 +56,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public abstract class AbstractTrainCarEntity extends AbstractMinecart implements IForgeAbstractMinecart, LinkableEntity<AbstractTrainCarEntity>, Colorable {
+public abstract class AbstractTrainCarEntity extends AbstractMinecart implements IAbstractMinecartExtension, LinkableEntity<AbstractTrainCarEntity>, Colorable {
 
     public static final EntityDataAccessor<Integer> COLOR_DATA = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
 
@@ -282,11 +282,13 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
                             Vec3 vec32 = this.getDeltaMovement();
                             Vec3 vec33 = pEntity.getDeltaMovement();
-                            if (((AbstractMinecart)pEntity).isPoweredCart() && !this.isPoweredCart()) {
+                            boolean entityIsPowered = pEntity instanceof AbstractLocomotiveEntity;
+                            boolean thisIsPowered = this instanceof AbstractLocomotiveEntity;
+                            if (entityIsPowered && !thisIsPowered) {
                                 this.setDeltaMovement(vec32.multiply(0.2D, 1.0D, 0.2D));
                                 this.push(vec33.x - d0, 0.0D, vec33.z - d1);
                                 pEntity.setDeltaMovement(vec33.multiply(0.95D, 1.0D, 0.95D));
-                            } else if (!((AbstractMinecart)pEntity).isPoweredCart() && this.isPoweredCart()) {
+                            } else if (!entityIsPowered && thisIsPowered) {
                                 pEntity.setDeltaMovement(vec33.multiply(0.2D, 1.0D, 0.2D));
                                 pEntity.push(vec32.x + d0, 0.0D, vec32.z + d1);
                                 this.setDeltaMovement(vec32.multiply(0.95D, 1.0D, 0.95D));
@@ -320,7 +322,9 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         if (this.level().isEmptyBlock(blockpos)) {
             BlockPos blockpos1 = blockpos.below();
             BlockState blockstate = this.level().getBlockState(blockpos1);
-            if (blockstate.collisionExtendsVertically(this.level(), blockpos1, this)) {
+            if (blockstate.is(net.minecraft.tags.BlockTags.FENCES) ||
+                    blockstate.is(net.minecraft.tags.BlockTags.WALLS) ||
+                    blockstate.getBlock() instanceof net.minecraft.world.level.block.FenceGateBlock) {
                 return blockpos1;
             }
         }
