@@ -26,3 +26,8 @@ mcmodsrepo
 
 # Files from Forge MDK
 forge*changelog.txt
+
+
+# Vibe coding stuff
+.hive
+CLAUDE.local.md
