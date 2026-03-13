@@ -12,7 +12,7 @@ import javax.annotation.Nonnull;
 
 public class ModRecipeSerializers {
     public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<AbstractRouteCopyRecipe>> TUG_ROUTE_COPY = Registration.RECIPE_SERIALIZERS.register(
-            "tug_route_copy", () -> new SimpleCraftingRecipeSerializer<>((loc, cat) -> new AbstractRouteCopyRecipe(loc, cat, ModItems.TUG_ROUTE.get()) {
+            "tug_route_copy", () -> new SimpleCraftingRecipeSerializer<>((cat) -> new AbstractRouteCopyRecipe(cat, ModItems.TUG_ROUTE.get()) {
                 @Override
                 public boolean stackHasNodes(ItemStack stack) {
                     return !TugRouteItem.getRoute(stack).isEmpty();
@@ -26,7 +26,7 @@ public class ModRecipeSerializers {
             }));
 
     public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<AbstractRouteCopyRecipe>> LOCO_ROUTE_COPY = Registration.RECIPE_SERIALIZERS.register(
-            "loco_route_copy", () -> new SimpleCraftingRecipeSerializer<>((loc, cat) -> new AbstractRouteCopyRecipe(loc, cat, ModItems.LOCO_ROUTE.get()) {
+            "loco_route_copy", () -> new SimpleCraftingRecipeSerializer<>((cat) -> new AbstractRouteCopyRecipe(cat, ModItems.LOCO_ROUTE.get()) {
                 @Override
                 public boolean stackHasNodes(ItemStack stack) {
                     return !LocoRouteItem.getRoute(stack).isEmpty();

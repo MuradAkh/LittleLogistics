@@ -16,20 +16,22 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.core.HolderLookup;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class ModLootTableProvider extends LootTableProvider {
 
-    public ModLootTableProvider(PackOutput output) {
+    public ModLootTableProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         super(output, Set.of(), ImmutableList.of(
                 new SubProviderEntry(ModBlockLootTables::new, LootContextParamSets.BLOCK)
-        ));
+        ), registries);
     }
 
     public static class ModBlockLootTables extends BlockLootSubProvider {
@@ -59,7 +61,7 @@ public class ModLootTableProvider extends LootTableProvider {
         @Override
         public @NotNull Iterable<Block> getKnownBlocks() {
             return Registration.BLOCKS.getEntries().stream()
-                    .map(RegistryObject::get)
+                    .map(DeferredHolder::get)
                     .collect(Collectors.toList());
         }
     }
