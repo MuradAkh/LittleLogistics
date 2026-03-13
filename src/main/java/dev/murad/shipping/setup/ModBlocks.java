@@ -25,15 +25,15 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.*;
 import java.util.function.Supplier;
 
 public class ModBlocks {
 
-    private static final MultiMap<ResourceKey<CreativeModeTab>, RegistryObject<? extends ItemLike>> PRIVATE_TAB_REGISTRY = new MultiMap<>();
+    private static final MultiMap<ResourceKey<CreativeModeTab>, DeferredHolder<?, ? extends ItemLike>> PRIVATE_TAB_REGISTRY = new MultiMap<>();
 
     // Taken from IRON_BLOCK
     private static BlockBehaviour.Properties METAL_BLOCK_BEHAVIOUR =
@@ -43,105 +43,105 @@ public class ModBlocks {
                     .sound(SoundType.METAL);
     private static BlockBehaviour.Properties RAIL_BLOCK_BEHAVIOUR = BlockBehaviour.Properties.copy(Blocks.RAIL);
 
-    public static final RegistryObject<Block> TUG_DOCK = register(
+    public static final DeferredHolder<Block, Block> TUG_DOCK = register(
             "tug_dock",
             () -> new TugDockBlock(METAL_BLOCK_BEHAVIOUR),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
 
-    public static final RegistryObject<Block> BARGE_DOCK = register(
+    public static final DeferredHolder<Block, Block> BARGE_DOCK = register(
             "barge_dock",
             () -> new BargeDockBlock(METAL_BLOCK_BEHAVIOUR),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
 
-    public static final RegistryObject<Block> GUIDE_RAIL_CORNER = register(
+    public static final DeferredHolder<Block, Block> GUIDE_RAIL_CORNER = register(
             "guide_rail_corner",
             () -> new CornerGuideRailBlock(METAL_BLOCK_BEHAVIOUR),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
 
-    public static final RegistryObject<Block> VESSEL_DETECTOR = register(
+    public static final DeferredHolder<Block, Block> VESSEL_DETECTOR = register(
             "vessel_detector",
             () -> new VesselDetectorBlock(METAL_BLOCK_BEHAVIOUR),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
 
-    public static final RegistryObject<Block> GUIDE_RAIL_TUG = register(
+    public static final DeferredHolder<Block, Block> GUIDE_RAIL_TUG = register(
             "guide_rail_tug",
             () -> new TugGuideRailBlock(METAL_BLOCK_BEHAVIOUR),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
 
-    public static final RegistryObject<Block> FLUID_HOPPER = register(
+    public static final DeferredHolder<Block, Block> FLUID_HOPPER = register(
             "fluid_hopper",
             () -> new FluidHopperBlock(METAL_BLOCK_BEHAVIOUR),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
 
-    public static final RegistryObject<Block> VESSEL_CHARGER = register(
+    public static final DeferredHolder<Block, Block> VESSEL_CHARGER = register(
             "vessel_charger",
             () -> new VesselChargerBlock(METAL_BLOCK_BEHAVIOUR),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
 
-    public static final RegistryObject<Block> RAPID_HOPPER = register(
+    public static final DeferredHolder<Block, Block> RAPID_HOPPER = register(
             "rapid_hopper",
             () -> new RapidHopperBlock(METAL_BLOCK_BEHAVIOUR),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
 
-    public static final RegistryObject<Block> SWITCH_RAIL = register(
+    public static final DeferredHolder<Block, Block> SWITCH_RAIL = register(
             "switch_rail",
             () -> new SwitchRail(RAIL_BLOCK_BEHAVIOUR, false),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
 
-    public static final RegistryObject<Block> AUTOMATIC_SWITCH_RAIL = register(
+    public static final DeferredHolder<Block, Block> AUTOMATIC_SWITCH_RAIL = register(
             "automatic_switch_rail",
             () -> new SwitchRail(RAIL_BLOCK_BEHAVIOUR, true),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
 
-    public static final RegistryObject<Block> TEE_JUNCTION_RAIL = register(
+    public static final DeferredHolder<Block, Block> TEE_JUNCTION_RAIL = register(
             "tee_junction_rail",
             () -> new TeeJunctionRail(RAIL_BLOCK_BEHAVIOUR, false),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
 
-    public static final RegistryObject<Block> AUTOMATIC_TEE_JUNCTION_RAIL = register(
+    public static final DeferredHolder<Block, Block> AUTOMATIC_TEE_JUNCTION_RAIL = register(
             "automatic_tee_junction_rail",
             () -> new TeeJunctionRail(RAIL_BLOCK_BEHAVIOUR, true),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
 
-    public static final RegistryObject<Block> JUNCTION_RAIL = register(
+    public static final DeferredHolder<Block, Block> JUNCTION_RAIL = register(
             "junction_rail",
             () -> new JunctionRail(RAIL_BLOCK_BEHAVIOUR),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
 
-    public static final RegistryObject<Block> CAR_DOCK_RAIL = register(
+    public static final DeferredHolder<Block, Block> CAR_DOCK_RAIL = register(
             "car_dock_rail",
             () -> new TrainCarDockingRail(RAIL_BLOCK_BEHAVIOUR),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
 
-    public static final RegistryObject<Block> LOCOMOTIVE_DOCK_RAIL = register(
+    public static final DeferredHolder<Block, Block> LOCOMOTIVE_DOCK_RAIL = register(
             "locomotive_dock_rail",
             () -> new LocomotiveDockingRail(RAIL_BLOCK_BEHAVIOUR),
             ImmutableList.of(
@@ -153,13 +153,13 @@ public class ModBlocks {
                 .forEach(event::accept);
     }
 
-    private static <T extends Block> RegistryObject<T> registerNoItem(String name, Supplier<T> block){
+    private static <T extends Block> DeferredHolder<Block, T> registerNoItem(String name, Supplier<T> block){
         return Registration.BLOCKS.register(name, block);
     }
 
-    private static <T extends Block> RegistryObject<T> register(String name, Supplier<T> block, List<ResourceKey<CreativeModeTab>> tabs){
-        RegistryObject<T> ret = registerNoItem(name, block);
-        RegistryObject<BlockItem> item = Registration.ITEMS.register(name, () -> new BlockItem(ret.get(), new Item.Properties()));
+    private static <T extends Block> DeferredHolder<Block, T> register(String name, Supplier<T> block, List<ResourceKey<CreativeModeTab>> tabs){
+        DeferredHolder<Block, T> ret = registerNoItem(name, block);
+        DeferredHolder<Item, BlockItem> item = Registration.ITEMS.register(name, () -> new BlockItem(ret.get(), new Item.Properties()));
 
         for (var tab : tabs) {
             PRIVATE_TAB_REGISTRY.putInsert(tab, item);
