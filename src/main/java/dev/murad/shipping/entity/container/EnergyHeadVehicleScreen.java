@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class EnergyHeadVehicleScreen<T extends Entity & HeadVehicle> extends AbstractHeadVehicleScreen<T, EnergyHeadVehicleContainer<T>> {
-    private static final ResourceLocation GUI = new ResourceLocation(ShippingMod.MOD_ID, "textures/container/energy_locomotive.png");
+    private static final ResourceLocation GUI = ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "textures/container/energy_locomotive.png");
 
     public EnergyHeadVehicleScreen(EnergyHeadVehicleContainer<T> menu, Inventory inventory, Component title) {
         super(menu, inventory, title);

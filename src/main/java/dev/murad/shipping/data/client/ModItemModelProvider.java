@@ -47,12 +47,12 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "tug_route")
                 .override()
                 .model(builder(itemGenerated, "tug_route_empty"))
-                .predicate(new ResourceLocation(ShippingMod.MOD_ID, "routestate"), 1f).end();
+                .predicate(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "routestate"), 1f).end();
 
         builder(itemGenerated, "spring")
                 .override()
                 .model(builder(itemGenerated, "spring_dominant_selected"))
-                .predicate(new ResourceLocation(ShippingMod.MOD_ID, "springstate"), 1f).end();
+                .predicate(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "springstate"), 1f).end();
 
         builder(itemGenerated, "conductors_wrench");
         builder(itemGenerated, "creative_capacitor");
@@ -71,7 +71,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "locomotive_route")
                 .override()
                 .model(builder(itemGenerated, "locomotive_route_empty"))
-                .predicate(new ResourceLocation(ShippingMod.MOD_ID, "locoroutestate"), 1f).end();
+                .predicate(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "locoroutestate"), 1f).end();
     }
 
 

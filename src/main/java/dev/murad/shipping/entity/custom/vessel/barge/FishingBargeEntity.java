@@ -45,7 +45,7 @@ public class FishingBargeEntity extends AbstractBargeEntity {
     private final Queue<Pair<Integer, Integer>> overFishedQueue = new LinkedList<>();
 
     private static final ResourceLocation FISHING_LOOT_TABLE =
-            new ResourceLocation(ShippingConfig.Server.FISHING_LOOT_TABLE.get());
+            ResourceLocation.parse(ShippingConfig.Server.FISHING_LOOT_TABLE.get());
 
     private static final int FISHING_COOLDOWN =
             ShippingConfig.Server.FISHING_COOLDOWN.get();

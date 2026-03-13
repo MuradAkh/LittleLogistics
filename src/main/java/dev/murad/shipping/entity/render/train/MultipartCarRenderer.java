@@ -52,7 +52,7 @@ public class MultipartCarRenderer<T extends AbstractTrainCarEntity> extends Enti
     }
 
     private static final ResourceLocation CHAIN_TEXTURE =
-            new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/chain.png");
+            ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "textures/entity/chain.png");
 
     private final ChainModel chainModel;
 

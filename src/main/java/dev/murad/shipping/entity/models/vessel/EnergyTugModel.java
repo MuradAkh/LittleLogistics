@@ -15,7 +15,7 @@ import net.minecraft.world.entity.Entity;
 
 public class EnergyTugModel<T extends Entity & Colorable> extends EntityModel<T> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "energy_tug_model"), "main");
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "energy_tug_model"), "main");
 	private final ModelPart bb_main;
 
 	public EnergyTugModel(ModelPart root) {

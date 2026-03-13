@@ -23,7 +23,7 @@ import java.util.Optional;
 
 public class TugRouteScreen extends AbstractContainerScreen<TugRouteContainer> {
     private static final Logger LOGGER = LogManager.getLogger(TugRouteScreen.class);
-    public static final ResourceLocation GUI = new ResourceLocation(ShippingMod.MOD_ID, "textures/container/tug_route.png");
+    public static final ResourceLocation GUI = ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "textures/container/tug_route.png");
 
     private final ItemStack stack;
 

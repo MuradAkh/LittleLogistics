@@ -10,11 +10,11 @@ import net.minecraft.world.item.Item;
 public class ModTags {
     public static final class Blocks {
 //        private static Tag.Named<Block> forge(String path) {
-//            return BlockTags.bind(new ResourceLocation("forge", path).toString());
+//            return BlockTags.bind(ResourceLocation.fromNamespaceAndPath("forge", path).toString());
 //        }
 //
 //        private static Tag.Named<Block> mod(String path) {
-//            return BlockTags.bind(new ResourceLocation(ShippingMod.MOD_ID, path).toString());
+//            return BlockTags.bind(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, path).toString());
 //        }
     }
 

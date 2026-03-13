@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 
 public class StringInputScreen extends Screen {
     private static final Logger LOGGER = LogManager.getLogger(StringInputScreen.class);
-    public static final ResourceLocation GUI = new ResourceLocation(ShippingMod.MOD_ID, "textures/container/tug_route_rename.png");
+    public static final ResourceLocation GUI = ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "textures/container/tug_route_rename.png");
 
     private String text;
     private EditBox textFieldWidget;

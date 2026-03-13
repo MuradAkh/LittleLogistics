@@ -30,14 +30,14 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
     private final ResourceLocation texture;
 
     private static final ResourceLocation CHAIN_TEXTURE =
-            new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/chain.png");
+            ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "textures/entity/chain.png");
 
     private final ChainModel chainModel;
 
     public TrainCarRenderer(EntityRendererProvider.Context context,
                             Function<ModelPart, EntityModel<T>> baseModel,
                             ModelLayerLocation layerLocation, String baseTexture) {
-        this(context, baseModel, layerLocation, new ResourceLocation(ShippingMod.MOD_ID, baseTexture));
+        this(context, baseModel, layerLocation, ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, baseTexture));
     }
 
     public TrainCarRenderer(EntityRendererProvider.Context context,

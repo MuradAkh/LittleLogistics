@@ -52,7 +52,7 @@ public class SpringItem extends Item {
     public SpringItem(Properties properties) {
         super(properties);
 
-//        addProperty(new ResourceLocation("first_selected"), (stack, a, b) -> getState(stack) == State.WAITING_NEXT ? 1f : 0f);
+//        addProperty(ResourceLocation.fromNamespaceAndPath("first_selected"), (stack, a, b) -> getState(stack) == State.WAITING_NEXT ? 1f : 0f);
     }
 
     // because 'itemInteractionForEntity' is only for Living entities
