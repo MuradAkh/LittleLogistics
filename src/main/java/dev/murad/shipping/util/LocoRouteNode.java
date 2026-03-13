@@ -1,14 +1,20 @@
 package dev.murad.shipping.util;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.Getter;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * TODO: Model using schemas to easier serialize/deserialize
@@ -19,6 +25,28 @@ public class LocoRouteNode {
     private static final String Y_TAG = "y";
     private static final String Z_TAG = "z";
     private static final String COORDS_TAG = "coordinates";
+
+    public static final Codec<LocoRouteNode> CODEC = RecordCodecBuilder.create(instance ->
+        instance.group(
+            Codec.STRING.optionalFieldOf("name")
+                .forGetter(n -> Optional.ofNullable(n.getName())),
+            Codec.INT.fieldOf("x")
+                .forGetter(LocoRouteNode::getX),
+            Codec.INT.fieldOf("y")
+                .forGetter(LocoRouteNode::getY),
+            Codec.INT.fieldOf("z")
+                .forGetter(LocoRouteNode::getZ)
+        ).apply(instance, (name, x, y, z) -> new LocoRouteNode(name.orElse(null), x, y, z))
+    );
+
+    public static final StreamCodec<FriendlyByteBuf, LocoRouteNode> STREAM_CODEC =
+        StreamCodec.composite(
+            ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8), n -> Optional.ofNullable(n.getName()),
+            ByteBufCodecs.INT, LocoRouteNode::getX,
+            ByteBufCodecs.INT, LocoRouteNode::getY,
+            ByteBufCodecs.INT, LocoRouteNode::getZ,
+            (name, x, y, z) -> new LocoRouteNode(name.orElse(null), x, y, z)
+        );
 
     @Nullable
     @Getter
