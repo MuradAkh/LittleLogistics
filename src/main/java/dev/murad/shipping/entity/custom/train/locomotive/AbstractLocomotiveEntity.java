@@ -41,7 +41,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -133,7 +132,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         }
 
         if(!this.level().isClientSide){
-            NetworkHooks.openScreen((ServerPlayer) pPlayer, createContainerProvider(), getDataAccessor()::write);
+            ((ServerPlayer) pPlayer).openMenu(createContainerProvider(), getDataAccessor()::write);
         }
 
         return InteractionResult.CONSUME;

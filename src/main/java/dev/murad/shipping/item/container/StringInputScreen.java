@@ -65,11 +65,12 @@ public class StringInputScreen extends Screen {
 
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(graphics);
+        this.renderBackground(graphics, mouseX, mouseY, partialTicks);
         super.render(graphics, mouseX, mouseY, partialTicks);
     }
 
-    public void renderBackground(@NotNull GuiGraphics graphics) {
+    @Override
+    public void renderBackground(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         int w = 156, h = 65;
         int i = (this.width - w) / 2;
         int j = (this.height - h) / 2;
