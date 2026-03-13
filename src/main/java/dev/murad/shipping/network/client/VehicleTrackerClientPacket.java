@@ -1,26 +1,33 @@
 package dev.murad.shipping.network.client;
 
-import lombok.RequiredArgsConstructor;
+import dev.murad.shipping.ShippingMod;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
-public class VehicleTrackerClientPacket {
-    public final CompoundTag tag;
-    public final String dimension;
+public record VehicleTrackerClientPacket(CompoundTag tag, String dimension)
+        implements CustomPacketPayload {
 
-    public VehicleTrackerClientPacket(FriendlyByteBuf buffer) {
-        this.tag = buffer.readNbt();
-        this.dimension = new String(buffer.readByteArray());
-    }
+    public static final Type<VehicleTrackerClientPacket> TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "vehicle_tracker"));
 
-    public void encode(FriendlyByteBuf buf) {
-        buf.writeNbt(tag);
-        buf.writeByteArray(dimension.getBytes());
+    public static final StreamCodec<FriendlyByteBuf, VehicleTrackerClientPacket> STREAM_CODEC =
+            StreamCodec.composite(
+                    ByteBufCodecs.COMPOUND_TAG, VehicleTrackerClientPacket::tag,
+                    ByteBufCodecs.STRING_UTF8, VehicleTrackerClientPacket::dimension,
+                    VehicleTrackerClientPacket::new
+            );
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 
     public static VehicleTrackerClientPacket of(List<EntityPosition> types, String dimension) {
@@ -47,14 +54,8 @@ public class VehicleTrackerClientPacket {
             return new EntityPosition(
                     coords.getString("type"),
                     coords.getInt("eid"),
-                    new Vec3(
-                            coords.getDouble("x"),
-                            coords.getDouble("y"),
-                            coords.getDouble("z")),
-                    new Vec3(
-                            coords.getDouble("xo"),
-                            coords.getDouble("yo"),
-                            coords.getDouble("zo"))
+                    new Vec3(coords.getDouble("x"), coords.getDouble("y"), coords.getDouble("z")),
+                    new Vec3(coords.getDouble("xo"), coords.getDouble("yo"), coords.getDouble("zo"))
             );
         }).collect(Collectors.toList());
     }
