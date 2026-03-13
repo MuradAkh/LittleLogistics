@@ -559,7 +559,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         if(compound.contains("eo")) {
             engineOn = compound.getBoolean("eo");
         }
-        routeItemHandler.deserializeNBT(compound.getCompound(LOCO_ROUTE_INV_TAG));
+        routeItemHandler.deserializeNBT(this.registryAccess(), compound.getCompound(LOCO_ROUTE_INV_TAG));
         navigator.loadFromNbt(compound.getCompound(NAVIGATOR_TAG));
         enrollmentHandler.load(compound);
         updateNavigatorFromItem();
@@ -569,7 +569,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     protected void addAdditionalSaveData(@NotNull CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.putBoolean("eo", engineOn);
-        compound.put(LOCO_ROUTE_INV_TAG, routeItemHandler.serializeNBT());
+        compound.put(LOCO_ROUTE_INV_TAG, routeItemHandler.serializeNBT(this.registryAccess()));
         compound.put(NAVIGATOR_TAG, navigator.saveToNbt());
         enrollmentHandler.save(compound);
     }

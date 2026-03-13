@@ -164,7 +164,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag compound) {
-        fuelItemHandler.deserializeNBT(compound.getCompound("fuelItems"));
+        fuelItemHandler.deserializeNBT(this.registryAccess(), compound.getCompound("fuelItems"));
         burnTime = compound.contains("burn") ? compound.getInt("burn") : 0;
         burnCapacity = compound.contains("burn_capacity") ? compound.getInt("burn_capacity") : 0;
         super.readAdditionalSaveData(compound);
@@ -172,7 +172,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag compound) {
-        compound.put("fuelItems", fuelItemHandler.serializeNBT());
+        compound.put("fuelItems", fuelItemHandler.serializeNBT(this.registryAccess()));
         compound.putInt("burn", burnTime);
         compound.putInt("burn_capacity", burnCapacity);
         super.addAdditionalSaveData(compound);

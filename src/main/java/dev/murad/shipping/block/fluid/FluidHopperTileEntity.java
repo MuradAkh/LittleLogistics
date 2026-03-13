@@ -56,13 +56,13 @@ public class FluidHopperTileEntity extends BlockEntity implements IVesselLoader 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        this.getTank().readFromNBT(tag);
+        this.getTank().readFromNBT(registries, tag);
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        this.getTank().writeToNBT(tag);
+        this.getTank().writeToNBT(registries, tag);
     }
 
     @Nonnull

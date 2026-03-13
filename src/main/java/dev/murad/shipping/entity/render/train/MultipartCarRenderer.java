@@ -22,6 +22,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.Vec3;
 
@@ -112,7 +113,7 @@ public class MultipartCarRenderer<T extends AbstractTrainCarEntity> extends Enti
         for (int i = 1; i < segments; i++) {
             matrixStack.pushPose();
             matrixStack.translate(i / 4.0, 0, 0);
-            chainModel.renderToBuffer(matrixStack, ivertexbuilderChain, p_225623_6_, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+            chainModel.renderToBuffer(matrixStack, ivertexbuilderChain, p_225623_6_, OverlayTexture.NO_OVERLAY, -1);
             matrixStack.popPose();
         }
 
@@ -208,15 +209,13 @@ public class MultipartCarRenderer<T extends AbstractTrainCarEntity> extends Enti
     protected void renderBaseModel(T entity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
         baseModel.renderToBuffer(matrixStack,
                 buffer.getBuffer(baseModel.renderType(baseTextureLocation)),
-                packedLight, overlay,
-                1.0F, 1.0F, 1.0F, 1.0F);
+                packedLight, overlay, -1);
     }
 
     protected void renderInsertModel(T entity, PoseStack matrixStack, MultiBufferSource buffer, float partialTicks, int packedLight, int overlay) {
         insertModel.renderToBuffer(matrixStack,
                 buffer.getBuffer(insertModel.renderType(insertTextureLocation)),
-                packedLight, overlay,
-                1.0F, 1.0F, 1.0F, 1.0F);
+                packedLight, overlay, -1);
     }
 
     protected void renderTrimModel(T entity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
@@ -226,7 +225,7 @@ public class MultipartCarRenderer<T extends AbstractTrainCarEntity> extends Enti
         trimModel.renderToBuffer(matrixStack,
                 buffer.getBuffer(trimModel.renderType(trimTextureLocation)),
                 packedLight, overlay,
-                color[0], color[1], color[2], 1.0F);
+                ARGB.colorFromFloat(1.0F, color[0], color[1], color[2]));
     }
 
     // Do not use these directly

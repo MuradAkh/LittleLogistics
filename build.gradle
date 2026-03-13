@@ -14,6 +14,10 @@ version = "mc${mc_version}-v${mod_version}"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ['-Xmaxerrs', '9999']
+}
+
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 // Parchment mappings temporarily disabled: parchment-1.21.1:2024.07.28 not yet available

@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.NotNull;
 
@@ -71,15 +72,13 @@ public class MultipartVesselRenderer<T extends VesselEntity> extends AbstractVes
     protected void renderBaseModel(T vesselEntity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
         baseModel.renderToBuffer(matrixStack,
                 buffer.getBuffer(baseModel.renderType(baseTextureLocation)),
-                packedLight, overlay,
-                1.0F, 1.0F, 1.0F, 1.0F);
+                packedLight, overlay, -1);
     }
 
     protected void renderInsertModel(T vesselEntity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
         insertModel.renderToBuffer(matrixStack,
                 buffer.getBuffer(insertModel.renderType(insertTextureLocation)),
-                packedLight, overlay,
-                1.0F, 1.0F, 1.0F, 1.0F);
+                packedLight, overlay, -1);
     }
 
     protected void renderTrimModel(T vesselEntity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
@@ -89,7 +88,7 @@ public class MultipartVesselRenderer<T extends VesselEntity> extends AbstractVes
         trimModel.renderToBuffer(matrixStack,
                 buffer.getBuffer(trimModel.renderType(trimTextureLocation)),
                 packedLight, overlay,
-                color[0], color[1], color[2], 1.0F);
+                ARGB.colorFromFloat(1.0F, color[0], color[1], color[2]));
     }
 
     public MultipartVesselRenderer<T> derotate() {

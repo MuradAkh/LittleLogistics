@@ -57,7 +57,7 @@ public class BaseBargeModel<T extends Entity & Colorable> extends EntityModel<T>
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
 		bb_main.render(poseStack, buffer, packedLight, packedOverlay);
 	}
 }

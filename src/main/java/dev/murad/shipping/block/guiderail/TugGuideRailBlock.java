@@ -28,13 +28,13 @@ public class TugGuideRailBlock extends Block {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
-        if(InteractionUtil.doConfigure(player, hand)){
+    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult rayTraceResult) {
+        if(InteractionUtil.doConfigure(player, InteractionHand.MAIN_HAND)){
             world.setBlockAndUpdate(pos, state.setValue(FACING, state.getValue(FACING).getClockWise()));
             return InteractionResult.SUCCESS;
         }
 
-        return super.use(state, world, pos, player, hand, rayTraceResult);
+        return super.useWithoutItem(state, world, pos, player, rayTraceResult);
     }
 
     @SuppressWarnings("deprecation")

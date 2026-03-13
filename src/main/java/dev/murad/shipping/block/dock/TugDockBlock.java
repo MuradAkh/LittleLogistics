@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.common.ToolAction;
+import net.neoforged.neoforge.common.ToolAction;
 
 import javax.annotation.Nullable;
 
@@ -38,13 +38,13 @@ public class TugDockBlock extends AbstractDockBlock {
 
     @SuppressWarnings("deprecation")
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
-        if(InteractionUtil.doConfigure(player, hand)){
+    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult rayTraceResult) {
+        if(InteractionUtil.doConfigure(player, InteractionHand.MAIN_HAND)){
             world.setBlockAndUpdate(pos, state.setValue(DockingBlockStates.INVERTED, !state.getValue(DockingBlockStates.INVERTED)));
             return InteractionResult.SUCCESS;
         }
 
-        return super.use(state, world, pos, player, hand, rayTraceResult);
+        return super.useWithoutItem(state, world, pos, player, rayTraceResult);
     }
 
     @Nullable

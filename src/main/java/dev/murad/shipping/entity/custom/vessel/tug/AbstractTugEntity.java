@@ -155,10 +155,10 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     public void readAdditionalSaveData(@NotNull CompoundTag compound) {
         if(compound.contains("inv")){
             ItemStackHandler old = new ItemStackHandler();
-            old.deserializeNBT(compound.getCompound("inv"));
+            old.deserializeNBT(this.registryAccess(), compound.getCompound("inv"));
             routeItemHandler.setStackInSlot(0, old.getStackInSlot(0));
         }else{
-            routeItemHandler.deserializeNBT(compound.getCompound("routeHandler"));
+            routeItemHandler.deserializeNBT(this.registryAccess(), compound.getCompound("routeHandler"));
         }
         nextStop = compound.contains("next_stop") ? compound.getInt("next_stop") : 0;
         engineOn = !compound.contains("engineOn") || compound.getBoolean("engineOn");
@@ -171,7 +171,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         compound.putInt("next_stop", nextStop);
         compound.putBoolean("engineOn", engineOn);
-        compound.put("routeHandler", routeItemHandler.serializeNBT());
+        compound.put("routeHandler", routeItemHandler.serializeNBT(this.registryAccess()));
         enrollmentHandler.save(compound);
         super.addAdditionalSaveData(compound);
     }

@@ -159,14 +159,14 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag compound) {
-        energyItemHandler.deserializeNBT(compound.getCompound("inv"));
+        energyItemHandler.deserializeNBT(this.registryAccess(), compound.getCompound("inv"));
         internalBattery.readAdditionalSaveData(compound.getCompound("energy_storage"));
         super.readAdditionalSaveData(compound);
     }
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag compound) {
-        compound.put("inv", energyItemHandler.serializeNBT());
+        compound.put("inv", energyItemHandler.serializeNBT(this.registryAccess()));
         CompoundTag energyNBT = new CompoundTag();
         internalBattery.addAdditionalSaveData(energyNBT);
         compound.put("energy_storage", energyNBT);

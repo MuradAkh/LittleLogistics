@@ -104,7 +104,7 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
         for (int i = 1; i < segments; i++) {
             matrixStack.pushPose();
             matrixStack.translate(i / 4.0, 0, 0);
-            chainModel.renderToBuffer(matrixStack, ivertexbuilderChain, p_225623_6_, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+            chainModel.renderToBuffer(matrixStack, ivertexbuilderChain, p_225623_6_, OverlayTexture.NO_OVERLAY, -1);
             matrixStack.popPose();
         }
 
@@ -184,7 +184,7 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
         pose.scale(-1.0F, -1.0F, 1.0F);
         this.entityModel.setupAnim(car, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
         VertexConsumer vertexconsumer = buffer.getBuffer(this.entityModel.renderType(this.getTextureLocation(car)));
-        this.entityModel.renderToBuffer(pose, vertexconsumer, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        this.entityModel.renderToBuffer(pose, vertexconsumer, packedLight, OverlayTexture.NO_OVERLAY, -1);
         renderAdditional(car, yaw, partialTicks, pose, buffer, packedLight);
         pose.popPose();
 

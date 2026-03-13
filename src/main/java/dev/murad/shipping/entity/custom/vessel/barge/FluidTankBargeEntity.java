@@ -71,7 +71,7 @@ public class FluidTankBargeEntity extends AbstractBargeEntity {
     public void readAdditionalSaveData(@NotNull CompoundTag tag)
     {
         super.readAdditionalSaveData(tag);
-        tank.readFromNBT(tag);
+        tank.readFromNBT(this.registryAccess(), tag);
         sendInfoToClient();
     }
 
@@ -79,7 +79,7 @@ public class FluidTankBargeEntity extends AbstractBargeEntity {
     public void addAdditionalSaveData(@NotNull CompoundTag tag)
     {
         super.addAdditionalSaveData(tag);
-        tank.writeToNBT(tag);
+        tank.writeToNBT(this.registryAccess(), tag);
     }
 
     private void sendInfoToClient(){

@@ -54,7 +54,7 @@ public abstract class AbstractVesselRenderer<T extends VesselEntity> extends Ent
         VertexConsumer ivertexbuilder = buffer.getBuffer(getModel(vesselEntity).renderType(this.getTextureLocation(vesselEntity)));
         int overlay = LivingEntityRenderer.getOverlayCoords(vesselEntity, 0);
 
-        getModel(vesselEntity).renderToBuffer(matrixStack, ivertexbuilder, packedLight, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
+        getModel(vesselEntity).renderToBuffer(matrixStack, ivertexbuilder, packedLight, overlay, -1);
     }
 
     protected double getModelYoffset() {
@@ -74,7 +74,7 @@ public abstract class AbstractVesselRenderer<T extends VesselEntity> extends Ent
             for (int i = 0; i < segments; i++) {
                 matrixStack.pushPose();
                 matrixStack.translate(i / 4.0, 0, 0);
-                chainModel.renderToBuffer(matrixStack, ivertexbuilderChain, p_225623_6_, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+                chainModel.renderToBuffer(matrixStack, ivertexbuilderChain, p_225623_6_, OverlayTexture.NO_OVERLAY, -1);
                 matrixStack.popPose();
             }
             matrixStack.popPose();

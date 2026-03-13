@@ -66,7 +66,7 @@ public class ChunkLoaderCarModel extends EntityModel<ChunkLoaderCarEntity> {
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
 		bb_main.render(poseStack, buffer, packedLight, packedOverlay);
 		bb_main2.render(poseStack, buffer, packedLight, packedOverlay);
 	}

@@ -117,10 +117,10 @@ public class EnergyTugEntity extends AbstractTugEntity {
         internalBattery.readAdditionalSaveData(compound.getCompound("energy_storage"));
         if(compound.contains("inv")){
             ItemStackHandler old = new ItemStackHandler();
-            old.deserializeNBT(compound.getCompound("inv"));
+            old.deserializeNBT(this.registryAccess(), compound.getCompound("inv"));
             itemHandler.setStackInSlot(0, old.getStackInSlot(1));
         }else{
-            itemHandler.deserializeNBT(compound.getCompound("tugItemHandler"));
+            itemHandler.deserializeNBT(this.registryAccess(), compound.getCompound("tugItemHandler"));
         }
         super.readAdditionalSaveData(compound);
     }
@@ -130,7 +130,7 @@ public class EnergyTugEntity extends AbstractTugEntity {
         CompoundTag energyNBT = new CompoundTag();
         internalBattery.addAdditionalSaveData(energyNBT);
         compound.put("energy_storage", energyNBT);
-        compound.put("tugItemHandler", itemHandler.serializeNBT());
+        compound.put("tugItemHandler", itemHandler.serializeNBT(this.registryAccess()));
         super.addAdditionalSaveData(compound);
     }
 

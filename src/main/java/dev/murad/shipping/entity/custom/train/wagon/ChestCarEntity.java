@@ -88,13 +88,13 @@ public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVa
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag t) {
         super.addAdditionalSaveData(t);
-        t.put("inv", itemHandler.serializeNBT());
+        t.put("inv", itemHandler.serializeNBT(this.registryAccess()));
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag t) {
         super.readAdditionalSaveData(t);
-        itemHandler.deserializeNBT(t.getCompound("inv"));
+        itemHandler.deserializeNBT(this.registryAccess(), t.getCompound("inv"));
     }
 
     // hack to disable hoppers before docking complete

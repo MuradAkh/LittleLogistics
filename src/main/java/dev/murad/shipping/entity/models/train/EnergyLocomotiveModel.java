@@ -75,11 +75,11 @@ public class EnergyLocomotiveModel<T extends AbstractTrainCarEntity> extends Ent
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-		bone.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
-		bone2.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
-		bone3.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
-		bone4.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
-		bb_main.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
+		bone.render(poseStack, buffer, packedLight, packedOverlay, color);
+		bone2.render(poseStack, buffer, packedLight, packedOverlay, color);
+		bone3.render(poseStack, buffer, packedLight, packedOverlay, color);
+		bone4.render(poseStack, buffer, packedLight, packedOverlay, color);
+		bb_main.render(poseStack, buffer, packedLight, packedOverlay, color);
 	}
 }

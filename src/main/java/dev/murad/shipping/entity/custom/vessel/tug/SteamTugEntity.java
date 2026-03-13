@@ -106,7 +106,7 @@ public class SteamTugEntity extends AbstractTugEntity {
     public void readAdditionalSaveData(@NotNull CompoundTag compound) {
         burnTime = compound.contains("burn") ? compound.getInt("burn") : 0;
         burnCapacity = compound.contains("burn_capacity") ? compound.getInt("burn_capacity") : 0;
-        fuelItemHandler.deserializeNBT(compound.getCompound("fuelItems"));
+        fuelItemHandler.deserializeNBT(this.registryAccess(), compound.getCompound("fuelItems"));
         super.readAdditionalSaveData(compound);
     }
 
@@ -114,7 +114,7 @@ public class SteamTugEntity extends AbstractTugEntity {
     public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         compound.putInt("burn", burnTime);
         compound.putInt("burn_capacity", burnCapacity);
-        compound.put("fuelItems", fuelItemHandler.serializeNBT());
+        compound.put("fuelItems", fuelItemHandler.serializeNBT(this.registryAccess()));
         super.addAdditionalSaveData(compound);
     }
 

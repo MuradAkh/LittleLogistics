@@ -1,5 +1,6 @@
 package dev.murad.shipping.util;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -49,15 +50,15 @@ public class FuelItemStackHandler extends ItemStackHandler {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        var tag = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        var tag = super.serializeNBT(provider);
         tag.remove("Size");
         return tag;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         nbt.remove("Size");
-        super.deserializeNBT(nbt);
+        super.deserializeNBT(provider, nbt);
     }
 }

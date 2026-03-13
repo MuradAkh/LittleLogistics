@@ -106,7 +106,7 @@ public class VesselDetectorBlock extends Block implements EntityBlock {
 
     @SuppressWarnings("deprecation")
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player entity, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player entity, BlockHitResult hit) {
         if (level.isClientSide()) {
             showParticles(pos, state, entity.level());
         }

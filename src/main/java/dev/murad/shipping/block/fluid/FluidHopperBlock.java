@@ -159,11 +159,11 @@ public class FluidHopperBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
+    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult rayTraceResult) {
         if (!world.isClientSide){
             BlockEntity entity = world.getBlockEntity(pos);
             if(entity instanceof FluidHopperTileEntity){
-                if(((FluidHopperTileEntity) entity).use(player, hand)){
+                if(((FluidHopperTileEntity) entity).use(player, InteractionHand.MAIN_HAND)){
                     return InteractionResult.CONSUME;
                 }
             }
