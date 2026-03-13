@@ -16,12 +16,14 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
-subsystems {
-    parchment {
-        mappingsVersion = parchment_version
-        minecraftVersion = mc_version
-    }
-}
+// Parchment mappings temporarily disabled: parchment-1.21.1:2024.07.28 not yet available
+// Re-enable once a valid parchment_version is available for MC 1.21.1
+// subsystems {
+//     parchment {
+//         mappingsVersion = parchment_version
+//         minecraftVersion = mc_version
+//     }
+// }
 
 runs {
     configureEach {
@@ -36,7 +38,7 @@ runs {
     server { }
 
     data {
-        programArguments.addAll '--mod', mod_id, '--all',
+        arguments.addAll '--mod', mod_id, '--all',
                 '--existing', file('src/main/resources').absolutePath,
                 '--existing', file('src/generated/resources').absolutePath,
                 '--output', file('src/generated/resources').absolutePath
@@ -49,9 +51,9 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
 
-    // Patchouli — verify NeoForge 1.21.1 availability (Gap L-10)
-    runtimeOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
-    compileOnly "vazkii.patchouli:Patchouli:${patchouli_version}:api"
+    // Patchouli — temporarily disabled: 1.21.1-88-NEOFORGE not available on maven.blamejared.com (Gap L-10)
+    // runtimeOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
+    // compileOnly "vazkii.patchouli:Patchouli:${patchouli_version}:api"
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 }
