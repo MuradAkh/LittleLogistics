@@ -249,10 +249,10 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(INDEPENDENT_MOTION, false);
-        entityData.define(OWNER, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(INDEPENDENT_MOTION, false);
+        builder.define(OWNER, "");
     }
 
     private void tickMovement() {
