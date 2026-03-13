@@ -31,3 +31,4 @@ forge*changelog.txt
 # Vibe coding stuff
 .hive
 CLAUDE.local.md
+.mcp.json
