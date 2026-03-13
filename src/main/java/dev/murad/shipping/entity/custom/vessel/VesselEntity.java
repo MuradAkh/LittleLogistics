@@ -165,10 +165,10 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.getEntityData().define(COLOR_DATA, -1);
-        LinkingHandler.defineSynchedData(this, DOMINANT_ID, DOMINATED_ID);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(COLOR_DATA, -1);
+        LinkingHandler.defineSynchedData(builder, DOMINANT_ID, DOMINATED_ID);
     }
 
     @Override

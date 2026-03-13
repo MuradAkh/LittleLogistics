@@ -4,6 +4,7 @@ import dev.murad.shipping.capability.StallingCapability;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
@@ -103,9 +104,9 @@ public class LinkingHandler<T extends Entity & LinkableEntity<T>> {
         globalCompound.put("dominant", compound);
     }
 
-    public static void defineSynchedData(Entity entity, EntityDataAccessor<Integer> dominantID, EntityDataAccessor<Integer> dominatedID) {
-        entity.getEntityData().define(dominantID, -1);
-        entity.getEntityData().define(dominatedID, -1);
+    public static void defineSynchedData(SynchedEntityData.Builder builder, EntityDataAccessor<Integer> dominantID, EntityDataAccessor<Integer> dominatedID) {
+        builder.define(dominantID, -1);
+        builder.define(dominatedID, -1);
     }
 
     public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> key) {
