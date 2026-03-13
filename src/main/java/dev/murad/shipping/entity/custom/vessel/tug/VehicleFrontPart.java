@@ -11,6 +11,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.LeadItem;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraftforge.entity.PartEntity;
 
 import javax.annotation.Nullable;
@@ -86,7 +87,7 @@ public class VehicleFrontPart extends PartEntity<Entity> {
     }
 
     @Override
-    protected void defineSynchedData() {
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
 
     }
 

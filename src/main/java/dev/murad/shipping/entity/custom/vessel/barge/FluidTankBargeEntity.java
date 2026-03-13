@@ -51,10 +51,10 @@ public class FluidTankBargeEntity extends AbstractBargeEntity {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(FLUID_TYPE, "minecraft:empty");
-        entityData.define(VOLUME, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(FLUID_TYPE, "minecraft:empty");
+        builder.define(VOLUME, 0);
     }
 
     @Override

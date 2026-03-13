@@ -195,11 +195,11 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        getEntityData().define(DOMINANT_ID, -1);
-        getEntityData().define(DOMINATED_ID, -1);
-        getEntityData().define(COLOR_DATA, -1);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DOMINANT_ID, -1);
+        builder.define(DOMINATED_ID, -1);
+        builder.define(COLOR_DATA, -1);
     }
 
 
