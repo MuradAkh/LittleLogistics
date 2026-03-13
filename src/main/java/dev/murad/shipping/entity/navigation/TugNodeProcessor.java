@@ -95,11 +95,11 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
     }
 
     private Node getWaterNode(int p_186328_1_, int p_186328_2_, int p_186328_3_) {
-        BlockPathTypes BlockPathTypes = this.isFree(p_186328_1_, p_186328_2_, p_186328_3_);
-        return  BlockPathTypes != BlockPathTypes.WATER ? null : this.getNode(p_186328_1_, p_186328_2_, p_186328_3_);
+        PathType pathType = this.isFree(p_186328_1_, p_186328_2_, p_186328_3_);
+        return pathType != PathType.WATER ? null : this.getNode(p_186328_1_, p_186328_2_, p_186328_3_);
     }
 
-    private BlockPathTypes isFree(int p_186327_1_, int p_186327_2_, int p_186327_3_) {
+    private PathType isFree(int p_186327_1_, int p_186327_2_, int p_186327_3_) {
         BlockPos.MutableBlockPos blockpos$mutable = new BlockPos.MutableBlockPos();
 
         for(int i = p_186327_1_; i < p_186327_1_ + this.entityWidth; ++i) {
@@ -107,19 +107,19 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
                 for(int k = p_186327_3_; k < p_186327_3_ + this.entityDepth; ++k) {
                     FluidState fluidstate = this.level.getFluidState(blockpos$mutable.set(i, j, k));
                     BlockState blockstate = this.level.getBlockState(blockpos$mutable.set(i, j, k));
-                    if (fluidstate.isEmpty() && blockstate.isPathfindable(this.level, blockpos$mutable.below(), PathComputationType.WATER) && blockstate.isAir()) {
-                        return BlockPathTypes.BREACH;
+                    if (fluidstate.isEmpty() && blockstate.isPathfindable(PathComputationType.WATER) && blockstate.isAir()) {
+                        return PathType.BREACH;
                     }
 
                     if (!fluidstate.is(FluidTags.WATER)) {
-                        return BlockPathTypes.BLOCKED;
+                        return PathType.BLOCKED;
                     }
                 }
             }
         }
 
         BlockState blockstate1 = this.level.getBlockState(blockpos$mutable);
-        return blockstate1.isPathfindable(this.level, blockpos$mutable, PathComputationType.WATER) ? BlockPathTypes.WATER : BlockPathTypes.BLOCKED;
+        return blockstate1.isPathfindable(PathComputationType.WATER) ? PathType.WATER : PathType.BLOCKED;
     }
 
 }
