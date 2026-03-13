@@ -15,9 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -44,24 +42,12 @@ public class FluidHopperTileEntity extends BlockEntity implements IVesselLoader 
         };
     };
 
-    private final LazyOptional<IFluidHandler> holder = LazyOptional.of(() -> tank);
-
-
-
     public boolean use(Player player, InteractionHand hand){
         boolean result = FluidUtil.interactWithFluidHandler(player, hand, tank);
         player.displayClientMessage(FluidDisplayUtil.getFluidDisplay(tank), false);
         return result;
     }
 
-
-    @Override
-    @Nonnull
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        if (capability == ForgeCapabilities.FLUID_HANDLER)
-            return holder.cast();
-        return super.getCapability(capability, facing);
-    }
 
     public FluidTank getTank() {
         return this.tank;

@@ -20,11 +20,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,13 +30,11 @@ import javax.annotation.Nullable;
 
 public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements ItemHandlerVanillaContainerWrapper, WorldlyContainer {
     private final ItemStackHandler energyItemHandler = createHandler();
-    private final LazyOptional<IItemHandler> energyItemHandlerOpt = LazyOptional.of(() -> energyItemHandler);
     private static final int MAX_ENERGY = ShippingConfig.Server.ENERGY_LOCO_BASE_CAPACITY.get();
     private static final int MAX_TRANSFER = ShippingConfig.Server.ENERGY_LOCO_BASE_MAX_CHARGE_RATE.get();
     private static final int ENERGY_USAGE = ShippingConfig.Server.ENERGY_LOCO_BASE_ENERGY_USAGE.get();
 
     private final ReadWriteEnergyStorage internalBattery = new ReadWriteEnergyStorage(MAX_ENERGY, MAX_TRANSFER, Integer.MAX_VALUE);
-    private final LazyOptional<IEnergyStorage> internalBatteryOpt = LazyOptional.of(() -> internalBattery);
 
     public EnergyLocomotiveEntity(EntityType<?> type, Level level) {
         super(type, level);
@@ -70,16 +65,12 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
         };
     }
 
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER) {
-            return energyItemHandlerOpt.cast();
-        } else if (cap == ForgeCapabilities.ENERGY) {
-            return internalBatteryOpt.cast();
-        }
+    public ItemStackHandler getEnergyItemHandler() {
+        return energyItemHandler;
+    }
 
-        return super.getCapability(cap, side);
+    public ReadWriteEnergyStorage getInternalBattery() {
+        return internalBattery;
     }
 
     @Override

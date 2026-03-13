@@ -3,7 +3,6 @@ package dev.murad.shipping.entity.custom.vessel.barge;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.FluidDisplayUtil;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -16,19 +15,13 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class FluidTankBargeEntity extends AbstractBargeEntity {
     public static int CAPACITY = FluidType.BUCKET_VOLUME * 10;
@@ -42,9 +35,6 @@ public class FluidTankBargeEntity extends AbstractBargeEntity {
     private static final EntityDataAccessor<String> FLUID_TYPE = SynchedEntityData.defineId(FluidTankBargeEntity.class, EntityDataSerializers.STRING);
     private Fluid clientCurrFluid = Fluids.EMPTY;
     private int clientCurrAmount = 0;
-
-
-    private final LazyOptional<IFluidHandler> holder = LazyOptional.of(() -> tank);
 
 
     public FluidTankBargeEntity(EntityType<? extends AbstractBargeEntity> type, Level world) {
@@ -113,12 +103,7 @@ public class FluidTankBargeEntity extends AbstractBargeEntity {
         }
     }
 
-    @Override
-    @Nonnull
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing)
-    {
-        if (capability == ForgeCapabilities.FLUID_HANDLER)
-            return holder.cast();
-        return super.getCapability(capability, facing);
+    public FluidTank getTank() {
+        return tank;
     }
 }

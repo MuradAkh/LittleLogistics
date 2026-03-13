@@ -20,19 +20,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class SteamTugEntity extends AbstractTugEntity {
     private final ForgeConfigSpec.ConfigValue<Double> FURNACE_FUEL_MULTIPLIER = ShippingConfig.Server.STEAM_TUG_FUEL_MULTIPLIER;
     private final FuelItemStackHandler fuelItemHandler = new FuelItemStackHandler();
-    private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> fuelItemHandler);
     protected int burnTime = 0;
     protected int burnCapacity = 0;
 
@@ -87,14 +79,8 @@ public class SteamTugEntity extends AbstractTugEntity {
                 .build();
     }
 
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER) {
-            return handler.cast();
-        }
-
-        return super.getCapability(cap, side);
+    public FuelItemStackHandler getFuelItemHandler() {
+        return fuelItemHandler;
     }
 
     @Override
