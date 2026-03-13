@@ -1,10 +1,10 @@
 package dev.murad.shipping.item;
 
+import dev.murad.shipping.setup.ModDataComponents;
 import dev.murad.shipping.util.*;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 
@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipContext;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -25,8 +26,6 @@ import java.util.List;
 
 @Log4j2
 public class LocoRouteItem extends Item {
-    private static final String ROUTE_NBT = "route";
-
     public LocoRouteItem(Properties properties) {
         super(properties);
     }
@@ -82,26 +81,20 @@ public class LocoRouteItem extends Item {
 
     private void saveRoute(ItemStack stack, LocoRoute route) {
         if (route.isEmpty()) {
-            // remove tag from stack
-            stack.setTag(null);
+            stack.remove(ModDataComponents.LOCO_ROUTE);
+        } else {
+            stack.set(ModDataComponents.LOCO_ROUTE, route);
         }
-
-        CompoundTag tag = stack.getOrCreateTag();
-        tag.put(ROUTE_NBT, route.toNBT());
     }
 
     public static LocoRoute getRoute(ItemStack stack) {
-        // check if it has nbt
-        if (stack.getTag() != null) {
-            return LocoRoute.fromNBT(stack.getTag().getCompound(ROUTE_NBT));
-        }
-        // empty route
-        return new LocoRoute();
+        LocoRoute route = stack.get(ModDataComponents.LOCO_ROUTE);
+        return route != null ? route : new LocoRoute();
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-        super.appendHoverText(stack, worldIn, tooltip, flagIn);
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
+        super.appendHoverText(stack, context, tooltip, flagIn);
         tooltip.add(Component.translatable("item.littlelogistics.locomotive_route.description"));
         tooltip.add(
                 Component.translatable("item.littlelogistics.locomotive_route.num_nodes", getRoute(stack).size())
