@@ -44,7 +44,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -306,7 +305,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             if (color != null) {
                 this.getEntityData().set(COLOR_DATA, color.getId());
             } else {
-                NetworkHooks.openScreen((ServerPlayer) player, createContainerProvider(), getDataAccessor()::write);
+                ((ServerPlayer) player).openMenu(createContainerProvider(), getDataAccessor()::write);
             }
         }
 
