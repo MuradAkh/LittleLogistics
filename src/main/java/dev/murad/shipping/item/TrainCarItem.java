@@ -4,8 +4,8 @@ import com.mojang.datafixers.util.Function4;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.tags.BlockTags;
@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.Vec3;
 
 // taken from Minecart item
 public class TrainCarItem extends Item {
@@ -30,12 +31,13 @@ public class TrainCarItem extends Item {
          * Dispense the specified stack, play the dispense sound and spawn particles.
          */
         public ItemStack execute(BlockSource p_42949_, ItemStack p_42950_) {
-            Direction direction = p_42949_.getBlockState().getValue(DispenserBlock.FACING);
-            Level level = p_42949_.getLevel();
-            double d0 = p_42949_.x() + (double)direction.getStepX() * 1.125D;
-            double d1 = Math.floor(p_42949_.y()) + (double)direction.getStepY();
-            double d2 = p_42949_.z() + (double)direction.getStepZ() * 1.125D;
-            BlockPos blockpos = p_42949_.getPos().relative(direction);
+            Direction direction = p_42949_.state().getValue(DispenserBlock.FACING);
+            Level level = p_42949_.level();
+            Vec3 vec3 = p_42949_.center();
+            double d0 = vec3.x() + (double)direction.getStepX() * 1.125D;
+            double d1 = Math.floor(vec3.y()) + (double)direction.getStepY();
+            double d2 = vec3.z() + (double)direction.getStepZ() * 1.125D;
+            BlockPos blockpos = p_42949_.pos().relative(direction);
             BlockState blockstate = level.getBlockState(blockpos);
             RailShape railshape = blockstate.getBlock() instanceof BaseRailBlock ? ((BaseRailBlock)blockstate.getBlock()).getRailDirection(blockstate, level, blockpos, null) : RailShape.NORTH_SOUTH;
             double d3;
@@ -73,7 +75,7 @@ public class TrainCarItem extends Item {
          * Play the dispense sound from the specified block.
          */
         protected void playSound(BlockSource p_42947_) {
-            p_42947_.getLevel().levelEvent(1000, p_42947_.getPos(), 0);
+            p_42947_.level().levelEvent(1000, p_42947_.pos(), 0);
         }
     };
     final Function4<Level, Double, Double, Double, AbstractTrainCarEntity> constructor;

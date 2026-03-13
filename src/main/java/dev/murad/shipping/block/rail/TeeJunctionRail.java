@@ -1,5 +1,8 @@
 package dev.murad.shipping.block.rail;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.murad.shipping.util.RailShapeUtil;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Set;
 
 public class TeeJunctionRail extends BaseRailBlock implements MultiShapeRail {
+    public static final MapCodec<TeeJunctionRail> CODEC = RecordCodecBuilder.mapCodec(instance ->
+        instance.group(
+            propertiesCodec(),
+            Codec.BOOL.fieldOf("automatic_switching").forGetter(TeeJunctionRail::isAutomaticSwitching)
+        ).apply(instance, TeeJunctionRail::new));
+
+    @Override
+    protected MapCodec<? extends BaseRailBlock> codec() {
+        return CODEC;
+    }
+
     // for compatibility issues
     public static final EnumProperty<RailShape> RAIL_SHAPE = RailShapeUtil.RAIL_SHAPE_STRAIGHT_FLAT;
     // facing denotes direction of straight out

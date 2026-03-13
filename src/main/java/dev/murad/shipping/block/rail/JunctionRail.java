@@ -1,5 +1,6 @@
 package dev.murad.shipping.block.rail;
 
+import com.mojang.serialization.MapCodec;
 import dev.murad.shipping.util.RailShapeUtil;
 import dev.murad.shipping.util.RailHelper;
 import net.minecraft.core.BlockPos;
@@ -26,9 +27,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Set;
 
 public class JunctionRail extends BaseRailBlock implements MultiShapeRail {
+    public static final MapCodec<JunctionRail> CODEC = simpleCodec(JunctionRail::new);
     private static final Logger log = LogManager.getLogger(JunctionRail.class);
     // for compatibilty issues
     public static final EnumProperty<RailShape> RAIL_SHAPE = RailShapeUtil.RAIL_SHAPE_STRAIGHT_FLAT;
+
+    @Override
+    protected MapCodec<? extends BaseRailBlock> codec() {
+        return CODEC;
+    }
 
     public JunctionRail(Properties pProperties) {
         super(true, pProperties);

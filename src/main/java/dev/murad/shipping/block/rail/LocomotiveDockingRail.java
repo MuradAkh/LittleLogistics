@@ -1,7 +1,9 @@
 package dev.murad.shipping.block.rail;
 
+import com.mojang.serialization.MapCodec;
 import dev.murad.shipping.block.dock.DockingBlockStates;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
+import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -16,6 +18,13 @@ import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Nullable;
 
 public class LocomotiveDockingRail extends AbstractDockingRail{
+    public static final MapCodec<LocomotiveDockingRail> CODEC = simpleCodec(LocomotiveDockingRail::new);
+
+    @Override
+    protected MapCodec<? extends BaseRailBlock> codec() {
+        return CODEC;
+    }
+
     public LocomotiveDockingRail(Properties pProperties) {
         super(pProperties);
     }
