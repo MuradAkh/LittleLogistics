@@ -64,7 +64,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     @Getter
     protected final ItemStackHandler routeItemHandler = createRouteItemHandler();
     protected boolean contentsChanged = false;
-    @Getter
     protected boolean docked = false;
     @Getter
     protected int remainingStallTime = 0;
