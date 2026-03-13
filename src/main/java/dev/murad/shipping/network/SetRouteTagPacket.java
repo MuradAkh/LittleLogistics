@@ -1,24 +1,29 @@
 package dev.murad.shipping.network;
 
-import lombok.RequiredArgsConstructor;
+import dev.murad.shipping.ShippingMod;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
-@RequiredArgsConstructor
-public class SetRouteTagPacket {
-    public final int routeChecksum;
-    public final boolean isOffhand;
-    public final CompoundTag tag;
+public record SetRouteTagPacket(int routeChecksum, boolean isOffhand, CompoundTag tag)
+        implements CustomPacketPayload {
 
-    public SetRouteTagPacket(FriendlyByteBuf buffer) {
-        this.routeChecksum = buffer.readInt();
-        this.isOffhand = buffer.readBoolean();
-        this.tag = buffer.readNbt();
-    }
+    public static final Type<SetRouteTagPacket> TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "set_route_tag"));
 
-    public void encode(FriendlyByteBuf buf) {
-        buf.writeInt(routeChecksum);
-        buf.writeBoolean(isOffhand);
-        buf.writeNbt(tag);
+    public static final StreamCodec<FriendlyByteBuf, SetRouteTagPacket> STREAM_CODEC =
+            StreamCodec.composite(
+                    ByteBufCodecs.INT, SetRouteTagPacket::routeChecksum,
+                    ByteBufCodecs.BOOL, SetRouteTagPacket::isOffhand,
+                    ByteBufCodecs.COMPOUND_TAG, SetRouteTagPacket::tag,
+                    SetRouteTagPacket::new
+            );
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

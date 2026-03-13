@@ -1,17 +1,25 @@
 package dev.murad.shipping.network;
 
-import lombok.RequiredArgsConstructor;
+import dev.murad.shipping.ShippingMod;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
-@RequiredArgsConstructor
-public class EnrollVehiclePacket {
-    public final int locoId;
+public record EnrollVehiclePacket(int locoId) implements CustomPacketPayload {
 
-    public EnrollVehiclePacket(FriendlyByteBuf buffer) {
-        this.locoId = buffer.readInt();
-    }
+    public static final Type<EnrollVehiclePacket> TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "enroll_vehicle"));
 
-    public void encode(FriendlyByteBuf buf) {
-        buf.writeInt(locoId);
+    public static final StreamCodec<FriendlyByteBuf, EnrollVehiclePacket> STREAM_CODEC =
+            StreamCodec.composite(
+                    ByteBufCodecs.INT, EnrollVehiclePacket::locoId,
+                    EnrollVehiclePacket::new
+            );
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }
