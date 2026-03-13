@@ -5,8 +5,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.capabilities.Capability;
+import net.neoforged.neoforge.capabilities.EntityCapability;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,28 +17,27 @@ public interface IVesselLoader {
         IMPORT
     }
 
-    static <T> Optional<T> getEntityCapability(BlockPos pos, Capability<T> capability, Level level){
-        List<Entity> fluidEntities = level.getEntities((Entity) null,
+    static <T> Optional<T> getEntityCapability(BlockPos pos, EntityCapability<T, @Nullable Void> capability, Level level){
+        List<Entity> entities = level.getEntities((Entity) null,
                 getSearchBox(pos),
                 (e -> entityPredicate(e, pos, capability))
         );
 
-        if(fluidEntities.isEmpty()){
+        if(entities.isEmpty()){
             return Optional.empty();
         } else {
-            Entity entity = fluidEntities.get(0);
-            return entity.getCapability(capability).resolve();
+            Entity entity = entities.get(0);
+            return Optional.ofNullable(entity.getCapability(capability, null));
         }
     }
 
-    static boolean entityPredicate(Entity entity, BlockPos pos, Capability<?> capability) {
-        return entity.getCapability(capability).resolve().map(cap -> {
-            if (entity instanceof LinkableEntity l){
-                return l.allowDockInterface() && (l.getBlockPos().getX() == pos.getX() && l.getBlockPos().getZ() == pos.getZ());
-            } else {
-                return true;
-            }
-        }).orElse(false);
+    static <T> boolean entityPredicate(Entity entity, BlockPos pos, EntityCapability<T, @Nullable Void> capability) {
+        T cap = entity.getCapability(capability, null);
+        if (cap == null) return false;
+        if (entity instanceof LinkableEntity<?> l) {
+            return l.allowDockInterface() && (l.getBlockPos().getX() == pos.getX() && l.getBlockPos().getZ() == pos.getZ());
+        }
+        return true;
     }
 
     static AABB getSearchBox(BlockPos pos) {
