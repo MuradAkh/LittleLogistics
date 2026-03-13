@@ -1,6 +1,6 @@
 package dev.murad.shipping.entity.custom;
 
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.ItemStackHandler;
 
 import java.util.Optional;
 
