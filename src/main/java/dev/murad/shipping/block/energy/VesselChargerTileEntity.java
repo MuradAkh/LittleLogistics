@@ -6,6 +6,7 @@ import dev.murad.shipping.capability.ReadWriteEnergyStorage;
 import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import dev.murad.shipping.util.LinkableEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -56,16 +57,16 @@ public class VesselChargerTileEntity extends BlockEntity implements IVesselLoade
     }
 
     @Override
-    public void load(CompoundTag compound) {
-        super.load(compound);
+    protected void loadAdditional(CompoundTag compound, HolderLookup.Provider registries) {
+        super.loadAdditional(compound, registries);
         internalBattery.readAdditionalSaveData(compound.getCompound("energy_storage"));
     }
 
     @Override
-    public void saveAdditional(CompoundTag compound) {
+    protected void saveAdditional(CompoundTag compound, HolderLookup.Provider registries) {
         CompoundTag energyNBT = new CompoundTag();
         internalBattery.addAdditionalSaveData(energyNBT);
-        super.saveAdditional(compound);
+        super.saveAdditional(compound, registries);
         compound.put("energy_storage", energyNBT);
     }
 

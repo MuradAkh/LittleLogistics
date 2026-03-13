@@ -7,7 +7,7 @@ import dev.murad.shipping.util.LinkableEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -54,22 +54,22 @@ public class FluidHopperTileEntity extends BlockEntity implements IVesselLoader 
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         this.getTank().readFromNBT(tag);
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         this.getTank().writeToNBT(tag);
     }
 
     @Nonnull
     @Override
-    public CompoundTag getUpdateTag() {
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         var tag = new CompoundTag();
-        saveAdditional(tag);    // okay to send entire inventory on chunk load
+        saveAdditional(tag, registries);    // okay to send entire inventory on chunk load
         return tag;
     }
 
@@ -79,8 +79,8 @@ public class FluidHopperTileEntity extends BlockEntity implements IVesselLoader 
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
-        this.load(packet.getTag());
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
+        loadAdditional(tag, registries);
     }
 
     private void serverTickInternal() {
