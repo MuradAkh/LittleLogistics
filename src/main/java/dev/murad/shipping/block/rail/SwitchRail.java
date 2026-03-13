@@ -1,5 +1,8 @@
 package dev.murad.shipping.block.rail;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.util.InteractionUtil;
 import dev.murad.shipping.util.RailShapeUtil;
@@ -31,6 +34,17 @@ import java.util.List;
 import java.util.Set;
 
 public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
+    public static final MapCodec<SwitchRail> CODEC = RecordCodecBuilder.mapCodec(instance ->
+        instance.group(
+            propertiesCodec(),
+            Codec.BOOL.fieldOf("automatic_switching").forGetter(SwitchRail::isAutomaticSwitching)
+        ).apply(instance, SwitchRail::new));
+
+    @Override
+    protected MapCodec<? extends BaseRailBlock> codec() {
+        return CODEC;
+    }
+
     public enum OutDirection implements StringRepresentable {
         LEFT("left"), RIGHT("right");
 

@@ -16,6 +16,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tags.FluidTags;
@@ -33,7 +34,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
@@ -49,7 +49,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.ForgeMod;
+import net.neoforged.neoforge.common.NeoForgeMod;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
@@ -64,6 +64,10 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public abstract class VesselEntity extends WaterAnimal implements LinkableEntity<VesselEntity>, Colorable {
+    private enum VesselStatus {
+        IN_WATER, UNDER_WATER, UNDER_FLOWING_WATER, ON_LAND, IN_AIR
+    }
+
     public static final EntityDataAccessor<Integer> COLOR_DATA = SynchedEntityData.defineId(VesselEntity.class, EntityDataSerializers.INT);
 
     private final static double NAMETAG_RENDERING_DISTANCE = 15;
@@ -85,8 +89,8 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     private int stuckCounter;
     private double waterLevel;
     private float landFriction;
-    private Boat.Status status;
-    private Boat.Status oldStatus;
+    private VesselStatus status;
+    private VesselStatus oldStatus;
     private double lastYd;
 
     @Override
@@ -139,8 +143,8 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 20.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.0D)
-                .add(ForgeMod.NAMETAG_DISTANCE.get(), NAMETAG_RENDERING_DISTANCE)
-                .add(ForgeMod.SWIM_SPEED.get(), 0.0D);
+                .add(NeoForgeMod.NAMETAG_DISTANCE, NAMETAG_RENDERING_DISTANCE)
+                .add(NeoForgeMod.SWIM_SPEED, 0.0D);
     }
 
     @Override
@@ -193,17 +197,17 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     // reset speed to 1
     private void resetAttributes(double newSpeed) {
         this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0);
-        this.getAttribute(ForgeMod.SWIM_SPEED.get()).setBaseValue(0);
+        this.getAttribute(NeoForgeMod.SWIM_SPEED).setBaseValue(0);
 
         this.getAttribute(Attributes.MOVEMENT_SPEED)
                 .addTransientModifier(
-                        new AttributeModifier("movementspeed_mult", newSpeed, AttributeModifier.Operation.ADDITION));
-        this.getAttribute(ForgeMod.SWIM_SPEED.get())
+                        new AttributeModifier(ResourceLocation.fromNamespaceAndPath("littlelogistics", "movementspeed_mult"), newSpeed, AttributeModifier.Operation.ADD_VALUE));
+        this.getAttribute(NeoForgeMod.SWIM_SPEED)
                 .addTransientModifier(
-                        new AttributeModifier("swimspeed_mult", newSpeed, AttributeModifier.Operation.ADDITION));
+                        new AttributeModifier(ResourceLocation.fromNamespaceAndPath("littlelogistics", "swimspeed_mult"), newSpeed, AttributeModifier.Operation.ADD_VALUE));
 
         setCustomNameVisible(true);
-        this.getAttribute(ForgeMod.NAMETAG_DISTANCE.get()).setBaseValue(NAMETAG_RENDERING_DISTANCE);
+        this.getAttribute(NeoForgeMod.NAMETAG_DISTANCE).setBaseValue(NAMETAG_RENDERING_DISTANCE);
     }
 
     @Override
@@ -301,25 +305,25 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
         double d2 = 0.0D;
         // MOB STUFF
         float invFriction = 0.05F;
-        if (this.oldStatus == Boat.Status.IN_AIR && this.status != Boat.Status.IN_AIR && this.status != Boat.Status.ON_LAND) {
+        if (this.oldStatus == VesselStatus.IN_AIR && this.status != VesselStatus.IN_AIR && this.status != VesselStatus.ON_LAND) {
             this.waterLevel = this.getY(1.0D);
             this.setPos(this.getX(), (double) (this.getWaterLevelAbove() - this.getBbHeight()) + 0.101D, this.getZ());
             this.setDeltaMovement(this.getDeltaMovement().multiply(1.0D, 0.0D, 1.0D));
             this.lastYd = 0.0D;
-            this.status = Boat.Status.IN_WATER;
+            this.status = VesselStatus.IN_WATER;
         } else {
-            if (this.status == Boat.Status.IN_WATER) {
+            if (this.status == VesselStatus.IN_WATER) {
                 d2 = (this.waterLevel - this.getY()) / (double) this.getBbHeight();
                 invFriction = 0.9F;
-            } else if (this.status == Boat.Status.UNDER_FLOWING_WATER) {
+            } else if (this.status == VesselStatus.UNDER_FLOWING_WATER) {
                 d1 = -7.0E-4D;
                 invFriction = 0.9F;
-            } else if (this.status == Boat.Status.UNDER_WATER) {
+            } else if (this.status == VesselStatus.UNDER_WATER) {
                 d2 = (double) 0.01F;
                 invFriction = 0.45F;
-            } else if (this.status == Boat.Status.IN_AIR) {
+            } else if (this.status == VesselStatus.IN_AIR) {
                 invFriction = 0.9F;
-            } else if (this.status == Boat.Status.ON_LAND) {
+            } else if (this.status == VesselStatus.ON_LAND) {
                 invFriction = this.landFriction;
                 if (this.getControllingPassenger() instanceof Player) {
                     this.landFriction /= 2.0F;
@@ -336,20 +340,20 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
 
     }
 
-    private Boat.Status getStatus() {
-        Boat.Status Boat$status = this.isUnderwater();
-        if (Boat$status != null) {
+    private VesselStatus getStatus() {
+        VesselStatus vesselStatus = this.isUnderwater();
+        if (vesselStatus != null) {
             this.waterLevel = this.getBoundingBox().maxY;
-            return Boat$status;
+            return vesselStatus;
         } else if (this.checkInWater()) {
-            return Boat.Status.IN_WATER;
+            return VesselStatus.IN_WATER;
         } else {
             float f = this.getGroundFriction();
             if (f > 0.0F) {
                 this.landFriction = f;
-                return Boat.Status.ON_LAND;
+                return VesselStatus.ON_LAND;
             } else {
-                return Boat.Status.IN_AIR;
+                return VesselStatus.IN_AIR;
             }
         }
     }
@@ -463,7 +467,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
      * Decides whether the boat is currently underwater.
      */
     @Nullable
-    private Boat.Status isUnderwater() {
+    private VesselStatus isUnderwater() {
         AABB aabb = this.getBoundingBox();
         double d0 = aabb.maxY + 0.001D;
         int i = Mth.floor(aabb.minX);
@@ -482,7 +486,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
                     FluidState fluidstate = this.level().getFluidState(blockpos$mutableblockpos);
                     if (fluidstate.is(FluidTags.WATER) && d0 < (double)((float)blockpos$mutableblockpos.getY() + fluidstate.getHeight(this.level(), blockpos$mutableblockpos))) {
                         if (!fluidstate.isSource()) {
-                            return Boat.Status.UNDER_FLOWING_WATER;
+                            return VesselStatus.UNDER_FLOWING_WATER;
                         }
 
                         flag = true;
@@ -491,7 +495,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
             }
         }
 
-        return flag ? Boat.Status.UNDER_WATER : null;
+        return flag ? VesselStatus.UNDER_WATER : null;
     }
 
     @Override
@@ -546,7 +550,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     public void travel(Vec3 relative) {
         if (this.isEffectiveAi() || this.isControlledByLocalInstance()) {
             double d0;
-            AttributeInstance gravity = this.getAttribute(net.minecraftforge.common.ForgeMod.ENTITY_GRAVITY.get());
+            AttributeInstance gravity = this.getAttribute(Attributes.GRAVITY);
             boolean flag = this.getDeltaMovement().y <= 0.0D;
             d0 = gravity.getValue();
 
@@ -693,7 +697,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     }
 
     protected double swimSpeed() {
-        return this.getAttribute(ForgeMod.SWIM_SPEED.get()).getValue();
+        return this.getAttribute(NeoForgeMod.SWIM_SPEED).getValue();
     }
 
     /**
