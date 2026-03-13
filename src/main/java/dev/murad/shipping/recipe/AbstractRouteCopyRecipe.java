@@ -1,8 +1,7 @@
 package dev.murad.shipping.recipe;
 
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -17,8 +16,8 @@ import java.util.Optional;
 
 public abstract class AbstractRouteCopyRecipe extends CustomRecipe {
     private final Item item;
-    public AbstractRouteCopyRecipe(ResourceLocation resourceLocation, CraftingBookCategory cat, Item matchingItem) {
-        super(resourceLocation, cat);
+    public AbstractRouteCopyRecipe(CraftingBookCategory cat, Item matchingItem) {
+        super(cat);
         this.item = matchingItem;
     }
 
@@ -79,7 +78,7 @@ public abstract class AbstractRouteCopyRecipe extends CustomRecipe {
 
     @Nonnull
     @Override
-    public ItemStack assemble(@Nonnull CraftingContainer inventory, @NotNull RegistryAccess pRegistryAccess) {
+    public ItemStack assemble(@Nonnull CraftingContainer inventory, HolderLookup.@NotNull Provider registries) {
         Optional<Pair<ItemStack, Integer>> matchOpt = checkTugRoutes(inventory);
         if (matchOpt.isEmpty()) return ItemStack.EMPTY;
 

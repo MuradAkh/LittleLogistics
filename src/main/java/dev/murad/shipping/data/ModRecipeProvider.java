@@ -4,25 +4,25 @@ import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.Tags;
+import net.neoforged.neoforge.common.Tags;
 
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
 public class ModRecipeProvider extends RecipeProvider {
 
-    public ModRecipeProvider(PackOutput packOutput) {
-        super(packOutput);
+    public ModRecipeProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
+        super(packOutput, registries);
     }
 
     @Override
-    protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
+    protected void buildRecipes(RecipeOutput output) {
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.TUG_DOCK.get(), 2)
                 .define('#', ModItems.SPRING.get())
                 .define('_', Tags.Items.STONE)
@@ -31,7 +31,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("#_#")
                 .pattern("$$$")
                 .unlockedBy("has_item", has(ModItems.SPRING.get()))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.BARGE_DOCK.get(), 2)
                 .define('#', ModItems.SPRING.get())
@@ -41,7 +41,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("_#_")
                 .pattern("$$$")
                 .unlockedBy("has_item", has(ModItems.SPRING.get()))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.VESSEL_DETECTOR.get(), 2)
                 .define('#', ModItems.SPRING.get())
@@ -51,7 +51,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("_$_")
                 .pattern("___")
                 .unlockedBy("has_item", has(ModItems.SPRING.get()))
-                .save(consumer);
+                .save(output);
 
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.GUIDE_RAIL_CORNER.get(), 3)
@@ -62,7 +62,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("$__")
                 .pattern("#__")
                 .unlockedBy("has_item", has(Items.POWERED_RAIL))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.SWITCH_RAIL.get(), 4)
                 .define('#', Items.RAIL)
@@ -70,14 +70,14 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("##")
                 .pattern("# ")
                 .unlockedBy("has_item", has(Items.RAIL))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.TEE_JUNCTION_RAIL.get(), 4)
                 .define('#', Items.RAIL)
                 .pattern("###")
                 .pattern(" # ")
                 .unlockedBy("has_item", has(Items.RAIL))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.JUNCTION_RAIL.get(), 5)
                 .define('#', Items.RAIL)
@@ -85,19 +85,19 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("###")
                 .pattern(" # ")
                 .unlockedBy("has_item", has(Items.RAIL))
-                .save(consumer);
+                .save(output);
 
         ShapelessRecipeBuilder.shapeless(RecipeCategory.TRANSPORTATION, ModBlocks.AUTOMATIC_SWITCH_RAIL.get(), 1)
                 .requires(ModBlocks.SWITCH_RAIL.get())
                 .requires(ModItems.RECEIVER_COMPONENT.get())
                 .unlockedBy("has_item", has(Items.RAIL))
-                .save(consumer);
+                .save(output);
 
         ShapelessRecipeBuilder.shapeless(RecipeCategory.TRANSPORTATION, ModBlocks.AUTOMATIC_TEE_JUNCTION_RAIL.get(), 1)
                 .requires(ModBlocks.TEE_JUNCTION_RAIL.get())
                 .requires(ModItems.RECEIVER_COMPONENT.get())
                 .unlockedBy("has_item", has(Items.RAIL))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.LOCOMOTIVE_DOCK_RAIL.get(), 2)
                 .define('#', Items.RAIL)
@@ -106,7 +106,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern(" # ")
                 .pattern(" # ")
                 .unlockedBy("has_item", has(Items.RAIL))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.CAR_DOCK_RAIL.get(), 3)
                 .define('#', Items.RAIL)
@@ -115,7 +115,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("$#$")
                 .pattern(" # ")
                 .unlockedBy("has_item", has(Items.RAIL))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.GUIDE_RAIL_TUG.get(), 8)
                 .define('#', ModItems.SPRING.get())
@@ -125,7 +125,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("___")
                 .pattern("___")
                 .unlockedBy("has_item", has(Items.POWERED_RAIL))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModBlocks.FLUID_HOPPER.get(), 1)
                 .define('_', Items.GLASS)
@@ -133,7 +133,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("_$_")
                 .pattern(" _ ")
                 .unlockedBy("has_item", has(Items.HOPPER))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModBlocks.VESSEL_CHARGER.get(), 1)
                 .define('_', Items.REDSTONE_BLOCK)
@@ -143,7 +143,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern(" $ ")
                 .pattern("_$_")
                 .unlockedBy("has_item", has(Items.REDSTONE))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.SPRING.get(), 6)
                 .define('_', Tags.Items.STRING)
@@ -151,7 +151,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("_$_")
                 .pattern("$_$")
                 .unlockedBy("has_item", has(Items.STRING))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.TUG_ROUTE.get())
                 .define('_', ModItems.TRANSMITTER_COMPONENT.get())
@@ -161,7 +161,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("$_$")
                 .pattern(" # ")
                 .unlockedBy("has_item", has(Items.REDSTONE))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.LOCO_ROUTE.get())
                 .define('_', ModItems.TRANSMITTER_COMPONENT.get())
@@ -171,7 +171,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("$_$")
                 .pattern(" # ")
                 .unlockedBy("has_item", has(Items.REDSTONE))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.STEAM_TUG.get())
                 .define('_', Items.PISTON)
@@ -181,7 +181,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("_#_")
                 .pattern("$$$")
                 .unlockedBy("has_item", has(Items.PISTON))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.ENERGY_TUG.get())
                 .define('_', Items.PISTON)
@@ -191,7 +191,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("_#_")
                 .pattern("$$$")
                 .unlockedBy("has_item", has(Items.PISTON))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.CHEST_BARGE.get())
                 .define('_', Items.CHEST)
@@ -200,7 +200,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("#_#")
                 .pattern("$$$")
                 .unlockedBy("has_item", has(Items.CHEST))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.BARREL_BARGE.get())
                 .define('_', Items.BARREL)
@@ -209,7 +209,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("#_#")
                 .pattern("$$$")
                 .unlockedBy("has_item", has(Items.BARREL))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.VACUUM_BARGE.get())
                 .define('_', Items.HOPPER)
@@ -218,7 +218,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("#_#")
                 .pattern("$$$")
                 .unlockedBy("has_item", has(Items.HOPPER))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.SEATER_BARGE.get())
                 .define('_', ItemTags.WOODEN_STAIRS)
@@ -227,7 +227,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("#_#")
                 .pattern("$$$")
                 .unlockedBy("has_item", has(Items.IRON_INGOT))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.FISHING_BARGE.get())
                 .define('#', Items.FISHING_ROD)
@@ -235,7 +235,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("###")
                 .pattern("$$$")
                 .unlockedBy("has_item", has(Items.FISHING_ROD))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.FLUID_BARGE.get())
                 .define('#', Items.GLASS)
@@ -244,7 +244,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern(" # ")
                 .pattern("$$$")
                 .unlockedBy("has_item", has(Items.GLASS))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.RAPID_HOPPER.get())
                 .define('_', Items.HOPPER)
@@ -253,7 +253,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("$_$")
                 .pattern(" # ")
                 .unlockedBy("has_item", has(Items.HOPPER))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.SEATER_CAR.get())
                 .define('#', ItemTags.PLANKS)
@@ -262,7 +262,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("###")
                 .pattern("$ $")
                 .unlockedBy("has_item", has(Items.IRON_INGOT))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.CHEST_CAR.get())
                 .define('#', Items.CHEST)
@@ -271,7 +271,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern(" # ")
                 .pattern(" $ ")
                 .unlockedBy("has_item", has(ModItems.SEATER_CAR.get()))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.BARREL_CAR.get())
                 .define('#', Items.BARREL)
@@ -280,7 +280,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern(" # ")
                 .pattern(" $ ")
                 .unlockedBy("has_item", has(ModItems.SEATER_CAR.get()))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.FLUID_CAR.get())
                 .define('#', Items.GLASS)
@@ -289,7 +289,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern(" # ")
                 .pattern(" $ ")
                 .unlockedBy("has_item", has(ModItems.SEATER_CAR.get()))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.ENERGY_LOCOMOTIVE.get())
                 .define('#', Items.IRON_INGOT)
@@ -300,7 +300,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("_._")
                 .pattern("#$#")
                 .unlockedBy("has_item", has(ModItems.SEATER_CAR.get()))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.STEAM_LOCOMOTIVE.get())
                 .define('#', Items.IRON_INGOT)
@@ -311,7 +311,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("_._")
                 .pattern("#$#")
                 .unlockedBy("has_item", has(ModItems.SEATER_CAR.get()))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.RECEIVER_COMPONENT.get(), 8)
                 .define('o', Items.ENDER_EYE)
@@ -321,7 +321,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("#")
                 .pattern("_")
                 .unlockedBy("has_item", has(Items.ENDER_EYE))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.TRANSMITTER_COMPONENT.get(), 4)
                 .define('o', Items.ENDER_PEARL)
@@ -331,7 +331,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("#")
                 .pattern("_")
                 .unlockedBy("has_item", has(Items.ENDER_EYE))
-                .save(consumer);
+                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.CONDUCTORS_WRENCH.get(), 1)
                 .define('-', Items.IRON_INGOT)
@@ -341,6 +341,6 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern(" -r")
                 .pattern("-  ")
                 .unlockedBy("has_item", has(ModItems.SPRING.get()))
-                .save(consumer);
+                .save(output);
     }
 }
