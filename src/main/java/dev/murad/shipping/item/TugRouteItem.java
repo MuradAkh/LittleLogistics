@@ -2,11 +2,10 @@ package dev.murad.shipping.item;
 
 import dev.murad.shipping.entity.accessor.TugRouteScreenDataAccessor;
 import dev.murad.shipping.item.container.TugRouteContainer;
-import dev.murad.shipping.util.LegacyTugRouteUtil;
+import dev.murad.shipping.setup.ModDataComponents;
 import dev.murad.shipping.util.TugRoute;
 import dev.murad.shipping.util.TugRouteNode;
 import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 
@@ -19,21 +18,19 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipContext;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec2;
 import net.minecraftforge.network.NetworkHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
 public class TugRouteItem extends Item {
     private static final Logger LOGGER = LogManager.getLogger(TugRouteItem.class);
 
-    private static final String ROUTE_NBT = "route";
     public TugRouteItem(Properties properties) {
         super(properties);
     }
@@ -80,23 +77,8 @@ public class TugRouteItem extends Item {
     }
 
     @Override
-    public void verifyTagAfterLoad(@Nonnull CompoundTag nbt) {
-        super.verifyTagAfterLoad(nbt);
-        // convert old nbt format of route: "" into compound format
-        // Precond: nbt is non-null, and nbt.tag is nonnull type 10
-        CompoundTag tag = nbt.getCompound("tag");
-        if (tag.contains(ROUTE_NBT, 8)) {
-            LOGGER.info("Found legacy tug route tag, replacing now");
-            String routeString = tag.getString(ROUTE_NBT);
-            List<Vec2> legacyRoute = LegacyTugRouteUtil.parseLegacyRouteString(routeString);
-            TugRoute route = LegacyTugRouteUtil.convertLegacyRoute(legacyRoute);
-            tag.put(ROUTE_NBT, route.toNBT());
-        }
-    }
-
-    @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-        super.appendHoverText(stack, worldIn, tooltip, flagIn);
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
+        super.appendHoverText(stack, context, tooltip, flagIn);
         tooltip.add(Component.translatable("item.littlelogistics.tug_route.description"));
         tooltip.add(
                 Component.translatable("item.littlelogistics.tug_route.num_nodes", getRoute(stack).size())
@@ -104,13 +86,8 @@ public class TugRouteItem extends Item {
     }
 
     public static TugRoute getRoute(ItemStack itemStack) {
-        CompoundTag nbt = getTag(itemStack);
-        if(nbt == null || !nbt.contains(ROUTE_NBT, 10)) {
-            // don't write tag from client side, just return empty route
-            return new TugRoute();
-        }
-
-        return TugRoute.fromNBT(nbt.getCompound(ROUTE_NBT));
+        TugRoute route = itemStack.get(ModDataComponents.TUG_ROUTE);
+        return route != null ? route : new TugRoute();
     }
 
     public static boolean popRoute(ItemStack itemStack) {
@@ -141,16 +118,10 @@ public class TugRouteItem extends Item {
 
     // should only be called server side
     public static void saveRoute(TugRoute route, ItemStack itemStack){
-        CompoundTag nbt = getTag(itemStack);
-        if (nbt == null) {
-            nbt = new CompoundTag();
-            itemStack.setTag(nbt);
+        if (route.isEmpty()) {
+            itemStack.remove(ModDataComponents.TUG_ROUTE);
+        } else {
+            itemStack.set(ModDataComponents.TUG_ROUTE, route);
         }
-        nbt.put(ROUTE_NBT, route.toNBT());
-    }
-
-    @Nullable
-    private static CompoundTag getTag(ItemStack stack)  {
-        return stack.getTag();
     }
 }
