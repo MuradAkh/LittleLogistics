@@ -2,8 +2,6 @@ package dev.murad.shipping.entity.custom.vessel.tug;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -12,7 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.LeadItem;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraftforge.entity.PartEntity;
+import net.neoforged.neoforge.entity.PartEntity;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -35,11 +33,6 @@ public class VehicleFrontPart extends PartEntity<Entity> {
     @Nullable
     public ItemStack getPickResult() {
         return getParent().getPickResult();
-    }
-
-    @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        throw new UnsupportedOperationException();
     }
 
     public EntityDimensions getDimensions(Pose pPose) {
