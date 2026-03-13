@@ -245,7 +245,9 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         if (!this.level().isClientSide) {
             // not perfect, doesn't work when a mob stand in the way without moving, but works well enough underwater to keep this
             if (pEntity instanceof LivingEntity l && l.getVehicle() == null){
-                this.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
+                if (this instanceof StallingCapability s) {
+                    s.stall();
+                }
             }
             if (!pEntity.noPhysics && !this.noPhysics) {
                 // fix carts with passengers falling behind

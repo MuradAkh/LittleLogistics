@@ -52,7 +52,9 @@ public class LinkingHandler<T extends Entity & LinkableEntity<T>> {
                 waitForDominated = false;
                 stallNonTicking();
             } else if (waitForDominated) {
-                entity.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
+                if (entity instanceof StallingCapability s) {
+                    s.stall();
+                }
             }
             entity.getEntityData().set(dominantID, leader.map(Entity::getId).orElse(-1));
             entity.getEntityData().set(dominatedID, follower.map(Entity::getId).orElse(-1));

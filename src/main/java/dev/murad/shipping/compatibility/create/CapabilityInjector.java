@@ -12,25 +12,25 @@ public class CapabilityInjector {
 
     public static class TrainCarController extends MinecartController {
         public static TrainCarController EMPTY;
-        private final LazyOptional<StallingCapability> stallingCapability;
+        private final StallingCapability stallingCapability;
 
         public TrainCarController(SeaterCarEntity entity) {
             super(entity);
-            stallingCapability = entity == null ? LazyOptional.empty() : entity.getCapability(StallingCapability.STALLING_CAPABILITY);
+            stallingCapability = entity;
         }
 
         public boolean isStalled() {
-            return stallingCapability.map(StallingCapability::isFrozen).orElse(false);
+            return stallingCapability != null && stallingCapability.isFrozen();
         }
 
         public void setStalledExternally(boolean stall) {
-            stallingCapability.ifPresent(cap -> {
+            if (stallingCapability != null) {
                 if (stall) {
-                    cap.freeze();
+                    stallingCapability.freeze();
                 } else {
-                    cap.unfreeze();
+                    stallingCapability.unfreeze();
                 }
-            });
+            }
         }
 
         public static TrainCarController empty() {

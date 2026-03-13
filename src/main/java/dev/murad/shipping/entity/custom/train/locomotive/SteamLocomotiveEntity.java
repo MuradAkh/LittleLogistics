@@ -166,7 +166,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
 
     @Override
     public boolean canPlaceItemThroughFace(int index, @NotNull ItemStack itemStack, @Nullable Direction dir) {
-        return stalling.isDocked();
+        return isDocked();
     }
 
     @Override

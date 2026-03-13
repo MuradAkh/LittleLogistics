@@ -158,7 +158,7 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
 
     @Override
     public boolean canPlaceItemThroughFace(int index, @NotNull ItemStack itemStack, @Nullable Direction dir) {
-        return stalling.isDocked();
+        return isDocked();
     }
 
     @Override

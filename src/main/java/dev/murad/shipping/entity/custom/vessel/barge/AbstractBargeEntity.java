@@ -3,7 +3,6 @@ package dev.murad.shipping.entity.custom.vessel.barge;
 
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.custom.vessel.VesselEntity;
-import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.util.Train;
 import lombok.Getter;
 import net.minecraft.nbt.CompoundTag;
@@ -24,15 +23,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Optional;
 
-public abstract class AbstractBargeEntity extends VesselEntity {
+public abstract class AbstractBargeEntity extends VesselEntity implements StallingCapability {
 
     public AbstractBargeEntity(EntityType<? extends AbstractBargeEntity> type, Level world) {
         super(type, world);
@@ -140,68 +135,55 @@ public abstract class AbstractBargeEntity extends VesselEntity {
         return isDockable();
     }
 
-    private final StallingCapability capability = new StallingCapability() {
-        @Override
-        public boolean isDocked() {
-            return delegate().map(StallingCapability::isDocked).orElse(false);
+    private Optional<StallingCapability> delegateStalling() {
+        if (linkingHandler.train.getHead() instanceof StallingCapability s) {
+            return Optional.of(s);
         }
+        return Optional.empty();
+    }
 
-        @Override
-        public void dock(double x, double y, double z) {
-            delegate().ifPresent(s -> s.dock(x, y, z));
-        }
-
-        @Override
-        public void undock() {
-            delegate().ifPresent(StallingCapability::undock);
-        }
-
-        @Override
-        public boolean isStalled() {
-            return delegate().map(StallingCapability::isStalled).orElse(false);
-        }
-
-        @Override
-        public void stall() {
-            delegate().ifPresent(StallingCapability::stall);
-        }
-
-        @Override
-        public void unstall() {
-            delegate().ifPresent(StallingCapability::unstall);
-        }
-
-        @Override
-        public boolean isFrozen() {
-            return AbstractBargeEntity.super.isFrozen();
-        }
-
-        @Override
-        public void freeze() {
-            AbstractBargeEntity.super.setFrozen(true);
-        }
-
-        @Override
-        public void unfreeze() {
-            AbstractBargeEntity.super.setFrozen(false);
-        }
-
-        private Optional<StallingCapability> delegate() {
-            if (linkingHandler.train.getHead() instanceof AbstractTugEntity e) {
-                return e.getCapability(StallingCapability.STALLING_CAPABILITY).resolve();
-            }
-            return Optional.empty();
-        }
-    };
-
-    private final LazyOptional<StallingCapability> capabilityOpt = LazyOptional.of(() -> capability);
-
-    @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
-        if (cap == StallingCapability.STALLING_CAPABILITY) {
-            return capabilityOpt.cast();
-        }
-        return super.getCapability(cap);
+    public boolean isDocked() {
+        return delegateStalling().map(StallingCapability::isDocked).orElse(false);
+    }
+
+    @Override
+    public void dock(double x, double y, double z) {
+        delegateStalling().ifPresent(s -> s.dock(x, y, z));
+    }
+
+    @Override
+    public void undock() {
+        delegateStalling().ifPresent(StallingCapability::undock);
+    }
+
+    @Override
+    public boolean isStalled() {
+        return delegateStalling().map(StallingCapability::isStalled).orElse(false);
+    }
+
+    @Override
+    public void stall() {
+        delegateStalling().ifPresent(StallingCapability::stall);
+    }
+
+    @Override
+    public void unstall() {
+        delegateStalling().ifPresent(StallingCapability::unstall);
+    }
+
+    @Override
+    public boolean isFrozen() {
+        return super.isFrozen();
+    }
+
+    @Override
+    public void freeze() {
+        setFrozen(true);
+    }
+
+    @Override
+    public void unfreeze() {
+        setFrozen(false);
     }
 }
