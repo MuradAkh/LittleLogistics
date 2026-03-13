@@ -1,0 +1,34 @@
+modLoader="javafml"
+loaderVersion="${neo_version_range}"
+license="${mod_license}"
+issueTrackerURL="https://github.com/MuradAkh/LittleLogistics/issues"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_title}"
+displayURL="${mod_url}"
+logoFile="${mod_icon_path}"
+authors="${mod_author}"
+description='''${mod_description}'''
+
+[[dependencies.${mod_id}]]
+    modId="neoforge"
+    type="required"
+    versionRange="${neo_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    versionRange="${mc_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="patchouli"
+    type="optional"
+    versionRange="${patchouli_version_range}"
+    ordering="NONE"
+    side="BOTH"
