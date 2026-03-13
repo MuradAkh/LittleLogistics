@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class SeaterCarModel extends EntityModel<SeaterCarEntity> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "seatercarmodel"), "main");
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "seatercarmodel"), "main");
 	private final ModelPart bb_main;
 
 	public SeaterCarModel(ModelPart root) {

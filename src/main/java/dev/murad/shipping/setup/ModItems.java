@@ -37,9 +37,9 @@ public class ModItems {
      *  Empty Icons
      */
 
-    public static final ResourceLocation LOCO_ROUTE_ICON = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_loco_route");
-    public static final ResourceLocation TUG_ROUTE_ICON = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_tug_route");
-    public static final ResourceLocation EMPTY_ENERGY = new ResourceLocation(ShippingMod.MOD_ID, "item/empty_energy");
+    public static final ResourceLocation LOCO_ROUTE_ICON = ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "item/empty_loco_route");
+    public static final ResourceLocation TUG_ROUTE_ICON = ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "item/empty_tug_route");
+    public static final ResourceLocation EMPTY_ENERGY = ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "item/empty_energy");
 
 
     /**

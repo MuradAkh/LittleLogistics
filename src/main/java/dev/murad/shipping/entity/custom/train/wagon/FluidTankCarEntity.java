@@ -102,7 +102,7 @@ public class FluidTankCarEntity extends AbstractWagonEntity {
                 clientCurrAmount =  entityData.get(VOLUME);
                 tank.setFluid(new FluidStack(clientCurrFluid, clientCurrAmount));
             } else if (FLUID_TYPE.equals(key)) {
-                ResourceLocation fluidName = new ResourceLocation(entityData.get(FLUID_TYPE));
+                ResourceLocation fluidName = ResourceLocation.parse(entityData.get(FLUID_TYPE));
                 clientCurrFluid = ForgeRegistries.FLUIDS.getValue(fluidName);
                 tank.setFluid(new FluidStack(clientCurrFluid, clientCurrAmount));
             }

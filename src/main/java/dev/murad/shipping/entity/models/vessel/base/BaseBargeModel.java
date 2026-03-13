@@ -15,9 +15,9 @@ import net.minecraft.world.entity.Entity;
 
 public class BaseBargeModel<T extends Entity & Colorable> extends EntityModel<T> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-	public static final ModelLayerLocation CLOSED_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "base_barge_model_closed"), "main");
-	public static final ModelLayerLocation OPEN_FRONT_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "base_barge_model_open_front"), "main");
-	public static final ModelLayerLocation OPEN_SIDES_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "base_barge_model_open_sides"), "main");
+	public static final ModelLayerLocation CLOSED_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "base_barge_model_closed"), "main");
+	public static final ModelLayerLocation OPEN_FRONT_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "base_barge_model_open_front"), "main");
+	public static final ModelLayerLocation OPEN_SIDES_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "base_barge_model_open_sides"), "main");
 
 	private final ModelPart bb_main;
 

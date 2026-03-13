@@ -13,7 +13,7 @@ import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
 
 public class SteamHeadVehicleScreen<T extends Entity & HeadVehicle> extends AbstractHeadVehicleScreen<T, SteamHeadVehicleContainer<T>> {
-    private static final ResourceLocation GUI = new ResourceLocation(ShippingMod.MOD_ID, "textures/container/steam_locomotive.png");
+    private static final ResourceLocation GUI = ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "textures/container/steam_locomotive.png");
 
     public SteamHeadVehicleScreen(SteamHeadVehicleContainer menu, Inventory inventory, Component p_i51105_3_) {
         super(menu, inventory, p_i51105_3_);

@@ -180,7 +180,7 @@ public class FluidRenderUtil {
         if(fluidStill == null){
             return;
         }
-//        VertexConsumer vertexBuilderBlockQuads = renderBuffer.getBuffer(RenderType.entityTranslucent(new ResourceLocation("minecraft:textures/block/lava_still.png")));
+//        VertexConsumer vertexBuilderBlockQuads = renderBuffer.getBuffer(RenderType.entityTranslucent(ResourceLocation.parse("minecraft:textures/block/lava_still.png")));
         VertexConsumer vertexBuilderBlockQuads = renderBuffer.getBuffer(RenderType.translucent());
 
         int color = attributes.getTintColor();

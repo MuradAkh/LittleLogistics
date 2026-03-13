@@ -16,9 +16,9 @@ import net.minecraft.world.entity.Entity;
 
 public class FishingInsertBargeModel<T extends Entity & Colorable> extends EntityModel<T> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-    public static final ModelLayerLocation STASHED_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "fishing_insert_barge_model_stashed"), "main");
-    public static final ModelLayerLocation TRANSITION_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "fishing_insert_barge_model_transition"), "main");
-    public static final ModelLayerLocation DEPLOYED_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "fishing_insert_barge_model_deployed"), "main");
+    public static final ModelLayerLocation STASHED_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "fishing_insert_barge_model_stashed"), "main");
+    public static final ModelLayerLocation TRANSITION_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "fishing_insert_barge_model_transition"), "main");
+    public static final ModelLayerLocation DEPLOYED_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "fishing_insert_barge_model_deployed"), "main");
     private final ModelPart armsLeft;
     private final ModelPart armsRight;
 

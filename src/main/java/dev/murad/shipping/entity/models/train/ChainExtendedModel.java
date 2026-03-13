@@ -16,7 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 // Paste this class into your mod and generate all required imports
 public class ChainExtendedModel extends EntityModel<AbstractBargeEntity> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ShippingMod.MOD_ID, "chainextendedmodel"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "chainextendedmodel"), "main");
     private final ModelPart bb_main;
 
     public ChainExtendedModel(ModelPart root) {

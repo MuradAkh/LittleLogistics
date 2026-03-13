@@ -26,7 +26,7 @@ import org.joml.Matrix4f;
 public abstract class AbstractVesselRenderer<T extends VesselEntity> extends EntityRenderer<T> {
 
     private static final ResourceLocation CHAIN_TEXTURE =
-            new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/chain.png");
+            ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "textures/entity/chain.png");
 
     private final ChainModel chainModel;
 

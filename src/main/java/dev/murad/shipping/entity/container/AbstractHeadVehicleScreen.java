@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractHeadVehicleScreen<U extends Entity & HeadVehicle, T extends AbstractHeadVehicleContainer<?, U>> extends AbstractVehicleScreen<T>{
-    private static final ResourceLocation REGISTRATION = new ResourceLocation(ShippingMod.MOD_ID, "textures/container/vehicle_registration.png");
+    private static final ResourceLocation REGISTRATION = ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "textures/container/vehicle_registration.png");
     private Button on;
     private Button off;
     private Button register;

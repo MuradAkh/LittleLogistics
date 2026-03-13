@@ -29,7 +29,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     public static ResourceLocation getBlTx(String name){
-        return new ResourceLocation(ShippingMod.MOD_ID, String.format("block/%s", name));
+        return ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, String.format("block/%s", name));
     }
 
     private ModelFile getTugDockModel(BlockState state){

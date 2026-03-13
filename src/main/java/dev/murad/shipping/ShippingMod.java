@@ -57,6 +57,6 @@ public class ShippingMod
     }
 
     public static ResourceLocation entityTexture(String suffix) {
-        return new ResourceLocation(ShippingMod.MOD_ID, String.format("textures/entity/%s", suffix));
+        return ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, String.format("textures/entity/%s", suffix));
     }
 }

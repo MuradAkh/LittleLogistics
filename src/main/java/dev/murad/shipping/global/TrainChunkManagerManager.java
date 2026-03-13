@@ -41,7 +41,7 @@ public class TrainChunkManagerManager extends SavedData {
         this.server = server;
         for (Tag cell : tag.getList("saved", 10)) {
             if (cell instanceof CompoundTag compoundTag) {
-                ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(compoundTag.getString("level")));
+                ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(compoundTag.getString("level")));
                 ServerLevel level = server.getLevel(dimension);
                 if (level == null) {
                     return;

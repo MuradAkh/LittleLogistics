@@ -48,7 +48,7 @@ import java.util.OptionalDouble;
 @Mod.EventBusSubscriber(modid = ShippingMod.MOD_ID, value = Dist.CLIENT)
 public class ForgeClientEventHandler {
 
-    public static final ResourceLocation BEAM_LOCATION = new ResourceLocation(ShippingMod.MOD_ID, "textures/entity/beacon_beam.png");
+    public static final ResourceLocation BEAM_LOCATION = ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "textures/entity/beacon_beam.png");
 
     public static class ModRenderType extends RenderType {
         public static final RenderType LINES = create("lines", DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, false, false,
