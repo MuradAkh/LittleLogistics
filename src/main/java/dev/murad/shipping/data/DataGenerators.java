@@ -4,10 +4,10 @@ import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.data.client.ModBlockStateProvider;
 import dev.murad.shipping.data.client.ModItemModelProvider;
 import net.minecraft.data.DataGenerator;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = ShippingMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class DataGenerators {
@@ -26,8 +26,8 @@ public final class DataGenerators {
         var blockTags = new ModBlockTagsProvider(pack, lookupProvider, existingFileHelper);
         gen.addProvider(true, blockTags);
         gen.addProvider(true, new ModItemTagsProvider(pack, lookupProvider, blockTags.contentsGetter(), existingFileHelper));
-        gen.addProvider(true, new ModLootTableProvider(pack));
-        gen.addProvider(true, new ModRecipeProvider(pack));
+        gen.addProvider(true, new ModLootTableProvider(pack, lookupProvider));
+        gen.addProvider(true, new ModRecipeProvider(pack, lookupProvider));
     }
 
 }
