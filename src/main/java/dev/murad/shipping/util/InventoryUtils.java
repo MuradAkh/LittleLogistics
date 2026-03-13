@@ -6,9 +6,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nullable;
@@ -46,10 +45,10 @@ public class InventoryUtils {
                 }
             } else if (!airList.isEmpty() && target instanceof Entity){
                 Entity e = (Entity) target;
-                boolean validSlot = e.getCapability(ForgeCapabilities.ITEM_HANDLER)
-                        .map(itemHandler -> airList.stream()
-                                .map(j -> itemHandler.isItemValid(j, stack))
-                                .reduce(false, Boolean::logicalOr)).orElse(true);
+                var itemHandler = e.getCapability(Capabilities.ItemHandler.ENTITY, null);
+                boolean validSlot = itemHandler != null
+                        ? airList.stream().map(j -> itemHandler.isItemValid(j, stack)).reduce(false, Boolean::logicalOr)
+                        : true;
                 if(validSlot) {
                     return true;
                 }
@@ -94,13 +93,7 @@ public class InventoryUtils {
     public static IEnergyStorage getEnergyCapabilityInSlot(int slot, ItemStackHandler handler) {
         ItemStack stack = handler.getStackInSlot(slot);
         if (!stack.isEmpty()) {
-            LazyOptional<IEnergyStorage> capabilityLazyOpt = stack.getCapability(ForgeCapabilities.ENERGY);
-            if (capabilityLazyOpt.isPresent()) {
-                Optional<IEnergyStorage> capabilityOpt = capabilityLazyOpt.resolve();
-                if (capabilityOpt.isPresent()) {
-                    return capabilityOpt.get();
-                }
-            }
+            return stack.getCapability(Capabilities.EnergyStorage.ITEM);
         }
         return null;
     }

@@ -14,7 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.minecraftforge.energy.IEnergyStorage;
 
 public class VesselChargerTileEntity extends BlockEntity implements IVesselLoader {
@@ -48,7 +48,7 @@ public class VesselChargerTileEntity extends BlockEntity implements IVesselLoade
 
     private boolean tryChargeEntity() {
         return IVesselLoader.getEntityCapability(getBlockPos().relative(getBlockState().getValue(VesselChargerBlock.FACING)),
-                ForgeCapabilities.ENERGY, level).map(iEnergyStorage -> {
+                Capabilities.EnergyStorage.ENTITY, level).map(iEnergyStorage -> {
                     int vesselCap = iEnergyStorage.receiveEnergy(MAX_TRANSFER, true);
                     int toTransfer = internalBattery.extractEnergy(vesselCap, false);
                     return iEnergyStorage.receiveEnergy(toTransfer, false) > 0;
@@ -71,14 +71,14 @@ public class VesselChargerTileEntity extends BlockEntity implements IVesselLoade
 
     @Override
     public<T extends Entity & LinkableEntity<T>> boolean hold(T vehicle, Mode mode) {
-        return vehicle.getCapability(ForgeCapabilities.ENERGY).map(energyHandler -> {
-            switch (mode) {
-                case EXPORT:
-                    return (energyHandler.getEnergyStored() < energyHandler.getMaxEnergyStored() - 50) && internalBattery.getEnergyStored() > 50;
-                default:
-                    return false;
-            }
-        }).orElse(false);
+        var energyHandler = vehicle.getCapability(Capabilities.EnergyStorage.ENTITY, null);
+        if (energyHandler == null) return false;
+        switch (mode) {
+            case EXPORT:
+                return (energyHandler.getEnergyStored() < energyHandler.getMaxEnergyStored() - 50) && internalBattery.getEnergyStored() > 50;
+            default:
+                return false;
+        }
     }
 
     public void use(Player player, InteractionHand hand) {

@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -94,11 +94,8 @@ public class FluidHopperTileEntity extends BlockEntity implements IVesselLoader 
     }
 
     private Optional<IFluidHandler> getExternalFluidHandler(BlockPos pos){
-        return Optional.ofNullable(this.level.getBlockEntity(pos))
-                .map(tile -> tile.getCapability(ForgeCapabilities.FLUID_HANDLER))
-                .flatMap(LazyOptional::resolve)
-                .map(Optional::of).orElseGet(() -> IVesselLoader.getEntityCapability(pos, ForgeCapabilities.FLUID_HANDLER, this.level));
-
+        return Optional.ofNullable(level.getCapability(Capabilities.FluidHandler.BLOCK, pos, null))
+                .or(() -> IVesselLoader.getEntityCapability(pos, Capabilities.FluidHandler.ENTITY, this.level));
     }
 
     private boolean tryImportFluid() {
@@ -116,16 +113,16 @@ public class FluidHopperTileEntity extends BlockEntity implements IVesselLoader 
 
     @Override
     public<T extends Entity & LinkableEntity<T>> boolean hold(T vehicle, Mode mode) {
-        return vehicle.getCapability(ForgeCapabilities.FLUID_HANDLER).map(iFluidHandler -> {
-            switch (mode) {
-                case IMPORT:
-                    return !FluidUtil.tryFluidTransfer(this.tank, iFluidHandler, 1, false).isEmpty();
-                case EXPORT:
-                    return !FluidUtil.tryFluidTransfer(iFluidHandler, this.tank, 1, false).isEmpty();
-                default:
-                    return false;
-            }
-        }).orElse(false);
+        var fluidHandler = vehicle.getCapability(Capabilities.FluidHandler.ENTITY, null);
+        if (fluidHandler == null) return false;
+        switch (mode) {
+            case IMPORT:
+                return !FluidUtil.tryFluidTransfer(this.tank, fluidHandler, 1, false).isEmpty();
+            case EXPORT:
+                return !FluidUtil.tryFluidTransfer(fluidHandler, this.tank, 1, false).isEmpty();
+            default:
+                return false;
+        }
     }
 
     public static void serverTick(Level level, BlockPos blockPos, BlockState blockState, FluidHopperTileEntity e) {
