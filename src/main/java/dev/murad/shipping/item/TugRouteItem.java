@@ -21,7 +21,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipContext;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -60,7 +59,7 @@ public class TugRouteItem extends Item {
         ItemStack itemstack = player.getItemInHand(hand);
         if(!player.level().isClientSide){
             if (player.isShiftKeyDown()) {
-                NetworkHooks.openScreen((ServerPlayer) player, createContainerProvider(hand), getDataAccessor(player, hand)::write);
+                ((ServerPlayer) player).openMenu(createContainerProvider(hand), getDataAccessor(player, hand)::write);
             } else {
                 int x = (int) Math.floor(player.getX());
                 int z = (int) Math.floor(player.getZ());
