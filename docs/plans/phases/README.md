@@ -2,7 +2,7 @@
 
 Concrete, step-by-step migration plans for each phase of the Forge 1.20.1 → NeoForge 1.21.1 port.
 
-See [evaluation.md](../../../evaluation.md) for the comprehensive gap analysis that informed these plans.
+See [evaluation.md](../2026-03-13-migration-eval.md) for the comprehensive gap analysis that informed these plans.
 
 ## Phases
 
@@ -13,12 +13,12 @@ See [evaluation.md](../../../evaluation.md) for the comprehensive gap analysis t
 | 2 | [Mod Entrypoint & Registration](phase-2-registration.md) | MEDIUM | RegistryObject → DeferredHolder across 15 files |
 | 3 | [Networking](phase-3-networking.md) | MEDIUM | SimpleChannel → CustomPacketPayload records with StreamCodec |
 | 4 | [Capabilities](phase-4-capabilities.md) | CRITICAL | 14 getCapability() overrides, 15 LazyOptional fields, centralized RegisterCapabilitiesEvent |
-| 5 | [Entity Data & BlockEntity Serialization](phase-5-entity-data.md) | MEDIUM | defineSynchedData Builder pattern, HolderLookup.Provider on BlockEntity load/save |
-| 6 | [Data Components](phase-6-data-components.md) | HIGH | Codec design for TugRoute/LocoRoute, Item NBT → DataComponentType |
-| 7 | [Recipe & Data Generation](phase-7-recipe-datagen.md) | LOW-MEDIUM | RecipeOutput signature (NO Runner class in 1.21.1) |
-| 8 | [GUI / Screens](phase-8-gui-screens.md) | LOW-MEDIUM | NetworkHooks.openScreen() removal, RegisterMenuScreensEvent |
-| 9A | [Vanilla/NeoForge API Reworks](phase-9a-api-reworks.md) | MEDIUM | AbstractMinecart.Type physics rewrite, PartEntity relocation |
-| 9B | [Mechanical Cleanup](phase-9b-mechanical-cleanup.md) | LOW | 80x ResourceLocation find-and-replace |
+| 5 | [Entity Data & BlockEntity Serialization](phase-5-entity-data.md) | ✅ DONE | defineSynchedData Builder pattern, HolderLookup.Provider on BlockEntity load/save |
+| 6 | [Data Components](phase-6-data-components.md) | ✅ DONE | Codec design for TugRoute/LocoRoute, Item NBT → DataComponentType |
+| 7 | [Recipe & Data Generation](phase-7-recipe-datagen.md) | ✅ DONE | RecipeOutput signature (NO Runner class in 1.21.1) |
+| 8 | [GUI / Screens](phase-8-gui-screens.md) | ✅ DONE | NetworkHooks.openScreen() removal, RegisterMenuScreensEvent |
+| 9A | [Vanilla/NeoForge API Reworks](phase-9a-api-reworks.md) | ✅ DONE | AbstractMinecart.Type physics rewrite, PartEntity relocation |
+| 9B | [Mechanical Cleanup](phase-9b-mechanical-cleanup.md) | ✅ DONE | 80x ResourceLocation find-and-replace |
 | 10 | [Create Mod Compatibility](phase-10-create-compat.md) | DEFERRED | Follow-up PR after Create for NeoForge 1.21.1 is available |
 
 ## Execution Order
