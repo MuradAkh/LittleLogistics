@@ -348,7 +348,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         return true;
     }
 
-    @Override
     public boolean isPoweredCart() {
         return true;
     }
