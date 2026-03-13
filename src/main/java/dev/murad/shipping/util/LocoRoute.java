@@ -1,12 +1,38 @@
 package dev.murad.shipping.util;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
 public class LocoRoute extends HashSet<LocoRouteNode> {
+
+    public static final Codec<LocoRoute> CODEC = RecordCodecBuilder.create(instance ->
+        instance.group(
+            Codec.STRING.optionalFieldOf("name")
+                .forGetter(r -> Optional.ofNullable(r.name)),
+            Codec.STRING.optionalFieldOf("owner")
+                .forGetter(r -> Optional.ofNullable(r.owner)),
+            LocoRouteNode.CODEC.listOf().fieldOf("nodes")
+                .forGetter(r -> List.copyOf(r))
+        ).apply(instance, (name, owner, nodes) ->
+            new LocoRoute(name.orElse(null), owner.orElse(null), new HashSet<>(nodes)))
+    );
+
+    public static final StreamCodec<FriendlyByteBuf, LocoRoute> STREAM_CODEC =
+        StreamCodec.composite(
+            ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8), r -> Optional.ofNullable(r.name),
+            ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8), r -> Optional.ofNullable(r.owner),
+            LocoRouteNode.STREAM_CODEC.apply(ByteBufCodecs.list()), r -> List.copyOf(r),
+            (name, owner, nodes) ->
+                new LocoRoute(name.orElse(null), owner.orElse(null), new HashSet<>(nodes))
+        );
 
     private static final String NAME_TAG = "name";
     private static final String OWNER_TAG = "owner";

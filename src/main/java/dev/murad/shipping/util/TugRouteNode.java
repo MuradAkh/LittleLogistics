@@ -1,17 +1,42 @@
 package dev.murad.shipping.util;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec2;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.Optional;
 
 public class TugRouteNode {
     private static final String NAME_TAG = "name";
     private static final String X_TAG = "x";
     private static final String Z_TAG = "z";
     private static final String COORDS_TAG = "coordinates";
+
+    public static final Codec<TugRouteNode> CODEC = RecordCodecBuilder.create(instance ->
+        instance.group(
+            Codec.STRING.optionalFieldOf("name")
+                .forGetter(n -> Optional.ofNullable(n.getName())),
+            Codec.DOUBLE.fieldOf("x")
+                .forGetter(TugRouteNode::getX),
+            Codec.DOUBLE.fieldOf("z")
+                .forGetter(TugRouteNode::getZ)
+        ).apply(instance, (name, x, z) -> new TugRouteNode(name.orElse(null), x, z))
+    );
+
+    public static final StreamCodec<FriendlyByteBuf, TugRouteNode> STREAM_CODEC =
+        StreamCodec.composite(
+            ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8), n -> Optional.ofNullable(n.getName()),
+            ByteBufCodecs.DOUBLE, TugRouteNode::getX,
+            ByteBufCodecs.DOUBLE, TugRouteNode::getZ,
+            (name, x, z) -> new TugRouteNode(name.orElse(null), x, z)
+        );
 
     private String name;
     private final double x, z;

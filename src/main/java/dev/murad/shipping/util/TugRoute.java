@@ -1,14 +1,36 @@
 package dev.murad.shipping.util;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TugRoute extends ArrayList<TugRouteNode> {
+
+    public static final Codec<TugRoute> CODEC = RecordCodecBuilder.create(instance ->
+        instance.group(
+            Codec.STRING.optionalFieldOf("name")
+                .forGetter(r -> Optional.ofNullable(r.name)),
+            TugRouteNode.CODEC.listOf().fieldOf("nodes")
+                .forGetter(r -> List.copyOf(r))
+        ).apply(instance, (name, nodes) -> new TugRoute(name.orElse(null), nodes))
+    );
+
+    public static final StreamCodec<FriendlyByteBuf, TugRoute> STREAM_CODEC =
+        StreamCodec.composite(
+            ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8), r -> Optional.ofNullable(r.name),
+            TugRouteNode.STREAM_CODEC.apply(ByteBufCodecs.list()), r -> List.copyOf(r),
+            (name, nodes) -> new TugRoute(name.orElse(null), nodes)
+        );
 
     private static final String NAME_TAG = "name";
     private static final String NODES_TAG = "nodes";
