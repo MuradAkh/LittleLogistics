@@ -16,7 +16,7 @@ public class CapabilityInjector {
 
         public TrainCarController(SeaterCarEntity entity) {
             super(entity);
-            stallingCapability = entity instanceof StallingCapability s ? s : null;
+            stallingCapability = entity;
         }
 
         public boolean isStalled() {
