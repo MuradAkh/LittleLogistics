@@ -1,6 +1,5 @@
 package dev.murad.shipping.entity.custom.train.wagon;
 
-import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.FluidDisplayUtil;
@@ -40,8 +39,8 @@ public class FluidTankCarEntity extends AbstractWagonEntity {
             sendInfoToClient();
         }
     };
-    private static final EntityDataAccessor<Integer> VOLUME = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<String> FLUID_TYPE = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<Integer> VOLUME = SynchedEntityData.defineId(FluidTankCarEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<String> FLUID_TYPE = SynchedEntityData.defineId(FluidTankCarEntity.class, EntityDataSerializers.STRING);
     private Fluid clientCurrFluid = Fluids.EMPTY;
     private int clientCurrAmount = 0;
     private final LazyOptional<IFluidHandler> holder = LazyOptional.of(() -> tank);
