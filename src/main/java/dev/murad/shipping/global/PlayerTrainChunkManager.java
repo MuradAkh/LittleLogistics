@@ -3,7 +3,6 @@ package dev.murad.shipping.global;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.network.client.EntityPosition;
 import dev.murad.shipping.network.client.VehicleTrackerClientPacket;
-import dev.murad.shipping.network.client.VehicleTrackerPacketHandler;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
 import lombok.Getter;
@@ -20,7 +19,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -141,7 +140,7 @@ public class PlayerTrainChunkManager extends SavedData {
 
         Player player = level.getPlayerByUUID(uuid);
         if(player instanceof ServerPlayer serverPlayer && serverPlayer.getItemInHand(InteractionHand.MAIN_HAND).getItem().equals(ModItems.CONDUCTORS_WRENCH.get())) {
-            VehicleTrackerPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer), VehicleTrackerClientPacket.of(getEntityPositions(), level.dimension().toString()));
+            PacketDistributor.sendToPlayer(serverPlayer, VehicleTrackerClientPacket.of(getEntityPositions(), level.dimension().toString()));
         }
 
         if(this.changed || changed || enrolled.stream()

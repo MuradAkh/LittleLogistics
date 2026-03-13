@@ -37,9 +37,6 @@ public class Registration  {
         ModTileEntitiesTypes.register();
         ModRecipeSerializers.register();
         ModMenuTypes.register();
-        // Phase 3 TODO: TugRoutePacketHandler.register();
-        // Phase 3 TODO: VehicleTrackerPacketHandler.register();
-        // Phase 3 TODO: VehiclePacketHandler.register();
         ModSounds.register();
     }
 }

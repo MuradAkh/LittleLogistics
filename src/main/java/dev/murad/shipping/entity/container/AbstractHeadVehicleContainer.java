@@ -3,10 +3,10 @@ package dev.murad.shipping.entity.container;
 import dev.murad.shipping.entity.accessor.HeadVehicleDataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.network.EnrollVehiclePacket;
-import dev.murad.shipping.network.VehiclePacketHandler;
 import dev.murad.shipping.network.SetEnginePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -57,11 +57,11 @@ public abstract class AbstractHeadVehicleContainer<T extends HeadVehicleDataAcce
     };
 
     public void setEngine(boolean state){
-        VehiclePacketHandler.INSTANCE.sendToServer(new SetEnginePacket(entity.getId(), state));
+        PacketDistributor.sendToServer(new SetEnginePacket(entity.getId(), state));
     }
 
     public void enroll(){
-        VehiclePacketHandler.INSTANCE.sendToServer(new EnrollVehiclePacket(entity.getId()));
+        PacketDistributor.sendToServer(new EnrollVehiclePacket(entity.getId()));
     }
 
     public String getOwner(){
