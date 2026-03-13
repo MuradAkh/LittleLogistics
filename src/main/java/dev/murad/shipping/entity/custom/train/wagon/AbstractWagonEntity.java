@@ -7,13 +7,9 @@ import dev.murad.shipping.util.Train;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
-
-import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
+public abstract class AbstractWagonEntity extends AbstractTrainCarEntity implements StallingCapability {
 
     public AbstractWagonEntity(EntityType<?> p_38087_, Level p_38088_) {
         super(p_38087_, p_38088_);
@@ -37,7 +33,7 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
 
     @Override
     public void tick() {
-        if(capability.isFrozen() || linkingHandler.train.getTug().map(s -> (AbstractLocomotiveEntity) s).map(AbstractLocomotiveEntity::shouldFreezeTrain).orElse(false)){
+        if(this.isFrozen() || linkingHandler.train.getTug().map(s -> (AbstractLocomotiveEntity) s).map(AbstractLocomotiveEntity::shouldFreezeTrain).orElse(false)){
             this.setDeltaMovement(Vec3.ZERO);
         } else {
             super.tick();
@@ -84,68 +80,55 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity {
         return isDockable();
     }
 
-    private final StallingCapability capability = new StallingCapability() {
-        @Override
-        public boolean isDocked() {
-            return delegate().map(StallingCapability::isDocked).orElse(false);
+    private Optional<StallingCapability> delegateStalling() {
+        if (linkingHandler.train.getHead() instanceof StallingCapability s) {
+            return Optional.of(s);
         }
+        return Optional.empty();
+    }
 
-        @Override
-        public void dock(double x, double y, double z) {
-            delegate().ifPresent(s -> s.dock(x, y, z));
-        }
-
-        @Override
-        public void undock() {
-            delegate().ifPresent(StallingCapability::undock);
-        }
-
-        @Override
-        public boolean isStalled() {
-            return delegate().map(StallingCapability::isStalled).orElse(false);
-        }
-
-        @Override
-        public void stall() {
-            delegate().ifPresent(StallingCapability::stall);
-        }
-
-        @Override
-        public void unstall() {
-            delegate().ifPresent(StallingCapability::unstall);
-        }
-
-        @Override
-        public boolean isFrozen() {
-            return AbstractWagonEntity.super.isFrozen();
-        }
-
-        @Override
-        public void freeze() {
-            AbstractWagonEntity.super.setFrozen(true);
-        }
-
-        @Override
-        public void unfreeze() {
-            AbstractWagonEntity.super.setFrozen(false);
-        }
-
-        private Optional<StallingCapability> delegate() {
-            if (linkingHandler.train.getHead() instanceof AbstractLocomotiveEntity e) {
-                return e.getCapability(StallingCapability.STALLING_CAPABILITY).resolve();
-            }
-            return Optional.empty();
-        }
-    };
-
-    private final LazyOptional<StallingCapability> capabilityOpt = LazyOptional.of(() -> capability);
-
-    @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
-        if (cap == StallingCapability.STALLING_CAPABILITY) {
-            return capabilityOpt.cast();
-        }
-        return super.getCapability(cap);
+    public boolean isDocked() {
+        return delegateStalling().map(StallingCapability::isDocked).orElse(false);
+    }
+
+    @Override
+    public void dock(double x, double y, double z) {
+        delegateStalling().ifPresent(s -> s.dock(x, y, z));
+    }
+
+    @Override
+    public void undock() {
+        delegateStalling().ifPresent(StallingCapability::undock);
+    }
+
+    @Override
+    public boolean isStalled() {
+        return delegateStalling().map(StallingCapability::isStalled).orElse(false);
+    }
+
+    @Override
+    public void stall() {
+        delegateStalling().ifPresent(StallingCapability::stall);
+    }
+
+    @Override
+    public void unstall() {
+        delegateStalling().ifPresent(StallingCapability::unstall);
+    }
+
+    @Override
+    public boolean isFrozen() {
+        return super.isFrozen();
+    }
+
+    @Override
+    public void freeze() {
+        setFrozen(true);
+    }
+
+    @Override
+    public void unfreeze() {
+        setFrozen(false);
     }
 }

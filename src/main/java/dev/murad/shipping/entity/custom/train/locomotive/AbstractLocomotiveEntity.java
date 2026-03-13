@@ -39,8 +39,6 @@ import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.network.NetworkHooks;
@@ -53,7 +51,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity implements LinkableEntityHead<AbstractTrainCarEntity>, ItemHandlerVanillaContainerWrapper, HeadVehicle {
+public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity implements LinkableEntityHead<AbstractTrainCarEntity>, ItemHandlerVanillaContainerWrapper, HeadVehicle, StallingCapability {
     @Setter
     protected boolean engineOn = false;
 
@@ -372,52 +370,49 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     private void tickDockCheck() {
-        getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(cap -> {
-            int x = (int) Math.floor(this.getX());
-            int y = (int) Math.floor(this.getY());
-            int z = (int) Math.floor(this.getZ());
+        int x = (int) Math.floor(this.getX());
+        int y = (int) Math.floor(this.getY());
+        int z = (int) Math.floor(this.getZ());
 
-            boolean docked = cap.isDocked();
+        boolean docked = this.isDocked();
 
-            if (docked && dockCheckCooldown > 0){
-                dockCheckCooldown--;
-                this.setDeltaMovement(Vec3.ZERO);
-                this.moveTo(x + 0.5 ,getY(),z + 0.5);
-                return;
-            }
+        if (docked && dockCheckCooldown > 0){
+            dockCheckCooldown--;
+            this.setDeltaMovement(Vec3.ZERO);
+            this.moveTo(x + 0.5 ,getY(),z + 0.5);
+            return;
+        }
 
-            Function<Double, Double> prepCord =
-                    (Double d) -> Math.abs(d - d.intValue());
-            Predicate<Double> aroundCentre =
-                    (var i) -> prepCord.apply(i) < 0.8 && prepCord.apply(i) > 0.2;
+        Function<Double, Double> prepCord =
+                (Double d) -> Math.abs(d - d.intValue());
+        Predicate<Double> aroundCentre =
+                (var i) -> prepCord.apply(i) < 0.8 && prepCord.apply(i) > 0.2;
 
-            if(!aroundCentre.test(this.getX()) || !aroundCentre.test(this.getZ())){
-                return;
-            }
+        if(!aroundCentre.test(this.getX()) || !aroundCentre.test(this.getZ())){
+            return;
+        }
 
 
-            // Check docks
-            boolean shouldDock = Optional.ofNullable(level().getBlockEntity(getOnPos().above()))
-                                    .filter(entity -> entity instanceof LocomotiveDockTileEntity)
-                                    .map(entity -> (LocomotiveDockTileEntity) entity)
-                                    .map(dock -> dock.hold(this, getDirection()))
-                                    .orElse(false);
+        // Check docks
+        boolean shouldDock = Optional.ofNullable(level().getBlockEntity(getOnPos().above()))
+                                .filter(entity -> entity instanceof LocomotiveDockTileEntity)
+                                .map(entity -> (LocomotiveDockTileEntity) entity)
+                                .map(dock -> dock.hold(this, getDirection()))
+                                .orElse(false);
 
-            boolean changedDock = !docked && shouldDock;
-            boolean changedUndock = docked && !shouldDock;
+        boolean changedDock = !docked && shouldDock;
+        boolean changedUndock = docked && !shouldDock;
 
-            if(shouldDock) {
-                dockCheckCooldown = 20; // todo: magic number
-                cap.dock(x + 0.5 ,getY(),z + 0.5);
-            } else {
-                dockCheckCooldown = 0;
-                cap.undock();
-            }
+        if(shouldDock) {
+            dockCheckCooldown = 20; // todo: magic number
+            this.dock(x + 0.5 ,getY(),z + 0.5);
+        } else {
+            dockCheckCooldown = 0;
+            this.undock();
+        }
 
-            if (changedDock) onDock();
-            if (changedUndock) onUndock();
-        });
-
+        if (changedDock) onDock();
+        if (changedUndock) onUndock();
     }
 
     private double getSpeedModifier(){
@@ -466,7 +461,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     public boolean shouldFreezeTrain() {
-        return !enrollmentHandler.mayMove() || (stalling.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(AbstractTrainCarEntity::isFrozen);
+        return !enrollmentHandler.mayMove() || (this.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(AbstractTrainCarEntity::isFrozen);
     }
 
     private void accelerate() {
@@ -504,65 +499,51 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         linkingHandler.train = train;
     }
 
-    protected final StallingCapability stalling = new StallingCapability() {
-        @Override
-        public boolean isDocked() {
-            return docked;
-        }
-
-        @Override
-        public void dock(double x, double y, double z) {
-            docked = true;
-            setDeltaMovement(Vec3.ZERO);
-            moveTo(x, y, z);
-        }
-
-        @Override
-        public void undock() {
-            docked = false;
-        }
-
-        @Override
-        public boolean isStalled() {
-            return remainingStallTime > 0;
-        }
-
-        @Override
-        public void stall() {
-            remainingStallTime = 20;
-        }
-
-        @Override
-        public void unstall() {
-            remainingStallTime = 0;
-        }
-
-        @Override
-        public boolean isFrozen() {
-            return AbstractLocomotiveEntity.super.isFrozen();
-        }
-
-        @Override
-        public void freeze() {
-            setFrozen(true);
-        }
-
-        @Override
-        public void unfreeze() {
-            setFrozen(false);
-        }
-    };
-
-    // cache for best performance
-    private final LazyOptional<StallingCapability> stallingOpt = LazyOptional.of(() -> stalling);
-
-    @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
-        if (cap == StallingCapability.STALLING_CAPABILITY) {
-            return stallingOpt.cast();
-        }
-        return super.getCapability(cap);
+    public boolean isDocked() {
+        return docked;
+    }
+
+    @Override
+    public void dock(double x, double y, double z) {
+        docked = true;
+        setDeltaMovement(Vec3.ZERO);
+        moveTo(x, y, z);
+    }
+
+    @Override
+    public void undock() {
+        docked = false;
+    }
+
+    @Override
+    public boolean isStalled() {
+        return remainingStallTime > 0;
+    }
+
+    @Override
+    public void stall() {
+        remainingStallTime = 20;
+    }
+
+    @Override
+    public void unstall() {
+        remainingStallTime = 0;
+    }
+
+    @Override
+    public boolean isFrozen() {
+        return super.isFrozen();
+    }
+
+    @Override
+    public void freeze() {
+        setFrozen(true);
+    }
+
+    @Override
+    public void unfreeze() {
+        setFrozen(false);
     }
 
     private void updateNavigatorFromItem() {
