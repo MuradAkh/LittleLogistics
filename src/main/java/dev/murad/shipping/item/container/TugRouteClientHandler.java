@@ -2,7 +2,7 @@ package dev.murad.shipping.item.container;
 
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.network.SetRouteTagPacket;
-import dev.murad.shipping.network.TugRoutePacketHandler;
+import net.neoforged.neoforge.network.PacketDistributor;
 import dev.murad.shipping.util.TugRoute;
 import dev.murad.shipping.util.TugRouteNode;
 import net.minecraft.client.Minecraft;
@@ -184,6 +184,6 @@ public class TugRouteClientHandler {
             entry.setIndex(i++);
         }
 
-        TugRoutePacketHandler.INSTANCE.sendToServer(new SetRouteTagPacket(route.hashCode(), isOffHand, route.toNBT()));
+        PacketDistributor.sendToServer(new SetRouteTagPacket(route.hashCode(), isOffHand, route.toNBT()));
     }
 }
