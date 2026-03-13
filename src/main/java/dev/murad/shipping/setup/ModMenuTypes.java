@@ -10,8 +10,8 @@ import dev.murad.shipping.item.container.TugRouteContainer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SimpleContainerData;
-import net.minecraftforge.common.extensions.IForgeMenuType;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 public class ModMenuTypes {
 
@@ -24,39 +24,39 @@ public class ModMenuTypes {
         return arr;
     }
 
-    public static final RegistryObject<MenuType<SteamHeadVehicleContainer<SteamTugEntity>>> TUG_CONTAINER =
+    public static final DeferredHolder<MenuType<?>, MenuType<SteamHeadVehicleContainer<SteamTugEntity>>> TUG_CONTAINER =
             Registration.CONTAINERS.register("tug_container",
-                    () -> IForgeMenuType.create(
+                    () -> IMenuTypeExtension.create(
                             (windowId, inv, data) ->
                                     new SteamHeadVehicleContainer<>(windowId, inv.player.level(), new SteamHeadVehicleDataAccessor(makeIntArray(data)), inv, inv.player)));
 
-    public static final RegistryObject<MenuType<EnergyHeadVehicleContainer<EnergyTugEntity>>> ENERGY_TUG_CONTAINER =
+    public static final DeferredHolder<MenuType<?>, MenuType<EnergyHeadVehicleContainer<EnergyTugEntity>>> ENERGY_TUG_CONTAINER =
             Registration.CONTAINERS.register("energy_tug_container",
-                    () -> IForgeMenuType.create(
+                    () -> IMenuTypeExtension.create(
                             (windowId, inv, data) ->
                                     new EnergyHeadVehicleContainer<>(windowId, inv.player.level(), new EnergyHeadVehicleDataAccessor(makeIntArray(data)), inv, inv.player)));
 
-    public static final RegistryObject<MenuType<SteamHeadVehicleContainer<SteamLocomotiveEntity>>> STEAM_LOCOMOTIVE_CONTAINER =
+    public static final DeferredHolder<MenuType<?>, MenuType<SteamHeadVehicleContainer<SteamLocomotiveEntity>>> STEAM_LOCOMOTIVE_CONTAINER =
             Registration.CONTAINERS.register("steam_locomotive_container",
-                    () -> IForgeMenuType.create(
+                    () -> IMenuTypeExtension.create(
                             (windowId, inv, data) ->
                                     new SteamHeadVehicleContainer<>(windowId, inv.player.level(), new SteamHeadVehicleDataAccessor(makeIntArray(data)), inv, inv.player)));
 
-    public static final RegistryObject<MenuType<EnergyHeadVehicleContainer<EnergyLocomotiveEntity>>> ENERGY_LOCOMOTIVE_CONTAINER =
+    public static final DeferredHolder<MenuType<?>, MenuType<EnergyHeadVehicleContainer<EnergyLocomotiveEntity>>> ENERGY_LOCOMOTIVE_CONTAINER =
             Registration.CONTAINERS.register("energy_locomotive_container",
-                    () -> IForgeMenuType.create(
+                    () -> IMenuTypeExtension.create(
                             (windowId, inv, data) ->
                                     new EnergyHeadVehicleContainer<>(windowId, inv.player.level(), new EnergyHeadVehicleDataAccessor(makeIntArray(data)), inv, inv.player)));
 
-    public static final RegistryObject<MenuType<FishingBargeContainer>> FISHING_BARGE_CONTAINER =
+    public static final DeferredHolder<MenuType<?>, MenuType<FishingBargeContainer>> FISHING_BARGE_CONTAINER =
             Registration.CONTAINERS.register("fishing_barge_container",
-                    () -> IForgeMenuType.create(
+                    () -> IMenuTypeExtension.create(
                             (windowId, inv, data) ->
                                     new FishingBargeContainer(windowId, inv.player.level(), data.readInt(), inv, inv.player)));
 
-    public static final RegistryObject<MenuType<TugRouteContainer>> TUG_ROUTE_CONTAINER =
+    public static final DeferredHolder<MenuType<?>, MenuType<TugRouteContainer>> TUG_ROUTE_CONTAINER =
             Registration.CONTAINERS.register("tug_route_container",
-                    () -> IForgeMenuType.create(
+                    () -> IMenuTypeExtension.create(
                             (windowId, inv, data) ->
                                     new TugRouteContainer(windowId, inv.player.level(), new TugRouteScreenDataAccessor(makeIntArray(data)), inv, inv.player)));
 
