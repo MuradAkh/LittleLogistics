@@ -20,8 +20,8 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -31,7 +31,7 @@ import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 public class ModItems {
-    private static final MultiMap<ResourceKey<CreativeModeTab>, RegistryObject<? extends Item>> PRIVATE_TAB_REGISTRY = new MultiMap<>();
+    private static final MultiMap<ResourceKey<CreativeModeTab>, DeferredHolder<Item, ? extends Item>> PRIVATE_TAB_REGISTRY = new MultiMap<>();
 
     /**
      *  Empty Icons
@@ -45,91 +45,91 @@ public class ModItems {
     /**
      * COMMON
      */
-    public static final RegistryObject<Item> CONDUCTORS_WRENCH = register("conductors_wrench",
+    public static final DeferredHolder<Item, Item> CONDUCTORS_WRENCH = register("conductors_wrench",
             () -> new WrenchItem(new Item.Properties().stacksTo(1)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
 
-    public static final RegistryObject<Item> SPRING = register("spring",
+    public static final DeferredHolder<Item, Item> SPRING = register("spring",
             () -> new SpringItem(new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> CREATIVE_CAPACITOR = register("creative_capacitor",
+    public static final DeferredHolder<Item, Item> CREATIVE_CAPACITOR = register("creative_capacitor",
             () -> new CreativeCapacitor(new Item.Properties().stacksTo(1)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
     /**
      * Vessels
      */
 
-    public static final RegistryObject<Item> CHEST_BARGE = register("barge",
+    public static final DeferredHolder<Item, Item> CHEST_BARGE = register("barge",
             () -> new VesselItem(
                     new Item.Properties(),
                     (level, x, y, z) -> new ChestBargeEntity(ModEntityTypes.CHEST_BARGE.get(), level, x, y, z)),
             ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> BARREL_BARGE = register("barrel_barge",
+    public static final DeferredHolder<Item, Item> BARREL_BARGE = register("barrel_barge",
             () -> new VesselItem(
                     new Item.Properties(),
                     (level, x, y, z) -> new ChestBargeEntity(ModEntityTypes.BARREL_BARGE.get(), level, x, y, z)),
             ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-//    public static final RegistryObject<Item> CHUNK_LOADER_BARGE = register("chunk_loader_barge",
+//    public static final DeferredHolder<Item, Item> CHUNK_LOADER_BARGE = register("chunk_loader_barge",
 //            () -> new VesselItem(new Item.Properties(), ChunkLoaderBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> FISHING_BARGE = register("fishing_barge",
+    public static final DeferredHolder<Item, Item> FISHING_BARGE = register("fishing_barge",
             () -> new VesselItem(new Item.Properties(), FishingBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> FLUID_BARGE = register("fluid_barge",
+    public static final DeferredHolder<Item, Item> FLUID_BARGE = register("fluid_barge",
             () -> new VesselItem(new Item.Properties(), FluidTankBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> SEATER_BARGE = register("seater_barge",
+    public static final DeferredHolder<Item, Item> SEATER_BARGE = register("seater_barge",
             () -> new VesselItem(new Item.Properties(), SeaterBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> VACUUM_BARGE = register("vacuum_barge",
+    public static final DeferredHolder<Item, Item> VACUUM_BARGE = register("vacuum_barge",
             () -> new VesselItem(new Item.Properties(), VacuumBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> STEAM_TUG = register("tug",
+    public static final DeferredHolder<Item, Item> STEAM_TUG = register("tug",
             () -> new VesselItem(new Item.Properties(), SteamTugEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> ENERGY_TUG = register("energy_tug",
+    public static final DeferredHolder<Item, Item> ENERGY_TUG = register("energy_tug",
             () -> new VesselItem(new Item.Properties(), EnergyTugEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
     /**
      * Trains
      */
 
-    public static final RegistryObject<Item> TUG_ROUTE = register("tug_route",
+    public static final DeferredHolder<Item, Item> TUG_ROUTE = register("tug_route",
             () -> new TugRouteItem(new Item.Properties().stacksTo(16)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> CHEST_CAR = register("chest_car",
+    public static final DeferredHolder<Item, Item> CHEST_CAR = register("chest_car",
             () -> new TrainCarItem((level, x, y, z) ->
                     new ChestCarEntity(ModEntityTypes.CHEST_CAR.get(), level, x, y, z),
                     new Item.Properties().stacksTo(64)),
             ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> BARREL_CAR = register("barrel_car",
+    public static final DeferredHolder<Item, Item> BARREL_CAR = register("barrel_car",
             () -> new TrainCarItem((level, x, y, z) ->
                     new ChestCarEntity(ModEntityTypes.BARREL_CAR.get(), level, x, y, z),
                     new Item.Properties().stacksTo(64)),
             ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> FLUID_CAR = register("fluid_car",
+    public static final DeferredHolder<Item, Item> FLUID_CAR = register("fluid_car",
             () -> new TrainCarItem(FluidTankCarEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> SEATER_CAR = register("seater_car",
+    public static final DeferredHolder<Item, Item> SEATER_CAR = register("seater_car",
             () -> new TrainCarItem(SeaterCarEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> STEAM_LOCOMOTIVE = register("steam_locomotive",
+    public static final DeferredHolder<Item, Item> STEAM_LOCOMOTIVE = register("steam_locomotive",
             () -> new TrainCarItem(SteamLocomotiveEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> ENERGY_LOCOMOTIVE = register("energy_locomotive",
+    public static final DeferredHolder<Item, Item> ENERGY_LOCOMOTIVE = register("energy_locomotive",
             () -> new TrainCarItem(EnergyLocomotiveEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> RECEIVER_COMPONENT = register("receiver_component",
+    public static final DeferredHolder<Item, Item> RECEIVER_COMPONENT = register("receiver_component",
             () -> new Item(new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> TRANSMITTER_COMPONENT = register("transmitter_component",
+    public static final DeferredHolder<Item, Item> TRANSMITTER_COMPONENT = register("transmitter_component",
             () -> new Item(new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
-    public static final RegistryObject<Item> LOCO_ROUTE = register("locomotive_route",
+    public static final DeferredHolder<Item, Item> LOCO_ROUTE = register("locomotive_route",
             () -> new LocoRouteItem(new Item.Properties().stacksTo(16)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
 
 
@@ -138,7 +138,7 @@ public class ModItems {
                 .forEach(event::accept);
     }
 
-    private static <T extends Item> RegistryObject<T> register(String name, Supplier<T> itemSupplier, List<ResourceKey<CreativeModeTab>> tabs) {
+    private static <T extends Item> DeferredHolder<Item, T> register(String name, Supplier<T> itemSupplier, List<ResourceKey<CreativeModeTab>> tabs) {
         var res = Registration.ITEMS.register(name, itemSupplier);
 
         for (var tab : tabs) {
