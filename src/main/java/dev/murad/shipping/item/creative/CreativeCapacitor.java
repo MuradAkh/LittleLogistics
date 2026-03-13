@@ -1,26 +1,15 @@
 package dev.murad.shipping.item.creative;
 
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.core.Direction;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.IEnergyStorage;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import net.minecraft.world.item.Item.Properties;
+import net.minecraftforge.energy.IEnergyStorage;
 
 public class CreativeCapacitor extends Item {
     public CreativeCapacitor(Properties props) {
         super(props);
     }
 
-    static class CreativeEnergyStorage implements IEnergyStorage {
+    public static class CreativeEnergyStorage implements IEnergyStorage {
         @Override
         public int receiveEnergy(int maxReceive, boolean simulate) {
             return maxReceive;
@@ -52,18 +41,4 @@ public class CreativeCapacitor extends Item {
         }
     }
 
-    @Nullable
-    @Override
-    public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
-        return new ICapabilityProvider() {
-            @Nonnull
-            @Override
-            public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-                if (cap == ForgeCapabilities.ENERGY) {
-                    return LazyOptional.of(CreativeEnergyStorage::new).cast();
-                }
-                return LazyOptional.empty();
-            }
-        };
-    }
 }

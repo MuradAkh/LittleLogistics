@@ -24,20 +24,14 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements ItemHandlerVanillaContainerWrapper, WorldlyContainer {
     private final FuelItemStackHandler fuelItemHandler = new FuelItemStackHandler();
-    private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> fuelItemHandler);
 
     // This has to remain as ConfigValue as the class isn't reloaded when changing worlds
     private static final ForgeConfigSpec.ConfigValue<Double> FURNACE_FUEL_MULTIPLIER = ShippingConfig.Server.STEAM_LOCO_FUEL_MULTIPLIER;
@@ -118,14 +112,8 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
         super.remove(r);
     }
 
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER) {
-            return handler.cast();
-        }
-
-        return super.getCapability(cap, side);
+    public FuelItemStackHandler getFuelItemHandler() {
+        return fuelItemHandler;
     }
 
     public SteamLocomotiveEntity(EntityType<?> type, Level level) {

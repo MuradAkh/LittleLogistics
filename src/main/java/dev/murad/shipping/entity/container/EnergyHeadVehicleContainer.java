@@ -8,8 +8,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.SlotItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
 
 public class EnergyHeadVehicleContainer<T extends Entity & HeadVehicle> extends AbstractHeadVehicleContainer<EnergyHeadVehicleDataAccessor, T> {
     public EnergyHeadVehicleContainer(int windowId, Level world, EnergyHeadVehicleDataAccessor data,
@@ -17,10 +17,11 @@ public class EnergyHeadVehicleContainer<T extends Entity & HeadVehicle> extends 
         super(ModMenuTypes.ENERGY_LOCOMOTIVE_CONTAINER.get(), windowId, world, data, playerInventory, player);
 
         if(entity != null) {
-            entity.getCapability(ForgeCapabilities.ITEM_HANDLER)
-                    .ifPresent(
-                            h -> addSlot(new SlotItemHandler(h, 0, 32, 35)
-                                    .setBackground(EMPTY_ATLAS_LOC, ModItems.EMPTY_ENERGY)));
+            var h = entity.getCapability(Capabilities.ItemHandler.ENTITY, null);
+            if (h != null) {
+                addSlot(new SlotItemHandler(h, 0, 32, 35)
+                        .setBackground(EMPTY_ATLAS_LOC, ModItems.EMPTY_ENERGY));
+            }
         }
     }
 
