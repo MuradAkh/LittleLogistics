@@ -26,6 +26,7 @@ SOFTWARE.
 
 
 import dev.murad.shipping.entity.custom.vessel.tug.VehicleFrontPart;
+import dev.murad.shipping.setup.ModDataComponents;
 import dev.murad.shipping.util.LinkableEntity;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.network.chat.Component;
@@ -36,6 +37,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipContext;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
@@ -87,27 +89,26 @@ public class SpringItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-        super.appendHoverText(stack, worldIn, tooltip, flagIn);
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
+        super.appendHoverText(stack, context, tooltip, flagIn);
         tooltip.add(springInfo);
     }
 
     private void setDominant(Level worldIn, ItemStack stack, Entity entity) {
-        stack.getOrCreateTag().putInt("linked", entity.getId());
+        stack.set(ModDataComponents.SPRING_LINKED, entity.getId());
     }
 
     @Nullable
     private Entity getDominant(Level worldIn, ItemStack stack) {
-        if (stack.getTag() != null && stack.getTag().contains("linked")) {
-            int id = stack.getTag().getInt("linked");
+        Integer id = stack.get(ModDataComponents.SPRING_LINKED);
+        if (id != null) {
             return worldIn.getEntity(id);
         }
-        resetLinked(stack);
         return null;
     }
 
     private void resetLinked(ItemStack itemstack) {
-        itemstack.removeTagKey("linked");
+        itemstack.remove(ModDataComponents.SPRING_LINKED);
     }
 
     @Override
@@ -117,9 +118,7 @@ public class SpringItem extends Item {
     }
 
     public static State getState(ItemStack stack) {
-        if(stack.getTag() != null && stack.getTag().contains("linked"))
-            return State.WAITING_NEXT;
-        return State.READY;
+        return stack.has(ModDataComponents.SPRING_LINKED) ? State.WAITING_NEXT : State.READY;
     }
 
 
