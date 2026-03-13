@@ -1,4 +1,4 @@
-# LittleLogistics NeoForge 1.21.10 Migration Evaluation
+# LittleLogistics NeoForge 1.21.1 Migration Evaluation
 
 **Evaluator:** evaluator-migration
 **Date:** 2026-03-13
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-After synthesizing discoveries from all 12 explorers, the migration from Forge 1.20.1 to NeoForge 1.21.10 is **technically demanding but tractable**. The mod has ~180 Java files, but only ~30 require non-trivial migration work. The adversarial explorer's core argument — that a focused big-bang port is faster than incremental abstraction — is correct and well-supported by the evidence.
+After synthesizing discoveries from all 12 explorers, the migration from Forge 1.20.1 to NeoForge 1.21.1 is **technically demanding but tractable**. The mod has ~180 Java files, but only ~30 require non-trivial migration work. The adversarial explorer's core argument — that a focused big-bang port is faster than incremental abstraction — is correct and well-supported by the evidence.
 
 The single most valuable pre-migration action is fixing a **pre-existing bug** found by the entity data explorer.
 
