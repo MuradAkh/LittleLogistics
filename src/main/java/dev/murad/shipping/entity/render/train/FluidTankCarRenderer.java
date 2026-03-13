@@ -10,7 +10,7 @@ import dev.murad.shipping.util.FluidRenderUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 public class FluidTankCarRenderer<T extends FluidTankCarEntity> extends MultipartCarRenderer<T>{
     protected FluidTankCarRenderer(EntityRendererProvider.Context context,

@@ -12,19 +12,17 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ShearsItem;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-
-import java.util.UUID;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 /**
  * Forge-wide event bus
  */
-@Mod.EventBusSubscriber(modid = ShippingMod.MOD_ID)
+@EventBusSubscriber(modid = ShippingMod.MOD_ID)
 public class ForgeEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -38,13 +36,10 @@ public class ForgeEventHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onWorldTick(TickEvent.LevelTickEvent event) {
-        if (event.phase == TickEvent.Phase.START) {
-            return;
-        }
+    public static void onWorldTick(LevelTickEvent.Post event) {
         // Don't do anything client side
-        if (event.level instanceof ServerLevel serverLevel) {
-            TrainChunkManagerManager.get(serverLevel.getServer()).getManagers(event.level.dimension()).forEach(PlayerTrainChunkManager::tick);
+        if (event.getLevel() instanceof ServerLevel serverLevel) {
+            TrainChunkManagerManager.get(serverLevel.getServer()).getManagers(event.getLevel().dimension()).forEach(PlayerTrainChunkManager::tick);
         }
     }
 

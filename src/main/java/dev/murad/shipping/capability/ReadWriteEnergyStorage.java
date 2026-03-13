@@ -1,8 +1,8 @@
 package dev.murad.shipping.capability;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.energy.EnergyStorage;
-import net.minecraftforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.energy.EnergyStorage;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 
 /**
  * Re-implementation of EnergyStorage so we can read and write it from/to NBT data

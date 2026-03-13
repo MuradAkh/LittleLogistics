@@ -32,11 +32,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import org.joml.Vector2d;
 
 import javax.annotation.Nullable;
@@ -45,7 +45,7 @@ import java.util.OptionalDouble;
 /**
  * Forge-wide event bus
  */
-@Mod.EventBusSubscriber(modid = ShippingMod.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = ShippingMod.MOD_ID, value = Dist.CLIENT)
 public class ForgeClientEventHandler {
 
     public static final ResourceLocation BEAM_LOCATION = ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "textures/entity/beacon_beam.png");

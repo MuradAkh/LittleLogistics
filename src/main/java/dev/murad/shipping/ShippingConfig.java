@@ -1,15 +1,15 @@
 package dev.murad.shipping;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
 
 public class ShippingConfig {
     public static class Common {
-        public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
-        public static final ForgeConfigSpec SPEC;
+        public static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+        public static final ModConfigSpec SPEC;
 
-        public static final ForgeConfigSpec.ConfigValue<Boolean> CREATE_COMPAT;
+        public static final ModConfigSpec.ConfigValue<Boolean> CREATE_COMPAT;
 
         static {
             BUILDER.push("compat").comment("Additional compatibility features for third-party mods, disable if broken by a third-party mod update.");
@@ -22,12 +22,12 @@ public class ShippingConfig {
     }
 
     public static class Client {
-        public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
-        public static final ForgeConfigSpec SPEC;
+        public static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+        public static final ModConfigSpec SPEC;
 
-        public static final ForgeConfigSpec.ConfigValue<Double> TUG_SMOKE_MODIFIER;
-        public static final ForgeConfigSpec.ConfigValue<Double> LOCO_SMOKE_MODIFIER;
-        public static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_TUG_ROUTE_BEACONS;
+        public static final ModConfigSpec.ConfigValue<Double> TUG_SMOKE_MODIFIER;
+        public static final ModConfigSpec.ConfigValue<Double> LOCO_SMOKE_MODIFIER;
+        public static final ModConfigSpec.ConfigValue<Boolean> DISABLE_TUG_ROUTE_BEACONS;
 
         static {
             BUILDER.push("general");
@@ -49,40 +49,40 @@ public class ShippingConfig {
     }
 
     public static class Server {
-        public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
-        public static final ForgeConfigSpec SPEC;
-        public static final ForgeConfigSpec.ConfigValue<Double> FISHING_TREASURE_CHANCE_MODIFIER;
-        public static final ForgeConfigSpec.ConfigValue<String> FISHING_LOOT_TABLE;
-        public static final ForgeConfigSpec.ConfigValue<Integer> FISHING_COOLDOWN;
+        public static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+        public static final ModConfigSpec SPEC;
+        public static final ModConfigSpec.ConfigValue<Double> FISHING_TREASURE_CHANCE_MODIFIER;
+        public static final ModConfigSpec.ConfigValue<String> FISHING_LOOT_TABLE;
+        public static final ModConfigSpec.ConfigValue<Integer> FISHING_COOLDOWN;
 
-        public static final ForgeConfigSpec.ConfigValue<Double> TUG_BASE_SPEED;
+        public static final ModConfigSpec.ConfigValue<Double> TUG_BASE_SPEED;
 
-        public static final ForgeConfigSpec.ConfigValue<Double> STEAM_TUG_FUEL_MULTIPLIER;
+        public static final ModConfigSpec.ConfigValue<Double> STEAM_TUG_FUEL_MULTIPLIER;
 
-        public static final ForgeConfigSpec.ConfigValue<Integer> TUG_PATHFINDING_MULTIPLIER;
-        public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_CAPACITY;
-        public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_ENERGY_USAGE;
-        public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_MAX_CHARGE_RATE;
+        public static final ModConfigSpec.ConfigValue<Integer> TUG_PATHFINDING_MULTIPLIER;
+        public static final ModConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_CAPACITY;
+        public static final ModConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_ENERGY_USAGE;
+        public static final ModConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_MAX_CHARGE_RATE;
 
-        public static final ForgeConfigSpec.ConfigValue<Double> TRAIN_MAX_SPEED;
-        public static final ForgeConfigSpec.ConfigValue<Double> LOCO_BASE_SPEED;
+        public static final ModConfigSpec.ConfigValue<Double> TRAIN_MAX_SPEED;
+        public static final ModConfigSpec.ConfigValue<Double> LOCO_BASE_SPEED;
 
-        public static final ForgeConfigSpec.ConfigValue<Double> STEAM_LOCO_FUEL_MULTIPLIER;
-        public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_CAPACITY;
-        public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_ENERGY_USAGE;
-        public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_MAX_CHARGE_RATE;
+        public static final ModConfigSpec.ConfigValue<Double> STEAM_LOCO_FUEL_MULTIPLIER;
+        public static final ModConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_CAPACITY;
+        public static final ModConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_ENERGY_USAGE;
+        public static final ModConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_MAX_CHARGE_RATE;
 
-        public static final ForgeConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_CAPACITY;
-        public static final ForgeConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_MAX_TRANSFER;
+        public static final ModConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_CAPACITY;
+        public static final ModConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_MAX_TRANSFER;
 
-        public static final ForgeConfigSpec.ConfigValue<List<? extends String>> TRAIN_EXEMPT_DAMAGE_SOURCES;
-        public static final ForgeConfigSpec.ConfigValue<List<? extends String>> VESSEL_EXEMPT_DAMAGE_SOURCES;
+        public static final ModConfigSpec.ConfigValue<List<? extends String>> TRAIN_EXEMPT_DAMAGE_SOURCES;
+        public static final ModConfigSpec.ConfigValue<List<? extends String>> VESSEL_EXEMPT_DAMAGE_SOURCES;
 
 
-        public static final ForgeConfigSpec.ConfigValue<Integer> CHUNK_LOADING_LEVEL;
-        public static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_CHUNK_MANAGEMENT;
-        public static final ForgeConfigSpec.ConfigValue<Integer> MAX_REGISTRERED_VEHICLES_PER_PLAYER;
-        public static final ForgeConfigSpec.ConfigValue<Boolean> OFFLINE_LOADING;
+        public static final ModConfigSpec.ConfigValue<Integer> CHUNK_LOADING_LEVEL;
+        public static final ModConfigSpec.ConfigValue<Boolean> DISABLE_CHUNK_MANAGEMENT;
+        public static final ModConfigSpec.ConfigValue<Integer> MAX_REGISTRERED_VEHICLES_PER_PLAYER;
+        public static final ModConfigSpec.ConfigValue<Boolean> OFFLINE_LOADING;
 
 
         static {

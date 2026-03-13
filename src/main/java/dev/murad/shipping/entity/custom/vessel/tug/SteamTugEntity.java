@@ -19,11 +19,11 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.jetbrains.annotations.NotNull;
 
 public class SteamTugEntity extends AbstractTugEntity {
-    private final ForgeConfigSpec.ConfigValue<Double> FURNACE_FUEL_MULTIPLIER = ShippingConfig.Server.STEAM_TUG_FUEL_MULTIPLIER;
+    private final ModConfigSpec.ConfigValue<Double> FURNACE_FUEL_MULTIPLIER = ShippingConfig.Server.STEAM_TUG_FUEL_MULTIPLIER;
     private final FuelItemStackHandler fuelItemHandler = new FuelItemStackHandler();
     protected int burnTime = 0;
     protected int burnCapacity = 0;

@@ -2,7 +2,7 @@ package dev.murad.shipping.item.creative;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Item.Properties;
-import net.minecraftforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 
 public class CreativeCapacitor extends Item {
     public CreativeCapacitor(Properties props) {

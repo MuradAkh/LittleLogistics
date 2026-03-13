@@ -23,7 +23,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +34,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
     private final FuelItemStackHandler fuelItemHandler = new FuelItemStackHandler();
 
     // This has to remain as ConfigValue as the class isn't reloaded when changing worlds
-    private static final ForgeConfigSpec.ConfigValue<Double> FURNACE_FUEL_MULTIPLIER = ShippingConfig.Server.STEAM_LOCO_FUEL_MULTIPLIER;
+    private static final ModConfigSpec.ConfigValue<Double> FURNACE_FUEL_MULTIPLIER = ShippingConfig.Server.STEAM_LOCO_FUEL_MULTIPLIER;
 
     // How many ticks left on this fuel
     protected int burnTime = 0;

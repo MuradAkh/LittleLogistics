@@ -16,11 +16,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.NotNull;
 
 
@@ -90,7 +90,7 @@ public class FluidTankCarEntity extends AbstractWagonEntity {
 
     private void sendInfoToClient(){
         entityData.set(VOLUME, tank.getFluidAmount());
-        entityData.set(FLUID_TYPE, ForgeRegistries.FLUIDS.getKey(tank.getFluid().getFluid()).toString());
+        entityData.set(FLUID_TYPE, BuiltInRegistries.FLUID.getKey(tank.getFluid().getFluid()).toString());
     }
 
     @Override
@@ -103,7 +103,7 @@ public class FluidTankCarEntity extends AbstractWagonEntity {
                 tank.setFluid(new FluidStack(clientCurrFluid, clientCurrAmount));
             } else if (FLUID_TYPE.equals(key)) {
                 ResourceLocation fluidName = ResourceLocation.parse(entityData.get(FLUID_TYPE));
-                clientCurrFluid = ForgeRegistries.FLUIDS.getValue(fluidName);
+                clientCurrFluid = BuiltInRegistries.FLUID.getValue(fluidName);
                 tank.setFluid(new FluidStack(clientCurrFluid, clientCurrAmount));
             }
         }

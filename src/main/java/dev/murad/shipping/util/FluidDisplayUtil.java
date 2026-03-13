@@ -3,7 +3,7 @@ package dev.murad.shipping.util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 
 public class FluidDisplayUtil {
     public static Component getFluidDisplay(FluidTank tank) {
