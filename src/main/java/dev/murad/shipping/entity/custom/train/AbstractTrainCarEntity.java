@@ -282,8 +282,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
                             Vec3 vec32 = this.getDeltaMovement();
                             Vec3 vec33 = pEntity.getDeltaMovement();
-                            boolean entityIsPowered = pEntity instanceof AbstractLocomotiveEntity;
-                            boolean thisIsPowered = this instanceof AbstractLocomotiveEntity;
+                            boolean entityIsPowered = (pEntity instanceof AbstractTrainCarEntity atc ? atc.isPoweredCart() : false);
+                            boolean thisIsPowered = this.isPoweredCart();
                             if (entityIsPowered && !thisIsPowered) {
                                 this.setDeltaMovement(vec32.multiply(0.2D, 1.0D, 0.2D));
                                 this.push(vec33.x - d0, 0.0D, vec33.z - d1);
@@ -559,10 +559,8 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         });
     }
 
-    @Override
-    public Type getMinecartType() {
-        // Why does this even exist
-        return Type.CHEST;
+    public boolean isPoweredCart() {
+        return false;
     }
 
     @Override

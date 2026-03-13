@@ -39,8 +39,8 @@ import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.entity.PartEntity;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.entity.PartEntity;
+import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -348,7 +348,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         return true;
     }
 
-    @Override
     public boolean isPoweredCart() {
         return true;
     }

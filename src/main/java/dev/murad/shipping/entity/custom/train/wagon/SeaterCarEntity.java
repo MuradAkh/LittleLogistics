@@ -8,7 +8,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -96,7 +95,4 @@ public class SeaterCarEntity extends AbstractWagonEntity {
         this.clampRotation(p_184190_1_);
     }
 
-    public AbstractMinecart.Type getMinecartType() {
-        return AbstractMinecart.Type.RIDEABLE;
-    }
 }
