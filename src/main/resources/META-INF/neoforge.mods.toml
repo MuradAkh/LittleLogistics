@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="${neo_version_range}"
+loaderVersion="[4,)"
 license="${mod_license}"
 issueTrackerURL="https://github.com/MuradAkh/LittleLogistics/issues"
 
