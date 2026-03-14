@@ -24,6 +24,11 @@ public class SeaterCarEntity extends AbstractWagonEntity {
     }
 
     @Override
+    protected boolean canAddPassenger(Entity passenger) {
+        return !this.isVehicle();
+    }
+
+    @Override
     public AbstractMinecart.Type getMinecartType() {
         return AbstractMinecart.Type.RIDEABLE;
     }

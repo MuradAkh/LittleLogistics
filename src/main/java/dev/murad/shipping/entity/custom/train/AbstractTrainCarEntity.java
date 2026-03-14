@@ -141,6 +141,11 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     }
 
 
+    @Override
+    protected boolean canAddPassenger(Entity passenger) {
+        return false;
+    }
+
     public boolean canBeCollidedWith() {
         // future me: we don't want to change this, because then you can't push the cart
         return super.canBeCollidedWith();

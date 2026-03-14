@@ -27,6 +27,8 @@ mcmodsrepo
 # Files from Forge MDK
 forge*changelog.txt
 
+# runs
+/runs
 
 # Vibe coding stuff
 .hive

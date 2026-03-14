@@ -20,13 +20,10 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.properties.RailShape;
@@ -37,7 +34,6 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import org.joml.Vector2d;
 
 import javax.annotation.Nullable;
 import java.util.OptionalDouble;
@@ -47,8 +43,6 @@ import java.util.OptionalDouble;
  */
 @EventBusSubscriber(modid = ShippingMod.MOD_ID, value = Dist.CLIENT)
 public class ForgeClientEventHandler {
-
-    public static final ResourceLocation BEAM_LOCATION = ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "textures/entity/beacon_beam.png");
 
     public static class ModRenderType extends RenderType {
         public static final RenderType LINES = create("lines", DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, false, false,
@@ -60,6 +54,21 @@ public class ForgeClientEventHandler {
                         .setOutputState(ITEM_ENTITY_TARGET)
                         .setWriteMaskState(COLOR_DEPTH_WRITE)
                         .setCullState(NO_CULL).createCompositeState(false));
+
+        public static final RenderType MARKER_TRIANGLES = create(
+                "marker_triangles",
+                DefaultVertexFormat.POSITION_COLOR,
+                VertexFormat.Mode.TRIANGLES,
+                256, false, false,
+                RenderType.CompositeState.builder()
+                        .setShaderState(POSITION_COLOR_SHADER)
+                        .setLayeringState(VIEW_OFFSET_Z_LAYERING)
+                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                        .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
+                        .setOutputState(ITEM_ENTITY_TARGET)
+                        .setWriteMaskState(COLOR_DEPTH_WRITE)
+                        .setCullState(NO_CULL)
+                        .createCompositeState(false));
 
         public ModRenderType(String pName, VertexFormat pFormat, VertexFormat.Mode pMode, int pBufferSize, boolean pAffectsCrumbling, boolean pSortOnUpload, Runnable pSetupState, Runnable pClearState) {
             super(pName, pFormat, pMode, pBufferSize, pAffectsCrumbling, pSortOnUpload, pSetupState, pClearState);
@@ -77,24 +86,33 @@ public class ForgeClientEventHandler {
     private static boolean renderRouteOnStack(RenderLevelStageEvent event, Player player, ItemStack stack) {
 
         if (stack.getItem().equals(ModItems.LOCO_ROUTE.get())) {
-            var buffer = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
+            if (ShippingConfig.Client.DISABLE_ROUTE_MARKERS.get()) {
+                return false;
+            }
+            var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
+            var camPos = camera.getPosition();
             var pose = event.getPoseStack();
-            var cameraOff = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+            var buffer = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
 
-            // Render Beacon Beams
+            int index = 0;
             for (var node : LocoRouteItem.getRoute(stack)) {
                 var block = node.toBlockPos();
+                double wx = block.getX() + 0.5;
+                double wz = block.getZ() + 0.5;
+                float alpha = RouteMarkerRenderer.computeAlpha(new Vec3(wx, block.getY(), wz), camPos);
+                if (alpha <= 0.0f) { index++; continue; }
+
+                // Stem + diamond marker (yellow)
+                var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
+                RouteMarkerRenderer.renderStem(pose, lineBuffer, camPos, wx, block.getY(), wz,
+                        1.0f, 1.0f, 0.3f, alpha);
+                var triBuffer = buffer.getBuffer(ModRenderType.MARKER_TRIANGLES);
+                RouteMarkerRenderer.renderMarker(pose, triBuffer, camera, camPos, wx, block.getY(), wz,
+                        1.0f, 1.0f, 0.3f, alpha);
+
+                // Rail surface box (keep existing rail shape rendering)
                 pose.pushPose();
                 {
-                    pose.translate(block.getX() - cameraOff.x, 1 - cameraOff.y, block.getZ() - cameraOff.z);
-                    BeaconRenderer.renderBeaconBeam(pose, buffer, BEAM_LOCATION, event.getPartialTick().getGameTimeDeltaPartialTick(false),
-                            1F, player.level().getGameTime(), player.level().getMinBuildHeight() + 1, 1024,
-                            DyeColor.YELLOW.getTextureDiffuseColor(), 0.1F, 0.2F);
-                }
-                pose.popPose();
-                pose.pushPose();
-                {
-                    // handling for removed blocks and blocks out of distance
                     var shape = RailHelper.getRail(block, player.level())
                             .map(pos -> RailHelper.getShape(pos, player.level()))
                             .orElse(RailShape.EAST_WEST);
@@ -123,63 +141,71 @@ public class ForgeClientEventHandler {
                         }
                     }
 
-                    pose.translate(block.getX() + baseX - cameraOff.x, block.getY() + baseY - cameraOff.y, block.getZ() + baseZ - cameraOff.z);
+                    pose.translate(block.getX() + baseX - camPos.x, block.getY() + baseY - camPos.y, block.getZ() + baseZ - camPos.z);
                     pose.mulPose(rotation);
 
                     AABB a = new AABB(0, 0, 0, 1, 0.2, 1);
-                    LevelRenderer.renderLineBox(pose, buffer.getBuffer(ModRenderType.LINES), a, 1.0f, 1.0f, 0.3f, 0.5f);
+                    LevelRenderer.renderLineBox(pose, buffer.getBuffer(ModRenderType.LINES), a, 1.0f, 1.0f, 0.3f, 0.5f * alpha);
                 }
                 pose.popPose();
+
+                // Label
+                String label = node.hasCustomName() ? node.getName() : String.valueOf(index + 1);
+                RouteMarkerRenderer.renderLabel(pose, buffer, camera, camPos, wx, block.getY(), wz, label, alpha);
+
+                index++;
             }
 
             buffer.endBatch();
         } else if (stack.getItem().equals(ModItems.TUG_ROUTE.get())){
-            if(ShippingConfig.Client.DISABLE_TUG_ROUTE_BEACONS.get()){
+            if(ShippingConfig.Client.DISABLE_ROUTE_MARKERS.get()){
                 return false;
             }
 
             var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
             var camPos = camera.getPosition();
+            var pose = event.getPoseStack();
+            var buffer = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
 
-            var renderTypeBuffer = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
             TugRoute route = TugRouteItem.getRoute(stack);
+            double baseY = player.level().getSeaLevel();
+
+            // Draw connecting lines between consecutive waypoints
+            var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
+            for (int i = 0, routeSize = route.size(); i < routeSize; i++) {
+                TugRouteNode from = route.get(i);
+                TugRouteNode to = route.get((i + 1) % routeSize);
+                double fx = from.getX() + 0.5, fz = from.getZ() + 0.5;
+                double tx = to.getX() + 0.5, tz = to.getZ() + 0.5;
+                Vec3 midpoint = new Vec3((fx + tx) / 2.0, baseY, (fz + tz) / 2.0);
+                float connAlpha = RouteMarkerRenderer.computeAlpha(midpoint, camPos);
+                // Last-to-first closing segment is dimmer
+                if (i == route.size() - 1) connAlpha *= 0.4f;
+                RouteMarkerRenderer.renderConnection(pose, lineBuffer, camPos,
+                        fx, baseY, fz, tx, baseY, tz,
+                        1.0f, 0.6f, 0.2f, connAlpha);
+            }
+
+            // Draw markers for each waypoint
             for (int i = 0, routeSize = route.size(); i < routeSize; i++) {
                 TugRouteNode node = route.get(i);
+                double wx = node.getX() + 0.5;
+                double wz = node.getZ() + 0.5;
+                float alpha = RouteMarkerRenderer.computeAlpha(new Vec3(wx, baseY, wz), camPos);
+                if (alpha <= 0.0f) continue;
 
-                // Direction from the beacon to the player
-                Vector2d playerDir = new Vector2d(node.getX() + 0.5, node.getZ() + 0.5)
-                        .sub(new Vector2d(camPos.x, camPos.z))
-                        .normalize(0.5);
-
-                PoseStack matrixStack = event.getPoseStack();
-                matrixStack.pushPose();
-                {
-                    matrixStack.translate(node.getX() - camPos.x, 0, node.getZ() - camPos.z);
-
-                    BeaconRenderer.renderBeaconBeam(matrixStack, renderTypeBuffer, BEAM_LOCATION, event.getPartialTick().getGameTimeDeltaPartialTick(false),
-                            1F, player.level().getGameTime(), player.level().getMinBuildHeight(), 1024,
-                            DyeColor.ORANGE.getTextureDiffuseColor(), 0.1F, 0.2F);
-                }
-                matrixStack.popPose();
-                matrixStack.pushPose();
-                {
-
-                    Vec3 nodePos = new Vec3(node.getX() + 0.5 - playerDir.x, camPos.y, node.getZ() + 0.5 - playerDir.y);
-                    Vec3 textRenderPos = computeFixedDistance(nodePos, camPos, 1.0);
-
-                    matrixStack.translate(textRenderPos.x - camPos.x, textRenderPos.y  - camPos.y, textRenderPos.z - camPos.z);
-                    matrixStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
-                    matrixStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
-                    matrixStack.scale(-0.025F, -0.025F, -0.025F);
-
-                    Font fontRenderer = Minecraft.getInstance().font;
-                    String text = node.getDisplayName(i);
-                    float width = (-fontRenderer.width(text) / (float) 2);
-                    fontRenderer.drawInBatch(text, width, 0.0F, -1, true, matrixStack.last().pose(), renderTypeBuffer, Font.DisplayMode.NORMAL, 0, 15728880);
-                }
-                matrixStack.popPose();
+                // Stem
+                RouteMarkerRenderer.renderStem(pose, buffer.getBuffer(ModRenderType.LINES), camPos,
+                        wx, baseY, wz, 1.0f, 0.6f, 0.2f, alpha);
+                // Diamond marker
+                RouteMarkerRenderer.renderMarker(pose, buffer.getBuffer(ModRenderType.MARKER_TRIANGLES), camera, camPos,
+                        wx, baseY, wz, 1.0f, 0.6f, 0.2f, alpha);
+                // Label
+                RouteMarkerRenderer.renderLabel(pose, buffer, camera, camPos,
+                        wx, baseY, wz, node.getDisplayName(i), alpha);
             }
-            renderTypeBuffer.endBatch();
+
+            buffer.endBatch();
         } else {
             return false;
         }
