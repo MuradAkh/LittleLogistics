@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 
@@ -62,7 +63,7 @@ public class TrainCarItem extends Item {
             }
 
             AbstractMinecart abstractminecart = ((TrainCarItem)p_42950_.getItem()).constructor.apply(level, d0, d1 + d3, d2);
-            if (p_42950_.hasCustomHoverName()) {
+            if (p_42950_.has(DataComponents.CUSTOM_NAME)) {
                 abstractminecart.setCustomName(p_42950_.getHoverName());
             }
 
@@ -105,7 +106,7 @@ public class TrainCarItem extends Item {
                 }
 
                 AbstractMinecart abstractminecart = constructor.apply(level, (double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.0625D + d0, (double)blockpos.getZ() + 0.5D);
-                if (itemstack.hasCustomHoverName()) {
+                if (itemstack.has(DataComponents.CUSTOM_NAME)) {
                     abstractminecart.setCustomName(itemstack.getHoverName());
                 }
 

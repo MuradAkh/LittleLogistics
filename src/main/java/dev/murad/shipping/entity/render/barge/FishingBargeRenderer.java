@@ -51,7 +51,7 @@ public class FishingBargeRenderer<T extends FishingBargeEntity> extends Multipar
         model.renderToBuffer(matrixStack,
                 buffer.getBuffer(model.renderType(texture)),
                 packedLight, overlay,
-                1.0F, 1.0F, 1.0F, 1.0F);
+                -1);
     }
 
     public static class Builder<T extends FishingBargeEntity> extends MultipartVesselRenderer.Builder<T> {

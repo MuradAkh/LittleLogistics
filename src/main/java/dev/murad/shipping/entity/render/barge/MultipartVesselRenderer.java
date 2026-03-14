@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ARGB;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.NotNull;
 
@@ -83,12 +83,12 @@ public class MultipartVesselRenderer<T extends VesselEntity> extends AbstractVes
 
     protected void renderTrimModel(T vesselEntity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
         var colorId = vesselEntity.getColor();
-        var color = (colorId == null ? DyeColor.RED : DyeColor.byId(colorId)).getTextureDiffuseColors();
+        int color = (colorId == null ? DyeColor.RED : DyeColor.byId(colorId)).getTextureDiffuseColor();
 
         trimModel.renderToBuffer(matrixStack,
                 buffer.getBuffer(trimModel.renderType(trimTextureLocation)),
                 packedLight, overlay,
-                ARGB.colorFromFloat(1.0F, color[0], color[1], color[2]));
+                color);
     }
 
     public MultipartVesselRenderer<T> derotate() {

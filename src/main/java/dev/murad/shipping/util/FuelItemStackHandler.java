@@ -7,7 +7,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
-import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
@@ -27,7 +26,7 @@ public class FuelItemStackHandler extends ItemStackHandler {
      */
     public int tryConsumeFuel() {
         var stack = getStackInSlot(0);
-        var burnTime = CommonHooks.getBurnTime(stack, null);
+        var burnTime = stack.getBurnTime(null);
 
         if (burnTime > 0) {
             // shrink the stack and replace with byproducts (if exists)

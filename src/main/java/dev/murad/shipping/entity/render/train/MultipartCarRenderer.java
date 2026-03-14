@@ -22,7 +22,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.util.ARGB;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.phys.Vec3;
 
@@ -201,7 +201,7 @@ public class MultipartCarRenderer<T extends AbstractTrainCarEntity> extends Enti
         pose.popPose();
 
         if (car.hasCustomName()) {
-            this.renderNameTag(car, car.getCustomName(), pose, buffer, packedLight);
+            this.renderNameTag(car, car.getCustomName(), pose, buffer, packedLight, partialTicks);
         }
 
         return attach;
@@ -220,12 +220,12 @@ public class MultipartCarRenderer<T extends AbstractTrainCarEntity> extends Enti
 
     protected void renderTrimModel(T entity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
         var colorId = entity.getColor();
-        var color = (colorId == null ? DyeColor.RED : DyeColor.byId(colorId)).getTextureDiffuseColors();
+        int color = (colorId == null ? DyeColor.RED : DyeColor.byId(colorId)).getTextureDiffuseColor();
 
         trimModel.renderToBuffer(matrixStack,
                 buffer.getBuffer(trimModel.renderType(trimTextureLocation)),
                 packedLight, overlay,
-                ARGB.colorFromFloat(1.0F, color[0], color[1], color[2]));
+                color);
     }
 
     // Do not use these directly

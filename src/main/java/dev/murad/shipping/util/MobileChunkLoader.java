@@ -3,15 +3,18 @@ package dev.murad.shipping.util;
 import com.mojang.datafixers.util.Pair;
 import dev.murad.shipping.ShippingMod;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.neoforged.neoforge.common.world.ForgeChunkManager;
+import net.neoforged.neoforge.common.world.chunk.TicketController;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 public class MobileChunkLoader {
+    public static final TicketController TICKET_CONTROLLER = new TicketController(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "mobile_chunk_loader"));
+
     private Optional<Pair<Integer, Integer>> loadedChunk = Optional.empty();
     private Entity entity;
 
@@ -30,7 +33,7 @@ public class MobileChunkLoader {
     }
 
     private void setChunkLoad(boolean add, Pair<Integer, Integer> chunk) {
-        ForgeChunkManager.forceChunk((ServerLevel) entity.level(), ShippingMod.MOD_ID, entity, chunk.getFirst(), chunk.getSecond(), add, false);
+        TICKET_CONTROLLER.forceChunk((ServerLevel) entity.level(), entity, chunk.getFirst(), chunk.getSecond(), add, false);
     }
 
     public void serverTick(){

@@ -108,19 +108,12 @@ public class TugRouteClientHandler {
     public final class TugList extends ObjectSelectionList<TugList.Entry> {
         public TugList(Minecraft minecraft, int width, int height, int y0, int y1, int itemHeight) {
             super(minecraft, width, height,
-                    y0, y1, itemHeight);
-            setRenderBackground(false);
-            setRenderTopAndBottom(false);
+                    y0, itemHeight);
         }
 
         @Override
         public @NotNull Optional<GuiEventListener> getChildAt(double p_212930_1_, double p_212930_3_) {
             return super.getChildAt(p_212930_1_, p_212930_3_);
-        }
-
-        @Override
-        public void render(@NotNull GuiGraphics graphics, int pMouseX, int pMouseY, float pPartialTick) {
-            super.render(graphics, pMouseX, pMouseY, pPartialTick);
         }
 
         public void add(TugRouteNode node, int index) {

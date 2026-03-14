@@ -189,7 +189,7 @@ public class TrainCarRenderer<T extends AbstractTrainCarEntity> extends EntityRe
         pose.popPose();
 
         if (car.hasCustomName()) {
-            this.renderNameTag(car, car.getCustomName(), pose, buffer, packedLight);
+            this.renderNameTag(car, car.getCustomName(), pose, buffer, packedLight, partialTicks);
         }
 
         return attach;

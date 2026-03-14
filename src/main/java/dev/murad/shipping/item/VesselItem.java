@@ -6,6 +6,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
@@ -74,7 +75,7 @@ public class VesselItem extends Item {
 
     protected Entity getEntity(Level world, ItemStack stack, BlockHitResult raytraceresult) {
         Entity e = addEntity.apply(world, raytraceresult.getLocation().x, raytraceresult.getLocation().y, raytraceresult.getLocation().z);
-        if (stack.hasCustomHoverName()) {
+        if (stack.has(DataComponents.CUSTOM_NAME)) {
             e.setCustomName(stack.getHoverName());
         }
         return e;

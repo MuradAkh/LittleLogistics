@@ -85,7 +85,7 @@ public class InventoryUtils {
         } else if (stack1.getCount() > stack1.getMaxStackSize()) {
             return false;
         } else {
-            return ItemStack.isSameItemSameTags(stack1, stack2);
+            return ItemStack.isSameItemSameComponents(stack1, stack2);
         }
     }
 

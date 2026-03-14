@@ -9,6 +9,7 @@ import dev.murad.shipping.item.container.TugRouteScreen;
 import dev.murad.shipping.setup.ModItemModelProperties;
 import dev.murad.shipping.setup.ModMenuTypes;
 import dev.murad.shipping.setup.Registration;
+import dev.murad.shipping.util.MobileChunkLoader;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -19,6 +20,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.common.world.chunk.RegisterTicketControllersEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,6 +37,7 @@ public class ShippingMod
 
         // Register the doClientStuff method for modloading
         modEventBus.addListener(this::doClientStuff);
+        modEventBus.addListener(this::registerTicketControllers);
 
         modContainer.registerConfig(ModConfig.Type.COMMON, ShippingConfig.Common.SPEC, "littlelogistics-common.toml");
         modContainer.registerConfig(ModConfig.Type.CLIENT, ShippingConfig.Client.SPEC, "littlelogistics-client.toml");
@@ -43,6 +46,10 @@ public class ShippingMod
 
     private void doClientStuff(final FMLClientSetupEvent event) {
         event.enqueueWork(ModItemModelProperties::register);
+    }
+
+    private void registerTicketControllers(final RegisterTicketControllersEvent event) {
+        event.register(MobileChunkLoader.TICKET_CONTROLLER);
     }
 
     @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)

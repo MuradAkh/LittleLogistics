@@ -135,7 +135,7 @@ public class ModItems {
 
     public static void buildCreativeTab(BuildCreativeModeTabContentsEvent event) {
         PRIVATE_TAB_REGISTRY.getOrDefault(event.getTabKey(), new ArrayList<>())
-                .forEach(event::accept);
+                .forEach(holder -> event.accept(holder.get()));
     }
 
     private static <T extends Item> DeferredHolder<Item, T> register(String name, Supplier<T> itemSupplier, List<ResourceKey<CreativeModeTab>> tabs) {

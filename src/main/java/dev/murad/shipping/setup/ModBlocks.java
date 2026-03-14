@@ -41,7 +41,7 @@ public class ModBlocks {
                     .mapColor(MapColor.METAL)
                     .strength(0.5F, 6.0F)
                     .sound(SoundType.METAL);
-    private static BlockBehaviour.Properties RAIL_BLOCK_BEHAVIOUR = BlockBehaviour.Properties.copy(Blocks.RAIL);
+    private static BlockBehaviour.Properties RAIL_BLOCK_BEHAVIOUR = BlockBehaviour.Properties.ofFullCopy(Blocks.RAIL);
 
     public static final DeferredHolder<Block, Block> TUG_DOCK = register(
             "tug_dock",
@@ -150,7 +150,7 @@ public class ModBlocks {
 
     public static void buildCreativeTab(BuildCreativeModeTabContentsEvent event) {
         PRIVATE_TAB_REGISTRY.getOrDefault(event.getTabKey(), new ArrayList<>())
-                .forEach(event::accept);
+                .forEach(holder -> event.accept(holder.get()));
     }
 
     private static <T extends Block> DeferredHolder<Block, T> registerNoItem(String name, Supplier<T> block){

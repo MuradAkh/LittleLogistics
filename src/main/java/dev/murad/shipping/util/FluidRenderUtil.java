@@ -47,13 +47,12 @@ public class FluidRenderUtil {
         float r = (color >> 16 & 0xFF) / 255.0F;
         float g = (color >> 8 & 0xFF) / 255.0F;
         float b = (color & 0xFF) / 255.0F;
-        renderBuffer.vertex(matrixPos, pos.x(), pos.y(), pos.z()) // position coordinate
-                .color(r, g, b, a)        // color
-                .uv(texUV.x, texUV.y)                     // texel coordinate
-                .overlayCoords(OverlayTexture.NO_OVERLAY)  // only relevant for rendering Entities (Living)
-                .uv2(0, 240)             // lightmap with full brightness
-                .normal(matrixNormal, normalVector.x(), normalVector.y(), normalVector.z())
-                .endVertex();
+        renderBuffer.addVertex(matrixPos, pos.x(), pos.y(), pos.z()) // position coordinate
+                .setColor(r, g, b, a)        // color
+                .setUv(texUV.x, texUV.y)                     // texel coordinate
+                .setOverlay(OverlayTexture.NO_OVERLAY)  // only relevant for rendering Entities (Living)
+                .setUv2(0, 240)             // lightmap with full brightness
+                .setNormal(normalVector.x(), normalVector.y(), normalVector.z());
     }
 
     private static void addQuad(Matrix4f matrixPos, Matrix3f matrixNormal, VertexConsumer renderBuffer, Vector3f blpos, Vector3f brpos, Vector3f trpos, Vector3f tlpos, Vector2f blUVpos, Vector2f brUVpos, Vector2f trUVpos, Vector2f tlUVpos, Vector3f normalVector, int color, int lightmapValue) {

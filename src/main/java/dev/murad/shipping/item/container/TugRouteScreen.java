@@ -143,39 +143,31 @@ public class TugRouteScreen extends AbstractContainerScreen<TugRouteContainer> {
                 4, 4);
 
         // top
-        graphics.blitRepeating(GUI,
-                left + 4, top,
-                getXSize() - 8, 4,
-                4, 0,
-                4, 4);
+        for (int tx = left + 4; tx < right - 4; tx += 4) {
+            graphics.blit(GUI, tx, top, 4, 0, Math.min(4, right - 4 - tx), 4);
+        }
 
         // bottom
-        graphics.blitRepeating(GUI,
-                left + 4, bot - 4,
-                getXSize() - 8, 4,
-                4, 8,
-                4,4);
+        for (int tx = left + 4; tx < right - 4; tx += 4) {
+            graphics.blit(GUI, tx, bot - 4, 4, 8, Math.min(4, right - 4 - tx), 4);
+        }
 
         // left
-        graphics.blitRepeating(GUI,
-                left, top + 4,
-                4, getYSize() - 8,
-                0, 4,
-                4,4);
+        for (int ty = top + 4; ty < bot - 4; ty += 4) {
+            graphics.blit(GUI, left, ty, 0, 4, 4, Math.min(4, bot - 4 - ty));
+        }
 
         // right
-        graphics.blitRepeating(GUI,
-                right - 4, top + 4,
-                4, getYSize() - 8,
-                8, 4,
-                4,4);
+        for (int ty = top + 4; ty < bot - 4; ty += 4) {
+            graphics.blit(GUI, right - 4, ty, 8, 4, 4, Math.min(4, bot - 4 - ty));
+        }
 
         // middle
-        graphics.blitRepeating(GUI,
-                left + 4, top + 4,
-                getXSize() - 8, getYSize() - 8,
-                4, 4,
-                4,4);
+        for (int ty = top + 4; ty < bot - 4; ty += 4) {
+            for (int tx = left + 4; tx < right - 4; tx += 4) {
+                graphics.blit(GUI, tx, ty, 4, 4, Math.min(4, right - 4 - tx), Math.min(4, bot - 4 - ty));
+            }
+        }
     }
 
     // remove inventory tag

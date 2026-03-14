@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public class VesselDetectorTileEntity extends BlockEntity  {
     private static final int MAX_RANGE = 3;
@@ -64,7 +65,7 @@ public class VesselDetectorTileEntity extends BlockEntity  {
 
         BlockPos end = start.offset(offX, offY, offZ);
 
-        return new AABB(start, end);
+        return new AABB(Vec3.atLowerCornerOf(start), Vec3.atLowerCornerOf(end));
     }
 
     public void serverTickInternal(){

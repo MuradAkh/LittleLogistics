@@ -16,6 +16,7 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.ICancellableEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 
@@ -71,18 +72,27 @@ public class ForgeEventHandler {
             if(item instanceof SpringItem springItem) {
                 if(target instanceof LinkableEntity || target instanceof VehicleFrontPart) {
                     springItem.onUsedOnEntity(event.getItemStack(), event.getEntity(), event.getLevel(), target);
-                    event.setCanceled(true);
-                    event.setCancellationResult(InteractionResult.SUCCESS);
+                    cancelEvent(event);
                 }
             }
 
             if(item instanceof ShearsItem) {
                 if(target instanceof LinkableEntity v) {
                     v.handleShearsCut();
-                    event.setCanceled(true);
-                    event.setCancellationResult(InteractionResult.SUCCESS);
+                    cancelEvent(event);
                 }
             }
+        }
+    }
+
+    private static void cancelEvent(PlayerInteractEvent event) {
+        if (event instanceof ICancellableEvent cancellable) {
+            cancellable.setCanceled(true);
+        }
+        if (event instanceof PlayerInteractEvent.EntityInteract e) {
+            e.setCancellationResult(InteractionResult.SUCCESS);
+        } else if (event instanceof PlayerInteractEvent.EntityInteractSpecific e) {
+            e.setCancellationResult(InteractionResult.SUCCESS);
         }
     }
 }

@@ -1,8 +1,8 @@
 package dev.murad.shipping.event;
 
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import dev.murad.shipping.ShippingConfig;
@@ -77,7 +77,7 @@ public class ForgeClientEventHandler {
     private static boolean renderRouteOnStack(RenderLevelStageEvent event, Player player, ItemStack stack) {
 
         if (stack.getItem().equals(ModItems.LOCO_ROUTE.get())) {
-            var buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            var buffer = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
             var pose = event.getPoseStack();
             var cameraOff = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
 
@@ -87,9 +87,9 @@ public class ForgeClientEventHandler {
                 pose.pushPose();
                 {
                     pose.translate(block.getX() - cameraOff.x, 1 - cameraOff.y, block.getZ() - cameraOff.z);
-                    BeaconRenderer.renderBeaconBeam(pose, buffer, BEAM_LOCATION, event.getPartialTick(),
+                    BeaconRenderer.renderBeaconBeam(pose, buffer, BEAM_LOCATION, event.getPartialTick().getGameTimeDeltaPartialTick(false),
                             1F, player.level().getGameTime(), player.level().getMinBuildHeight() + 1, 1024,
-                            DyeColor.YELLOW.getTextureDiffuseColors(), 0.1F, 0.2F);
+                            DyeColor.YELLOW.getTextureDiffuseColor(), 0.1F, 0.2F);
                 }
                 pose.popPose();
                 pose.pushPose();
@@ -141,7 +141,7 @@ public class ForgeClientEventHandler {
             var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
             var camPos = camera.getPosition();
 
-            var renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            var renderTypeBuffer = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
             TugRoute route = TugRouteItem.getRoute(stack);
             for (int i = 0, routeSize = route.size(); i < routeSize; i++) {
                 TugRouteNode node = route.get(i);
@@ -156,9 +156,9 @@ public class ForgeClientEventHandler {
                 {
                     matrixStack.translate(node.getX() - camPos.x, 0, node.getZ() - camPos.z);
 
-                    BeaconRenderer.renderBeaconBeam(matrixStack, renderTypeBuffer, BEAM_LOCATION, event.getPartialTick(),
+                    BeaconRenderer.renderBeaconBeam(matrixStack, renderTypeBuffer, BEAM_LOCATION, event.getPartialTick().getGameTimeDeltaPartialTick(false),
                             1F, player.level().getGameTime(), player.level().getMinBuildHeight(), 1024,
-                            DyeColor.ORANGE.getTextureDiffuseColors(), 0.1F, 0.2F);
+                            DyeColor.ORANGE.getTextureDiffuseColor(), 0.1F, 0.2F);
                 }
                 matrixStack.popPose();
                 matrixStack.pushPose();
@@ -203,7 +203,7 @@ public class ForgeClientEventHandler {
 
         // Only render registered vehicles when conductors wrench is on the mainhand
         if (mainStack.getItem().equals(ModItems.CONDUCTORS_WRENCH.get()) && player.level().dimension().toString().equals(VehicleTrackerPacketHandler.toRenderDimension)){
-            MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
             var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
             Vec3 camPos = camera.getPosition();
 
@@ -211,7 +211,7 @@ public class ForgeClientEventHandler {
                 @Nullable
                 Entity entity = player.level().getEntity(position.id());
 
-                Vec3 entityPos = entity != null ? entity.getPosition(event.getPartialTick()) : position.pos();
+                Vec3 entityPos = entity != null ? entity.getPosition(event.getPartialTick().getGameTimeDeltaPartialTick(false)) : position.pos();
                 Vec3 iconRenderPos = computeFixedDistance(entityPos, camPos, 1.0);
                 Vec3 textRenderPos = computeFixedDistance(entityPos, camPos, 0.9);
                 PoseStack matrixStack = event.getPoseStack();
