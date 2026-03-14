@@ -60,16 +60,25 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     protected final ChunkManagerEnrollmentHandler enrollmentHandler;
 
     // CONTAINER STUFF
-    @Getter
     protected final ItemStackHandler routeItemHandler = createRouteItemHandler();
+
+    public ItemStackHandler getRouteItemHandler() {
+        return routeItemHandler;
+    }
     protected boolean contentsChanged = false;
     protected boolean docked = false;
-    @Getter
     protected int remainingStallTime = 0;
+
+    public int getRemainingStallTime() {
+        return remainingStallTime;
+    }
     private double swimSpeedMult = 1;
 
-    @Setter
     protected boolean engineOn = true;
+
+    public void setEngineOn(boolean engineOn) {
+        this.engineOn = engineOn;
+    }
 
     private int dockCheckCooldown = 0;
     private boolean independentMotion = false;
@@ -251,11 +260,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
         if (changedDock) onDock();
         if (changedUndock) onUndock();
-    }
-
-    @Override
-    public boolean canBreatheUnderwater() {
-        return true;
     }
 
     protected void makeSmoke() {
@@ -515,7 +519,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         if (!this.level().isClientSide) {
             var stack = new ItemStack(this.getDropItem());
             if (this.hasCustomName()) {
-                stack.setHoverName(this.getCustomName());
+                stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, this.getCustomName());
             }
             this.spawnAtLocation(stack);
             Containers.dropContents(this.level(), this, this);
@@ -588,7 +592,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Override
-    public boolean canBeLeashed(Player p_184652_1_) {
+    public boolean canBeLeashed() {
         return true;
     }
 

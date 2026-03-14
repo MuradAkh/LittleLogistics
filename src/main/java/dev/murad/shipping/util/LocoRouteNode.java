@@ -2,7 +2,6 @@ package dev.murad.shipping.util;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import lombok.Getter;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -49,10 +48,25 @@ public class LocoRouteNode {
         );
 
     @Nullable
-    @Getter
     private String name;
-    @Getter
     private final int x, y, z;
+
+    @Nullable
+    public String getName() {
+        return name;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public int getZ() {
+        return z;
+    }
 
     public LocoRouteNode(@Nullable String name, int x, int y, int z) {
         this.name = name;

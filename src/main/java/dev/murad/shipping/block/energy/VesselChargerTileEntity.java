@@ -49,7 +49,7 @@ public class VesselChargerTileEntity extends BlockEntity implements IVesselLoade
 
     private boolean tryChargeEntity() {
         return IVesselLoader.getEntityCapability(getBlockPos().relative(getBlockState().getValue(VesselChargerBlock.FACING)),
-                Capabilities.EnergyStorage.ENTITY, level).map(iEnergyStorage -> {
+                Capabilities.EnergyStorage.ENTITY, null, level).map(iEnergyStorage -> {
                     int vesselCap = iEnergyStorage.receiveEnergy(MAX_TRANSFER, true);
                     int toTransfer = internalBattery.extractEnergy(vesselCap, false);
                     return iEnergyStorage.receiveEnergy(toTransfer, false) > 0;

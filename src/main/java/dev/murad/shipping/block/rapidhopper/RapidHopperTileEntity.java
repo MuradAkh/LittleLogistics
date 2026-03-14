@@ -20,14 +20,15 @@ public class RapidHopperTileEntity extends HopperBlockEntity {
     }
 
     public static void pushItemsTick(Level pLevel, BlockPos pPos, BlockState pState, RapidHopperTileEntity pBlockEntity) {
-        pBlockEntity.setCooldown(0);
         pBlockEntity.rapidCooldown--;
         if (pBlockEntity.rapidCooldown <= 0) {
-            if(!tryMoveItems(pLevel, pPos, pState, pBlockEntity, () -> suckInItems(pLevel, pBlockEntity))){
-                pBlockEntity.rapidCooldown = SEARCH_COOLDOWN;
-            }else {
-                pBlockEntity.rapidCooldown = RAPID_COOLDOWN;
-            }
+            // Force cooldown to 1 so parent's pushItemsTick will process items
+            pBlockEntity.setCooldown(1);
+            HopperBlockEntity.pushItemsTick(pLevel, pPos, pState, pBlockEntity);
+            // Reset to rapid timing — vanilla sets cooldown to 8, we override
+            boolean movedItems = !pBlockEntity.isEmpty();
+            pBlockEntity.setCooldown(0);
+            pBlockEntity.rapidCooldown = movedItems ? RAPID_COOLDOWN : SEARCH_COOLDOWN;
         }
     }
 

@@ -20,7 +20,7 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
     }
 
     private boolean isOppositeGuideRail(Node Node, Direction direction){
-        BlockState state = this.level.getBlockState(Node.asBlockPos().below());
+        BlockState state = this.currentContext.level().getBlockState(Node.asBlockPos().below());
         if (state.is(ModBlocks.GUIDE_RAIL_TUG.get())){
             return TugGuideRailBlock.getArrowsDirection(state).getOpposite().equals(direction);
         }
@@ -48,7 +48,7 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
     }
 
     @Override
-    public Target getGoal(double p_224768_1_, double p_224768_3_, double p_224768_5_) {
+    public Target getTarget(double p_224768_1_, double p_224768_3_, double p_224768_5_) {
         return new Target(getNodeSimple(Mth.floor(p_224768_1_), Mth.floor(p_224768_3_), Mth.floor(p_224768_5_)));
     }
 
@@ -74,13 +74,13 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
             )
             ){
                 // if the point's neighbour has land, penalty is 5 unless there is a dock
-                if(!level.getFluidState(surr).is(Fluids.WATER)){
+                if(!this.currentContext.level().getFluidState(surr).is(Fluids.WATER)){
                     penalty = 5f;
                 }
                 if(
-                        level.getBlockState(surr).is(ModBlocks.GUIDE_RAIL_CORNER.get()) ||
-                                level.getBlockState(surr).is(ModBlocks.BARGE_DOCK.get()) ||
-                                level.getBlockState(surr).is(ModBlocks.TUG_DOCK.get())
+                        this.currentContext.level().getBlockState(surr).is(ModBlocks.GUIDE_RAIL_CORNER.get()) ||
+                                this.currentContext.level().getBlockState(surr).is(ModBlocks.BARGE_DOCK.get()) ||
+                                this.currentContext.level().getBlockState(surr).is(ModBlocks.TUG_DOCK.get())
 
                 ){
                     penalty = 0;
@@ -105,8 +105,8 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
         for(int i = p_186327_1_; i < p_186327_1_ + this.entityWidth; ++i) {
             for(int j = p_186327_2_; j < p_186327_2_ + this.entityHeight; ++j) {
                 for(int k = p_186327_3_; k < p_186327_3_ + this.entityDepth; ++k) {
-                    FluidState fluidstate = this.level.getFluidState(blockpos$mutable.set(i, j, k));
-                    BlockState blockstate = this.level.getBlockState(blockpos$mutable.set(i, j, k));
+                    FluidState fluidstate = this.currentContext.level().getFluidState(blockpos$mutable.set(i, j, k));
+                    BlockState blockstate = this.currentContext.level().getBlockState(blockpos$mutable.set(i, j, k));
                     if (fluidstate.isEmpty() && blockstate.isPathfindable(PathComputationType.WATER) && blockstate.isAir()) {
                         return PathType.BREACH;
                     }
@@ -118,7 +118,7 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
             }
         }
 
-        BlockState blockstate1 = this.level.getBlockState(blockpos$mutable);
+        BlockState blockstate1 = this.currentContext.level().getBlockState(blockpos$mutable);
         return blockstate1.isPathfindable(PathComputationType.WATER) ? PathType.WATER : PathType.BLOCKED;
     }
 

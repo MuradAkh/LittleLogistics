@@ -68,9 +68,16 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
 
     private final static double NAMETAG_RENDERING_DISTANCE = 15;
 
-    @Getter
-    @Setter
     private boolean frozen = false;
+
+    public boolean isFrozen() {
+        return frozen;
+    }
+
+    public void setFrozen(boolean frozen) {
+        this.frozen = frozen;
+    }
+
     public static final EntityDataAccessor<Integer> DOMINANT_ID = SynchedEntityData.defineId(VesselEntity.class, EntityDataSerializers.INT);
     public static final EntityDataAccessor<Integer> DOMINATED_ID = SynchedEntityData.defineId(VesselEntity.class, EntityDataSerializers.INT);
     protected final LinkingHandler<VesselEntity> linkingHandler = new LinkingHandler<>(this, VesselEntity.class, DOMINANT_ID, DOMINATED_ID);

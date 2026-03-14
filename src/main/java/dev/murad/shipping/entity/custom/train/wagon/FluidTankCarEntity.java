@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
@@ -43,6 +44,11 @@ public class FluidTankCarEntity extends AbstractWagonEntity {
     public FluidTankCarEntity(Level level, Double aDouble, Double aDouble1, Double aDouble2) {
         super(ModEntityTypes.FLUID_CAR.get(), level, aDouble, aDouble1, aDouble2);
 
+    }
+
+    @Override
+    public AbstractMinecart.Type getMinecartType() {
+        return AbstractMinecart.Type.RIDEABLE;
     }
 
     @Override
@@ -103,7 +109,7 @@ public class FluidTankCarEntity extends AbstractWagonEntity {
                 tank.setFluid(new FluidStack(clientCurrFluid, clientCurrAmount));
             } else if (FLUID_TYPE.equals(key)) {
                 ResourceLocation fluidName = ResourceLocation.parse(entityData.get(FLUID_TYPE));
-                clientCurrFluid = BuiltInRegistries.FLUID.getValue(fluidName);
+                clientCurrFluid = BuiltInRegistries.FLUID.get(fluidName);
                 tank.setFluid(new FluidStack(clientCurrFluid, clientCurrAmount));
             }
         }

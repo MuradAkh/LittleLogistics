@@ -49,7 +49,7 @@ public class SeaterBargeEntity extends AbstractBargeEntity{
     public void positionRider(@NotNull Entity passenger, Entity.@NotNull MoveFunction pCallback) {
         if (this.hasPassenger(passenger)) {
             float f = -0.1F;
-            float f1 = (float)((this.dead ? (double)0.01F : this.getPassengersRidingOffset()) + passenger.getMyRidingOffset());
+            float f1 = (float)(this.isRemoved() ? 0.01F : 0.0F);
             Vec3 vector3d = (new Vec3((double)f, 0.0D, 0.0D)).yRot(-this.getYRot() * ((float)Math.PI / 180F) - ((float)Math.PI / 2F));
             passenger.setPos(this.getX() + vector3d.x, this.getY() - 0.5 + (double)f1, this.getZ() + vector3d.z);
             if (passenger instanceof Animal && this.getPassengers().size() > 1) {

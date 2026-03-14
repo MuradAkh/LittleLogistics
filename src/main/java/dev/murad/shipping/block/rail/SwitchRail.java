@@ -6,8 +6,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.util.InteractionUtil;
 import dev.murad.shipping.util.RailShapeUtil;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -74,8 +72,12 @@ public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
     public static final EnumProperty<OutDirection> OUT_DIRECTION = EnumProperty.create("out_direction", OutDirection.class);
     // is this rail track engaged?
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
-    @Getter
     private final boolean automaticSwitching;
+
+    @Override
+    public boolean isAutomaticSwitching() {
+        return automaticSwitching;
+    }
 
     public SwitchRail(Properties pProperties, boolean automaticSwitching) {
         super(false, pProperties);
@@ -207,8 +209,8 @@ public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
     }
 
     @Override
-    public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
-        if (InteractionUtil.doConfigure(pPlayer, pHand)) {
+    protected InteractionResult useWithoutItem(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, BlockHitResult pHit) {
+        if (InteractionUtil.doConfigure(pPlayer, pPlayer.getUsedItemHand())) {
             pLevel.setBlockAndUpdate(pPos, this.mirror(pState, Mirror.LEFT_RIGHT));
             return InteractionResult.SUCCESS;
         }

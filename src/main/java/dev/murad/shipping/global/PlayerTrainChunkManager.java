@@ -16,6 +16,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.phys.Vec3;
@@ -43,12 +44,12 @@ public class PlayerTrainChunkManager extends SavedData {
 
     public static PlayerTrainChunkManager get(ServerLevel level, UUID uuid){
         DimensionDataStorage storage = level.getDataStorage();
-        return storage.computeIfAbsent((tag) -> new PlayerTrainChunkManager(tag, level, uuid), () -> new PlayerTrainChunkManager(level, uuid), "littlelogistics:chunkmanager-" + uuid.toString());
+        return storage.computeIfAbsent(new SavedData.Factory<>(() -> new PlayerTrainChunkManager(level, uuid), (tag, provider) -> new PlayerTrainChunkManager(tag, level, uuid)), "littlelogistics:chunkmanager-" + uuid.toString());
     }
 
     public static Optional<PlayerTrainChunkManager> getSaved(ServerLevel level, UUID uuid){
         DimensionDataStorage storage = level.getDataStorage();
-        return Optional.ofNullable(storage.get((tag) -> new PlayerTrainChunkManager(tag, level, uuid),"littlelogistics:chunkmanager-" + uuid.toString()));
+        return Optional.ofNullable(storage.get(new SavedData.Factory<>(() -> new PlayerTrainChunkManager(level, uuid), (tag, provider) -> new PlayerTrainChunkManager(tag, level, uuid)), "littlelogistics:chunkmanager-" + uuid.toString()));
     }
 
     public static boolean enroll(Entity entity, UUID uuid){
@@ -224,7 +225,7 @@ public class PlayerTrainChunkManager extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         tag.putInt("numVehicles", numVehicles);
         tag.putLongArray("chunksToLoad", toLoad.stream().map(ChunkPos::toLong).collect(Collectors.toList()));
         return tag;

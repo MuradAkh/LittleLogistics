@@ -17,22 +17,22 @@ public interface IVesselLoader {
         IMPORT
     }
 
-    static <T> Optional<T> getEntityCapability(BlockPos pos, EntityCapability<T, @Nullable Void> capability, Level level){
+    static <T, C> Optional<T> getEntityCapability(BlockPos pos, EntityCapability<T, C> capability, C context, Level level){
         List<Entity> entities = level.getEntities((Entity) null,
                 getSearchBox(pos),
-                (e -> entityPredicate(e, pos, capability))
+                (e -> entityPredicate(e, pos, capability, context))
         );
 
         if(entities.isEmpty()){
             return Optional.empty();
         } else {
             Entity entity = entities.get(0);
-            return Optional.ofNullable(entity.getCapability(capability, null));
+            return Optional.ofNullable(entity.getCapability(capability, context));
         }
     }
 
-    static <T> boolean entityPredicate(Entity entity, BlockPos pos, EntityCapability<T, @Nullable Void> capability) {
-        T cap = entity.getCapability(capability, null);
+    static <T, C> boolean entityPredicate(Entity entity, BlockPos pos, EntityCapability<T, C> capability, C context) {
+        T cap = entity.getCapability(capability, context);
         if (cap == null) return false;
         if (entity instanceof LinkableEntity<?> l) {
             return l.allowDockInterface() && (l.getBlockPos().getX() == pos.getX() && l.getBlockPos().getZ() == pos.getZ());

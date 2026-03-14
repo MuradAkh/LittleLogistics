@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,8 +29,7 @@ public class TrainChunkManagerManager extends SavedData {
                 .overworld()
                 .getDataStorage()
                 .computeIfAbsent(
-                        tag -> new TrainChunkManagerManager(tag, server),
-                        () -> new TrainChunkManagerManager(server),
+                        new SavedData.Factory<>(() -> new TrainChunkManagerManager(server), (tag, provider) -> new TrainChunkManagerManager(tag, server)),
                         "littlelogistics:trainchunkmanagermanager");
     }
 
@@ -57,7 +57,7 @@ public class TrainChunkManagerManager extends SavedData {
     }
 
     @Override
-    public @NotNull CompoundTag save(@NotNull CompoundTag tag) {
+    public @NotNull CompoundTag save(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
         ListTag topList = new ListTag();
         for (var cell : managers.cellSet()) {
             CompoundTag inner = new CompoundTag();

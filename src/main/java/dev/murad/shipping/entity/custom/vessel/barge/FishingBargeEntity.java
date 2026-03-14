@@ -44,8 +44,9 @@ public class FishingBargeEntity extends AbstractBargeEntity {
     private final Set<Pair<Integer, Integer>> overFishedCoords = new HashSet<>();
     private final Queue<Pair<Integer, Integer>> overFishedQueue = new LinkedList<>();
 
-    private static final ResourceLocation FISHING_LOOT_TABLE =
-            ResourceLocation.parse(ShippingConfig.Server.FISHING_LOOT_TABLE.get());
+    private static final net.minecraft.resources.ResourceKey<LootTable> FISHING_LOOT_TABLE =
+            net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE,
+                    ResourceLocation.parse(ShippingConfig.Server.FISHING_LOOT_TABLE.get()));
 
     private static final int FISHING_COOLDOWN =
             ShippingConfig.Server.FISHING_COOLDOWN.get();
@@ -123,13 +124,11 @@ public class FishingBargeEntity extends AbstractBargeEntity {
                     .withParameter(LootContextParams.ORIGIN, this.position())
                     .withParameter(LootContextParams.THIS_ENTITY, this)
                     .withParameter(LootContextParams.TOOL, new ItemStack(Items.FISHING_ROD))
-                    .withParameter(LootContextParams.KILLER_ENTITY, this)
-                    .withParameter(LootContextParams.THIS_ENTITY, this)
                     .create(LootContextParamSets.FISHING);
 
             LootTable loottable = this.level()
                     .getServer()
-                    .getLootData()
+                    .reloadableRegistries()
                     .getLootTable(r < treasure_chance ? BuiltInLootTables.FISHING_TREASURE : FISHING_LOOT_TABLE);
 
             List<ItemStack> list = loottable.getRandomItems(params);

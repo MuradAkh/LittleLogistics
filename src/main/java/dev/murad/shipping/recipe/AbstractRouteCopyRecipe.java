@@ -2,7 +2,7 @@ package dev.murad.shipping.recipe;
 
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
@@ -39,11 +39,11 @@ public abstract class AbstractRouteCopyRecipe extends CustomRecipe {
     }
 
     // returns a pair of <Filled Tug Route, Unfilled Tug Route>
-    private Optional<Pair<ItemStack, Integer>> checkTugRoutes(CraftingContainer inventory) {
+    private Optional<Pair<ItemStack, Integer>> checkTugRoutes(CraftingInput inventory) {
         int i = 0;
         ItemStack filledRoute = ItemStack.EMPTY;
 
-        for(int j = 0; j < inventory.getContainerSize(); ++j) {
+        for(int j = 0; j < inventory.size(); ++j) {
             ItemStack stack = inventory.getItem(j);
             if (!stack.isEmpty()) {
                 if (isRouteWithNodes(stack, true)) {
@@ -72,13 +72,13 @@ public abstract class AbstractRouteCopyRecipe extends CustomRecipe {
     }
 
     @Override
-    public boolean matches(@Nonnull CraftingContainer inventory, @Nonnull Level level) {
+    public boolean matches(@Nonnull CraftingInput inventory, @Nonnull Level level) {
         return checkTugRoutes(inventory).isPresent();
     }
 
     @Nonnull
     @Override
-    public ItemStack assemble(@Nonnull CraftingContainer inventory, HolderLookup.@NotNull Provider registries) {
+    public ItemStack assemble(@Nonnull CraftingInput inventory, HolderLookup.@NotNull Provider registries) {
         Optional<Pair<ItemStack, Integer>> matchOpt = checkTugRoutes(inventory);
         if (matchOpt.isEmpty()) return ItemStack.EMPTY;
 

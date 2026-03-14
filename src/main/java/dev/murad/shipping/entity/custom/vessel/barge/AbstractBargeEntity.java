@@ -119,7 +119,7 @@ public abstract class AbstractBargeEntity extends VesselEntity implements Stalli
         if (!this.level().isClientSide) {
             var stack = new ItemStack(this.getDropItem());
             if (this.hasCustomName()) {
-                stack.setHoverName(this.getCustomName());
+                stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, this.getCustomName());
             }
             this.spawnAtLocation(stack);
         }

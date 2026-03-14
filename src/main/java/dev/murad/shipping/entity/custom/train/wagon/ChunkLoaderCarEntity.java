@@ -5,6 +5,7 @@ import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.MobileChunkLoader;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +23,11 @@ public class ChunkLoaderCarEntity extends AbstractWagonEntity {
         super(ModEntityTypes.CHUNK_LOADER_CAR.get(), level, aDouble, aDouble1, aDouble2);
         mobileChunkLoader = new MobileChunkLoader(this);
 
+    }
+
+    @Override
+    public AbstractMinecart.Type getMinecartType() {
+        return AbstractMinecart.Type.RIDEABLE;
     }
 
     @Override

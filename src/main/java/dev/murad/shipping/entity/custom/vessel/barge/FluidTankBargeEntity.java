@@ -97,7 +97,7 @@ public class FluidTankBargeEntity extends AbstractBargeEntity {
                 tank.setFluid(new FluidStack(clientCurrFluid, clientCurrAmount));
             } else if (FLUID_TYPE.equals(key)) {
                 ResourceLocation fluidName = ResourceLocation.parse(entityData.get(FLUID_TYPE));
-                clientCurrFluid = BuiltInRegistries.FLUID.getValue(fluidName);
+                clientCurrFluid = BuiltInRegistries.FLUID.get(fluidName);
                 tank.setFluid(new FluidStack(clientCurrFluid, clientCurrAmount));
             }
         }

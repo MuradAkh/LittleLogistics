@@ -64,12 +64,21 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     public static final EntityDataAccessor<Integer> DOMINATED_ID = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
     protected final LinkingHandler<AbstractTrainCarEntity> linkingHandler = new LinkingHandler<>(this, AbstractTrainCarEntity.class, DOMINANT_ID, DOMINATED_ID);
     protected static double TRAIN_SPEED = ShippingConfig.Server.TRAIN_MAX_SPEED.get();
-    @Getter
     protected final RailHelper railHelper;
 
-    @Getter
-    @Setter
+    public RailHelper getRailHelper() {
+        return railHelper;
+    }
+
     private boolean frozen = false;
+
+    public boolean isFrozen() {
+        return frozen;
+    }
+
+    public void setFrozen(boolean frozen) {
+        this.frozen = frozen;
+    }
 
     private static final Map<RailShape, Pair<Vec3i, Vec3i>> EXITS = Util.make(Maps.newEnumMap(RailShape.class), (enumMap) -> {
         Vec3i west = Direction.WEST.getNormal();
@@ -487,7 +496,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
             var stack = this.getPickResult();
 
             if (this.hasCustomName()) {
-                stack.setHoverName(this.getCustomName());
+                stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, this.getCustomName());
             }
 
             this.spawnAtLocation(stack);

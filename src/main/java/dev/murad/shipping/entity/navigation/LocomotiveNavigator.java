@@ -73,7 +73,11 @@ public class LocomotiveNavigator {
             BlockPos blockPos = locomotive.getBlockPos();
 
             // figure out direction the locomotive came from.
-            BlockPos offset = blockPos.offset(oldHorizontalBlockPos.multiply(-1));
+            BlockPos offset = new BlockPos(
+                    blockPos.getX() - oldHorizontalBlockPos.getX(),
+                    blockPos.getY() - oldHorizontalBlockPos.getY(),
+                    blockPos.getZ() - oldHorizontalBlockPos.getZ()
+            );
             Optional<Direction> moveDirOpt = getDirectionFromHorizontalOffset(offset.getX(), offset.getZ());
             Direction moveDir = moveDirOpt.orElse(locomotive.getDirection());
 

@@ -4,8 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.murad.shipping.util.RailShapeUtil;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -50,8 +48,12 @@ public class TeeJunctionRail extends BaseRailBlock implements MultiShapeRail {
     // moving right is default non-powered direction
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
-    @Getter
     private final boolean automaticSwitching;
+
+    @Override
+    public boolean isAutomaticSwitching() {
+        return automaticSwitching;
+    }
 
     public TeeJunctionRail(BlockBehaviour.Properties pProperties, boolean automaticSwitching) {
         super(false, pProperties);

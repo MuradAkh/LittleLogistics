@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
@@ -107,6 +108,11 @@ public class ChestCarEntity extends AbstractWagonEntity implements ItemHandlerVa
     @Override
     public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
         return isDockable();
+    }
+
+    @Override
+    public AbstractMinecart.Type getMinecartType() {
+        return AbstractMinecart.Type.RIDEABLE;
     }
 
     @Override

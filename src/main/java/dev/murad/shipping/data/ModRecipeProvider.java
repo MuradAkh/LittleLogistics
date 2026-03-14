@@ -25,7 +25,7 @@ public class ModRecipeProvider extends RecipeProvider {
     protected void buildRecipes(RecipeOutput output) {
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.TUG_DOCK.get(), 2)
                 .define('#', ModItems.SPRING.get())
-                .define('_', Tags.Items.STONE)
+                .define('_', Tags.Items.STONES)
                 .define('$', Items.IRON_INGOT)
                 .pattern("___")
                 .pattern("#_#")
@@ -35,7 +35,7 @@ public class ModRecipeProvider extends RecipeProvider {
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.BARGE_DOCK.get(), 2)
                 .define('#', ModItems.SPRING.get())
-                .define('_', Tags.Items.STONE)
+                .define('_', Tags.Items.STONES)
                 .define('$', Items.IRON_INGOT)
                 .pattern("___")
                 .pattern("_#_")
@@ -45,7 +45,7 @@ public class ModRecipeProvider extends RecipeProvider {
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.VESSEL_DETECTOR.get(), 2)
                 .define('#', ModItems.SPRING.get())
-                .define('_', Tags.Items.STONE)
+                .define('_', Tags.Items.STONES)
                 .define('$', Items.REDSTONE_TORCH)
                 .pattern("_#_")
                 .pattern("_$_")
@@ -56,7 +56,7 @@ public class ModRecipeProvider extends RecipeProvider {
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.GUIDE_RAIL_CORNER.get(), 3)
                 .define('#', ModItems.SPRING.get())
-                .define('_', Tags.Items.STONE)
+                .define('_', Tags.Items.STONES)
                 .define('$', Items.POWERED_RAIL)
                 .pattern("#__")
                 .pattern("$__")
@@ -119,7 +119,7 @@ public class ModRecipeProvider extends RecipeProvider {
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.GUIDE_RAIL_TUG.get(), 8)
                 .define('#', ModItems.SPRING.get())
-                .define('_', Tags.Items.STONE)
+                .define('_', Tags.Items.STONES)
                 .define('$', Items.POWERED_RAIL)
                 .pattern("#$#")
                 .pattern("___")
@@ -146,7 +146,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.SPRING.get(), 6)
-                .define('_', Tags.Items.STRING)
+                .define('_', Tags.Items.STRINGS)
                 .define('$', Items.IRON_NUGGET)
                 .pattern("_$_")
                 .pattern("$_$")

@@ -3,7 +3,6 @@ package dev.murad.shipping.util;
 import com.mojang.authlib.GameProfile;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.global.PlayerTrainChunkManager;
-import lombok.RequiredArgsConstructor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -11,12 +10,15 @@ import net.minecraft.world.entity.Entity;
 import java.util.Optional;
 import java.util.UUID;
 
-@RequiredArgsConstructor
 public class ChunkManagerEnrollmentHandler {
     private static final String UUID_TAG = "EnrollmentHandlerOwner";
     private UUID uuid = null;
     private int enrollMe = -1;
     private final Entity entity;
+
+    public ChunkManagerEnrollmentHandler(Entity entity) {
+        this.entity = entity;
+    }
 
     public void tick(){
         if(enrollMe >= 0){

@@ -51,12 +51,18 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity implements LinkableEntityHead<AbstractTrainCarEntity>, ItemHandlerVanillaContainerWrapper, HeadVehicle, StallingCapability {
-    @Setter
     protected boolean engineOn = false;
 
+    public void setEngineOn(boolean engineOn) {
+        this.engineOn = engineOn;
+    }
+
     protected final ChunkManagerEnrollmentHandler enrollmentHandler;
-    @Setter
     private boolean doflip = false;
+
+    public void setDoflip(boolean doflip) {
+        this.doflip = doflip;
+    }
     private boolean independentMotion = false;
     private boolean docked = false;
     private final VehicleFrontPart frontHitbox;
@@ -68,15 +74,22 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     private BlockPos currentHorizontalBlockPos;
     @Nullable
-    @Getter
     private BlockPos oldHorizontalBlockPos;
+
+    @Nullable
+    public BlockPos getOldHorizontalBlockPos() {
+        return oldHorizontalBlockPos;
+    }
 
     // item handler for loco routes
     private static final String LOCO_ROUTE_INV_TAG = "locoRouteInv";
 
 
-    @Getter
     protected ItemStackHandler routeItemHandler = createLocoRouteItemHandler();
+
+    public ItemStackHandler getRouteItemHandler() {
+        return routeItemHandler;
+    }
 
     private static final String NAVIGATOR_TAG = "navigator";
     protected LocomotiveNavigator navigator = new LocomotiveNavigator(this);

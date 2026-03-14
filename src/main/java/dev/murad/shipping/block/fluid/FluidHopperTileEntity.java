@@ -95,7 +95,7 @@ public class FluidHopperTileEntity extends BlockEntity implements IVesselLoader 
 
     private Optional<IFluidHandler> getExternalFluidHandler(BlockPos pos){
         return Optional.ofNullable(level.getCapability(Capabilities.FluidHandler.BLOCK, pos, null))
-                .or(() -> IVesselLoader.getEntityCapability(pos, Capabilities.FluidHandler.ENTITY, this.level));
+                .or(() -> IVesselLoader.getEntityCapability(pos, Capabilities.FluidHandler.ENTITY, null, this.level));
     }
 
     private boolean tryImportFluid() {
