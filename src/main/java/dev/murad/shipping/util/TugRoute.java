@@ -38,6 +38,10 @@ public class TugRoute extends ArrayList<TugRouteNode> {
 
     private String name;
 
+    public String getName() {
+        return name;
+    }
+
     public TugRoute(String name, List<TugRouteNode> nodes) {
         super(nodes);
         this.name = name;

@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TugRouteItem extends Item {
@@ -85,7 +86,9 @@ public class TugRouteItem extends Item {
 
     public static TugRoute getRoute(ItemStack itemStack) {
         TugRoute route = itemStack.get(ModDataComponents.TUG_ROUTE);
-        return route != null ? route : new TugRoute();
+        // Return a defensive copy — Data Components must be treated as immutable.
+        // Mutating the stored object and calling set() is a no-op because equals() sees no change.
+        return route != null ? new TugRoute(route.getName(), new ArrayList<>(route)) : new TugRoute();
     }
 
     public static boolean popRoute(ItemStack itemStack) {

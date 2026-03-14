@@ -43,6 +43,16 @@ public class LocoRoute extends HashSet<LocoRouteNode> {
     @Nullable
     private String owner;
 
+    @Nullable
+    public String getName() {
+        return name;
+    }
+
+    @Nullable
+    public String getOwner() {
+        return owner;
+    }
+
     public LocoRoute(@Nullable String name,
                      @Nullable String owner,
                      Set<LocoRouteNode> nodes) {

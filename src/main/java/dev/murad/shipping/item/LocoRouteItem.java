@@ -21,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.List;
 
 @Log4j2
@@ -88,7 +89,9 @@ public class LocoRouteItem extends Item {
 
     public static LocoRoute getRoute(ItemStack stack) {
         LocoRoute route = stack.get(ModDataComponents.LOCO_ROUTE);
-        return route != null ? route : new LocoRoute();
+        // Return a defensive copy — Data Components must be treated as immutable.
+        // Mutating the stored object and calling set() is a no-op because equals() sees no change.
+        return route != null ? new LocoRoute(route.getName(), route.getOwner(), new HashSet<>(route)) : new LocoRoute();
     }
 
     @Override
