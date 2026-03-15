@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "dev.murad.shipping.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "mixins": [
+    "RailStateAccessor",
+    "RailStateMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
