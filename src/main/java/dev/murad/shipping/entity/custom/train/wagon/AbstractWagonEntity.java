@@ -81,7 +81,8 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity impleme
     }
 
     private Optional<StallingCapability> delegateStalling() {
-        if (linkingHandler.train.getHead() instanceof StallingCapability s) {
+        var head = linkingHandler.train.getHead();
+        if (head != this && head instanceof StallingCapability s) {
             return Optional.of(s);
         }
         return Optional.empty();
