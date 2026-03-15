@@ -1,7 +1,6 @@
 package dev.murad.shipping.entity.navigation;
 
 import dev.murad.shipping.block.rail.MultiShapeRail;
-import dev.murad.shipping.block.rail.SwitchRail;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.util.LocoRoute;
 import dev.murad.shipping.util.LocoRouteNode;
@@ -117,7 +116,6 @@ public class LocomotiveNavigator {
         reset();
         if (tag == null) return;
 
-        // list of intarrays (type 11)
         routeNodes.addAll(convertTagToSet(tag.getList(ROUTE_TAG, Tag.TAG_INT_ARRAY)));
         visitedNodes.addAll(convertTagToSet(tag.getList(VISITED_TAG, Tag.TAG_INT_ARRAY)));
     }

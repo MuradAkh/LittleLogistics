@@ -14,8 +14,6 @@ import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModSounds;
 import dev.murad.shipping.util.*;
-import lombok.Getter;
-import lombok.Setter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -58,11 +56,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     protected final ChunkManagerEnrollmentHandler enrollmentHandler;
-    private boolean doflip = false;
 
-    public void setDoflip(boolean doflip) {
-        this.doflip = doflip;
-    }
     private boolean independentMotion = false;
     private boolean docked = false;
     private final VehicleFrontPart frontHitbox;
@@ -491,8 +485,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     @Override
     public void setDominant(AbstractTrainCarEntity entity) {
     }
-
-
 
     @Override
     public void removeDominated() {
