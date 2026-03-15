@@ -91,7 +91,8 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractLocomotiveEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(AbstractLocomotiveEntity.class, EntityDataSerializers.STRING);
-    private int dockCheckCooldown = 0;
+    private int dockHoldTicks = 0;
+    private int postUndockTicks = 0;
 
 
     public AbstractLocomotiveEntity(EntityType<?> type, Level world) {
@@ -286,7 +287,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             entityData.set(INDEPENDENT_MOTION, true);
             accelerate();
         }else{
-            if(RailHelper.getRail(this.getOnPos().above(), this.level())
+            if(!docked && RailHelper.getRail(this.getOnPos().above(), this.level())
                     .map(railHelper::getShape)
                     .map(Enum::name)
                     .map(s -> s.contains("ASCENDING"))
@@ -382,8 +383,8 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
         boolean wasDocked = this.isDocked();
 
-        if (wasDocked && dockCheckCooldown > 0) {
-            dockCheckCooldown--;
+        if (wasDocked && dockHoldTicks > 0) {
+            dockHoldTicks--;
             this.setDeltaMovement(Vec3.ZERO);
             this.moveTo(x + 0.5, getY(), z + 0.5);
             return;
@@ -395,6 +396,11 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                 (var i) -> prepCord.apply(i) < 0.8 && prepCord.apply(i) > 0.2;
 
         if (!aroundCentre.test(this.getX()) || !aroundCentre.test(this.getZ())) {
+            return;
+        }
+
+        if (postUndockTicks > 0) {
+            postUndockTicks--;
             return;
         }
 
@@ -425,13 +431,14 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             // Refresh follower dock assignments each check cycle
             // as followers may still be settling into position via spring physics
             occupyFollowerDocks();
-            dockCheckCooldown = dock != null ? 5 : 20;
+            dockHoldTicks = dock != null ? 5 : 20;
             this.dock(x + 0.5, getY(), z + 0.5);
         } else {
             if (changedUndock && dock != null) {
                 vacateAllDocks();
+                postUndockTicks = 10;
             }
-            dockCheckCooldown = 0;
+            dockHoldTicks = 0;
             this.undock();
         }
 

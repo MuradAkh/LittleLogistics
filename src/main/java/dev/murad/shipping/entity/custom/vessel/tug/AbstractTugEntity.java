@@ -81,7 +81,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         this.engineOn = engineOn;
     }
 
-    private int dockCheckCooldown = 0;
+    private int dockHoldTicks = 0;
+    private int postUndockTicks = 0;
     private boolean independentMotion = false;
     private int pathfindCooldown = 0;
     private VehicleFrontPart frontHitbox;
@@ -230,10 +231,15 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
         boolean wasDocked = this.isDocked();
 
-        if (wasDocked && dockCheckCooldown > 0) {
-            dockCheckCooldown--;
+        if (wasDocked && dockHoldTicks > 0) {
+            dockHoldTicks--;
             this.setDeltaMovement(Vec3.ZERO);
             this.moveTo(x + 0.5, getY(), z + 0.5);
+            return;
+        }
+
+        if (postUndockTicks > 0) {
+            postUndockTicks--;
             return;
         }
 
@@ -264,13 +270,14 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             // Refresh follower dock assignments each check cycle
             // as followers may still be settling into position via spring physics
             occupyFollowerDocks();
-            dockCheckCooldown = dock != null ? 5 : 20;
+            dockHoldTicks = dock != null ? 5 : 20;
             this.dock(x + 0.5, getY(), z + 0.5);
         } else {
             if (changedUndock && dock != null) {
                 vacateAllDocks();
+                postUndockTicks = 10;
             }
-            dockCheckCooldown = 0;
+            dockHoldTicks = 0;
             this.undock();
         }
 

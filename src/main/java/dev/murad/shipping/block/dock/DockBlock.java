@@ -50,7 +50,6 @@ public class DockBlock extends Block implements EntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        // TODO: ModTileEntitiesTypes.DOCK will be registered in Task 6
         return ModTileEntitiesTypes.DOCK.get().create(pos, state);
     }
 
