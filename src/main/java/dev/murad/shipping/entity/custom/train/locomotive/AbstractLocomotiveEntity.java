@@ -14,6 +14,7 @@ import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModSounds;
 import dev.murad.shipping.util.*;
+import lombok.Setter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -49,11 +50,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity implements LinkableEntityHead<AbstractTrainCarEntity>, ItemHandlerVanillaContainerWrapper, HeadVehicle, StallingCapability {
-    protected boolean engineOn = false;
 
-    public void setEngineOn(boolean engineOn) {
-        this.engineOn = engineOn;
-    }
+    @Setter
+    protected boolean engineOn = false;
 
     protected final ChunkManagerEnrollmentHandler enrollmentHandler;
 
@@ -309,7 +308,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             if(level().getBlockState(block).getBlock() instanceof MultiShapeRail r){
                 if(!this.level().getEntitiesOfClass(Entity.class, new AABB(pos), e -> e.equals(this) || e.equals(frontHitbox)).isEmpty())
                     return Optional.empty();
-                return r.getPriorityDirectionsToCheck(level().getBlockState(block), prevExitTaken.getOpposite())
+                return r.getPreferredExits(level().getBlockState(block), prevExitTaken.getOpposite())
                         .stream()
                         .map(p -> railHelper.traverse(pos.relative(p), this.level(), p, (dir, f) -> checkLocoCollision(f), 2))
                         .map(Optional::isPresent)

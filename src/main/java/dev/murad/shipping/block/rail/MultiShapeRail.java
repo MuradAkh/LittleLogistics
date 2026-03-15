@@ -19,9 +19,31 @@ public interface MultiShapeRail {
      */
     boolean setRailState(BlockState state, Level world, BlockPos pos, Direction in, Direction out);
 
-    Set<Direction> getPossibleOutputDirections(BlockState state, Direction inputSide);
+    /**
+     * Returns the directions a train can exit toward when entering from {@code inputSide}.
+     * For automatic rails, this may return multiple options. For manual/redstone rails,
+     * this respects the current powered state and may return empty if the input side
+     * is on the inactive branch.
+     *
+     * @param state     current blockstate of the rail
+     * @param inputSide the direction the train is arriving from (e.g. NORTH means
+     *                  the train is entering from the north side, moving southward)
+     * @return set of directions the train can exit toward, or empty if entry from
+     *         this side is not currently allowed
+     */
+    Set<Direction> getExitDirections(BlockState state, Direction inputSide);
 
-    Set<Direction> getPriorityDirectionsToCheck(BlockState state, Direction entrance);
+    /**
+     * Returns alternative directions the locomotive navigator should check first when
+     * approaching from {@code entrance}. This is used to prefer straight-through paths
+     * over branching — e.g. a train entering from the powered branch of a switch rail
+     * should check the unpowered (straight) direction first before committing to a turn.
+     *
+     * @param state    current blockstate of the rail
+     * @param entrance the direction the train is arriving from
+     * @return set of directions to prioritize checking, or empty if no priority applies
+     */
+    Set<Direction> getPreferredExits(BlockState state, Direction entrance);
 
     /**
      * @param direction Direction of travel for the train
@@ -34,7 +56,7 @@ public interface MultiShapeRail {
      * Returns all directions this rail structurally connects to, regardless of powered state.
      * Used by the RailState mixin to determine vanilla rail auto-connection.
      */
-    Set<Direction> getAllConnectedDirections(BlockState state);
+    Set<Direction> getConnectedSides(BlockState state);
 
     /**
      * Trigger a reshape on adjacent vanilla rails so they connect to this multi-shape rail.

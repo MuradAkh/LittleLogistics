@@ -149,7 +149,7 @@ public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
     @Override
     public boolean setRailState(BlockState state, Level world, BlockPos pos, Direction in, Direction out) {
         BranchingRailConfiguration c = getRailConfiguration(state);
-        Set<Direction> possibilities = getPossibleOutputDirections(state, in);
+        Set<Direction> possibilities = getExitDirections(state, in);
 
         if (!automaticSwitching) {
             return possibilities.contains(out);
@@ -183,20 +183,20 @@ public class SwitchRail extends BaseRailBlock implements MultiShapeRail {
 
 
     @Override
-    public Set<Direction> getAllConnectedDirections(BlockState state) {
+    public Set<Direction> getConnectedSides(BlockState state) {
         BranchingRailConfiguration c = getRailConfiguration(state);
         return Set.of(c.getRootDirection(), c.getUnpoweredDirection(), c.getPoweredDirection());
     }
 
     @Override
-    public Set<Direction> getPossibleOutputDirections(BlockState state, Direction inputSide) {
+    public Set<Direction> getExitDirections(BlockState state, Direction inputSide) {
         BranchingRailConfiguration c = getRailConfiguration(state);
         boolean powered = state.getValue(POWERED);
         return c.getPossibleDirections(inputSide, automaticSwitching, powered);
     }
 
     @Override
-    public Set<Direction> getPriorityDirectionsToCheck(BlockState state, Direction entrance) {
+    public Set<Direction> getPreferredExits(BlockState state, Direction entrance) {
         BranchingRailConfiguration c = getRailConfiguration(state);
         return entrance.equals(c.getPoweredDirection()) ? Set.of(c.getUnpoweredDirection()) : Set.of();
     }

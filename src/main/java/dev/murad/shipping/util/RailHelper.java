@@ -217,7 +217,7 @@ public class RailHelper {
         if (state.getBlock() instanceof MultiShapeRail r) {
             // if rail is a MultiShapeRail, return all possible outputs from the input side
             // it doesn't matter if this rail is automatically switching.
-            return r.getPossibleOutputDirections(state, inputSide)
+            return r.getExitDirections(state, inputSide)
                     .stream()
                     .map(RailDir::new)
                     .collect(Collectors.toList());

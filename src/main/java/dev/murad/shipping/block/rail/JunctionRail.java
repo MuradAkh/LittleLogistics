@@ -70,7 +70,7 @@ public class JunctionRail extends BaseRailBlock implements MultiShapeRail {
         return RAIL_SHAPE;
     }
 
-    @Override
+   @Override
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return FLAT_AABB;
     }
@@ -111,14 +111,14 @@ public class JunctionRail extends BaseRailBlock implements MultiShapeRail {
     private static final Set<Direction> ALL_HORIZONTAL = Set.of(Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST);
 
     @Override
-    public Set<Direction> getAllConnectedDirections(BlockState state) {
+    public Set<Direction> getConnectedSides(BlockState state) {
         return ALL_HORIZONTAL;
     }
 
     static final Set<Direction> NO_POSSIBILITIES = Set.of();
 
     @Override
-    public Set<Direction> getPossibleOutputDirections(BlockState state, Direction inputSide) {
+    public Set<Direction> getExitDirections(BlockState state, Direction inputSide) {
         if (inputSide.getAxis().isHorizontal()) {
             return Set.of(inputSide.getOpposite());
         }
@@ -126,7 +126,7 @@ public class JunctionRail extends BaseRailBlock implements MultiShapeRail {
     }
 
     @Override
-    public Set<Direction> getPriorityDirectionsToCheck(BlockState state, Direction entrance) {
+    public Set<Direction> getPreferredExits(BlockState state, Direction entrance) {
         if(entrance.equals(Direction.EAST) || entrance.equals(Direction.WEST)){
             return Set.of(Direction.NORTH, Direction.SOUTH);
         } else return Set.of();
