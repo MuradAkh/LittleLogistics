@@ -31,6 +31,12 @@ public interface MultiShapeRail {
     boolean isAutomaticSwitching();
 
     /**
+     * Returns all directions this rail structurally connects to, regardless of powered state.
+     * Used by the RailState mixin to determine vanilla rail auto-connection.
+     */
+    Set<Direction> getAllConnectedDirections(BlockState state);
+
+    /**
      * Trigger a reshape on adjacent vanilla rails so they connect to this multi-shape rail.
      * Call from onPlace after the custom rail has been placed in the world.
      */

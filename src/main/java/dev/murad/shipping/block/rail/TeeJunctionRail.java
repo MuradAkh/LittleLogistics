@@ -6,9 +6,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.murad.shipping.util.RailShapeUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -164,6 +161,12 @@ public class TeeJunctionRail extends BaseRailBlock implements MultiShapeRail {
         }
 
         return false;
+    }
+
+    @Override
+    public Set<Direction> getAllConnectedDirections(BlockState state) {
+        BranchingRailConfiguration c = getRailConfiguration(state);
+        return Set.of(c.getRootDirection(), c.getUnpoweredDirection(), c.getPoweredDirection());
     }
 
     @Override

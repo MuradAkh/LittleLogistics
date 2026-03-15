@@ -40,7 +40,7 @@ public class RailStateMixin {
                       : dz == 1 ? Direction.SOUTH
                       : Direction.NORTH;
 
-        if (!multiShapeRail.getPossibleOutputDirections(this.state, dir).isEmpty()) {
+        if (multiShapeRail.getAllConnectedDirections(this.state).contains(dir)) {
             cir.setReturnValue(true);
         }
     }
