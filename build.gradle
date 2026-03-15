@@ -59,6 +59,10 @@ dependencies {
     // runtimeOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
     // compileOnly "vazkii.patchouli:Patchouli:${patchouli_version}:api"
 
+    // Test mods for runtime
+    runtimeOnly "maven.modrinth:emi:1.1.22+1.21.1+neoforge"
+    runtimeOnly "maven.modrinth:pipez:neoforge-1.21.1-1.2.19"
+    runtimeOnly "maven.modrinth:create:mc1.21.1-6.0.9"
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 }
 
@@ -144,5 +148,9 @@ repositories {
     maven {
         name = "Progwml6 maven"
         url = "https://dvs1.progwml6.com/files/maven/"
+    }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
     }
 }
