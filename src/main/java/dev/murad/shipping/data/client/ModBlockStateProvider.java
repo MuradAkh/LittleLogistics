@@ -1,6 +1,8 @@
 package dev.murad.shipping.data.client;
 
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.block.dock.DockBlock;
+import dev.murad.shipping.block.dock.DockRail;
 import dev.murad.shipping.block.dock.DockingBlockStates;
 import dev.murad.shipping.block.energy.VesselChargerBlock;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
@@ -208,6 +210,23 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .modelFile(getRapidHopperModel(state)
                 )
                 .rotationY((int) state.getValue(HopperBlock.FACING).getOpposite().toYRot())
+                .build()
+        );
+
+        getVariantBuilder(ModBlocks.DOCK_BLOCK.get()).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(models().orientable("dock",
+                        getBlTx("dock_side"),
+                        getBlTx("dock_front"),
+                        getBlTx("dock_top")))
+                .rotationY((int) state.getValue(DockBlock.FACING).getOpposite().toYRot())
+                .build()
+        );
+
+        getVariantBuilder(ModBlocks.DOCK_RAIL.get()).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(models()
+                        .withExistingParent("dock_rail", mcLoc("rail_flat"))
+                        .texture("rail", getBlTx("dock_rail")))
+                .rotationY(state.getValue(DockRail.RAIL_SHAPE).equals(RailShape.NORTH_SOUTH) ? 0 : 90)
                 .build()
         );
     }

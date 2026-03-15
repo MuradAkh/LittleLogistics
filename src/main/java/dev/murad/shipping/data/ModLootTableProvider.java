@@ -56,6 +56,8 @@ public class ModLootTableProvider extends LootTableProvider {
             dropSelf(ModBlocks.RAPID_HOPPER.get());
             dropSelf(ModBlocks.CAR_DOCK_RAIL.get());
             dropSelf(ModBlocks.LOCOMOTIVE_DOCK_RAIL.get());
+            dropSelf(ModBlocks.DOCK_BLOCK.get());
+            dropSelf(ModBlocks.DOCK_RAIL.get());
         }
 
         @Override
