@@ -1,7 +1,9 @@
 package dev.murad.shipping.util;
 
 import dev.murad.shipping.capability.StallingCapability;
+import dev.murad.shipping.entity.custom.HeadVehicle;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -63,18 +65,19 @@ public class LinkingHandler<T extends Entity & LinkableEntity<T>> {
     }
 
     private void stallNonTicking() {
-//        boolean skip = entity.getTrain()
-//                .getTug()
-//                .flatMap(tug -> {
-//                    if (tug instanceof HeadVehicle h)
-//                        return Optional.of(h);
-//                    else return Optional.empty();
-//                })
-//                .map(HeadVehicle::hasOwner).orElse(true);
-//
-//        if(!skip && !((ServerLevel) entity.level).isPositionEntityTicking(dominated.get().blockPosition())){
-//            entity.getCapability(StallingCapability.STALLING_CAPABILITY).ifPresent(StallingCapability::stall);
-//        }
+        if (follower.isEmpty()) return;
+
+        boolean skip = entity.getTrain()
+                .getTug()
+                .filter(tug -> tug instanceof HeadVehicle)
+                .map(tug -> ((HeadVehicle) tug).hasOwner())
+                .orElse(true);
+
+        if (!skip && !((ServerLevel) entity.level()).isPositionEntityTicking(follower.get().blockPosition())) {
+            if (entity instanceof StallingCapability s) {
+                s.stall();
+            }
+        }
     }
 
     public void readAdditionalSaveData(CompoundTag compound) {
