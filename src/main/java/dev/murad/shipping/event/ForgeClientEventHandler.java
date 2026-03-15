@@ -98,10 +98,14 @@ public class ForgeClientEventHandler {
 
         if (!(state.getBlock() instanceof DockBlock) && !(state.getBlock() instanceof DockRail)) return;
 
+        // Prefer Y axis; fall back to X for mice that report horizontal scroll
+        double scroll = event.getScrollDeltaY() != 0 ? event.getScrollDeltaY() : event.getScrollDeltaX();
+        if (scroll == 0) return;
+
         // Consume the scroll event to prevent hotbar switching
         event.setCanceled(true);
 
-        int delta = event.getScrollDeltaY() > 0 ? 1 : -1;
+        int delta = scroll > 0 ? 1 : -1;
         PacketDistributor.sendToServer(new SetDockConfigPacket(pos, delta));
     }
 
