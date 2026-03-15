@@ -1,6 +1,7 @@
 package dev.murad.shipping.setup;
 
 import dev.murad.shipping.block.dock.BargeDockTileEntity;
+import dev.murad.shipping.block.dock.DockBlockEntity;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.energy.VesselChargerTileEntity;
 import dev.murad.shipping.block.fluid.FluidHopperTileEntity;
@@ -60,6 +61,14 @@ public class ModTileEntitiesTypes {
             "rapid_hopper",
             RapidHopperTileEntity::new,
             ModBlocks.RAPID_HOPPER
+    );
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DockBlockEntity>> DOCK = Registration.TILE_ENTITIES.register(
+            "dock",
+            () -> BlockEntityType.Builder.of(
+                    (pos, state) -> new DockBlockEntity(ModTileEntitiesTypes.DOCK.get(), pos, state),
+                    ModBlocks.DOCK_BLOCK.get(), ModBlocks.DOCK_RAIL.get()
+            ).build(null)
     );
 
     private static <T extends BlockEntity> DeferredHolder<BlockEntityType<?>, BlockEntityType<T>> register(

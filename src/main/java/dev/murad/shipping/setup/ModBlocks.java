@@ -3,6 +3,8 @@ package dev.murad.shipping.setup;
 
 import com.google.common.collect.ImmutableList;
 import dev.murad.shipping.block.dock.BargeDockBlock;
+import dev.murad.shipping.block.dock.DockBlock;
+import dev.murad.shipping.block.dock.DockRail;
 import dev.murad.shipping.block.dock.TugDockBlock;
 import dev.murad.shipping.block.energy.VesselChargerBlock;
 import dev.murad.shipping.block.fluid.FluidHopperBlock;
@@ -144,6 +146,20 @@ public class ModBlocks {
     public static final DeferredHolder<Block, Block> LOCOMOTIVE_DOCK_RAIL = register(
             "locomotive_dock_rail",
             () -> new LocomotiveDockingRail(RAIL_BLOCK_BEHAVIOUR),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
+
+    public static final DeferredHolder<Block, Block> DOCK_BLOCK = register(
+            "dock",
+            () -> new DockBlock(METAL_BLOCK_BEHAVIOUR),
+            ImmutableList.of(
+                    CreativeModeTabs.TOOLS_AND_UTILITIES,
+                    CreativeModeTabs.REDSTONE_BLOCKS));
+
+    public static final DeferredHolder<Block, Block> DOCK_RAIL = register(
+            "dock_rail",
+            () -> new DockRail(RAIL_BLOCK_BEHAVIOUR),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));

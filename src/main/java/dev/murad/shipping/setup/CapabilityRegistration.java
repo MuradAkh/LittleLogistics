@@ -132,6 +132,23 @@ public class CapabilityRegistration {
             (blockEntity, direction) -> blockEntity.getTank()
         );
 
+        // Universal dock block capabilities
+        event.registerBlockEntity(
+            Capabilities.ItemHandler.BLOCK,
+            ModTileEntitiesTypes.DOCK.get(),
+            (blockEntity, direction) -> blockEntity.getItemHandler()
+        );
+        event.registerBlockEntity(
+            Capabilities.FluidHandler.BLOCK,
+            ModTileEntitiesTypes.DOCK.get(),
+            (blockEntity, direction) -> blockEntity.getFluidHandler()
+        );
+        event.registerBlockEntity(
+            Capabilities.EnergyStorage.BLOCK,
+            ModTileEntitiesTypes.DOCK.get(),
+            (blockEntity, direction) -> blockEntity.getEnergyStorage()
+        );
+
         // === Item capabilities ===
 
         // CreativeCapacitor -> infinite energy
