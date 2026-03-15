@@ -4,6 +4,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -36,6 +39,7 @@ public class DockBlockEntity extends BlockEntity {
 
     @Nullable
     private Entity dockedVehicle;
+    private boolean occupied; // client-synced shadow of dockedVehicle != null
     private int ticksSinceLastTransfer;
 
     // --- Capability wrappers (always non-null; delegate to vehicle when docked) ---
@@ -85,6 +89,7 @@ public class DockBlockEntity extends BlockEntity {
      */
     public void occupyDock(Entity vehicle) {
         this.dockedVehicle = vehicle;
+        this.occupied = true;
         this.ticksSinceLastTransfer = 0;
 
         // Connect wrappers to the vehicle's capabilities
@@ -98,6 +103,7 @@ public class DockBlockEntity extends BlockEntity {
         if (vehicleEnergy != null) this.energyStorage.connect(vehicleEnergy);
 
         setChanged();
+        syncToClient();
         // Invalidate block capabilities so adjacent pipes/hoppers re-query
         if (level != null) {
             level.invalidateCapabilities(worldPosition);
@@ -109,11 +115,13 @@ public class DockBlockEntity extends BlockEntity {
      */
     public void vacateDock() {
         this.dockedVehicle = null;
+        this.occupied = false;
         this.itemHandler.disconnect();
         this.fluidHandler.disconnect();
         this.energyStorage.disconnect();
 
         setChanged();
+        syncToClient();
         if (level != null) {
             level.invalidateCapabilities(worldPosition);
         }
@@ -234,6 +242,7 @@ public class DockBlockEntity extends BlockEntity {
         int newIndex = Math.clamp(currentIndex + delta, 0, TIMEOUT_PRESETS.length - 1);
         idleTimeoutTicks = TIMEOUT_PRESETS[newIndex];
         setChanged();
+        syncToClient();
     }
 
     /**
@@ -242,6 +251,30 @@ public class DockBlockEntity extends BlockEntity {
     public void cycleRedstoneMode() {
         redstoneMode = redstoneMode.next();
         setChanged();
+        syncToClient();
+    }
+
+    // =========================================================================
+    // Client sync
+    // =========================================================================
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = new CompoundTag();
+        saveAdditional(tag, registries);
+        tag.putBoolean("Occupied", dockedVehicle != null);
+        return tag;
+    }
+
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    private void syncToClient() {
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
     }
 
     // =========================================================================
@@ -267,6 +300,9 @@ public class DockBlockEntity extends BlockEntity {
             } catch (IllegalArgumentException e) {
                 redstoneMode = RedstoneMode.IGNORE;
             }
+        }
+        if (tag.contains("Occupied")) {
+            occupied = tag.getBoolean("Occupied");
         }
     }
 
@@ -296,6 +332,10 @@ public class DockBlockEntity extends BlockEntity {
     @Nullable
     public Entity getDockedVehicle() {
         return dockedVehicle;
+    }
+
+    public boolean isOccupied() {
+        return occupied;
     }
 
     public int getIdleTimeoutTicks() {
