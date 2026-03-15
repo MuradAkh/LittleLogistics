@@ -2,16 +2,11 @@ package dev.murad.shipping.setup;
 
 
 import com.google.common.collect.ImmutableList;
-import dev.murad.shipping.block.dock.BargeDockBlock;
 import dev.murad.shipping.block.dock.DockBlock;
 import dev.murad.shipping.block.dock.DockRail;
-import dev.murad.shipping.block.dock.TugDockBlock;
-import dev.murad.shipping.block.energy.VesselChargerBlock;
-import dev.murad.shipping.block.fluid.FluidHopperBlock;
 import dev.murad.shipping.block.guiderail.CornerGuideRailBlock;
 import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.block.rail.*;
-import dev.murad.shipping.block.rapidhopper.RapidHopperBlock;
 import dev.murad.shipping.block.vesseldetector.VesselDetectorBlock;
 import dev.murad.shipping.util.MultiMap;
 import net.minecraft.resources.ResourceKey;
@@ -45,20 +40,6 @@ public class ModBlocks {
                     .sound(SoundType.METAL);
     private static BlockBehaviour.Properties RAIL_BLOCK_BEHAVIOUR = BlockBehaviour.Properties.ofFullCopy(Blocks.RAIL);
 
-    public static final DeferredHolder<Block, Block> TUG_DOCK = register(
-            "tug_dock",
-            () -> new TugDockBlock(METAL_BLOCK_BEHAVIOUR),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
-
-    public static final DeferredHolder<Block, Block> BARGE_DOCK = register(
-            "barge_dock",
-            () -> new BargeDockBlock(METAL_BLOCK_BEHAVIOUR),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
-
     public static final DeferredHolder<Block, Block> GUIDE_RAIL_CORNER = register(
             "guide_rail_corner",
             () -> new CornerGuideRailBlock(METAL_BLOCK_BEHAVIOUR),
@@ -76,27 +57,6 @@ public class ModBlocks {
     public static final DeferredHolder<Block, Block> GUIDE_RAIL_TUG = register(
             "guide_rail_tug",
             () -> new TugGuideRailBlock(METAL_BLOCK_BEHAVIOUR),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
-
-    public static final DeferredHolder<Block, Block> FLUID_HOPPER = register(
-            "fluid_hopper",
-            () -> new FluidHopperBlock(METAL_BLOCK_BEHAVIOUR),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
-
-    public static final DeferredHolder<Block, Block> VESSEL_CHARGER = register(
-            "vessel_charger",
-            () -> new VesselChargerBlock(METAL_BLOCK_BEHAVIOUR),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
-
-    public static final DeferredHolder<Block, Block> RAPID_HOPPER = register(
-            "rapid_hopper",
-            () -> new RapidHopperBlock(METAL_BLOCK_BEHAVIOUR),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
@@ -132,20 +92,6 @@ public class ModBlocks {
     public static final DeferredHolder<Block, Block> JUNCTION_RAIL = register(
             "junction_rail",
             () -> new JunctionRail(RAIL_BLOCK_BEHAVIOUR),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
-
-    public static final DeferredHolder<Block, Block> CAR_DOCK_RAIL = register(
-            "car_dock_rail",
-            () -> new TrainCarDockingRail(RAIL_BLOCK_BEHAVIOUR),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
-
-    public static final DeferredHolder<Block, Block> LOCOMOTIVE_DOCK_RAIL = register(
-            "locomotive_dock_rail",
-            () -> new LocomotiveDockingRail(RAIL_BLOCK_BEHAVIOUR),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));

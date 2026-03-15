@@ -41,21 +41,14 @@ public class ModLootTableProvider extends LootTableProvider {
 
         @Override
         protected void generate() {
-            dropSelf(ModBlocks.TUG_DOCK.get());
-            dropSelf(ModBlocks.BARGE_DOCK.get());
             dropSelf(ModBlocks.GUIDE_RAIL_CORNER.get());
             dropSelf(ModBlocks.GUIDE_RAIL_TUG.get());
-            dropSelf(ModBlocks.FLUID_HOPPER.get());
-            dropSelf(ModBlocks.VESSEL_CHARGER.get());
             dropSelf(ModBlocks.VESSEL_DETECTOR.get());
             dropSelf(ModBlocks.SWITCH_RAIL.get());
             dropSelf(ModBlocks.AUTOMATIC_SWITCH_RAIL.get());
             dropSelf(ModBlocks.TEE_JUNCTION_RAIL.get());
             dropSelf(ModBlocks.AUTOMATIC_TEE_JUNCTION_RAIL.get());
             dropSelf(ModBlocks.JUNCTION_RAIL.get());
-            dropSelf(ModBlocks.RAPID_HOPPER.get());
-            dropSelf(ModBlocks.CAR_DOCK_RAIL.get());
-            dropSelf(ModBlocks.LOCOMOTIVE_DOCK_RAIL.get());
             dropSelf(ModBlocks.DOCK_BLOCK.get());
             dropSelf(ModBlocks.DOCK_RAIL.get());
         }

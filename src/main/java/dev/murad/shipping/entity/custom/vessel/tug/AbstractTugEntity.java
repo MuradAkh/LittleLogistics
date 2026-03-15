@@ -2,7 +2,6 @@ package dev.murad.shipping.entity.custom.vessel.tug;
 
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.dock.DockBlockEntity;
-import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
@@ -238,34 +237,21 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             return;
         }
 
-        // Try new DockBlockEntity first, fall back to old TugDockTileEntity
         DockBlockEntity dock = findAdjacentDock();
 
         boolean shouldDock;
         if (dock != null) {
-            // New dock system
             if (!wasDocked) {
-                // First arrival: check pass-through rule
                 if (dock.shouldPassThrough(this.getDirection())) {
-                    shouldDock = false; // skip this dock, there's one ahead
+                    shouldDock = false;
                 } else {
-                    shouldDock = true; // this is the front dock, stop here
+                    shouldDock = true;
                 }
             } else {
-                // Already docked: check if ANY dock in chain is still holding
                 shouldDock = isDockChainHolding();
             }
         } else {
-            // Fallback to old TugDockTileEntity system
-            shouldDock = this.getSideDirections()
-                    .stream()
-                    .map((curr) ->
-                            Optional.ofNullable(level().getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
-                                    .filter(entity -> entity instanceof TugDockTileEntity)
-                                    .map(entity -> (TugDockTileEntity) entity)
-                                    .map(d -> d.hold(this, curr))
-                                    .orElse(false))
-                    .reduce(false, (acc, curr) -> acc || curr);
+            shouldDock = false;
         }
 
         boolean changedDock = !wasDocked && shouldDock;

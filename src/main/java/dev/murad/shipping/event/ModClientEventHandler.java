@@ -1,7 +1,6 @@
 package dev.murad.shipping.event;
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.block.fluid.render.FluidHopperTileEntityRenderer;
 import dev.murad.shipping.entity.custom.vessel.barge.FishingBargeEntity;
 import dev.murad.shipping.entity.models.insert.*;
 import dev.murad.shipping.entity.models.train.*;
@@ -17,7 +16,6 @@ import dev.murad.shipping.entity.render.train.TrainCarRenderer;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
-import dev.murad.shipping.setup.ModTileEntitiesTypes;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.neoforged.api.distmarker.Dist;
@@ -37,15 +35,11 @@ public class ModClientEventHandler {
     @SubscribeEvent
     public static void onRenderTypeSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.FLUID_HOPPER.get(), RenderType.cutoutMipped());
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.VESSEL_CHARGER.get(), RenderType.cutoutMipped());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.JUNCTION_RAIL.get(), RenderType.cutoutMipped());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.SWITCH_RAIL.get(), RenderType.cutoutMipped());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.AUTOMATIC_SWITCH_RAIL.get(), RenderType.cutoutMipped());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.TEE_JUNCTION_RAIL.get(), RenderType.cutoutMipped());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.AUTOMATIC_TEE_JUNCTION_RAIL.get(), RenderType.cutoutMipped());
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.CAR_DOCK_RAIL.get(), RenderType.cutoutMipped());
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.LOCOMOTIVE_DOCK_RAIL.get(), RenderType.cutoutMipped());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.DOCK_RAIL.get(), RenderType.cutoutMipped());
         });
     }
@@ -190,7 +184,6 @@ public class ModClientEventHandler {
                 .emptyInsert()
                 .build());
 
-        event.registerBlockEntityRenderer(ModTileEntitiesTypes.FLUID_HOPPER.get(), FluidHopperTileEntityRenderer::new);
     }
 
     @SubscribeEvent

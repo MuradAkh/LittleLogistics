@@ -1,8 +1,6 @@
 package dev.murad.shipping.setup;
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.block.energy.VesselChargerTileEntity;
-import dev.murad.shipping.block.fluid.FluidHopperTileEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.SteamTugEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.custom.vessel.barge.FluidTankBargeEntity;
@@ -117,20 +115,6 @@ public class CapabilityRegistration {
         );
 
         // === BlockEntity capabilities ===
-
-        // VesselChargerTileEntity -> energy storage
-        event.registerBlockEntity(
-            Capabilities.EnergyStorage.BLOCK,
-            ModTileEntitiesTypes.VESSEL_CHARGER.get(),
-            (blockEntity, direction) -> blockEntity.getInternalBattery()
-        );
-
-        // FluidHopperTileEntity -> fluid handler
-        event.registerBlockEntity(
-            Capabilities.FluidHandler.BLOCK,
-            ModTileEntitiesTypes.FLUID_HOPPER.get(),
-            (blockEntity, direction) -> blockEntity.getTank()
-        );
 
         // Universal dock block capabilities
         event.registerBlockEntity(

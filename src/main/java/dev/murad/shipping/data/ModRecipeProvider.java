@@ -23,26 +23,6 @@ public class ModRecipeProvider extends RecipeProvider {
 
     @Override
     protected void buildRecipes(RecipeOutput output) {
-        ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.TUG_DOCK.get(), 2)
-                .define('#', ModItems.SPRING.get())
-                .define('_', Tags.Items.STONES)
-                .define('$', Items.IRON_INGOT)
-                .pattern("___")
-                .pattern("#_#")
-                .pattern("$$$")
-                .unlockedBy("has_item", has(ModItems.SPRING.get()))
-                .save(output);
-
-        ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.BARGE_DOCK.get(), 2)
-                .define('#', ModItems.SPRING.get())
-                .define('_', Tags.Items.STONES)
-                .define('$', Items.IRON_INGOT)
-                .pattern("___")
-                .pattern("_#_")
-                .pattern("$$$")
-                .unlockedBy("has_item", has(ModItems.SPRING.get()))
-                .save(output);
-
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.VESSEL_DETECTOR.get(), 2)
                 .define('#', ModItems.SPRING.get())
                 .define('_', Tags.Items.STONES)
@@ -99,15 +79,6 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.RAIL))
                 .save(output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.LOCOMOTIVE_DOCK_RAIL.get(), 2)
-                .define('#', Items.RAIL)
-                .define('$', ModItems.SPRING.get())
-                .pattern(" $ ")
-                .pattern(" # ")
-                .pattern(" # ")
-                .unlockedBy("has_item", has(Items.RAIL))
-                .save(output);
-
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.DOCK_BLOCK.get(), 2)
                 .define('#', ModItems.SPRING.get())
                 .define('_', Tags.Items.STONES)
@@ -126,15 +97,6 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.RAIL))
                 .save(output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.CAR_DOCK_RAIL.get(), 3)
-                .define('#', Items.RAIL)
-                .define('$', ModItems.SPRING.get())
-                .pattern(" # ")
-                .pattern("$#$")
-                .pattern(" # ")
-                .unlockedBy("has_item", has(Items.RAIL))
-                .save(output);
-
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.GUIDE_RAIL_TUG.get(), 8)
                 .define('#', ModItems.SPRING.get())
                 .define('_', Tags.Items.STONES)
@@ -143,24 +105,6 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("___")
                 .pattern("___")
                 .unlockedBy("has_item", has(Items.POWERED_RAIL))
-                .save(output);
-
-        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModBlocks.FLUID_HOPPER.get(), 1)
-                .define('_', Items.GLASS)
-                .define('$', Items.HOPPER)
-                .pattern("_$_")
-                .pattern(" _ ")
-                .unlockedBy("has_item", has(Items.HOPPER))
-                .save(output);
-
-        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModBlocks.VESSEL_CHARGER.get(), 1)
-                .define('_', Items.REDSTONE_BLOCK)
-                .define('$', Items.IRON_INGOT)
-                .define('.', Items.GOLD_INGOT)
-                .pattern(" . ")
-                .pattern(" $ ")
-                .pattern("_$_")
-                .unlockedBy("has_item", has(Items.REDSTONE))
                 .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.SPRING.get(), 6)
@@ -203,7 +147,7 @@ public class ModRecipeProvider extends RecipeProvider {
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.ENERGY_TUG.get())
                 .define('_', Items.PISTON)
-                .define('#', ModBlocks.VESSEL_CHARGER.get())
+                .define('#', Items.COPPER_BLOCK)
                 .define('$', Items.IRON_INGOT)
                 .pattern(" $ ")
                 .pattern("_#_")
@@ -264,15 +208,6 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_item", has(Items.GLASS))
                 .save(output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModBlocks.RAPID_HOPPER.get())
-                .define('_', Items.HOPPER)
-                .define('#', Items.REDSTONE_BLOCK)
-                .define('$', Items.GOLD_INGOT)
-                .pattern("$_$")
-                .pattern(" # ")
-                .unlockedBy("has_item", has(Items.HOPPER))
-                .save(output);
-
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.SEATER_CAR.get())
                 .define('#', ItemTags.PLANKS)
                 .define('$', Items.IRON_INGOT)
@@ -311,7 +246,7 @@ public class ModRecipeProvider extends RecipeProvider {
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, ModItems.ENERGY_LOCOMOTIVE.get())
                 .define('#', Items.IRON_INGOT)
-                .define('.', ModBlocks.VESSEL_CHARGER.get())
+                .define('.', Items.COPPER_BLOCK)
                 .define('_', Blocks.PISTON)
                 .define('$', ModItems.SEATER_CAR.get())
                 .pattern(" # ")

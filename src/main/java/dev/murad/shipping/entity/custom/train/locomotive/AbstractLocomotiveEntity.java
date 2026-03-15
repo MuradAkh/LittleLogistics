@@ -3,7 +3,6 @@ package dev.murad.shipping.entity.custom.train.locomotive;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.dock.DockBlockEntity;
 import dev.murad.shipping.block.rail.MultiShapeRail;
-import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
@@ -398,12 +397,10 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             return;
         }
 
-        // Try new DockBlockEntity first, fall back to old LocomotiveDockTileEntity
         DockBlockEntity dock = findDockAtPosition();
 
         boolean shouldDock;
         if (dock != null) {
-            // New dock system
             if (!wasDocked) {
                 if (dock.shouldPassThrough(this.getDirection())) {
                     shouldDock = false;
@@ -414,12 +411,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                 shouldDock = isDockChainHolding();
             }
         } else {
-            // Fallback to old LocomotiveDockTileEntity system
-            shouldDock = Optional.ofNullable(level().getBlockEntity(getOnPos().above()))
-                    .filter(entity -> entity instanceof LocomotiveDockTileEntity)
-                    .map(entity -> (LocomotiveDockTileEntity) entity)
-                    .map(d -> d.hold(this, getDirection()))
-                    .orElse(false);
+            shouldDock = false;
         }
 
         boolean changedDock = !wasDocked && shouldDock;
@@ -551,7 +543,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                                         var shape = railHelper.getShape(railoc.get());
                                         var block = this.level().getBlockState(railoc.get());
                                         return !(shape.equals(RailShape.EAST_WEST) || shape.equals(RailShape.NORTH_SOUTH))
-                                                || block.is(ModBlocks.LOCOMOTIVE_DOCK_RAIL.get())
+                                                || block.is(ModBlocks.DOCK_RAIL.get())
                                                 || block.getBlock() instanceof MultiShapeRail;
                                     },
                                     12))

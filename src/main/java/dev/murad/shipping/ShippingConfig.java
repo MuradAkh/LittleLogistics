@@ -72,9 +72,6 @@ public class ShippingConfig {
         public static final ModConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_ENERGY_USAGE;
         public static final ModConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_MAX_CHARGE_RATE;
 
-        public static final ModConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_CAPACITY;
-        public static final ModConfigSpec.ConfigValue<Integer> VESSEL_CHARGER_BASE_MAX_TRANSFER;
-
         public static final ModConfigSpec.ConfigValue<List<? extends String>> TRAIN_EXEMPT_DAMAGE_SOURCES;
         public static final ModConfigSpec.ConfigValue<List<? extends String>> VESSEL_EXEMPT_DAMAGE_SOURCES;
 
@@ -149,18 +146,6 @@ public class ShippingConfig {
                 ENERGY_TUG_BASE_MAX_CHARGE_RATE =
                         BUILDER.comment("Base max charge rate of the Energy tug in FE/tick, must be an integer >= 1. Default 100.")
                                 .defineInRange("energyTugBaseMaxChargeRate", 100, 1, Integer.MAX_VALUE);
-                BUILDER.pop();
-            }
-            BUILDER.pop();
-            BUILDER.push("dock");
-            {
-                BUILDER.push("charger");
-                VESSEL_CHARGER_BASE_CAPACITY =
-                        BUILDER.comment("Base max capacity of the Vessel Charger in FE, must be an integer >= 1. Default 10000.")
-                                .defineInRange("vesselChargerBaseCapacity", 10000, 1, Integer.MAX_VALUE);
-                VESSEL_CHARGER_BASE_MAX_TRANSFER =
-                        BUILDER.comment("Base max transfer rate of the Vessel Charger in FE/tick, must be an integer >= 1. Default 100.")
-                                .defineInRange("vesselChargerBaseMaxTransfer", 100, 1, Integer.MAX_VALUE);
                 BUILDER.pop();
             }
             BUILDER.pop();
