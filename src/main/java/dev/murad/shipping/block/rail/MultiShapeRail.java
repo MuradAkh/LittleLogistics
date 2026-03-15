@@ -3,6 +3,8 @@ package dev.murad.shipping.block.rail;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseRailBlock;
+import net.minecraft.world.level.block.RailState;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 
@@ -27,4 +29,22 @@ public interface MultiShapeRail {
     RailShape getVanillaRailShapeFromDirection(BlockState state, BlockPos pos, Level level, Direction direction);
 
     boolean isAutomaticSwitching();
+
+    /**
+     * Trigger a reshape on adjacent vanilla rails so they connect to this multi-shape rail.
+     * Call from onPlace after the custom rail has been placed in the world.
+     */
+    static void reshapeNeighborRails(Level level, BlockPos pos) {
+        if (level.isClientSide()) return;
+        for (Direction dir : Direction.Plane.HORIZONTAL) {
+            BlockPos neighborPos = pos.relative(dir);
+            BlockState neighborState = level.getBlockState(neighborPos);
+            if (BaseRailBlock.isRail(neighborState) && !(neighborState.getBlock() instanceof MultiShapeRail)) {
+                BaseRailBlock railBlock = (BaseRailBlock) neighborState.getBlock();
+                RailShape shape = railBlock.getRailDirection(neighborState, level, neighborPos, null);
+                new RailState(level, neighborPos, neighborState)
+                        .place(level.hasNeighborSignal(neighborPos), true, shape);
+            }
+        }
+    }
 }

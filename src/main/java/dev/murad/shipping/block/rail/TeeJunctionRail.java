@@ -71,6 +71,14 @@ public class TeeJunctionRail extends BaseRailBlock implements MultiShapeRail {
     }
 
     @Override
+    protected void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+        super.onPlace(pState, pLevel, pPos, pOldState, pIsMoving);
+        if (!pOldState.is(pState.getBlock())) {
+            MultiShapeRail.reshapeNeighborRails(pLevel, pPos);
+        }
+    }
+
+    @Override
     protected BlockState updateState(BlockState pState, Level pLevel, BlockPos pPos, boolean pIsMoving) {
         return pState;
     }
