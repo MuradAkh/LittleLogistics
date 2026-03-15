@@ -1,6 +1,7 @@
 package dev.murad.shipping.entity.custom.vessel.tug;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.block.dock.DockBlockEntity;
 import dev.murad.shipping.block.dock.TugDockTileEntity;
 import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.capability.StallingCapability;
@@ -40,6 +41,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.entity.PartEntity;
@@ -227,39 +229,132 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         int y = (int) Math.floor(this.getY());
         int z = (int) Math.floor(this.getZ());
 
-        boolean docked = this.isDocked();
+        boolean wasDocked = this.isDocked();
 
-        if (docked && dockCheckCooldown > 0){
+        if (wasDocked && dockCheckCooldown > 0) {
             dockCheckCooldown--;
             this.setDeltaMovement(Vec3.ZERO);
-            this.moveTo(x + 0.5 ,getY(),z + 0.5);
+            this.moveTo(x + 0.5, getY(), z + 0.5);
             return;
         }
 
-        // Check docks
-        boolean shouldDock = this.getSideDirections()
-                .stream()
-                .map((curr) ->
-                        Optional.ofNullable(level().getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
-                                .filter(entity -> entity instanceof TugDockTileEntity)
-                                .map(entity -> (TugDockTileEntity) entity)
-                                .map(dock -> dock.hold(this, curr))
-                                .orElse(false))
-                .reduce(false, (acc, curr) -> acc || curr);
+        // Try new DockBlockEntity first, fall back to old TugDockTileEntity
+        DockBlockEntity dock = findAdjacentDock();
 
-        boolean changedDock = !docked && shouldDock;
-        boolean changedUndock = docked && !shouldDock;
-
-        if(shouldDock) {
-            dockCheckCooldown = 20; // todo: magic number
-            this.dock(x + 0.5 ,getY(),z + 0.5);
+        boolean shouldDock;
+        if (dock != null) {
+            // New dock system
+            if (!wasDocked) {
+                // First arrival: check pass-through rule
+                if (dock.shouldPassThrough(this.getDirection())) {
+                    shouldDock = false; // skip this dock, there's one ahead
+                } else {
+                    shouldDock = true; // this is the front dock, stop here
+                }
+            } else {
+                // Already docked: check if ANY dock in chain is still holding
+                shouldDock = isDockChainHolding();
+            }
         } else {
+            // Fallback to old TugDockTileEntity system
+            shouldDock = this.getSideDirections()
+                    .stream()
+                    .map((curr) ->
+                            Optional.ofNullable(level().getBlockEntity(new BlockPos(x + curr.getStepX(), y, z + curr.getStepZ())))
+                                    .filter(entity -> entity instanceof TugDockTileEntity)
+                                    .map(entity -> (TugDockTileEntity) entity)
+                                    .map(d -> d.hold(this, curr))
+                                    .orElse(false))
+                    .reduce(false, (acc, curr) -> acc || curr);
+        }
+
+        boolean changedDock = !wasDocked && shouldDock;
+        boolean changedUndock = wasDocked && !shouldDock;
+
+        if (shouldDock) {
+            if (changedDock && dock != null) {
+                // First time docking with new system: register with all docks
+                dock.occupyDock(this);
+                occupyFollowerDocks();
+            }
+            dockCheckCooldown = dock != null ? 5 : 20;
+            this.dock(x + 0.5, getY(), z + 0.5);
+        } else {
+            if (changedUndock && dock != null) {
+                vacateAllDocks();
+            }
             dockCheckCooldown = 0;
             this.undock();
         }
 
         if (changedDock) onDock();
         if (changedUndock) onUndock();
+    }
+
+    @Nullable
+    private DockBlockEntity findAdjacentDock() {
+        BlockPos pos = this.blockPosition();
+        for (Direction dir : getSideDirections()) {
+            BlockEntity be = level().getBlockEntity(pos.relative(dir));
+            if (be instanceof DockBlockEntity dockBE) {
+                return dockBE;
+            }
+        }
+        return null;
+    }
+
+    private boolean isDockChainHolding() {
+        DockBlockEntity myDock = findAdjacentDock();
+        if (myDock != null && myDock.isHolding()) return true;
+
+        // Walk follower chain
+        Optional<VesselEntity> follower = this.getFollower();
+        while (follower.isPresent()) {
+            BlockPos followerPos = follower.get().blockPosition();
+            for (Direction dir : getSideDirections()) {
+                BlockEntity be = level().getBlockEntity(followerPos.relative(dir));
+                if (be instanceof DockBlockEntity dockBE && dockBE.isHolding()) {
+                    return true;
+                }
+            }
+            follower = follower.get().getFollower();
+        }
+        return false;
+    }
+
+    private void occupyFollowerDocks() {
+        Optional<VesselEntity> follower = this.getFollower();
+        while (follower.isPresent()) {
+            Entity followerEntity = follower.get();
+            BlockPos followerPos = followerEntity.blockPosition();
+            for (Direction dir : getSideDirections()) {
+                BlockEntity be = level().getBlockEntity(followerPos.relative(dir));
+                if (be instanceof DockBlockEntity dockBE) {
+                    dockBE.occupyDock(followerEntity);
+                    break;
+                }
+            }
+            follower = follower.get().getFollower();
+        }
+    }
+
+    private void vacateAllDocks() {
+        // Vacate head dock
+        DockBlockEntity myDock = findAdjacentDock();
+        if (myDock != null) myDock.vacateDock();
+
+        // Vacate follower docks
+        Optional<VesselEntity> follower = this.getFollower();
+        while (follower.isPresent()) {
+            BlockPos followerPos = follower.get().blockPosition();
+            for (Direction dir : getSideDirections()) {
+                BlockEntity be = level().getBlockEntity(followerPos.relative(dir));
+                if (be instanceof DockBlockEntity dockBE) {
+                    dockBE.vacateDock();
+                }
+            }
+            follower = follower.get().getFollower();
+        }
     }
 
     protected void makeSmoke() {

@@ -1,6 +1,7 @@
 package dev.murad.shipping.entity.custom.train.locomotive;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.block.dock.DockBlockEntity;
 import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.block.rail.blockentity.LocomotiveDockTileEntity;
 import dev.murad.shipping.capability.StallingCapability;
@@ -34,6 +35,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
@@ -378,12 +380,12 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         int y = (int) Math.floor(this.getY());
         int z = (int) Math.floor(this.getZ());
 
-        boolean docked = this.isDocked();
+        boolean wasDocked = this.isDocked();
 
-        if (docked && dockCheckCooldown > 0){
+        if (wasDocked && dockCheckCooldown > 0) {
             dockCheckCooldown--;
             this.setDeltaMovement(Vec3.ZERO);
-            this.moveTo(x + 0.5 ,getY(),z + 0.5);
+            this.moveTo(x + 0.5, getY(), z + 0.5);
             return;
         }
 
@@ -392,31 +394,130 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         Predicate<Double> aroundCentre =
                 (var i) -> prepCord.apply(i) < 0.8 && prepCord.apply(i) > 0.2;
 
-        if(!aroundCentre.test(this.getX()) || !aroundCentre.test(this.getZ())){
+        if (!aroundCentre.test(this.getX()) || !aroundCentre.test(this.getZ())) {
             return;
         }
 
+        // Try new DockBlockEntity first, fall back to old LocomotiveDockTileEntity
+        DockBlockEntity dock = findDockAtPosition();
 
-        // Check docks
-        boolean shouldDock = Optional.ofNullable(level().getBlockEntity(getOnPos().above()))
-                                .filter(entity -> entity instanceof LocomotiveDockTileEntity)
-                                .map(entity -> (LocomotiveDockTileEntity) entity)
-                                .map(dock -> dock.hold(this, getDirection()))
-                                .orElse(false);
-
-        boolean changedDock = !docked && shouldDock;
-        boolean changedUndock = docked && !shouldDock;
-
-        if(shouldDock) {
-            dockCheckCooldown = 20; // todo: magic number
-            this.dock(x + 0.5 ,getY(),z + 0.5);
+        boolean shouldDock;
+        if (dock != null) {
+            // New dock system
+            if (!wasDocked) {
+                if (dock.shouldPassThrough(this.getDirection())) {
+                    shouldDock = false;
+                } else {
+                    shouldDock = true;
+                }
+            } else {
+                shouldDock = isDockChainHolding();
+            }
         } else {
+            // Fallback to old LocomotiveDockTileEntity system
+            shouldDock = Optional.ofNullable(level().getBlockEntity(getOnPos().above()))
+                    .filter(entity -> entity instanceof LocomotiveDockTileEntity)
+                    .map(entity -> (LocomotiveDockTileEntity) entity)
+                    .map(d -> d.hold(this, getDirection()))
+                    .orElse(false);
+        }
+
+        boolean changedDock = !wasDocked && shouldDock;
+        boolean changedUndock = wasDocked && !shouldDock;
+
+        if (shouldDock) {
+            if (changedDock && dock != null) {
+                dock.occupyDock(this);
+                occupyFollowerDocks();
+            }
+            dockCheckCooldown = dock != null ? 5 : 20;
+            this.dock(x + 0.5, getY(), z + 0.5);
+        } else {
+            if (changedUndock && dock != null) {
+                vacateAllDocks();
+            }
             dockCheckCooldown = 0;
             this.undock();
         }
 
         if (changedDock) onDock();
         if (changedUndock) onUndock();
+    }
+
+    @Nullable
+    private DockBlockEntity findDockAtPosition() {
+        // Rail docks are under the vehicle (at the rail block position)
+        BlockEntity be = level().getBlockEntity(getOnPos().above());
+        if (be instanceof DockBlockEntity dockBE) {
+            return dockBE;
+        }
+        // Also check at blockPosition in case of different rail placement
+        be = level().getBlockEntity(blockPosition());
+        if (be instanceof DockBlockEntity dockBE) {
+            return dockBE;
+        }
+        return null;
+    }
+
+    private boolean isDockChainHolding() {
+        DockBlockEntity myDock = findDockAtPosition();
+        if (myDock != null && myDock.isHolding()) return true;
+
+        // Walk follower chain
+        Optional<AbstractTrainCarEntity> follower = this.getFollower();
+        while (follower.isPresent()) {
+            BlockPos followerPos = follower.get().getOnPos().above();
+            BlockEntity be = level().getBlockEntity(followerPos);
+            if (be instanceof DockBlockEntity dockBE && dockBE.isHolding()) {
+                return true;
+            }
+            // Also check blockPosition
+            be = level().getBlockEntity(follower.get().blockPosition());
+            if (be instanceof DockBlockEntity dockBE && dockBE.isHolding()) {
+                return true;
+            }
+            follower = follower.get().getFollower();
+        }
+        return false;
+    }
+
+    private void occupyFollowerDocks() {
+        Optional<AbstractTrainCarEntity> follower = this.getFollower();
+        while (follower.isPresent()) {
+            Entity followerEntity = follower.get();
+            BlockPos followerPos = followerEntity.getOnPos().above();
+            BlockEntity be = level().getBlockEntity(followerPos);
+            if (be instanceof DockBlockEntity dockBE) {
+                dockBE.occupyDock(followerEntity);
+            } else {
+                be = level().getBlockEntity(followerEntity.blockPosition());
+                if (be instanceof DockBlockEntity dockBE) {
+                    dockBE.occupyDock(followerEntity);
+                }
+            }
+            follower = follower.get().getFollower();
+        }
+    }
+
+    private void vacateAllDocks() {
+        // Vacate head dock
+        DockBlockEntity myDock = findDockAtPosition();
+        if (myDock != null) myDock.vacateDock();
+
+        // Vacate follower docks
+        Optional<AbstractTrainCarEntity> follower = this.getFollower();
+        while (follower.isPresent()) {
+            BlockPos followerPos = follower.get().getOnPos().above();
+            BlockEntity be = level().getBlockEntity(followerPos);
+            if (be instanceof DockBlockEntity dockBE) {
+                dockBE.vacateDock();
+            }
+            be = level().getBlockEntity(follower.get().blockPosition());
+            if (be instanceof DockBlockEntity dockBE) {
+                dockBE.vacateDock();
+            }
+            follower = follower.get().getFollower();
+        }
     }
 
     private double getSpeedModifier(){
