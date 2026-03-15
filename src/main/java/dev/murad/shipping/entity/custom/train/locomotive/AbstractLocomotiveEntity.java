@@ -420,8 +420,10 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         if (shouldDock) {
             if (changedDock && dock != null) {
                 dock.occupyDock(this);
-                occupyFollowerDocks();
             }
+            // Refresh follower dock assignments each check cycle
+            // as followers may still be settling into position via spring physics
+            occupyFollowerDocks();
             dockCheckCooldown = dock != null ? 5 : 20;
             this.dock(x + 0.5, getY(), z + 0.5);
         } else {
@@ -477,14 +479,23 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         Optional<AbstractTrainCarEntity> follower = this.getFollower();
         while (follower.isPresent()) {
             Entity followerEntity = follower.get();
-            BlockPos followerPos = followerEntity.getOnPos().above();
-            BlockEntity be = level().getBlockEntity(followerPos);
+            // Check dock at follower's rail position
+            DockBlockEntity targetDock = null;
+            BlockEntity be = level().getBlockEntity(followerEntity.getOnPos().above());
             if (be instanceof DockBlockEntity dockBE) {
-                dockBE.occupyDock(followerEntity);
+                targetDock = dockBE;
             } else {
                 be = level().getBlockEntity(followerEntity.blockPosition());
                 if (be instanceof DockBlockEntity dockBE) {
-                    dockBE.occupyDock(followerEntity);
+                    targetDock = dockBE;
+                }
+            }
+            if (targetDock != null) {
+                // Only re-assign if the dock has a different vehicle (or none)
+                Entity current = targetDock.getDockedVehicle();
+                if (current != followerEntity) {
+                    if (current != null) targetDock.vacateDock();
+                    targetDock.occupyDock(followerEntity);
                 }
             }
             follower = follower.get().getFollower();

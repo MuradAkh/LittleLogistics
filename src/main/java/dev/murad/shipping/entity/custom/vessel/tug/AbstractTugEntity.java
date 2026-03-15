@@ -259,10 +259,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
         if (shouldDock) {
             if (changedDock && dock != null) {
-                // First time docking with new system: register with all docks
                 dock.occupyDock(this);
-                occupyFollowerDocks();
             }
+            // Refresh follower dock assignments each check cycle
+            // as followers may still be settling into position via spring physics
+            occupyFollowerDocks();
             dockCheckCooldown = dock != null ? 5 : 20;
             this.dock(x + 0.5, getY(), z + 0.5);
         } else {
@@ -316,7 +317,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             for (Direction dir : getSideDirections()) {
                 BlockEntity be = level().getBlockEntity(followerPos.relative(dir));
                 if (be instanceof DockBlockEntity dockBE) {
-                    dockBE.occupyDock(followerEntity);
+                    // Only re-assign if the dock has a different vehicle (or none)
+                    Entity current = dockBE.getDockedVehicle();
+                    if (current != followerEntity) {
+                        if (current != null) dockBE.vacateDock();
+                        dockBE.occupyDock(followerEntity);
+                    }
                     break;
                 }
             }
