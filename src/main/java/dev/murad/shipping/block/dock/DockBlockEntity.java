@@ -13,6 +13,7 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -34,14 +35,11 @@ public class DockBlockEntity extends BlockEntity {
     private Entity dockedVehicle;
     private int ticksSinceLastTransfer;
 
-    // --- Resolved vehicle capabilities (not persisted) ---
+    // --- Capability wrappers (always non-null; delegate to vehicle when docked) ---
 
-    @Nullable
-    private IItemHandler itemHandler;
-    @Nullable
-    private IFluidHandler fluidHandler;
-    @Nullable
-    private IEnergyStorage energyStorage;
+    private final DockItemHandler itemHandler;
+    private final DockFluidHandler fluidHandler;
+    private final DockEnergyStorage energyStorage;
 
     // --- Preset timeout values for scroll cycling ---
 
@@ -69,6 +67,9 @@ public class DockBlockEntity extends BlockEntity {
 
     public DockBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+        this.itemHandler = new DockItemHandler(this);
+        this.fluidHandler = new DockFluidHandler(this);
+        this.energyStorage = new DockEnergyStorage(this);
     }
 
     // =========================================================================
@@ -83,10 +84,15 @@ public class DockBlockEntity extends BlockEntity {
         this.dockedVehicle = vehicle;
         this.ticksSinceLastTransfer = 0;
 
-        // Resolve capabilities from the docked vehicle
-        this.itemHandler = vehicle.getCapability(Capabilities.ItemHandler.ENTITY, null);
-        this.fluidHandler = vehicle.getCapability(Capabilities.FluidHandler.ENTITY, null);
-        this.energyStorage = vehicle.getCapability(Capabilities.EnergyStorage.ENTITY, null);
+        // Connect wrappers to the vehicle's capabilities
+        IItemHandler vehicleItems = vehicle.getCapability(Capabilities.ItemHandler.ENTITY, null);
+        if (vehicleItems != null) this.itemHandler.connect(vehicleItems);
+
+        IFluidHandler vehicleFluids = vehicle.getCapability(Capabilities.FluidHandler.ENTITY, null);
+        if (vehicleFluids != null) this.fluidHandler.connect(vehicleFluids);
+
+        IEnergyStorage vehicleEnergy = vehicle.getCapability(Capabilities.EnergyStorage.ENTITY, null);
+        if (vehicleEnergy != null) this.energyStorage.connect(vehicleEnergy);
 
         setChanged();
         // Invalidate block capabilities so adjacent pipes/hoppers re-query
@@ -100,9 +106,9 @@ public class DockBlockEntity extends BlockEntity {
      */
     public void vacateDock() {
         this.dockedVehicle = null;
-        this.itemHandler = null;
-        this.fluidHandler = null;
-        this.energyStorage = null;
+        this.itemHandler.disconnect();
+        this.fluidHandler.disconnect();
+        this.energyStorage.disconnect();
 
         setChanged();
         if (level != null) {
@@ -240,18 +246,18 @@ public class DockBlockEntity extends BlockEntity {
     // Capability getters (called by CapabilityRegistration to expose block caps)
     // =========================================================================
 
-    @Nullable
-    public IItemHandler getItemHandler() {
+    @Nonnull
+    public DockItemHandler getItemHandler() {
         return itemHandler;
     }
 
-    @Nullable
-    public IFluidHandler getFluidHandler() {
+    @Nonnull
+    public DockFluidHandler getFluidHandler() {
         return fluidHandler;
     }
 
-    @Nullable
-    public IEnergyStorage getEnergyStorage() {
+    @Nonnull
+    public DockEnergyStorage getEnergyStorage() {
         return energyStorage;
     }
 
