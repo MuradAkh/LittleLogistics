@@ -30,6 +30,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import net.neoforged.neoforge.capabilities.Capabilities;
+
 import javax.annotation.Nullable;
 
 /**
@@ -136,5 +138,77 @@ public class DockRail extends BaseRailBlock implements EntityBlock {
     @Override
     public boolean canConnectRedstone(BlockState state, BlockGetter level, BlockPos pos, @Nullable Direction side) {
         return true;
+    }
+
+    // --- Neighbor capability detection ---
+
+    private static boolean isEligibleSide(Direction direction, RailShape shape) {
+        if (direction == Direction.UP || direction == Direction.DOWN) {
+            return true;
+        }
+        if (shape == RailShape.NORTH_SOUTH) {
+            return direction == Direction.EAST || direction == Direction.WEST;
+        }
+        if (shape == RailShape.EAST_WEST) {
+            return direction == Direction.NORTH || direction == Direction.SOUTH;
+        }
+        return false;
+    }
+
+    private static boolean hasCapability(Level level, BlockPos neighborPos, Direction queryDirection) {
+        // queryDirection is the direction FROM the neighbor TOWARD the dock rail
+        if (level.getBlockEntity(neighborPos) == null) return false;
+        if (level.getCapability(Capabilities.ItemHandler.BLOCK, neighborPos, queryDirection) != null) return true;
+        if (level.getCapability(Capabilities.FluidHandler.BLOCK, neighborPos, queryDirection) != null) return true;
+        if (level.getCapability(Capabilities.EnergyStorage.BLOCK, neighborPos, queryDirection) != null) return true;
+        return false;
+    }
+
+    private static BooleanProperty propertyForDirection(Direction dir) {
+        return switch (dir) {
+            case NORTH -> NORTH;
+            case SOUTH -> SOUTH;
+            case EAST -> EAST;
+            case WEST -> WEST;
+            case UP -> UP;
+            case DOWN -> DOWN;
+        };
+    }
+
+    private static BlockState updatePanelState(BlockState state, Level level, BlockPos pos) {
+        RailShape shape = state.getValue(RAIL_SHAPE);
+        for (Direction dir : Direction.values()) {
+            BooleanProperty prop = propertyForDirection(dir);
+            if (isEligibleSide(dir, shape)) {
+                BlockPos neighborPos = pos.relative(dir);
+                boolean connected = hasCapability(level, neighborPos, dir.getOpposite());
+                state = state.setValue(prop, connected);
+            } else {
+                state = state.setValue(prop, false);
+            }
+        }
+        return state;
+    }
+
+    @Override
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
+        super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
+        if (!level.isClientSide) {
+            BlockState updated = updatePanelState(state, level, pos);
+            if (updated != state) {
+                level.setBlock(pos, updated, 3);
+            }
+        }
+    }
+
+    @Override
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        super.onPlace(state, level, pos, oldState, movedByPiston);
+        if (!level.isClientSide) {
+            BlockState updated = updatePanelState(state, level, pos);
+            if (updated != state) {
+                level.setBlock(pos, updated, 3);
+            }
+        }
     }
 }
