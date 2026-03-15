@@ -15,6 +15,7 @@ import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.setup.ModSounds;
 import dev.murad.shipping.util.*;
 import lombok.Setter;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -454,72 +455,46 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     private boolean isDockChainHolding() {
-        DockBlockEntity myDock = findDockAtPosition();
-        if (myDock != null && myDock.isHolding()) return true;
+        DockBlockEntity headDock = findDockAtPosition();
+        if (headDock == null) return false;
+        if (headDock.isHolding()) return true;
 
-        // Walk follower chain
-        Optional<AbstractTrainCarEntity> follower = this.getFollower();
-        while (follower.isPresent()) {
-            BlockPos followerPos = follower.get().getOnPos().above();
-            BlockEntity be = level().getBlockEntity(followerPos);
-            if (be instanceof DockBlockEntity dockBE && dockBE.isHolding()) {
-                return true;
-            }
-            // Also check blockPosition
-            be = level().getBlockEntity(follower.get().blockPosition());
-            if (be instanceof DockBlockEntity dockBE && dockBE.isHolding()) {
-                return true;
-            }
-            follower = follower.get().getFollower();
+        for (DockBlockEntity dock : headDock.getFollowerDocks(this.getDirection())) {
+            if (dock.isHolding()) return true;
         }
         return false;
     }
 
     private void occupyFollowerDocks() {
+        DockBlockEntity headDock = findDockAtPosition();
+        if (headDock == null) return;
+
+        // Get ordered dock chain behind the head dock
+        List<DockBlockEntity> followerDocks = headDock.getFollowerDocks(this.getDirection());
+
+        // Walk follower vehicle chain and zip with dock chain by index
         Optional<AbstractTrainCarEntity> follower = this.getFollower();
-        while (follower.isPresent()) {
+        int index = 0;
+        while (follower.isPresent() && index < followerDocks.size()) {
+            DockBlockEntity dock = followerDocks.get(index);
             Entity followerEntity = follower.get();
-            // Check dock at follower's rail position
-            DockBlockEntity targetDock = null;
-            BlockEntity be = level().getBlockEntity(followerEntity.getOnPos().above());
-            if (be instanceof DockBlockEntity dockBE) {
-                targetDock = dockBE;
-            } else {
-                be = level().getBlockEntity(followerEntity.blockPosition());
-                if (be instanceof DockBlockEntity dockBE) {
-                    targetDock = dockBE;
-                }
-            }
-            if (targetDock != null) {
-                // Only re-assign if the dock has a different vehicle (or none)
-                Entity current = targetDock.getDockedVehicle();
-                if (current != followerEntity) {
-                    if (current != null) targetDock.vacateDock();
-                    targetDock.occupyDock(followerEntity);
-                }
+            Entity current = dock.getDockedVehicle();
+            if (current != followerEntity) {
+                if (current != null) dock.vacateDock();
+                dock.occupyDock(followerEntity);
             }
             follower = follower.get().getFollower();
+            index++;
         }
     }
 
     private void vacateAllDocks() {
-        // Vacate head dock
-        DockBlockEntity myDock = findDockAtPosition();
-        if (myDock != null) myDock.vacateDock();
+        DockBlockEntity headDock = findDockAtPosition();
+        if (headDock == null) return;
+        headDock.vacateDock();
 
-        // Vacate follower docks
-        Optional<AbstractTrainCarEntity> follower = this.getFollower();
-        while (follower.isPresent()) {
-            BlockPos followerPos = follower.get().getOnPos().above();
-            BlockEntity be = level().getBlockEntity(followerPos);
-            if (be instanceof DockBlockEntity dockBE) {
-                dockBE.vacateDock();
-            }
-            be = level().getBlockEntity(follower.get().blockPosition());
-            if (be instanceof DockBlockEntity dockBE) {
-                dockBE.vacateDock();
-            }
-            follower = follower.get().getFollower();
+        for (DockBlockEntity dock : headDock.getFollowerDocks(this.getDirection())) {
+            dock.vacateDock();
         }
     }
 

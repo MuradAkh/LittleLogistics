@@ -1,6 +1,7 @@
 package dev.murad.shipping.block.dock;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
@@ -15,6 +16,8 @@ import net.neoforged.neoforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Universal dock block entity that detects docked vehicles, proxies their
@@ -178,11 +181,36 @@ public class DockBlockEntity extends BlockEntity {
      * @param vehicleHeading the direction the vehicle is traveling
      * @return true if another dock block entity exists in the forward direction
      */
-    public boolean shouldPassThrough(net.minecraft.core.Direction vehicleHeading) {
+    public boolean shouldPassThrough(Direction vehicleHeading) {
         if (level == null) return false;
         BlockPos ahead = worldPosition.relative(vehicleHeading);
         BlockEntity aheadBE = level.getBlockEntity(ahead);
         return aheadBE instanceof DockBlockEntity;
+    }
+
+    /**
+     * Returns an ordered list of follower docks behind this head dock.
+     * Walks in the opposite direction of vehicleHeading (the direction
+     * followers trail behind the head vehicle).
+     *
+     * @param vehicleHeading the direction the head vehicle was traveling
+     * @return list of DockBlockEntities behind this one, in order (nearest first)
+     */
+    public List<DockBlockEntity> getFollowerDocks(Direction vehicleHeading) {
+        List<DockBlockEntity> docks = new ArrayList<>();
+        if (level == null) return docks;
+        Direction behind = vehicleHeading.getOpposite();
+        BlockPos current = worldPosition.relative(behind);
+        while (true) {
+            BlockEntity be = level.getBlockEntity(current);
+            if (be instanceof DockBlockEntity dockBE) {
+                docks.add(dockBE);
+                current = current.relative(behind);
+            } else {
+                break;
+            }
+        }
+        return docks;
     }
 
     // =========================================================================
