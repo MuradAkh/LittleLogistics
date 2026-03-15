@@ -1,6 +1,7 @@
 package dev.murad.shipping.network;
 
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.block.dock.DockBlockEntity;
 import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.network.client.VehicleTrackerClientPacket;
@@ -8,9 +9,11 @@ import dev.murad.shipping.network.client.VehicleTrackerPacketHandler;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.TugRoute;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -42,6 +45,11 @@ public class NetworkHandler {
                 SetRouteTagPacket.TYPE,
                 SetRouteTagPacket.STREAM_CODEC,
                 NetworkHandler::handleSetRouteTag
+        );
+        registrar.playToServer(
+                SetDockConfigPacket.TYPE,
+                SetDockConfigPacket.STREAM_CODEC,
+                NetworkHandler::handleSetDockConfig
         );
 
         // Server → Client packets
@@ -89,6 +97,31 @@ public class NetworkHandler {
             CompoundTag routeTag = packet.tag();
             LOGGER.info(routeTag);
             TugRouteItem.saveRoute(TugRoute.fromNBT(routeTag), heldStack);
+        });
+    }
+
+    private static void handleSetDockConfig(SetDockConfigPacket packet, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            ServerPlayer serverPlayer = (ServerPlayer) context.player();
+            // Verify the player is close enough to the block
+            if (serverPlayer.distanceToSqr(
+                    packet.pos().getX() + 0.5,
+                    packet.pos().getY() + 0.5,
+                    packet.pos().getZ() + 0.5) > 64) { // 8 blocks squared
+                return;
+            }
+            BlockEntity be = serverPlayer.level().getBlockEntity(packet.pos());
+            if (be instanceof DockBlockEntity dockBE) {
+                dockBE.adjustTimeout(packet.scrollDelta());
+                int timeoutTicks = dockBE.getIdleTimeoutTicks();
+                String display = timeoutTicks >= 20
+                        ? (timeoutTicks / 20) + "s"
+                        : timeoutTicks + " ticks";
+                serverPlayer.displayClientMessage(
+                        Component.literal("Dock timeout: " + display),
+                        true
+                );
+            }
         });
     }
 
