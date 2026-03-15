@@ -141,13 +141,62 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .build()
         );
 
-        getVariantBuilder(ModBlocks.DOCK_RAIL.get()).forAllStates(state -> ConfiguredModel.builder()
-                .modelFile(models()
-                        .withExistingParent("dock_rail", mcLoc("rail_flat"))
-                        .texture("rail", getBlTx("dock_rail")))
-                .rotationY(state.getValue(DockRail.RAIL_SHAPE).equals(RailShape.NORTH_SOUTH) ? 0 : 90)
-                .build()
-        );
+        // --- Dock Rail (multipart) ---
+        ResourceLocation deepslate = ResourceLocation.withDefaultNamespace("block/deepslate");
+
+        ModelFile dockRailModel = models()
+                .withExistingParent("dock_rail", mcLoc("rail_flat"))
+                .texture("rail", getBlTx("dock_rail"));
+
+        getMultipartBuilder(ModBlocks.DOCK_RAIL.get())
+                // Base: north_south
+                .part().modelFile(dockRailModel).addModel()
+                    .condition(DockRail.RAIL_SHAPE, RailShape.NORTH_SOUTH).end()
+                // Base: east_west (rotated 90)
+                .part().modelFile(dockRailModel).rotationY(90).addModel()
+                    .condition(DockRail.RAIL_SHAPE, RailShape.EAST_WEST).end()
+                // North panel
+                .part().modelFile(models().getBuilder("dock_rail_panel_north")
+                    .texture("panel", deepslate)
+                    .element().from(0, 0, -1).to(16, 16, 1)
+                        .allFaces((dir, f) -> f.texture("#panel")).end())
+                    .addModel()
+                    .condition(DockRail.NORTH, true).end()
+                // South panel
+                .part().modelFile(models().getBuilder("dock_rail_panel_south")
+                    .texture("panel", deepslate)
+                    .element().from(0, 0, 15).to(16, 16, 17)
+                        .allFaces((dir, f) -> f.texture("#panel")).end())
+                    .addModel()
+                    .condition(DockRail.SOUTH, true).end()
+                // East panel
+                .part().modelFile(models().getBuilder("dock_rail_panel_east")
+                    .texture("panel", deepslate)
+                    .element().from(15, 0, 0).to(17, 16, 16)
+                        .allFaces((dir, f) -> f.texture("#panel")).end())
+                    .addModel()
+                    .condition(DockRail.EAST, true).end()
+                // West panel
+                .part().modelFile(models().getBuilder("dock_rail_panel_west")
+                    .texture("panel", deepslate)
+                    .element().from(-1, 0, 0).to(1, 16, 16)
+                        .allFaces((dir, f) -> f.texture("#panel")).end())
+                    .addModel()
+                    .condition(DockRail.WEST, true).end()
+                // Top panel (tunnel ceiling)
+                .part().modelFile(models().getBuilder("dock_rail_panel_top")
+                    .texture("panel", deepslate)
+                    .element().from(0, 15, 0).to(16, 17, 16)
+                        .allFaces((dir, f) -> f.texture("#panel")).end())
+                    .addModel()
+                    .condition(DockRail.UP, true).end()
+                // Bottom panel (opaque floor)
+                .part().modelFile(models().getBuilder("dock_rail_panel_bottom")
+                    .texture("panel", deepslate)
+                    .element().from(0, 0, 0).to(16, 2, 16)
+                        .allFaces((dir, f) -> f.texture("#panel")).end())
+                    .addModel()
+                    .condition(DockRail.DOWN, true).end();
     }
 
 }
