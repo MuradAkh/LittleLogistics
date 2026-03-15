@@ -22,7 +22,7 @@ eclipse
 run
 */generated/*
 mcmodsrepo
-
+.factorypath
 
 # Files from Forge MDK
 forge*changelog.txt
