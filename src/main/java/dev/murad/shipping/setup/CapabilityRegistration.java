@@ -69,6 +69,20 @@ public class CapabilityRegistration {
             (entity, ctx) -> entity.getRawHandler()
         );
 
+        // ChestBargeEntity -> chest item handler
+        event.registerEntity(
+            Capabilities.ItemHandler.ENTITY,
+            ModEntityTypes.CHEST_BARGE.get(),
+            (entity, ctx) -> entity.getRawHandler()
+        );
+
+        // BarrelBargeEntity -> chest item handler (same class as ChestBargeEntity)
+        event.registerEntity(
+            Capabilities.ItemHandler.ENTITY,
+            ModEntityTypes.BARREL_BARGE.get(),
+            (entity, ctx) -> entity.getRawHandler()
+        );
+
         // === Entity capabilities: ENERGY ===
 
         // EnergyTugEntity -> internal battery

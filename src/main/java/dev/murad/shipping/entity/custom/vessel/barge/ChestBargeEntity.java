@@ -26,6 +26,10 @@ import java.util.stream.IntStream;
 public class ChestBargeEntity extends AbstractBargeEntity implements Container, MenuProvider, WorldlyContainer, TrainInventoryProvider {
     protected final ItemStackHandler itemHandler = new ItemStackHandler(27);
 
+    public ItemStackHandler getRawHandler() {
+        return itemHandler;
+    }
+
     public ChestBargeEntity(EntityType<? extends ChestBargeEntity> type, Level world) {
         super(type, world);
     }
