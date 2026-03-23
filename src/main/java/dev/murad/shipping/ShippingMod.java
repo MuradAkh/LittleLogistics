@@ -1,16 +1,20 @@
 package dev.murad.shipping;
 
+import dev.murad.shipping.block.dockingstation.DockingStationBlock;
+import dev.murad.shipping.block.dockingstation.DockingStationScreen;
 import dev.murad.shipping.entity.container.*;
 import dev.murad.shipping.entity.custom.train.locomotive.EnergyLocomotiveEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.SteamLocomotiveEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.SteamTugEntity;
 import dev.murad.shipping.item.container.TugRouteScreen;
+import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItemModelProperties;
 import dev.murad.shipping.setup.ModMenuTypes;
 import dev.murad.shipping.setup.Registration;
 import dev.murad.shipping.util.MobileChunkLoader;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.DyeColor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -19,6 +23,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.common.world.chunk.RegisterTicketControllersEvent;
 import org.apache.logging.log4j.LogManager;
@@ -61,6 +66,15 @@ public class ShippingMod
             event.register(ModMenuTypes.ENERGY_TUG_CONTAINER.get(), EnergyHeadVehicleScreen<EnergyTugEntity>::new);
             event.register(ModMenuTypes.ENERGY_LOCOMOTIVE_CONTAINER.get(), EnergyHeadVehicleScreen<EnergyLocomotiveEntity>::new);
             event.register(ModMenuTypes.TUG_ROUTE_CONTAINER.get(), TugRouteScreen::new);
+            event.register(ModMenuTypes.DOCKING_STATION.get(), DockingStationScreen::new);
+        }
+
+        @SubscribeEvent
+        public static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
+            event.register(
+                    (state, level, pos, tintIndex) ->
+                            DyeColor.byId(state.getValue(DockingStationBlock.COLOR)).getTextureDiffuseColor(),
+                    ModBlocks.DOCKING_STATION.get());
         }
     }
 

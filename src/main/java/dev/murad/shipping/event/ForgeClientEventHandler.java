@@ -7,11 +7,8 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.block.dock.DockBlock;
-import dev.murad.shipping.block.dock.DockRail;
 import dev.murad.shipping.item.LocoRouteItem;
 import dev.murad.shipping.item.TugRouteItem;
-import dev.murad.shipping.network.SetDockConfigPacket;
 import dev.murad.shipping.network.client.EntityPosition;
 import dev.murad.shipping.network.client.VehicleTrackerPacketHandler;
 import dev.murad.shipping.setup.EntityItemMap;
@@ -30,14 +27,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -82,31 +75,6 @@ public class ForgeClientEventHandler {
         public ModRenderType(String pName, VertexFormat pFormat, VertexFormat.Mode pMode, int pBufferSize, boolean pAffectsCrumbling, boolean pSortOnUpload, Runnable pSetupState, Runnable pClearState) {
             super(pName, pFormat, pMode, pBufferSize, pAffectsCrumbling, pSortOnUpload, pSetupState, pClearState);
         }
-    }
-
-    @SubscribeEvent
-    public static void onMouseScroll(InputEvent.MouseScrollingEvent event) {
-        Minecraft mc = Minecraft.getInstance();
-        Player player = mc.player;
-        if (player == null || !player.isShiftKeyDown()) return;
-
-        HitResult hitResult = mc.hitResult;
-        if (hitResult == null || hitResult.getType() != HitResult.Type.BLOCK) return;
-
-        BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
-        BlockState state = player.level().getBlockState(pos);
-
-        if (!(state.getBlock() instanceof DockBlock) && !(state.getBlock() instanceof DockRail)) return;
-
-        // Prefer Y axis; fall back to X for mice that report horizontal scroll
-        double scroll = event.getScrollDeltaY() != 0 ? event.getScrollDeltaY() : event.getScrollDeltaX();
-        if (scroll == 0) return;
-
-        // Consume the scroll event to prevent hotbar switching
-        event.setCanceled(true);
-
-        int delta = scroll > 0 ? 1 : -1;
-        PacketDistributor.sendToServer(new SetDockConfigPacket(pos, delta));
     }
 
     @SubscribeEvent

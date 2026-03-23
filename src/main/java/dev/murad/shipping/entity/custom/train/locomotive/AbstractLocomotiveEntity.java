@@ -1,7 +1,7 @@
 package dev.murad.shipping.entity.custom.train.locomotive;
 
 import dev.murad.shipping.ShippingConfig;
-import dev.murad.shipping.block.dock.DockBlockEntity;
+import dev.murad.shipping.block.dockingstation.DockingStationBlockEntity;
 import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
@@ -404,7 +404,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             return;
         }
 
-        DockBlockEntity dock = findDockAtPosition();
+        DockingStationBlockEntity dock = findDockAtPosition();
 
         boolean shouldDock;
         if (dock != null) {
@@ -447,43 +447,43 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     @Nullable
-    private DockBlockEntity findDockAtPosition() {
-        // Rail docks are under the vehicle (at the rail block position)
-        BlockEntity be = level().getBlockEntity(getOnPos().above());
-        if (be instanceof DockBlockEntity dockBE) {
-            return dockBE;
-        }
-        // Also check at blockPosition in case of different rail placement
-        be = level().getBlockEntity(blockPosition());
-        if (be instanceof DockBlockEntity dockBE) {
-            return dockBE;
+    private DockingStationBlockEntity findDockAtPosition() {
+        // Docking station controller is 1 block to the left or right of the rail.
+        // getOnPos().above() == the rail block position for a cart.
+        BlockPos railPos = getOnPos().above();
+        Direction forward = getDirection();
+        for (Direction side : new Direction[]{forward.getClockWise(), forward.getCounterClockWise()}) {
+            BlockEntity be = level().getBlockEntity(railPos.relative(side));
+            if (be instanceof DockingStationBlockEntity dbe) {
+                return dbe;
+            }
         }
         return null;
     }
 
     private boolean isDockChainHolding() {
-        DockBlockEntity headDock = findDockAtPosition();
+        DockingStationBlockEntity headDock = findDockAtPosition();
         if (headDock == null) return false;
         if (headDock.isHolding()) return true;
 
-        for (DockBlockEntity dock : headDock.getFollowerDocks(this.getDirection())) {
+        for (DockingStationBlockEntity dock : headDock.getFollowerDocks(this.getDirection())) {
             if (dock.isHolding()) return true;
         }
         return false;
     }
 
     private void occupyFollowerDocks() {
-        DockBlockEntity headDock = findDockAtPosition();
+        DockingStationBlockEntity headDock = findDockAtPosition();
         if (headDock == null) return;
 
         // Get ordered dock chain behind the head dock
-        List<DockBlockEntity> followerDocks = headDock.getFollowerDocks(this.getDirection());
+        List<DockingStationBlockEntity> followerDocks = headDock.getFollowerDocks(this.getDirection());
 
         // Walk follower vehicle chain and zip with dock chain by index
         Optional<AbstractTrainCarEntity> follower = this.getFollower();
         int index = 0;
         while (follower.isPresent() && index < followerDocks.size()) {
-            DockBlockEntity dock = followerDocks.get(index);
+            DockingStationBlockEntity dock = followerDocks.get(index);
             Entity followerEntity = follower.get();
             Entity current = dock.getDockedVehicle();
             if (current != followerEntity) {
@@ -496,11 +496,11 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     private void vacateAllDocks() {
-        DockBlockEntity headDock = findDockAtPosition();
+        DockingStationBlockEntity headDock = findDockAtPosition();
         if (headDock == null) return;
         headDock.vacateDock();
 
-        for (DockBlockEntity dock : headDock.getFollowerDocks(this.getDirection())) {
+        for (DockingStationBlockEntity dock : headDock.getFollowerDocks(this.getDirection())) {
             dock.vacateDock();
         }
     }
@@ -536,7 +536,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                                         var shape = railHelper.getShape(railoc.get());
                                         var block = this.level().getBlockState(railoc.get());
                                         return !(shape.equals(RailShape.EAST_WEST) || shape.equals(RailShape.NORTH_SOUTH))
-                                                || block.is(ModBlocks.DOCK_RAIL.get())
                                                 || block.getBlock() instanceof MultiShapeRail;
                                     },
                                     12))

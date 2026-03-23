@@ -1,6 +1,6 @@
 package dev.murad.shipping.setup;
 
-import dev.murad.shipping.block.dock.DockBlockEntity;
+import dev.murad.shipping.block.dockingstation.DockingStationBlockEntity;
 import dev.murad.shipping.block.vesseldetector.VesselDetectorTileEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -14,11 +14,11 @@ public class ModTileEntitiesTypes {
             ModBlocks.VESSEL_DETECTOR
     );
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DockBlockEntity>> DOCK = Registration.TILE_ENTITIES.register(
-            "dock",
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DockingStationBlockEntity>> DOCKING_STATION = Registration.TILE_ENTITIES.register(
+            "docking_station",
             () -> BlockEntityType.Builder.of(
-                    (pos, state) -> new DockBlockEntity(ModTileEntitiesTypes.DOCK.get(), pos, state),
-                    ModBlocks.DOCK_BLOCK.get(), ModBlocks.DOCK_RAIL.get()
+                    (pos, state) -> new DockingStationBlockEntity(ModTileEntitiesTypes.DOCKING_STATION.get(), pos, state),
+                    ModBlocks.DOCKING_STATION.get()
             ).build(null)
     );
 

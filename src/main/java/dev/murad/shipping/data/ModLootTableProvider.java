@@ -49,8 +49,7 @@ public class ModLootTableProvider extends LootTableProvider {
             dropSelf(ModBlocks.TEE_JUNCTION_RAIL.get());
             dropSelf(ModBlocks.AUTOMATIC_TEE_JUNCTION_RAIL.get());
             dropSelf(ModBlocks.JUNCTION_RAIL.get());
-            dropSelf(ModBlocks.DOCK_BLOCK.get());
-            dropSelf(ModBlocks.DOCK_RAIL.get());
+            dropSelf(ModBlocks.DOCKING_STATION.get());
         }
 
         @Override

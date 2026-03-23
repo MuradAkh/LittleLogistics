@@ -1,7 +1,7 @@
 package dev.murad.shipping.entity.custom.vessel.tug;
 
 import dev.murad.shipping.ShippingConfig;
-import dev.murad.shipping.block.dock.DockBlockEntity;
+import dev.murad.shipping.block.dockingstation.DockingStationBlockEntity;
 import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
@@ -243,7 +243,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             return;
         }
 
-        DockBlockEntity dock = findAdjacentDock();
+        DockingStationBlockEntity dock = findAdjacentDock();
 
         boolean shouldDock;
         if (dock != null) {
@@ -286,40 +286,44 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Nullable
-    private DockBlockEntity findAdjacentDock() {
+    private DockingStationBlockEntity findAdjacentDock() {
         BlockPos pos = this.blockPosition();
         for (Direction dir : getSideDirections()) {
-            BlockEntity be = level().getBlockEntity(pos.relative(dir));
-            if (be instanceof DockBlockEntity dockBE) {
-                return dockBE;
+            // Check same level and one above — the controller sits on the canal bank
+            // which is typically one block higher than the water the tug occupies.
+            for (BlockPos candidate : new BlockPos[]{pos.relative(dir), pos.above().relative(dir)}) {
+                BlockEntity be = level().getBlockEntity(candidate);
+                if (be instanceof DockingStationBlockEntity dockBE) {
+                    return dockBE;
+                }
             }
         }
         return null;
     }
 
     private boolean isDockChainHolding() {
-        DockBlockEntity headDock = findAdjacentDock();
+        DockingStationBlockEntity headDock = findAdjacentDock();
         if (headDock == null) return false;
         if (headDock.isHolding()) return true;
 
-        for (DockBlockEntity dock : headDock.getFollowerDocks(this.getDirection())) {
+        for (DockingStationBlockEntity dock : headDock.getFollowerDocks(this.getDirection())) {
             if (dock.isHolding()) return true;
         }
         return false;
     }
 
     private void occupyFollowerDocks() {
-        DockBlockEntity headDock = findAdjacentDock();
+        DockingStationBlockEntity headDock = findAdjacentDock();
         if (headDock == null) return;
 
         // Get ordered dock chain behind the head dock
-        List<DockBlockEntity> followerDocks = headDock.getFollowerDocks(this.getDirection());
+        List<DockingStationBlockEntity> followerDocks = headDock.getFollowerDocks(this.getDirection());
 
         // Walk follower vehicle chain and zip with dock chain by index
         Optional<VesselEntity> follower = this.getFollower();
         int index = 0;
         while (follower.isPresent() && index < followerDocks.size()) {
-            DockBlockEntity dock = followerDocks.get(index);
+            DockingStationBlockEntity dock = followerDocks.get(index);
             Entity followerEntity = follower.get();
             Entity current = dock.getDockedVehicle();
             if (current != followerEntity) {
@@ -332,11 +336,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     private void vacateAllDocks() {
-        DockBlockEntity headDock = findAdjacentDock();
+        DockingStationBlockEntity headDock = findAdjacentDock();
         if (headDock == null) return;
         headDock.vacateDock();
 
-        for (DockBlockEntity dock : headDock.getFollowerDocks(this.getDirection())) {
+        for (DockingStationBlockEntity dock : headDock.getFollowerDocks(this.getDirection())) {
             dock.vacateDock();
         }
     }

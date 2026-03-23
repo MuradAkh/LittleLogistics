@@ -1,7 +1,7 @@
 package dev.murad.shipping.network;
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.block.dock.DockBlockEntity;
+import dev.murad.shipping.block.dockingstation.DockingStationBlockEntity;
 import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.network.client.VehicleTrackerClientPacket;
@@ -9,7 +9,6 @@ import dev.murad.shipping.network.client.VehicleTrackerPacketHandler;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.TugRoute;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
@@ -50,6 +49,16 @@ public class NetworkHandler {
                 SetDockConfigPacket.TYPE,
                 SetDockConfigPacket.STREAM_CODEC,
                 NetworkHandler::handleSetDockConfig
+        );
+        registrar.playToServer(
+                SetStationNamePacket.TYPE,
+                SetStationNamePacket.STREAM_CODEC,
+                NetworkHandler::handleSetStationName
+        );
+        registrar.playToServer(
+                SetDockRedstoneModePacket.TYPE,
+                SetDockRedstoneModePacket.STREAM_CODEC,
+                NetworkHandler::handleSetDockRedstoneMode
         );
 
         // Server → Client packets
@@ -103,24 +112,47 @@ public class NetworkHandler {
     private static void handleSetDockConfig(SetDockConfigPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             ServerPlayer serverPlayer = (ServerPlayer) context.player();
-            // Verify the player is close enough to the block
             if (serverPlayer.distanceToSqr(
                     packet.pos().getX() + 0.5,
                     packet.pos().getY() + 0.5,
-                    packet.pos().getZ() + 0.5) > 64) { // 8 blocks squared
+                    packet.pos().getZ() + 0.5) > 64) {
                 return;
             }
             BlockEntity be = serverPlayer.level().getBlockEntity(packet.pos());
-            if (be instanceof DockBlockEntity dockBE) {
+            if (be instanceof DockingStationBlockEntity dockBE) {
                 dockBE.adjustTimeout(packet.scrollDelta());
-                int timeoutTicks = dockBE.getIdleTimeoutTicks();
-                String display = timeoutTicks >= 20
-                        ? (timeoutTicks / 20) + "s"
-                        : timeoutTicks + " ticks";
-                serverPlayer.displayClientMessage(
-                        Component.literal("Dock timeout: " + display),
-                        true
-                );
+            }
+        });
+    }
+
+    private static void handleSetDockRedstoneMode(SetDockRedstoneModePacket packet, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            ServerPlayer serverPlayer = (ServerPlayer) context.player();
+            if (serverPlayer.distanceToSqr(
+                    packet.controllerPos().getX() + 0.5,
+                    packet.controllerPos().getY() + 0.5,
+                    packet.controllerPos().getZ() + 0.5) > 64) {
+                return;
+            }
+            BlockEntity be = serverPlayer.level().getBlockEntity(packet.controllerPos());
+            if (be instanceof DockingStationBlockEntity dockBE) {
+                dockBE.setRedstoneMode(packet.modeOrdinal());
+            }
+        });
+    }
+
+    private static void handleSetStationName(SetStationNamePacket packet, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            ServerPlayer serverPlayer = (ServerPlayer) context.player();
+            if (serverPlayer.distanceToSqr(
+                    packet.controllerPos().getX() + 0.5,
+                    packet.controllerPos().getY() + 0.5,
+                    packet.controllerPos().getZ() + 0.5) > 64) {
+                return;
+            }
+            BlockEntity be = serverPlayer.level().getBlockEntity(packet.controllerPos());
+            if (be instanceof DockingStationBlockEntity dockBE) {
+                dockBE.setStationName(packet.name());
             }
         });
     }

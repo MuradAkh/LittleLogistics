@@ -43,7 +43,6 @@ public class ModClientEventHandler {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.AUTOMATIC_SWITCH_RAIL.get(), RenderType.cutoutMipped());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.TEE_JUNCTION_RAIL.get(), RenderType.cutoutMipped());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.AUTOMATIC_TEE_JUNCTION_RAIL.get(), RenderType.cutoutMipped());
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.DOCK_RAIL.get(), RenderType.cutoutMipped());
         });
     }
 

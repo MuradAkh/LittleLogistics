@@ -41,6 +41,8 @@
   "entity.littlelogistics.steam_locomotive": "Steam Locomotive",
   "entity.littlelogistics.energy_locomotive": "Energy Locomotive",
 
+  "block.littlelogistics.docking_station": "Docking Station",
+  "block.littlelogistics.docking_station.no_space": "Not enough space to place Docking Station",
   "block.littlelogistics.tug_dock": "Tug Dock",
   "block.littlelogistics.barge_dock": "Barge Dock",
   "block.littlelogistics.guide_rail_tug": "Tug Guide Rail",
@@ -57,6 +59,8 @@
   "block.littlelogistics.automatic_tee_junction_rail": "Automatic T-Junction Rail",
   "block.littlelogistics.locomotive_dock_rail": "Locomotive Docking Rail",
   "block.littlelogistics.car_dock_rail": "Train Car Docking Rail",
+
+  "container.littlelogistics.docking_station": "Docking Station",
 
   "screen.littlelogistics.tug": "Steam Tug",
   "screen.littlelogistics.fishing_barge": "Auto-Fishing Barge",

@@ -2,8 +2,7 @@ package dev.murad.shipping.setup;
 
 
 import com.google.common.collect.ImmutableList;
-import dev.murad.shipping.block.dock.DockBlock;
-import dev.murad.shipping.block.dock.DockRail;
+import dev.murad.shipping.block.dockingstation.DockingStationBlock;
 import dev.murad.shipping.block.guiderail.CornerGuideRailBlock;
 import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.block.rail.*;
@@ -96,16 +95,9 @@ public class ModBlocks {
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
 
-    public static final DeferredHolder<Block, Block> DOCK_BLOCK = register(
-            "dock",
-            () -> new DockBlock(METAL_BLOCK_BEHAVIOUR),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
-
-    public static final DeferredHolder<Block, Block> DOCK_RAIL = register(
-            "dock_rail",
-            () -> new DockRail(RAIL_BLOCK_BEHAVIOUR),
+    public static final DeferredHolder<Block, Block> DOCKING_STATION = register(
+            "docking_station",
+            () -> new DockingStationBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion()),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));

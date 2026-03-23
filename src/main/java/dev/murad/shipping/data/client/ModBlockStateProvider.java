@@ -1,8 +1,8 @@
 package dev.murad.shipping.data.client;
 
 import dev.murad.shipping.ShippingMod;
-import dev.murad.shipping.block.dock.DockBlock;
-import dev.murad.shipping.block.dock.DockRail;
+import dev.murad.shipping.block.dockingstation.DockingStationBlock;
+import dev.murad.shipping.block.dockingstation.DockingStationPart;
 import dev.murad.shipping.block.guiderail.CornerGuideRailBlock;
 import dev.murad.shipping.block.rail.SwitchRail;
 import dev.murad.shipping.block.vesseldetector.VesselDetectorBlock;
@@ -11,7 +11,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.RailShape;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
@@ -132,71 +131,33 @@ public class ModBlockStateProvider extends BlockStateProvider {
                         .texture("rail", getBlTx("junction_rail")))
                 .build());
 
-        getVariantBuilder(ModBlocks.DOCK_BLOCK.get()).forAllStates(state -> ConfiguredModel.builder()
-                .modelFile(models().orientable("dock",
-                        getBlTx("dock_side"),
-                        getBlTx("dock_front"),
-                        getBlTx("dock_top")))
-                .rotationY((int) state.getValue(DockBlock.FACING).getOpposite().toYRot())
-                .build()
-        );
+        // --- Docking Station ---
+        // Models are hand-crafted in src/main/resources; just reference them.
+        ModelFile portModel   = models().getExistingFile(modLoc("block/docking_station_port"));
+        ModelFile columnModel = models().getExistingFile(modLoc("block/docking_station_column"));
+        ModelFile bridgeModel = models().getExistingFile(modLoc("block/docking_station_bridge"));
 
-        // --- Dock Rail (multipart) ---
-        ResourceLocation deepslate = ResourceLocation.withDefaultNamespace("block/deepslate");
+        getVariantBuilder(ModBlocks.DOCKING_STATION.get()).forAllStates(state -> {
+            Direction facing = state.getValue(DockingStationBlock.FACING);
+            DockingStationPart part = state.getValue(DockingStationBlock.PART);
 
-        ModelFile dockRailModel = models()
-                .withExistingParent("dock_rail", mcLoc("rail_flat"))
-                .texture("rail", getBlTx("dock_rail"));
+            // Port face rotation: facing.getOpposite().toYRot() points the port outward
+            int portRot = (int) facing.getOpposite().toYRot();
 
-        getMultipartBuilder(ModBlocks.DOCK_RAIL.get())
-                // Base: north_south
-                .part().modelFile(dockRailModel).addModel()
-                    .condition(DockRail.RAIL_SHAPE, RailShape.NORTH_SOUTH).end()
-                // Base: east_west (rotated 90)
-                .part().modelFile(dockRailModel).rotationY(90).addModel()
-                    .condition(DockRail.RAIL_SHAPE, RailShape.EAST_WEST).end()
-                // North panel
-                .part().modelFile(models().getBuilder("dock_rail_panel_north")
-                    .texture("panel", deepslate)
-                    .element().from(0, 0, -1).to(16, 16, 1)
-                        .allFaces((dir, f) -> f.texture("#panel")).end())
-                    .addModel()
-                    .condition(DockRail.NORTH, true).end()
-                // South panel
-                .part().modelFile(models().getBuilder("dock_rail_panel_south")
-                    .texture("panel", deepslate)
-                    .element().from(0, 0, 15).to(16, 16, 17)
-                        .allFaces((dir, f) -> f.texture("#panel")).end())
-                    .addModel()
-                    .condition(DockRail.SOUTH, true).end()
-                // East panel
-                .part().modelFile(models().getBuilder("dock_rail_panel_east")
-                    .texture("panel", deepslate)
-                    .element().from(15, 0, 0).to(17, 16, 16)
-                        .allFaces((dir, f) -> f.texture("#panel")).end())
-                    .addModel()
-                    .condition(DockRail.EAST, true).end()
-                // West panel
-                .part().modelFile(models().getBuilder("dock_rail_panel_west")
-                    .texture("panel", deepslate)
-                    .element().from(-1, 0, 0).to(1, 16, 16)
-                        .allFaces((dir, f) -> f.texture("#panel")).end())
-                    .addModel()
-                    .condition(DockRail.WEST, true).end()
-                // Top panel (tunnel ceiling)
-                .part().modelFile(models().getBuilder("dock_rail_panel_top")
-                    .texture("panel", deepslate)
-                    .element().from(0, 15, 0).to(16, 17, 16)
-                        .allFaces((dir, f) -> f.texture("#panel")).end())
-                    .addModel()
-                    .condition(DockRail.UP, true).end()
-                // Bottom panel (opaque floor)
-                .part().modelFile(models().getBuilder("dock_rail_panel_bottom")
-                    .texture("panel", deepslate)
-                    .element().from(0, 0, 0).to(16, 2, 16)
-                        .allFaces((dir, f) -> f.texture("#panel")).end())
-                    .addModel()
-                    .condition(DockRail.DOWN, true).end();
+            return switch (part) {
+                case CONTROLLER -> ConfiguredModel.builder()
+                        .modelFile(portModel)
+                        .rotationY(portRot)
+                        .build();
+                case BRIDGE -> ConfiguredModel.builder()
+                        .modelFile(bridgeModel)
+                        .rotationY(portRot)
+                        .build();
+                case LEFT_TOP -> ConfiguredModel.builder()
+                        .modelFile(columnModel)
+                        .build();
+            };
+        });
     }
 
 }

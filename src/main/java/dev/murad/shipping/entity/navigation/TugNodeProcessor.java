@@ -79,7 +79,7 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
                 }
                 if(
                         this.currentContext.level().getBlockState(surr).is(ModBlocks.GUIDE_RAIL_CORNER.get()) ||
-                                this.currentContext.level().getBlockState(surr).is(ModBlocks.DOCK_BLOCK.get())
+                                this.currentContext.level().getBlockState(surr).is(ModBlocks.DOCKING_STATION.get())
                 ){
                     penalty = 0;
                     break;

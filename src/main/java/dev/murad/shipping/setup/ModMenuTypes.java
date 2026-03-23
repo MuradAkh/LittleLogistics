@@ -1,5 +1,6 @@
 package dev.murad.shipping.setup;
 
+import dev.murad.shipping.block.dockingstation.DockingStationMenu;
 import dev.murad.shipping.entity.accessor.*;
 import dev.murad.shipping.entity.container.EnergyHeadVehicleContainer;
 import dev.murad.shipping.entity.container.SteamHeadVehicleContainer;
@@ -57,6 +58,10 @@ public class ModMenuTypes {
 
 
 
+
+    public static final DeferredHolder<MenuType<?>, MenuType<DockingStationMenu>> DOCKING_STATION =
+            Registration.CONTAINERS.register("docking_station",
+                    () -> IMenuTypeExtension.create(DockingStationMenu::new));
 
     public static void register () {}
 }

@@ -1,0 +1,37 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "metal":    "littlelogistics:block/docking_station_metal",
+    "accent":   "littlelogistics:block/docking_station_accent",
+    "particle": "littlelogistics:block/docking_station_metal"
+  },
+  "elements": [
+    {
+      "comment": "Vertical post rising from the base below",
+      "from": [5, 0, 5],
+      "to":   [11, 12, 11],
+      "faces": {
+        "north": { "uv": [0, 0, 6, 12], "texture": "#accent", "tintindex": 0 },
+        "south": { "uv": [0, 0, 6, 12], "texture": "#accent", "tintindex": 0 },
+        "east":  { "uv": [0, 0, 6, 12], "texture": "#accent", "tintindex": 0 },
+        "west":  { "uv": [0, 0, 6, 12], "texture": "#accent", "tintindex": 0 },
+        "up":    { "uv": [5, 5, 11, 11], "texture": "#metal" },
+        "down":  { "uv": [5, 5, 11, 11], "texture": "#metal", "cullface": "down" }
+      }
+    },
+    {
+      "comment": "Crane head platform — full-width cap; accent colour on top surface",
+      "from": [0, 12, 0],
+      "to":   [16, 16, 16],
+      "faces": {
+        "north": { "uv": [0, 12, 16, 16], "texture": "#metal", "cullface": "north" },
+        "south": { "uv": [0, 12, 16, 16], "texture": "#metal", "cullface": "south" },
+        "east":  { "uv": [0, 12, 16, 16], "texture": "#metal", "cullface": "east" },
+        "west":  { "uv": [0, 12, 16, 16], "texture": "#metal", "cullface": "west" },
+        "up":    { "uv": [0,  0, 16, 16], "texture": "#accent", "tintindex": 0, "cullface": "up" },
+        "down":  { "uv": [0,  0, 16, 16], "texture": "#metal" }
+      }
+    }
+  ]
+}

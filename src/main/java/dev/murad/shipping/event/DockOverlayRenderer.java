@@ -1,8 +1,7 @@
 package dev.murad.shipping.event;
 
-import dev.murad.shipping.block.dock.DockBlock;
-import dev.murad.shipping.block.dock.DockBlockEntity;
-import dev.murad.shipping.block.dock.DockRail;
+import dev.murad.shipping.block.dockingstation.DockingStationBlock;
+import dev.murad.shipping.block.dockingstation.DockingStationBlockEntity;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -27,48 +26,38 @@ public class DockOverlayRenderer {
         BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
         BlockState state = player.level().getBlockState(pos);
 
-        if (!(state.getBlock() instanceof DockBlock) && !(state.getBlock() instanceof DockRail)) return;
+        if (!(state.getBlock() instanceof DockingStationBlock)) return;
 
-        BlockEntity be = player.level().getBlockEntity(pos);
-        if (!(be instanceof DockBlockEntity dock)) return;
+        // For extension parts, delegate to the controller BE
+        DockingStationBlockEntity dock = DockingStationBlock.getControllerBE(state, player.level(), pos);
+        if (dock == null) return;
 
-        int timeoutTicks = dock.getIdleTimeoutTicks();
-        DockBlockEntity.RedstoneMode mode = dock.getRedstoneMode();
+        DockingStationBlockEntity.RedstoneMode mode = dock.getRedstoneMode();
         boolean occupied = dock.isOccupied();
 
-        String timeoutStr = formatTimeout(timeoutTicks);
         String modeStr = formatRedstoneMode(mode);
 
         Font font = mc.font;
         int screenW = graphics.guiWidth();
         int screenH = graphics.guiHeight();
 
-        // Position: below crosshair, offset down
         int boxX = screenW / 2;
         int startY = screenH / 2 + 16;
 
-        // Build lines
-        boolean sneaking = player.isShiftKeyDown();
-        String line1 = "Timeout: " + timeoutStr + (sneaking ? "  [Scroll]" : "");
-        String line2 = "Redstone: " + modeStr + "  [Right-click]";
-        String line3 = occupied ? "Vehicle docked" : "Empty";
-        String hint = sneaking ? "Scroll to adjust timeout" : "Sneak + Scroll to adjust timeout";
+        String line1 = occupied ? "Status: Vehicle docked" : "Status: Empty";
+        String line2 = "Redstone: " + modeStr;
+        String line3 = "Right-click to configure";
 
-        int maxWidth = Math.max(font.width(line1),
-                Math.max(font.width(line2),
-                        Math.max(font.width(line3), font.width(hint))));
+        int maxWidth = Math.max(font.width(line1), Math.max(font.width(line2), font.width(line3)));
 
         int padding = 4;
         int lineHeight = 11;
-        int boxWidth = maxWidth + padding * 2;
-        int boxHeight = lineHeight * 4 + padding * 2;
+        int boxWidth  = maxWidth + padding * 2;
+        int boxHeight = lineHeight * 3 + padding * 2;
         int left = boxX - boxWidth / 2;
-        int top = startY;
+        int top  = startY;
 
-        // Semi-transparent background
         graphics.fill(left, top, left + boxWidth, top + boxHeight, 0xAA000000);
-
-        // Border
         graphics.fill(left, top, left + boxWidth, top + 1, 0xFF555555);
         graphics.fill(left, top + boxHeight - 1, left + boxWidth, top + boxHeight, 0xFF555555);
         graphics.fill(left, top, left + 1, top + boxHeight, 0xFF555555);
@@ -77,24 +66,14 @@ public class DockOverlayRenderer {
         int textX = left + padding;
         int textY = top + padding;
 
-        graphics.drawString(font, line1, textX, textY, 0xFFFFFF);
+        graphics.drawString(font, line1, textX, textY, occupied ? 0x55FF55 : 0xAAAAAA);
         textY += lineHeight;
         graphics.drawString(font, line2, textX, textY, 0xCCCCCC);
         textY += lineHeight;
-        graphics.drawString(font, line3, textX, textY, occupied ? 0x55FF55 : 0xAAAAAA);
-        textY += lineHeight;
-        graphics.drawString(font, hint, textX, textY, 0x888888);
+        graphics.drawString(font, line3, textX, textY, 0x888888);
     }
 
-    private static String formatTimeout(int ticks) {
-        double seconds = ticks / 20.0;
-        if (seconds == (int) seconds) {
-            return (int) seconds + "s";
-        }
-        return String.format("%.1fs", seconds);
-    }
-
-    private static String formatRedstoneMode(DockBlockEntity.RedstoneMode mode) {
+    private static String formatRedstoneMode(DockingStationBlockEntity.RedstoneMode mode) {
         return switch (mode) {
             case IGNORE -> "Ignore";
             case HOLD_WHILE_POWERED -> "Hold";

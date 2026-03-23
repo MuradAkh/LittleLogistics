@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all":      "littlelogistics:block/docking_station_metal",
+    "particle": "littlelogistics:block/docking_station_metal"
+  }
+}

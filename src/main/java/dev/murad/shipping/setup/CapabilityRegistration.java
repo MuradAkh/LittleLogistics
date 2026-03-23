@@ -116,21 +116,33 @@ public class CapabilityRegistration {
 
         // === BlockEntity capabilities ===
 
-        // Universal dock block capabilities
+        // Docking station port capabilities — exposed on the FACING (port) face only
         event.registerBlockEntity(
             Capabilities.ItemHandler.BLOCK,
-            ModTileEntitiesTypes.DOCK.get(),
-            (blockEntity, direction) -> blockEntity.getItemHandler()
+            ModTileEntitiesTypes.DOCKING_STATION.get(),
+            (be, direction) -> {
+                if (direction == null) return be.getItemHandler();
+                var facing = be.getBlockState().getValue(dev.murad.shipping.block.dockingstation.DockingStationBlock.FACING);
+                return direction == facing ? be.getItemHandler() : null;
+            }
         );
         event.registerBlockEntity(
             Capabilities.FluidHandler.BLOCK,
-            ModTileEntitiesTypes.DOCK.get(),
-            (blockEntity, direction) -> blockEntity.getFluidHandler()
+            ModTileEntitiesTypes.DOCKING_STATION.get(),
+            (be, direction) -> {
+                if (direction == null) return be.getFluidHandler();
+                var facing = be.getBlockState().getValue(dev.murad.shipping.block.dockingstation.DockingStationBlock.FACING);
+                return direction == facing ? be.getFluidHandler() : null;
+            }
         );
         event.registerBlockEntity(
             Capabilities.EnergyStorage.BLOCK,
-            ModTileEntitiesTypes.DOCK.get(),
-            (blockEntity, direction) -> blockEntity.getEnergyStorage()
+            ModTileEntitiesTypes.DOCKING_STATION.get(),
+            (be, direction) -> {
+                if (direction == null) return be.getEnergyStorage();
+                var facing = be.getBlockState().getValue(dev.murad.shipping.block.dockingstation.DockingStationBlock.FACING);
+                return direction == facing ? be.getEnergyStorage() : null;
+            }
         );
 
         // === Item capabilities ===

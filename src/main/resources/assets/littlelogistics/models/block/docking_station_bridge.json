@@ -1,0 +1,37 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "metal":    "littlelogistics:block/docking_station_metal",
+    "accent":   "littlelogistics:block/docking_station_accent",
+    "particle": "littlelogistics:block/docking_station_metal"
+  },
+  "elements": [
+    {
+      "comment": "Jib beam — narrow arm (post-width) extending inward from the crane head",
+      "from": [5, 12, 0],
+      "to":   [11, 16, 16],
+      "faces": {
+        "north": { "uv": [0, 0, 6, 4], "texture": "#metal", "cullface": "north" },
+        "south": { "uv": [0, 0, 6, 4], "texture": "#metal", "cullface": "south" },
+        "east":  { "uv": [0, 0, 16, 4], "texture": "#accent", "tintindex": 0 },
+        "west":  { "uv": [0, 0, 16, 4], "texture": "#accent", "tintindex": 0 },
+        "up":    { "uv": [0, 0, 6, 16], "texture": "#accent", "tintindex": 0 },
+        "down":  { "uv": [0, 0, 6, 16], "texture": "#metal" }
+      }
+    },
+    {
+      "comment": "Hook block — accent-coloured weight hanging below the arm tip",
+      "from": [4, 5, 12],
+      "to":   [12, 12, 16],
+      "faces": {
+        "north": { "uv": [0, 0, 8, 7], "texture": "#accent", "tintindex": 0 },
+        "south": { "uv": [0, 0, 8, 7], "texture": "#metal",  "cullface": "south" },
+        "east":  { "uv": [0, 0, 4, 7], "texture": "#accent", "tintindex": 0 },
+        "west":  { "uv": [0, 0, 4, 7], "texture": "#accent", "tintindex": 0 },
+        "up":    { "uv": [0, 0, 8, 4], "texture": "#metal" },
+        "down":  { "uv": [0, 0, 8, 4], "texture": "#accent", "tintindex": 0 }
+      }
+    }
+  ]
+}

@@ -25,6 +25,5 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
         tag(BlockTags.RAILS).add(ModBlocks.TEE_JUNCTION_RAIL.get());
         tag(BlockTags.RAILS).add(ModBlocks.AUTOMATIC_TEE_JUNCTION_RAIL.get());
         tag(BlockTags.RAILS).add(ModBlocks.JUNCTION_RAIL.get());
-        tag(BlockTags.RAILS).add(ModBlocks.DOCK_RAIL.get());
     }
 }
