@@ -44,6 +44,16 @@ public class LinkingHandler<T extends Entity & LinkableEntity<T>> {
             fetchDominantClient();
             fetchDominatedClient();
         } else {
+            // Clear stale references left behind by chunk unloads.
+            // We do NOT call removeDominant/removeDominated here — the head entity's
+            // consist list owns reconnection; just null out the dead Java reference.
+            if (leader.isPresent() && leader.get().isRemoved()) {
+                leader = Optional.empty();
+            }
+            if (follower.isPresent() && follower.get().isRemoved()) {
+                follower = Optional.empty();
+            }
+
             if (leader.isEmpty() && dominantNBT != null) {
                 tryToLoadFromNBT(dominantNBT).ifPresent(entity::setDominant);
                 leader.ifPresent(d -> {

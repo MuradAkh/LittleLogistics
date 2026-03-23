@@ -18,6 +18,10 @@ import lombok.Setter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -49,8 +53,11 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -95,6 +102,19 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         return isDocked();
     }
 
+    // =========================================================================
+    // Consist (chain) management — head entity owns the authoritative UUID list
+    // =========================================================================
+
+    private static final String CONSIST_TAG = "consist";
+    /** Ticks without finding an entity before we assume it was permanently removed. */
+    private static final int CONSIST_RECONNECT_TIMEOUT = 600;
+
+    /** Ordered UUID list: index 0 = this tug, index N = Nth barge in chain. */
+    private List<UUID> consistUUIDs = new ArrayList<>();
+    /** Per-UUID reconnect attempt counters; entry removed on successful find. */
+    private final Map<UUID, Integer> reconnectAttempts = new HashMap<>();
+
     protected TugRoute path;
     protected int nextStop;
 
@@ -105,6 +125,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         this.path = new TugRoute();
         frontHitbox = new VehicleFrontPart(this);
         enrollmentHandler = new ChunkManagerEnrollmentHandler(this);
+        // Seed consist list with just self; extended when barges are linked
+        consistUUIDs.add(this.getUUID());
     }
 
     public AbstractTugEntity(EntityType type, Level worldIn, double x, double y, double z) {
@@ -175,6 +197,19 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         engineOn = !compound.contains("engineOn") || compound.getBoolean("engineOn");
         contentsChanged = true;
         enrollmentHandler.load(compound);
+        consistUUIDs.clear();
+        reconnectAttempts.clear();
+        if (compound.contains(CONSIST_TAG, Tag.TAG_LIST)) {
+            ListTag list = compound.getList(CONSIST_TAG, Tag.TAG_STRING);
+            for (int i = 0; i < list.size(); i++) {
+                try {
+                    consistUUIDs.add(UUID.fromString(list.getString(i)));
+                } catch (IllegalArgumentException ignored) {}
+            }
+        }
+        if (consistUUIDs.isEmpty()) {
+            consistUUIDs.add(this.getUUID());
+        }
         super.readAdditionalSaveData(compound);
     }
 
@@ -184,7 +219,120 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         compound.putBoolean("engineOn", engineOn);
         compound.put("routeHandler", routeItemHandler.serializeNBT(this.registryAccess()));
         enrollmentHandler.save(compound);
+        // Persist consist list — rebuild from live chain first so new spring links are captured
+        rebuildConsistList();
+        ListTag consistTag = new ListTag();
+        for (UUID uuid : consistUUIDs) {
+            consistTag.add(StringTag.valueOf(uuid.toString()));
+        }
+        compound.put(CONSIST_TAG, consistTag);
         super.addAdditionalSaveData(compound);
+    }
+
+    // =========================================================================
+    // Consist reconnection
+    // =========================================================================
+
+    private void tickConsist(ServerLevel level) {
+        tickReconnect(level);
+        rebuildConsistList();
+    }
+
+    /**
+     * Iterates consistUUIDs and re-establishes any missing links using the level's
+     * entity-by-UUID lookup (world-wide, not position-based).
+     * Stalls the tug if followers are still loading and we don't have a chunk-loading owner.
+     * Times out UUIDs that never load (permanently removed entities).
+     */
+    private void tickReconnect(ServerLevel level) {
+        if (consistUUIDs.size() <= 1) return;
+
+        boolean hadUnloaded = false;
+        List<UUID> updated = new ArrayList<>();
+        updated.add(this.getUUID());
+
+        VesselEntity prev = this;
+        for (int i = 1; i < consistUUIDs.size(); i++) {
+            UUID uuid = consistUUIDs.get(i);
+            Entity found = level.getEntity(uuid);
+
+            if (found == null || found.isRemoved() || !(found instanceof VesselEntity curr)) {
+                // Entity not loaded — check if the NEXT slot is alive with no leader,
+                // which indicates UUID[i] was permanently killed (handleLinkableKill fired).
+                boolean skippedDeadSlot = false;
+                if (i + 1 < consistUUIDs.size()) {
+                    Entity nextFound = level.getEntity(consistUUIDs.get(i + 1));
+                    if (nextFound instanceof VesselEntity nextVessel && !nextVessel.isRemoved()
+                            && nextVessel.getLeader().map(Entity::isRemoved).orElse(
+                                    nextVessel.getLeader().isEmpty())) {
+                        // UUID[i] is permanently gone; skip it and let the loop connect prev→nextVessel
+                        reconnectAttempts.remove(uuid);
+                        skippedDeadSlot = true;
+                        // Don't add uuid to updated — it's dropped
+                    }
+                }
+
+                if (!skippedDeadSlot) {
+                    int attempts = reconnectAttempts.getOrDefault(uuid, 0) + 1;
+                    if (attempts > CONSIST_RECONNECT_TIMEOUT) {
+                        // Timed out — treat as permanently gone, stop chain here
+                        reconnectAttempts.remove(uuid);
+                        break;
+                    }
+                    reconnectAttempts.put(uuid, attempts);
+                    updated.add(uuid);
+                    // Preserve the rest of the list as-is (they're behind this pending one)
+                    updated.addAll(consistUUIDs.subList(i + 1, consistUUIDs.size()));
+                    hadUnloaded = true;
+                    break;
+                }
+                // skippedDeadSlot=true: continue loop — i increments to the next slot (nextVessel)
+                continue;
+            }
+
+            reconnectAttempts.remove(uuid);
+            updated.add(uuid);
+
+            // Reconnect if the link is missing (prev→curr not established)
+            if (!prev.getFollower().map(f -> f == curr).orElse(false)) {
+                // Only claim curr if it has no live leader (avoid stealing from another train)
+                if (curr.getLeader().map(Entity::isRemoved).orElse(true)) {
+                    prev.setDominated(curr);
+                    curr.setDominant(prev);
+                }
+            }
+
+            prev = curr;
+        }
+
+        consistUUIDs = updated;
+
+        if (hadUnloaded && !hasOwner()) {
+            stall();
+        }
+    }
+
+    /**
+     * Rebuilds consistUUIDs by walking the live chain, then appending any
+     * pending-reconnect UUIDs from the current list that follow the live tail.
+     * This captures new spring links and removes permanently cut wagons.
+     */
+    private void rebuildConsistList() {
+        List<UUID> liveList = new ArrayList<>();
+        liveList.add(this.getUUID());
+        Optional<VesselEntity> cur = getFollower();
+        while (cur.isPresent()) {
+            liveList.add(cur.get().getUUID());
+            cur = cur.get().getFollower();
+        }
+
+        UUID liveTail = liveList.get(liveList.size() - 1);
+        int idx = consistUUIDs.indexOf(liveTail);
+        if (idx >= 0 && idx + 1 < consistUUIDs.size()) {
+            // Append unloaded-but-pending UUIDs that follow the current live tail
+            liveList.addAll(consistUUIDs.subList(idx + 1, consistUUIDs.size()));
+        }
+        consistUUIDs = liveList;
     }
 
     private void tickRouteCheck() {
@@ -431,6 +579,10 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
                 tickRouteCheck();
                 tickCheckDock();
 
+                if (AbstractTugEntity.this.level() instanceof ServerLevel serverLevel) {
+                    tickConsist(serverLevel);
+                }
+
                 followPath();
                 followGuideRail();
 
@@ -599,7 +751,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Override
     public void remove(RemovalReason r) {
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide && r != RemovalReason.UNLOADED_TO_CHUNK) {
             var stack = new ItemStack(this.getDropItem());
             if (this.hasCustomName()) {
                 stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, this.getCustomName());

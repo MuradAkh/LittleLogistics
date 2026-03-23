@@ -106,7 +106,7 @@ public abstract class AbstractBargeEntity extends VesselEntity implements Stalli
 
     @Override
     public void remove(RemovalReason r){
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide && r != RemovalReason.UNLOADED_TO_CHUNK) {
             var stack = new ItemStack(this.getDropItem());
             if (this.hasCustomName()) {
                 stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, this.getCustomName());

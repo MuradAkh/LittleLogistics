@@ -19,6 +19,10 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -46,12 +50,25 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity implements LinkableEntityHead<AbstractTrainCarEntity>, ItemHandlerVanillaContainerWrapper, HeadVehicle, StallingCapability {
+
+    // =========================================================================
+    // Consist (chain) management
+    // =========================================================================
+
+    private static final String CONSIST_TAG = "consist";
+    private static final int CONSIST_RECONNECT_TIMEOUT = 600;
+
+    private List<UUID> consistUUIDs = new ArrayList<>();
+    private final Map<UUID, Integer> reconnectAttempts = new HashMap<>();
 
     @Setter
     protected boolean engineOn = false;
@@ -99,12 +116,14 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         super(type, world);
         frontHitbox = new VehicleFrontPart(this);
         enrollmentHandler = new ChunkManagerEnrollmentHandler(this);
+        consistUUIDs.add(this.getUUID());
     }
 
     public AbstractLocomotiveEntity(EntityType<?> type, Level level, Double x, Double y, Double z) {
         super(type, level, x, y, z);
         frontHitbox = new VehicleFrontPart(this);
         enrollmentHandler = new ChunkManagerEnrollmentHandler(this);
+        consistUUIDs.add(this.getUUID());
     }
 
     @Override
@@ -124,7 +143,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     @Override
     public void remove(RemovalReason r) {
-        if(!this.level().isClientSide){
+        if(!this.level().isClientSide && r != RemovalReason.UNLOADED_TO_CHUNK){
             this.spawnAtLocation(routeItemHandler.getStackInSlot(0));
         }
         super.remove(r);
@@ -207,6 +226,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             enrollmentHandler.getPlayerName().ifPresent(name ->
                     entityData.set(OWNER, name)
             );
+            if (this.level() instanceof ServerLevel serverLevel) {
+                tickConsist(serverLevel);
+            }
         }
 
         tickYRot();
@@ -633,6 +655,91 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         setFrozen(false);
     }
 
+    // =========================================================================
+    // Consist reconnection
+    // =========================================================================
+
+    private void tickConsist(ServerLevel level) {
+        tickReconnect(level);
+        rebuildConsistList();
+    }
+
+    private void tickReconnect(ServerLevel level) {
+        if (consistUUIDs.size() <= 1) return;
+
+        boolean hadUnloaded = false;
+        List<UUID> updated = new ArrayList<>();
+        updated.add(this.getUUID());
+
+        AbstractTrainCarEntity prev = this;
+        for (int i = 1; i < consistUUIDs.size(); i++) {
+            UUID uuid = consistUUIDs.get(i);
+            Entity found = level.getEntity(uuid);
+
+            if (found == null || found.isRemoved() || !(found instanceof AbstractTrainCarEntity curr)) {
+                boolean skippedDeadSlot = false;
+                if (i + 1 < consistUUIDs.size()) {
+                    Entity nextFound = level.getEntity(consistUUIDs.get(i + 1));
+                    if (nextFound instanceof AbstractTrainCarEntity nextCar && !nextCar.isRemoved()
+                            && nextCar.getLeader().map(Entity::isRemoved).orElse(
+                                    nextCar.getLeader().isEmpty())) {
+                        reconnectAttempts.remove(uuid);
+                        skippedDeadSlot = true;
+                    }
+                }
+
+                if (!skippedDeadSlot) {
+                    int attempts = reconnectAttempts.getOrDefault(uuid, 0) + 1;
+                    if (attempts > CONSIST_RECONNECT_TIMEOUT) {
+                        reconnectAttempts.remove(uuid);
+                        break;
+                    }
+                    reconnectAttempts.put(uuid, attempts);
+                    updated.add(uuid);
+                    updated.addAll(consistUUIDs.subList(i + 1, consistUUIDs.size()));
+                    hadUnloaded = true;
+                    break;
+                }
+                continue;
+            }
+
+            reconnectAttempts.remove(uuid);
+            updated.add(uuid);
+
+            if (!prev.getFollower().map(f -> f == curr).orElse(false)) {
+                if (curr.getLeader().map(Entity::isRemoved).orElse(true)) {
+                    prev.setDominated(curr);
+                    curr.setDominant(prev);
+                }
+            }
+
+            prev = curr;
+        }
+
+        consistUUIDs = updated;
+
+        if (hadUnloaded && !hasOwner()) {
+            stall();
+        }
+    }
+
+    private void rebuildConsistList() {
+        List<UUID> liveList = new ArrayList<>();
+        liveList.add(this.getUUID());
+        Optional<AbstractTrainCarEntity> cur = getFollower();
+        while (cur.isPresent()) {
+            liveList.add(cur.get().getUUID());
+            cur = cur.get().getFollower();
+        }
+
+        UUID liveTail = liveList.get(liveList.size() - 1);
+        int idx = consistUUIDs.indexOf(liveTail);
+        if (idx >= 0 && idx + 1 < consistUUIDs.size()) {
+            liveList.addAll(consistUUIDs.subList(idx + 1, consistUUIDs.size()));
+        }
+        consistUUIDs = liveList;
+    }
+
     private void updateNavigatorFromItem() {
         ItemStack stack = routeItemHandler.getStackInSlot(0);
         if (stack.getItem() instanceof LocoRouteItem) {
@@ -652,6 +759,19 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         navigator.loadFromNbt(compound.getCompound(NAVIGATOR_TAG));
         enrollmentHandler.load(compound);
         updateNavigatorFromItem();
+        consistUUIDs.clear();
+        reconnectAttempts.clear();
+        if (compound.contains(CONSIST_TAG, Tag.TAG_LIST)) {
+            ListTag list = compound.getList(CONSIST_TAG, Tag.TAG_STRING);
+            for (int i = 0; i < list.size(); i++) {
+                try {
+                    consistUUIDs.add(UUID.fromString(list.getString(i)));
+                } catch (IllegalArgumentException ignored) {}
+            }
+        }
+        if (consistUUIDs.isEmpty()) {
+            consistUUIDs.add(this.getUUID());
+        }
     }
 
     @Override
@@ -661,6 +781,12 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         compound.put(LOCO_ROUTE_INV_TAG, routeItemHandler.serializeNBT(this.registryAccess()));
         compound.put(NAVIGATOR_TAG, navigator.saveToNbt());
         enrollmentHandler.save(compound);
+        rebuildConsistList();
+        ListTag consistTag = new ListTag();
+        for (UUID uuid : consistUUIDs) {
+            consistTag.add(StringTag.valueOf(uuid.toString()));
+        }
+        compound.put(CONSIST_TAG, consistTag);
     }
 
     // duplicate due to linking issues

@@ -209,7 +209,6 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
                 .addTransientModifier(
                         new AttributeModifier(ResourceLocation.fromNamespaceAndPath("littlelogistics", "swimspeed_mult"), newSpeed, AttributeModifier.Operation.ADD_VALUE));
 
-        setCustomNameVisible(true);
         this.getAttribute(NeoForgeMod.NAMETAG_DISTANCE).setBaseValue(NAMETAG_RENDERING_DISTANCE);
     }
 
@@ -279,7 +278,11 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
 
     @Override
     public void remove(RemovalReason r) {
-        handleLinkableKill();
+        // Only sever chain links on permanent removal. Chunk unloads are temporary —
+        // the head entity's consist list will reconnect when the chunk reloads.
+        if (r != RemovalReason.UNLOADED_TO_CHUNK) {
+            handleLinkableKill();
+        }
         super.remove(r);
     }
 

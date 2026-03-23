@@ -127,7 +127,6 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     }
 
     private void resetAttributes() {
-        setCustomNameVisible(true);
     }
 
     protected Optional<RailShape> getRailShape() {
@@ -489,7 +488,11 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     @Override
     public void remove(RemovalReason r) {
-        handleLinkableKill();
+        // Only sever chain links on permanent removal. Chunk unloads are temporary —
+        // the head entity's consist list will reconnect when the chunk reloads.
+        if (r != RemovalReason.UNLOADED_TO_CHUNK) {
+            handleLinkableKill();
+        }
         super.remove(r);
     }
 
