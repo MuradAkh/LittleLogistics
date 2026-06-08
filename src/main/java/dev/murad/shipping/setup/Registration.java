@@ -11,7 +11,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.sounds.SoundEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import dev.murad.shipping.setup.ModDataComponents;
 
 
 public class Registration  {
@@ -32,8 +31,10 @@ public class Registration  {
         ENTITIES.register(eventBus);
         SOUND_EVENTS.register(eventBus);
         ModDataComponents.COMPONENTS.register(eventBus);
+        ModCreativeTabs.CREATIVE_MODE_TABS.register(eventBus);
 
         ModEntityTypes.register();
+        ModCreativeTabs.register();
         ModItems.register();
         ModBlocks.register();
         ModTileEntitiesTypes.register();
