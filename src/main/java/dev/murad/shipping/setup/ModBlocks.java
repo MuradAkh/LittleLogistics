@@ -95,6 +95,10 @@ public class ModBlocks {
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));
 
+    public static final DeferredHolder<Block, Block> PORTAL_RAIL = registerNoItem(
+            "portal_rail",
+            () -> new PortalRail(RAIL_BLOCK_BEHAVIOUR));
+
     public static final DeferredHolder<Block, Block> DOCKING_STATION = register(
             "docking_station",
             () -> new DockingStationBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion()),

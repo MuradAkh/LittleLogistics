@@ -1,0 +1,18 @@
+{
+  "render_type": "minecraft:cutout_mipped",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "littlelogistics:block/rail_portal",
+    "rail": "littlelogistics:block/rail_portal"
+  },
+  "elements": [
+    {
+      "from": [0, 0, -8],
+      "to":   [16, 1, 16],
+      "faces": {
+        "up":   { "uv": [0, 0, 16, 16], "texture": "#rail" },
+        "down": { "uv": [0, 0, 16, 16], "texture": "#rail", "cullface": "down" }
+      }
+    }
+  ]
+}

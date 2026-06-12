@@ -63,6 +63,14 @@ public class ChunkManagerEnrollmentHandler {
         }
     }
 
+    /* Skips the server-restart enrollment freeze (enrollMe = 5) after a portal crossing.
+       The freeze guards a TrainChunkManagerManager race on disk load, which doesn't apply
+       here; the destination manager is created fresh with active = true. */
+    public void skipPortalArrivalFreeze() {
+        enrollMe = -1;
+    }
+
+
     public Optional<String> getPlayerName(){
         if(uuid == null)
             return Optional.empty();

@@ -90,6 +90,10 @@ public class LinkingHandler<T extends Entity & LinkableEntity<T>> {
         }
     }
 
+    public void clearWaitForDominated() {
+        waitForDominated = false;
+    }
+
     public void readAdditionalSaveData(CompoundTag compound) {
         dominantNBT = compound.getCompound("dominant");
         waitForDominated = compound.getBoolean("hasChild");
