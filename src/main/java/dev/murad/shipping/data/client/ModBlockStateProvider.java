@@ -133,28 +133,27 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
         // --- Docking Station ---
         // Models are hand-crafted in src/main/resources; just reference them.
-        ModelFile portModel   = models().getExistingFile(modLoc("block/docking_station_port"));
-        ModelFile columnModel = models().getExistingFile(modLoc("block/docking_station_column"));
-        ModelFile bridgeModel = models().getExistingFile(modLoc("block/docking_station_bridge"));
+        ModelFile craneModel = models().getExistingFile(modLoc("block/docking_station_crane"));
+        ModelFile emptyModel = models().getExistingFile(modLoc("block/docking_station_empty"));
 
         getVariantBuilder(ModBlocks.DOCKING_STATION.get()).forAllStates(state -> {
             Direction facing = state.getValue(DockingStationBlock.FACING);
             DockingStationPart part = state.getValue(DockingStationBlock.PART);
 
-            // Port face rotation: facing.getOpposite().toYRot() points the port outward
-            int portRot = (int) facing.getOpposite().toYRot();
+            // Crane model is exported facing opposite the block's outward direction.
+            int portRot = ((int) facing.getOpposite().toYRot() + 180) % 360;
 
             return switch (part) {
                 case CONTROLLER -> ConfiguredModel.builder()
-                        .modelFile(portModel)
+                        .modelFile(craneModel)
                         .rotationY(portRot)
                         .build();
                 case BRIDGE -> ConfiguredModel.builder()
-                        .modelFile(bridgeModel)
+                        .modelFile(emptyModel)
                         .rotationY(portRot)
                         .build();
                 case LEFT_TOP -> ConfiguredModel.builder()
-                        .modelFile(columnModel)
+                        .modelFile(emptyModel)
                         .build();
             };
         });

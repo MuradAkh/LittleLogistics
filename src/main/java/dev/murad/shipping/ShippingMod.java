@@ -76,6 +76,13 @@ public class ShippingMod
                             DyeColor.byId(state.getValue(DockingStationBlock.COLOR)).getTextureDiffuseColor(),
                     ModBlocks.DOCKING_STATION.get());
         }
+
+        @SubscribeEvent
+        public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
+            event.register(
+                    (stack, tintIndex) -> DyeColor.RED.getTextureDiffuseColor(),
+                    ModBlocks.DOCKING_STATION.get().asItem());
+        }
     }
 
     public static ResourceLocation entityTexture(String suffix) {
