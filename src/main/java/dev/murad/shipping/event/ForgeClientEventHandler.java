@@ -27,10 +27,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -41,6 +43,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.Set;
 
@@ -56,6 +59,8 @@ public class ForgeClientEventHandler {
     private static final double TUG_ROUTE_ARROW_SPACING = 4.0D;
     private static final double TUG_ROUTE_LABEL_Y_OFFSET = 0.22D;
     private static final double TUG_ROUTE_NODE_CLIP_DISTANCE = 0.5D;
+    private static final int TUG_ROUTE_PREVIEW_DEBOUNCE_TICKS = 3;
+    private static final int TUG_ROUTE_PREVIEW_NODES_PER_TICK = 256;
 
     private record PreviewPoint(Vec3 position, boolean isNode, boolean isCorner) {
     }
@@ -65,6 +70,33 @@ public class ForgeClientEventHandler {
 
     private record RailPort(Vec3 position, Vec3 side) {
     }
+
+    private static final class PendingTugRoutePreview {
+        private final Level level;
+        private final TugRoute route;
+        private final BlockPos target;
+        private final long targetSince;
+        @Nullable
+        private TugRouteCompiler.PreviewPathfinder pathfinder;
+        @Nullable
+        private TugRouteSegment segment;
+        private boolean finished;
+
+        private PendingTugRoutePreview(Level level, TugRoute route, BlockPos target, long targetSince) {
+            this.level = level;
+            this.route = route.copy();
+            this.target = target.immutable();
+            this.targetSince = targetSince;
+        }
+
+        private boolean matches(Level level, TugRoute route, BlockPos target) {
+            return this.level == level && this.route.equals(route) && this.target.equals(target);
+        }
+    }
+
+    @Nullable
+    private static PendingTugRoutePreview pendingTugRoutePreview;
+    private static boolean renderedTugRouteTargetPreview;
 
     public static class ModRenderType extends RenderType {
         public static final RenderType LINES = create("lines", DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, false, false,
@@ -100,6 +132,96 @@ public class ForgeClientEventHandler {
     @SubscribeEvent
     public static void onWorldUnload(LevelEvent.Unload event) {
         VehicleTrackerPacketHandler.flush();
+        pendingTugRoutePreview = null;
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(ClientTickEvent.Post event) {
+        Player player = Minecraft.getInstance().player;
+        if (player == null || ShippingConfig.Client.DISABLE_ROUTE_MARKERS.get()) {
+            pendingTugRoutePreview = null;
+            return;
+        }
+
+        ItemStack routeStack = getHeldTugRoute(player);
+        if (routeStack.isEmpty()) {
+            pendingTugRoutePreview = null;
+            return;
+        }
+
+        TugRoute route = TugRouteItem.getRoute(routeStack);
+        Optional<BlockPos> target = TugRouteItem.getTargetedWaypoint(player.level(), player);
+        if (route.isEmpty() || target.isEmpty() || route.stream().anyMatch(node -> node.isAt(target.get()))) {
+            pendingTugRoutePreview = null;
+            return;
+        }
+
+        BlockPos targetPos = target.get();
+        if (pendingTugRoutePreview == null || !pendingTugRoutePreview.matches(player.level(), route, targetPos)) {
+            pendingTugRoutePreview = new PendingTugRoutePreview(player.level(), route, targetPos, player.level().getGameTime());
+            return;
+        }
+
+        advancePendingTugRoutePreview(pendingTugRoutePreview);
+    }
+
+    private static ItemStack getHeldTugRoute(Player player) {
+        ItemStack mainHand = player.getItemInHand(InteractionHand.MAIN_HAND);
+        if (mainHand.getItem().equals(ModItems.TUG_ROUTE.get())) {
+            return mainHand;
+        }
+
+        ItemStack offHand = player.getItemInHand(InteractionHand.OFF_HAND);
+        return offHand.getItem().equals(ModItems.TUG_ROUTE.get()) ? offHand : ItemStack.EMPTY;
+    }
+
+    private static void advancePendingTugRoutePreview(PendingTugRoutePreview preview) {
+        if (preview.finished || preview.level.getGameTime() - preview.targetSince < TUG_ROUTE_PREVIEW_DEBOUNCE_TICKS) {
+            return;
+        }
+
+        if (preview.pathfinder == null) {
+            BlockPos start = preview.route.getLast().toBlockPos();
+            double maxSegmentLength = ShippingConfig.Server.TUG_ROUTE_MAX_SEGMENT_LENGTH.get();
+            if (Math.sqrt(start.distSqr(preview.target)) > maxSegmentLength
+                || Math.sqrt(preview.route.getFirst().toBlockPos().distSqr(preview.target)) > maxSegmentLength) {
+                preview.finished = true;
+                return;
+            }
+
+            preview.pathfinder = TugRouteCompiler.createPreviewPathfinder(
+                preview.level,
+                start,
+                preview.target,
+                getOccupiedPreviewBlocks(preview.route),
+                getBlockedPreviewWaypoints(preview.route, start)
+            );
+        }
+
+        TugRouteCompiler.PreviewPathStatus status = preview.pathfinder.advance(TUG_ROUTE_PREVIEW_NODES_PER_TICK);
+        if (status == TugRouteCompiler.PreviewPathStatus.FOUND) {
+            preview.segment = preview.pathfinder.getResult().orElse(null);
+            preview.finished = true;
+        } else if (status == TugRouteCompiler.PreviewPathStatus.FAILED) {
+            preview.finished = true;
+        }
+    }
+
+    private static Set<BlockPos> getOccupiedPreviewBlocks(TugRoute route) {
+        Set<BlockPos> occupied = new HashSet<>();
+        int retainedSegmentCount = Math.max(0, route.getSegments().size() - 1);
+        for (int segmentIndex = 0; segmentIndex < retainedSegmentCount; segmentIndex++) {
+            for (TugRoutePoint point : route.getSegments().get(segmentIndex).getPoints()) {
+                occupied.add(point.toBlockPos());
+            }
+        }
+        return occupied;
+    }
+
+    private static Set<BlockPos> getBlockedPreviewWaypoints(TugRoute route, BlockPos start) {
+        Set<BlockPos> blocked = getTugRouteNodePositions(route);
+        blocked.remove(start);
+        return blocked;
     }
 
     /**
@@ -227,7 +349,7 @@ public class ForgeClientEventHandler {
                 Vec3 arrowCenter = segment.from().lerp(segment.to(), ratio);
                 float arrowAlpha = RouteMarkerRenderer.computeAlpha(arrowCenter, camPos);
                 if (arrowAlpha > 0.0f && isArrowClearOfCorners(arrowCenter, segment.forward(), segment.side(), previewPoints)) {
-                    renderTugRouteArrow(pose, buffer.getBuffer(ModRenderType.LINES), camPos, arrowCenter, segment.forward(), segment.side(), arrowAlpha);
+                    renderTugRouteArrow(pose, buffer.getBuffer(ModRenderType.LINES), camPos, arrowCenter, segment.forward(), segment.side(), 1.0f, 0.6f, 0.2f, arrowAlpha);
                 }
                 nextArrowDistance += TUG_ROUTE_ARROW_SPACING;
             }
@@ -235,7 +357,7 @@ public class ForgeClientEventHandler {
             travelled += segmentLength;
         }
 
-        renderNonNodeCorners(pose, buffer, camPos, previewPoints);
+        renderNonNodeCorners(pose, buffer, camPos, previewPoints, 1.0f, 0.6f, 0.2f);
 
         for (int i = 0, routeSize = route.size(); i < routeSize; i++) {
             TugRouteNode node = route.get(i);
@@ -253,29 +375,120 @@ public class ForgeClientEventHandler {
                     node.getDisplayName(i), alpha);
         }
 
-        renderTargetedTugRouteWater(pose, buffer.getBuffer(ModRenderType.LINES), camPos);
+        if (!renderedTugRouteTargetPreview) {
+            renderTargetedTugRouteWater(pose, buffer, camPos, route);
+            renderedTugRouteTargetPreview = true;
+        }
 
         buffer.endBatch();
     }
 
-    private static void renderTargetedTugRouteWater(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer lineBuffer,
-                                                     Vec3 camPos) {
+    private static void renderTargetedTugRouteWater(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos,
+                                                     TugRoute route) {
         Player player = Minecraft.getInstance().player;
         if (player == null) {
             return;
         }
 
         TugRouteItem.getTargetedWaypoint(player.level(), player).ifPresent(pos -> {
+            var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
+            if (route.stream().anyMatch(node -> node.isAt(pos))) {
+                renderTugRouteRemovalTarget(pose, lineBuffer, camPos, pos);
+                return;
+            }
+
+            boolean invalidPreview = isPendingTugRoutePreviewInvalid(player.level(), route, pos);
+            float red = 1.0f;
+            float green = invalidPreview ? 0.1f : 1.0f;
+            float blue = invalidPreview ? 0.1f : 0.3f;
             double y = pos.getY() + TUG_ROUTE_SURFACE_Y_OFFSET;
             Vec3 northWest = new Vec3(pos.getX(), y, pos.getZ());
             Vec3 northEast = new Vec3(pos.getX() + 1.0D, y, pos.getZ());
             Vec3 southEast = new Vec3(pos.getX() + 1.0D, y, pos.getZ() + 1.0D);
             Vec3 southWest = new Vec3(pos.getX(), y, pos.getZ() + 1.0D);
-            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, northWest, northEast, 1.0f, 0.1f, 0.1f, 1.0f);
-            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, northEast, southEast, 1.0f, 0.1f, 0.1f, 1.0f);
-            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, southEast, southWest, 1.0f, 0.1f, 0.1f, 1.0f);
-            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, southWest, northWest, 1.0f, 0.1f, 0.1f, 1.0f);
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, northWest, northEast, red, green, blue, 1.0f);
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, northEast, southEast, red, green, blue, 1.0f);
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, southEast, southWest, red, green, blue, 1.0f);
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, southWest, northWest, red, green, blue, 1.0f);
+
+            getPendingTugRouteSegment(player.level(), route, pos).ifPresent(segment ->
+                renderPendingTugRouteSegment(pose, buffer, camPos, segment)
+            );
         });
+    }
+
+    private static boolean isPendingTugRoutePreviewInvalid(Level level, TugRoute route, BlockPos target) {
+        return pendingTugRoutePreview != null
+            && pendingTugRoutePreview.matches(level, route, target)
+            && pendingTugRoutePreview.finished
+            && pendingTugRoutePreview.segment == null;
+    }
+
+    private static void renderTugRouteRemovalTarget(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer lineBuffer,
+                                                     Vec3 camPos, BlockPos pos) {
+        double y = pos.getY() + TUG_ROUTE_SURFACE_Y_OFFSET;
+        Vec3 northWest = new Vec3(pos.getX(), y, pos.getZ());
+        Vec3 northEast = new Vec3(pos.getX() + 1.0D, y, pos.getZ());
+        Vec3 southEast = new Vec3(pos.getX() + 1.0D, y, pos.getZ() + 1.0D);
+        Vec3 southWest = new Vec3(pos.getX(), y, pos.getZ() + 1.0D);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, northWest, northEast, 0.0f, 0.0f, 0.0f, 1.0f);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, northEast, southEast, 0.0f, 0.0f, 0.0f, 1.0f);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, southEast, southWest, 0.0f, 0.0f, 0.0f, 1.0f);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, southWest, northWest, 0.0f, 0.0f, 0.0f, 1.0f);
+
+        Vec3 crossNorthWest = new Vec3(pos.getX() + 0.25D, y, pos.getZ() + 0.25D);
+        Vec3 crossNorthEast = new Vec3(pos.getX() + 0.75D, y, pos.getZ() + 0.25D);
+        Vec3 crossSouthEast = new Vec3(pos.getX() + 0.75D, y, pos.getZ() + 0.75D);
+        Vec3 crossSouthWest = new Vec3(pos.getX() + 0.25D, y, pos.getZ() + 0.75D);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, crossNorthWest, crossSouthEast, 0.0f, 0.0f, 0.0f, 1.0f);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, crossNorthEast, crossSouthWest, 0.0f, 0.0f, 0.0f, 1.0f);
+    }
+
+    private static Optional<TugRouteSegment> getPendingTugRouteSegment(Level level, TugRoute route, BlockPos target) {
+        if (route.isEmpty() || route.stream().anyMatch(node -> node.isAt(target))) {
+            return Optional.empty();
+        }
+
+        if (pendingTugRoutePreview == null || !pendingTugRoutePreview.matches(level, route, target)) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(pendingTugRoutePreview.segment);
+    }
+
+    private static void renderPendingTugRouteSegment(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos,
+                                                      TugRouteSegment segment) {
+        List<TugRoutePoint> points = segment.getPoints();
+        if (points.size() < 2) {
+            return;
+        }
+
+        List<PreviewPoint> previewPoints = new ArrayList<>(points.size());
+        for (int i = 0; i < points.size(); i++) {
+            TugRoutePoint point = points.get(i);
+            boolean isEndpoint = i == 0 || i == points.size() - 1;
+            previewPoints.add(new PreviewPoint(toWaterSurface(point.toVec3Center()), isEndpoint, false));
+        }
+        previewPoints = markCornerPoints(previewPoints);
+
+        for (int pointIndex = 1; pointIndex < previewPoints.size(); pointIndex++) {
+            PreviewSegment previewSegment = trimPreviewSegment(previewPoints.get(pointIndex - 1), previewPoints.get(pointIndex));
+            if (previewSegment == null) {
+                continue;
+            }
+
+            Vec3 leftFrom = previewSegment.from().add(previewSegment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            Vec3 leftTo = previewSegment.to().add(previewSegment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            Vec3 rightFrom = previewSegment.from().subtract(previewSegment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            Vec3 rightTo = previewSegment.to().subtract(previewSegment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            float alpha = RouteMarkerRenderer.computeAlpha(previewSegment.from().add(previewSegment.to()).scale(0.5D), camPos);
+            if (alpha > 0.0f) {
+                var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
+                RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, leftFrom, leftTo, 1.0f, 1.0f, 0.3f, alpha);
+                RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, rightFrom, rightTo, 1.0f, 1.0f, 0.3f, alpha);
+            }
+        }
+
+        renderNonNodeCorners(pose, buffer, camPos, previewPoints, 1.0f, 1.0f, 0.3f);
     }
 
     private static List<PreviewPoint> flattenTugRoutePreviewPoints(TugRoute route) {
@@ -308,7 +521,8 @@ public class ForgeClientEventHandler {
         return markCornerPoints(rawPoints);
     }
 
-    private static void renderNonNodeCorners(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos, List<PreviewPoint> previewPoints) {
+    private static void renderNonNodeCorners(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos,
+                                             List<PreviewPoint> previewPoints, float red, float green, float blue) {
         for (int i = 1; i < previewPoints.size() - 1; i++) {
             PreviewPoint corner = previewPoints.get(i);
             if (!corner.isCorner() || corner.isNode()) {
@@ -331,8 +545,8 @@ public class ForgeClientEventHandler {
             }
 
             var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
-            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, incomingLeft, outgoingLeft, 1.0f, 0.6f, 0.2f, alpha);
-            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, incomingRight, outgoingRight, 1.0f, 0.6f, 0.2f, alpha);
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, incomingLeft, outgoingLeft, red, green, blue, alpha);
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, incomingRight, outgoingRight, red, green, blue, alpha);
         }
     }
 
@@ -475,13 +689,13 @@ public class ForgeClientEventHandler {
     }
 
     private static void renderTugRouteArrow(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer lineBuffer, Vec3 camPos,
-                                            Vec3 center, Vec3 forward, Vec3 side, float alpha) {
+                                            Vec3 center, Vec3 forward, Vec3 side, float red, float green, float blue, float alpha) {
         Vec3 tip = center.add(forward.scale(TUG_ROUTE_ARROW_LENGTH * 0.5D));
         Vec3 base = center.subtract(forward.scale(TUG_ROUTE_ARROW_LENGTH * 0.5D));
         Vec3 left = base.add(side.scale(TUG_ROUTE_ARROW_WIDTH * 0.5D));
         Vec3 right = base.subtract(side.scale(TUG_ROUTE_ARROW_WIDTH * 0.5D));
-        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, left, tip, 1.0f, 0.6f, 0.2f, alpha);
-        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, right, tip, 1.0f, 0.6f, 0.2f, alpha);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, left, tip, red, green, blue, alpha);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, right, tip, red, green, blue, alpha);
     }
 
     @SubscribeEvent
@@ -491,6 +705,8 @@ public class ForgeClientEventHandler {
         }
 
         Player player = Minecraft.getInstance().player;
+
+        renderedTugRouteTargetPreview = false;
 
         ItemStack mainStack = player.getItemInHand(InteractionHand.MAIN_HAND);
         ItemStack offStack = player.getItemInHand(InteractionHand.OFF_HAND);

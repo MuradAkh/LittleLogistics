@@ -10,7 +10,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "Point at a navigable water block and right click to add a node to the back of the tug route (cannot add to the middle). Right click an existing node to remove it. The targeted water block is highlighted red, and nodes are indicated with beams while the item is held."
+      "text": "Point at a navigable water block and right click to add a node to the back of the tug route (cannot add to the middle). Right click an existing node to remove it. The targeted water block is highlighted yellow, and nodes are indicated with beams while the item is held."
     }
   ]
 }

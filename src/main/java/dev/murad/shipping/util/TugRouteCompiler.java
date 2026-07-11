@@ -39,6 +39,12 @@ public final class TugRouteCompiler {
         }
     }
 
+    public enum PreviewPathStatus {
+        SEARCHING,
+        FOUND,
+        FAILED
+    }
+
     private record SearchState(BlockPos pos, @Nullable Direction incomingDirection) {
     }
 
@@ -142,6 +148,122 @@ public final class TugRouteCompiler {
      */
     public static boolean isNavigableWaypoint(Level level, BlockPos pos) {
         return isNavigable(level, pos);
+    }
+
+    /**
+     * Creates a resumable path search for client-only route previews. Call {@link PreviewPathfinder#advance(int)}
+     * from the client tick loop rather than completing the search during rendering.
+     */
+    public static PreviewPathfinder createPreviewPathfinder(Level level, BlockPos start, BlockPos goal,
+                                                            Set<BlockPos> occupied, Set<BlockPos> blockedWaypoints) {
+        return new PreviewPathfinder(level, start, goal, occupied, blockedWaypoints);
+    }
+
+    public static final class PreviewPathfinder {
+        private final Level level;
+        private final BlockPos start;
+        private final BlockPos goal;
+        private final Set<BlockPos> occupied;
+        private final Set<BlockPos> blockedWaypoints;
+        private final PriorityQueue<SearchNode> openSet = new PriorityQueue<>(Comparator.comparingDouble(SearchNode::fScore));
+        private final Map<SearchState, Double> gScores = new HashMap<>();
+        private final Map<SearchState, SearchState> cameFrom = new HashMap<>();
+        private final Map<BlockPos, Double> bestPositionScores = new HashMap<>();
+        private final Set<SearchState> closed = new HashSet<>();
+        private final int visitedLimit;
+        private PreviewPathStatus status;
+        @Nullable
+        private TugRouteSegment result;
+
+        private PreviewPathfinder(Level level, BlockPos start, BlockPos goal, Set<BlockPos> occupied, Set<BlockPos> blockedWaypoints) {
+            this.level = level;
+            this.start = start.immutable();
+            this.goal = goal.immutable();
+            this.occupied = Set.copyOf(occupied);
+            this.blockedWaypoints = Set.copyOf(blockedWaypoints);
+            this.visitedLimit = BASE_VISITED_LIMIT * ShippingConfig.Server.TUG_PATHFINDING_MULTIPLIER.get();
+
+            if (start.equals(goal)) {
+                this.result = new TugRouteSegment(List.of(new TugRoutePoint(start)));
+                this.status = PreviewPathStatus.FOUND;
+                return;
+            }
+
+            SearchState startState = new SearchState(this.start, null);
+            this.gScores.put(startState, 0.0D);
+            this.bestPositionScores.put(this.start, 0.0D);
+            this.openSet.add(new SearchNode(startState, 0.0D, heuristic(this.start, this.goal)));
+            this.status = PreviewPathStatus.SEARCHING;
+        }
+
+        public PreviewPathStatus advance(int nodeBudget) {
+            if (this.status != PreviewPathStatus.SEARCHING) {
+                return this.status;
+            }
+
+            int processed = 0;
+            while (processed < nodeBudget && !this.openSet.isEmpty() && this.closed.size() < this.visitedLimit) {
+                SearchNode current = this.openSet.poll();
+                if (!this.closed.add(current.state())) {
+                    continue;
+                }
+                processed++;
+
+                SearchState currentState = current.state();
+                if (currentState.pos().equals(this.goal)) {
+                    this.result = reconstructPath(currentState, this.cameFrom).segment();
+                    this.status = PreviewPathStatus.FOUND;
+                    return this.status;
+                }
+
+                for (Direction direction : Direction.Plane.HORIZONTAL) {
+                    if (currentState.incomingDirection() != null && direction == currentState.incomingDirection().getOpposite()) {
+                        continue;
+                    }
+
+                    BlockPos neighbor = currentState.pos().relative(direction);
+                    if (!isNavigable(this.level, neighbor) || isOppositeGuideRail(this.level, neighbor, direction)) {
+                        continue;
+                    }
+                    if (this.blockedWaypoints.contains(neighbor)) {
+                        continue;
+                    }
+                    if (this.occupied.contains(neighbor) && !neighbor.equals(this.goal) && !neighbor.equals(this.start)) {
+                        continue;
+                    }
+
+                    double tentativeScore = current.gScore() + 1.0D + getLandPenalty(this.level, neighbor)
+                        + getTurnPenalty(currentState.incomingDirection(), direction);
+                    SearchState neighborState = new SearchState(neighbor, direction);
+                    if (tentativeScore >= this.gScores.getOrDefault(neighborState, Double.MAX_VALUE)) {
+                        continue;
+                    }
+                    if (!neighbor.equals(this.goal) && tentativeScore >= this.bestPositionScores.getOrDefault(neighbor, Double.MAX_VALUE)) {
+                        continue;
+                    }
+
+                    this.cameFrom.put(neighborState, currentState);
+                    this.gScores.put(neighborState, tentativeScore);
+                    if (!neighbor.equals(this.goal)) {
+                        this.bestPositionScores.put(neighbor, tentativeScore);
+                    }
+                    this.openSet.add(new SearchNode(neighborState, tentativeScore, tentativeScore + heuristic(neighbor, this.goal)));
+                }
+            }
+
+            if (this.openSet.isEmpty() || this.closed.size() >= this.visitedLimit) {
+                this.status = PreviewPathStatus.FAILED;
+            }
+            return this.status;
+        }
+
+        public PreviewPathStatus getStatus() {
+            return this.status;
+        }
+
+        public Optional<TugRouteSegment> getResult() {
+            return Optional.ofNullable(this.result);
+        }
     }
 
     private static SegmentCompileResult compileSegments(Level level, TugRoute route, Set<BlockPos> waypointPositions, Direction initialDirection) {

@@ -66,19 +66,7 @@ public class TugRouteItem extends Item {
                 if (anchor.isEmpty()) {
                     player.displayClientMessage(Component.literal("Point at navigable water to place a tug route waypoint."), true);
                 } else if (!tryRemoveSpecific(world, stack, anchor.get())) {
-                    if (pushRoute(world, stack, anchor.get(), player)) {
-                        player.displayClientMessage(Component.translatable(
-                            "item.littlelogistics.tug_route.added",
-                            anchor.get().getX(),
-                            anchor.get().getZ()
-                        ), false);
-                    }
-                } else {
-                    player.displayClientMessage(Component.translatable(
-                        "item.littlelogistics.tug_route.removed",
-                        anchor.get().getX(),
-                        anchor.get().getZ()
-                    ), false);
+                    pushRoute(world, stack, anchor.get(), player);
                 }
             }
         }
