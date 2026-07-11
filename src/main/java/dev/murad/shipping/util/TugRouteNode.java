@@ -3,11 +3,11 @@ package dev.murad.shipping.util;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.phys.Vec2;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -16,54 +16,61 @@ import java.util.Optional;
 public class TugRouteNode {
     private static final String NAME_TAG = "name";
     private static final String X_TAG = "x";
+    private static final String Y_TAG = "y";
     private static final String Z_TAG = "z";
     private static final String COORDS_TAG = "coordinates";
 
     public static final Codec<TugRouteNode> CODEC = RecordCodecBuilder.create(instance ->
         instance.group(
             Codec.STRING.optionalFieldOf("name")
-                .forGetter(n -> Optional.ofNullable(n.getName())),
-            Codec.DOUBLE.fieldOf("x")
+                .forGetter(node -> Optional.ofNullable(node.getName())),
+            Codec.INT.fieldOf("x")
                 .forGetter(TugRouteNode::getX),
-            Codec.DOUBLE.fieldOf("z")
+            Codec.INT.fieldOf("y")
+                .forGetter(TugRouteNode::getY),
+            Codec.INT.fieldOf("z")
                 .forGetter(TugRouteNode::getZ)
-        ).apply(instance, (name, x, z) -> new TugRouteNode(name.orElse(null), x, z))
+        ).apply(instance, (name, x, y, z) -> new TugRouteNode(name.orElse(null), x, y, z))
     );
 
     public static final StreamCodec<FriendlyByteBuf, TugRouteNode> STREAM_CODEC =
         StreamCodec.composite(
-            ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8), n -> Optional.ofNullable(n.getName()),
-            ByteBufCodecs.DOUBLE, TugRouteNode::getX,
-            ByteBufCodecs.DOUBLE, TugRouteNode::getZ,
-            (name, x, z) -> new TugRouteNode(name.orElse(null), x, z)
+            ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8), node -> Optional.ofNullable(node.getName()),
+            ByteBufCodecs.INT, TugRouteNode::getX,
+            ByteBufCodecs.INT, TugRouteNode::getY,
+            ByteBufCodecs.INT, TugRouteNode::getZ,
+            (name, x, y, z) -> new TugRouteNode(name.orElse(null), x, y, z)
         );
 
+    @Nullable
     private String name;
-    private final double x, z;
+    private final int x;
+    private final int y;
+    private final int z;
 
-    public TugRouteNode(String name, double x, double z) {
+    public TugRouteNode(@Nullable String name, int x, int y, int z) {
         this.name = name;
         this.x = x;
+        this.y = y;
         this.z = z;
     }
 
-    public TugRouteNode(double x, double y) {
-        this(null, x, y);
+    public TugRouteNode(BlockPos pos) {
+        this(null, pos.getX(), pos.getY(), pos.getZ());
     }
 
     public String getDisplayName(int index) {
         if (!this.hasCustomName()) {
             return I18n.get("item.littlelogistics.tug_route.node", index);
-        } else {
-            return I18n.get("item.littlelogistics.tug_route.node_named", index, getName());
         }
+        return I18n.get("item.littlelogistics.tug_route.node_named", index, getName());
     }
 
     public String getDisplayCoords() {
-        return this.x + ", " + this.z;
+        return this.x + ", " + this.y + ", " + this.z;
     }
 
-    public void setName(String name) {
+    public void setName(@Nullable String name) {
         this.name = name;
     }
 
@@ -76,12 +83,24 @@ public class TugRouteNode {
         return this.name != null;
     }
 
-    public double getX() {
+    public int getX() {
         return this.x;
     }
 
-    public double getZ() {
+    public int getY() {
+        return this.y;
+    }
+
+    public int getZ() {
         return this.z;
+    }
+
+    public BlockPos toBlockPos() {
+        return new BlockPos(x, y, z);
+    }
+
+    public boolean isAt(BlockPos pos) {
+        return this.x == pos.getX() && this.y == pos.getY() && this.z == pos.getZ();
     }
 
     @Override
@@ -89,24 +108,24 @@ public class TugRouteNode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TugRouteNode that = (TugRouteNode) o;
-        return Double.compare(that.x, x) == 0 && Double.compare(that.z, z) == 0 && Objects.equals(name, that.name);
+        return x == that.x && y == that.y && z == that.z && Objects.equals(name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, x, z);
+        return Objects.hash(name, x, y, z);
     }
 
     public CompoundTag toNBT() {
         CompoundTag tag = new CompoundTag();
         if (this.hasCustomName()) {
-            //noinspection ConstantConditions
             tag.putString(NAME_TAG, this.getName());
         }
 
         CompoundTag coords = new CompoundTag();
-        coords.putDouble(X_TAG, x);
-        coords.putDouble(Z_TAG, z);
+        coords.putInt(X_TAG, x);
+        coords.putInt(Y_TAG, y);
+        coords.putInt(Z_TAG, z);
 
         tag.put(COORDS_TAG, coords);
         return tag;
@@ -119,14 +138,14 @@ public class TugRouteNode {
         }
 
         CompoundTag coords = tag.getCompound(COORDS_TAG);
-        double x = coords.getDouble(X_TAG);
-        double z = coords.getDouble(Z_TAG);
+        int x = coords.getInt(X_TAG);
+        int y = coords.getInt(Y_TAG);
+        int z = coords.getInt(Z_TAG);
 
-        return new TugRouteNode(name, x, z);
+        return new TugRouteNode(name, x, y, z);
     }
 
-    public static TugRouteNode fromVector2f(Vec2 node) {
-        double x = node.x, z = node.y;
-        return new TugRouteNode(null, x, z);
+    public static TugRouteNode fromBlockPos(BlockPos pos) {
+        return new TugRouteNode(pos);
     }
 }

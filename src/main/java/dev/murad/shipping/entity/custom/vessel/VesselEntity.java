@@ -3,6 +3,7 @@ package dev.murad.shipping.entity.custom.vessel;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.entity.Colorable;
 import dev.murad.shipping.entity.custom.TrainInventoryProvider;
+import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.LinkingHandler;
@@ -271,6 +272,12 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
 
     public void doChainMath(){
         linkingHandler.leader.ifPresent((dominant) -> {
+                if (dominant.getTrain().getTug().filter(AbstractTugEntity.class::isInstance).map(AbstractTugEntity.class::cast)
+                        .map(tug -> tug.updateFollowerOnRoute(this))
+                        .orElse(false)) {
+                    checkInsideBlocks();
+                    return;
+                }
                 SpringPhysicsUtil.adjustSpringedEntities(dominant, this);
                 checkInsideBlocks();
         });

@@ -73,7 +73,7 @@ public class SteamTugEntity extends AbstractTugEntity {
                 .withBurnProgress(this::getBurnProgress)
                 .withId(this.getId())
                 .withLit(this::isLit)
-                .withVisitedSize(() -> nextStop)
+                .withVisitedSize(this::getVisitedRouteNodeCount)
                 .withOn(() -> engineOn)
                 .withRouteSize(() -> path != null ? path.size() : 0)
                 .withCanMove(enrollmentHandler::mayMove)

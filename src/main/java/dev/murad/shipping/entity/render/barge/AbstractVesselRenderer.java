@@ -2,6 +2,7 @@ package dev.murad.shipping.entity.render.barge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.vessel.VesselEntity;
@@ -36,6 +37,7 @@ public abstract class AbstractVesselRenderer<T extends VesselEntity> extends Ent
     }
 
     public void render(T vesselEntity, float yaw, float partialTick, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
+        Pair<Vec3, Vec3> attachmentPoints = getAttachmentPoints(vesselEntity, partialTick);
         matrixStack.pushPose();
         matrixStack.translate(0.0D, getModelYoffset(), 0.0D);
         matrixStack.translate(0.0D, 0.07, 0.0D);
@@ -43,9 +45,9 @@ public abstract class AbstractVesselRenderer<T extends VesselEntity> extends Ent
         matrixStack.scale(-1.0F, -1.0F, 1.0F);
         matrixStack.mulPose(Axis.YP.rotationDegrees(getModelYrot()));
         renderModel(vesselEntity, matrixStack, buffer, p_225623_6_);
-        getAndRenderChain(vesselEntity, matrixStack, buffer, p_225623_6_);
         matrixStack.popPose();
 
+        getAndRenderChain(vesselEntity, attachmentPoints, partialTick, matrixStack, buffer, p_225623_6_);
         getAndRenderLeash(vesselEntity, yaw, partialTick, matrixStack, buffer, p_225623_6_);
 
     }
@@ -65,20 +67,36 @@ public abstract class AbstractVesselRenderer<T extends VesselEntity> extends Ent
         return 90.0F;
     }
 
-    private void getAndRenderChain(T bargeEntity, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
-        if(bargeEntity.getLeader().isPresent()) {
-            double dist = bargeEntity.getLeader().get().distanceTo(bargeEntity);
-            VertexConsumer ivertexbuilderChain = buffer.getBuffer(chainModel.renderType(CHAIN_TEXTURE));
-            int segments = (int) Math.ceil(dist * 4);
+    private void getAndRenderChain(T vesselEntity, Pair<Vec3, Vec3> attachmentPoints, float partialTick, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {
+        if (vesselEntity.getLeader().isEmpty()) {
+            return;
+        }
+
+        Pair<Vec3, Vec3> leaderAttachmentPoints = getAttachmentPoints(vesselEntity.getLeader().get(), partialTick);
+        Vec3 from = attachmentPoints.getFirst();
+        Vec3 to = leaderAttachmentPoints.getSecond();
+        Vec3 origin = vesselEntity.getPosition(partialTick);
+        Vec3 vec = from.vectorTo(to);
+        double dist = vec.length();
+        if (dist <= 1.0E-4D) {
+            return;
+        }
+
+        VertexConsumer chainBuffer = buffer.getBuffer(chainModel.renderType(CHAIN_TEXTURE));
+        int segments = (int) Math.ceil(dist * 4);
+        matrixStack.pushPose();
+        Vec3 localFrom = from.subtract(origin);
+        matrixStack.translate(localFrom.x, localFrom.y, localFrom.z);
+        matrixStack.mulPose(Axis.YP.rotation(-(float) Math.atan2(vec.z, vec.x)));
+        matrixStack.mulPose(Axis.ZP.rotation((float) (Math.asin(vec.y / dist))));
+
+        for (int i = 1; i < segments; i++) {
             matrixStack.pushPose();
-            for (int i = 0; i < segments; i++) {
-                matrixStack.pushPose();
-                matrixStack.translate(i / 4.0, 0, 0);
-                chainModel.renderToBuffer(matrixStack, ivertexbuilderChain, p_225623_6_, OverlayTexture.NO_OVERLAY, -1);
-                matrixStack.popPose();
-            }
+            matrixStack.translate(i / 4.0, 0, 0);
+            chainModel.renderToBuffer(matrixStack, chainBuffer, packedLight, OverlayTexture.NO_OVERLAY, -1);
             matrixStack.popPose();
         }
+        matrixStack.popPose();
     }
 
     private void getAndRenderLeash(T bargeEntity, float p_225623_2_, float p_225623_3_, PoseStack matrixStack, MultiBufferSource buffer, int p_225623_6_) {
@@ -108,6 +126,39 @@ public abstract class AbstractVesselRenderer<T extends VesselEntity> extends Ent
 
 
     abstract EntityModel<T> getModel(T entity);
+
+    protected Pair<Vec3, Vec3> getAttachmentPoints(VesselEntity vesselEntity, float partialTick) {
+        Vec3 position = vesselEntity.getPosition(partialTick);
+        Vec3 bearing = getBearing(vesselEntity, partialTick);
+        Vec3 chainCentre = position.add(0.0D, getChainYOffset(), 0.0D);
+        return getAttachmentPoints(chainCentre, bearing);
+    }
+
+    protected Pair<Vec3, Vec3> getAttachmentPoints(Vec3 chainCentre, Vec3 bearing) {
+        double offset = getAttachmentOffset();
+        return Pair.of(chainCentre.add(bearing.scale(offset)), chainCentre.add(bearing.scale(-offset)));
+    }
+
+    protected double getChainYOffset() {
+        return getModelYoffset() + 0.07D;
+    }
+
+    protected double getAttachmentOffset() {
+        return 0.20D;
+    }
+
+    private Vec3 getBearing(VesselEntity vesselEntity, float partialTick) {
+        double dx = vesselEntity.getX() - vesselEntity.xo;
+        double dz = vesselEntity.getZ() - vesselEntity.zo;
+        Vec3 movementBearing = new Vec3(dx, 0.0D, dz);
+        if (movementBearing.lengthSqr() > 1.0E-4D) {
+            return movementBearing.normalize();
+        }
+
+        float interpolatedYaw = Mth.rotLerp(partialTick, vesselEntity.yRotO, vesselEntity.getYRot());
+        double radians = Math.toRadians(interpolatedYaw + 90.0D);
+        return new Vec3(Math.cos(radians), 0.0D, Math.sin(radians)).normalize();
+    }
 
 
     private <E extends Entity> void renderLeash(T pEntityLiving, float pPartialTicks, PoseStack pMatrixStack, MultiBufferSource pBuffer, E pLeashHolder) {

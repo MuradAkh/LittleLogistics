@@ -90,7 +90,7 @@
   "global.littlelogistics.no_connected_inventory_car": "This train car requires a connected inventory behind it but none was provided. Link additional train car that provide inventory behind this one, such as a Chest Car.",
   "global.littlelogistics.connected_inventory": "This barge has %s connected inventories",
 
-  "item.littlelogistics.tug_route.description": "Right click to add node at the end of the route, right click at the same location to remove. Shift right click to bring up menu.",
+  "item.littlelogistics.tug_route.description": "Point at water and right click to add a node at the end of the route; right click an existing node to remove it. Shift right click to bring up menu.",
   "item.littlelogistics.tug_route.num_nodes": "Route Nodes: %s",
   "item.littlelogistics.tug_route.added": "Added Route Node X:%s Z:%s",
   "item.littlelogistics.tug_route.removed": "Removed Route Node X:%s Z:%s",

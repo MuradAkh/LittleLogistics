@@ -151,6 +151,16 @@ public class RouteMarkerRenderer {
 
         double markerY1 = y1 + STEM_HEIGHT;
         double markerY2 = y2 + STEM_HEIGHT;
+        renderLine(poseStack, lineBuffer, camPos,
+                new Vec3(x1, markerY1, z1),
+                new Vec3(x2, markerY2, z2),
+                r, g, b, alpha);
+    }
+
+    public static void renderLine(PoseStack poseStack, VertexConsumer lineBuffer,
+                                  Vec3 camPos, Vec3 from, Vec3 to,
+                                  float r, float g, float b, float alpha) {
+        if (alpha <= 0.0f) return;
 
         poseStack.pushPose();
         {
@@ -160,9 +170,9 @@ public class RouteMarkerRenderer {
             Matrix4f mat = poseStack.last().pose();
 
             // Compute direction for normal
-            float dx = (float) (x2 - x1);
-            float dy = (float) (markerY2 - markerY1);
-            float dz = (float) (z2 - z1);
+            float dx = (float) (to.x - from.x);
+            float dy = (float) (to.y - from.y);
+            float dz = (float) (to.z - from.z);
             float len = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
             if (len < 1e-6f) {
                 poseStack.popPose();
@@ -172,9 +182,9 @@ public class RouteMarkerRenderer {
             float ny = dy / len;
             float nz = dz / len;
 
-            lineBuffer.addVertex(mat, (float) x1, (float) markerY1, (float) z1)
+            lineBuffer.addVertex(mat, (float) from.x, (float) from.y, (float) from.z)
                     .setColor(r, g, b, alpha).setNormal(nx, ny, nz);
-            lineBuffer.addVertex(mat, (float) x2, (float) markerY2, (float) z2)
+            lineBuffer.addVertex(mat, (float) to.x, (float) to.y, (float) to.z)
                     .setColor(r, g, b, alpha).setNormal(nx, ny, nz);
         }
         poseStack.popPose();
@@ -201,10 +211,18 @@ public class RouteMarkerRenderer {
 
         // Position text slightly above the diamond marker
         double labelY = baseY + STEM_HEIGHT + MARKER_SIZE + 0.15;
+        renderLabelAtY(poseStack, bufferSource, camera, camPos, worldX, labelY, worldZ, text, alpha);
+    }
+
+    public static void renderLabelAtY(PoseStack poseStack, MultiBufferSource bufferSource,
+                                      Camera camera, Vec3 camPos,
+                                      double worldX, double worldY, double worldZ,
+                                      String text, float alpha) {
+        if (alpha <= 0.0f) return;
 
         poseStack.pushPose();
         {
-            poseStack.translate(worldX - camPos.x, labelY - camPos.y, worldZ - camPos.z);
+            poseStack.translate(worldX - camPos.x, worldY - camPos.y, worldZ - camPos.z);
 
             // Face the camera
             poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));

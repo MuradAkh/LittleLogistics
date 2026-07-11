@@ -30,6 +30,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.Entity;
@@ -59,6 +60,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
@@ -91,10 +93,17 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private int dockHoldTicks = 0;
     private int postUndockTicks = 0;
     private boolean independentMotion = false;
-    private int pathfindCooldown = 0;
+    private double routeProgress = 0.0D;
     private VehicleFrontPart frontHitbox;
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.STRING);
+    private static final String ROUTE_PROGRESS_TAG = "route_progress";
+    private static final double ROUTE_LOOKAHEAD = 0.8D;
+    private static final double TUG_REAR_COUPLER_OFFSET = 0.22D;
+    private static final double HEAD_COUPLER_GAP = 0.05D;
+    private static final double BODY_COUPLER_GAP = 0.20D;
+    private static final double FOLLOWER_CORRECTION_BLEND = 0.65D;
+    private static final double FOLLOWER_HARD_SNAP_DISTANCE = 4.0D;
 
 
 
@@ -116,7 +125,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private final Map<UUID, Integer> reconnectAttempts = new HashMap<>();
 
     protected TugRoute path;
-    protected int nextStop;
+    @Nullable
+    private TugRouteTrack routeTrack;
 
     public AbstractTugEntity(EntityType<? extends WaterAnimal> type, Level world) {
         super(type, world);
@@ -193,7 +203,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         }else{
             routeItemHandler.deserializeNBT(this.registryAccess(), compound.getCompound("routeHandler"));
         }
-        nextStop = compound.contains("next_stop") ? compound.getInt("next_stop") : 0;
+        routeProgress = compound.contains(ROUTE_PROGRESS_TAG) ? compound.getDouble(ROUTE_PROGRESS_TAG) : 0.0D;
         engineOn = !compound.contains("engineOn") || compound.getBoolean("engineOn");
         contentsChanged = true;
         enrollmentHandler.load(compound);
@@ -215,7 +225,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag compound) {
-        compound.putInt("next_stop", nextStop);
+        compound.putDouble(ROUTE_PROGRESS_TAG, routeProgress);
         compound.putBoolean("engineOn", engineOn);
         compound.put("routeHandler", routeItemHandler.serializeNBT(this.registryAccess()));
         enrollmentHandler.save(compound);
@@ -340,11 +350,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             ItemStack stack = routeItemHandler.getStackInSlot(0);
             this.setPath(TugRouteItem.getRoute(stack));
             contentsChanged = false;
-        }
-
-        // fix for currently borked worlds
-        if (nextStop >= this.path.size()) {
-            this.nextStop = 0;
         }
     }
 
@@ -584,7 +589,9 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
                 }
 
                 followPath();
-                followGuideRail();
+                if (!hasCompiledRouteTrack()) {
+                    followGuideRail();
+                }
 
             }
 
@@ -658,35 +665,33 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     private void followPath() {
-        pathfindCooldown--;
-        if (!this.path.isEmpty() && !this.docked && engineOn && !shouldFreezeTrain() && tickFuel()) {
-            TugRouteNode stop = path.get(nextStop);
-            if (navigation.getPath() == null || navigation.getPath().isDone()
-            ) {
-                if(pathfindCooldown < 0 || navigation.getPath() != null){  //only go on cooldown when the path was not completed
-                    navigation.moveTo(stop.getX(), this.getY(), stop.getZ(), 0.3);
-                    pathfindCooldown = 20;
-                } else {
-                    return;
-                }
-            }
-            double distance = Math.abs(Math.hypot(this.getX() - (stop.getX() + 0.5), this.getZ() - (stop.getZ() + 0.5)));
+        if (hasCompiledRouteTrack() && !this.docked && engineOn && !shouldFreezeTrain() && tickFuel()) {
             independentMotion = true;
             entityData.set(INDEPENDENT_MOTION, true);
+            navigation.stop();
 
-            if (distance < 0.9) {
-                incrementStop();
+            double speed = getRouteCruiseSpeed();
+            routeProgress = routeTrack.wrapDistance(routeProgress + speed);
+            TugRouteTrack.Sample current = routeTrack.sample(routeProgress);
+            TugRouteTrack.Sample lookAhead = routeTrack.sample(routeProgress + ROUTE_LOOKAHEAD);
+            Vec3 desiredDirection = lookAhead.position().subtract(this.position());
+            Vec3 horizontalDirection = new Vec3(desiredDirection.x, 0.0D, desiredDirection.z);
+
+            if (horizontalDirection.lengthSqr() > 1.0E-4D) {
+                Vec3 desiredVelocity = horizontalDirection.normalize().scale(speed);
+                Vec3 currentVelocity = this.getDeltaMovement();
+                this.setDeltaMovement(currentVelocity.scale(0.55D).add(desiredVelocity.scale(0.45D)));
+                this.setYRot(computeRouteYaw(desiredVelocity));
             }
 
-        } else{
+            if (this.position().distanceTo(current.position()) > 2.0D) {
+                this.moveTo(current.position().x, this.getY(), current.position().z, this.getYRot(), this.getXRot());
+            }
+        } else {
             entityData.set(INDEPENDENT_MOTION, false);
             this.navigation.stop();
-            if (remainingStallTime > 0){
+            if (remainingStallTime > 0) {
                 remainingStallTime--;
-            }
-
-            if (this.path.isEmpty()){
-                this.nextStop = 0;
             }
         }
     }
@@ -704,18 +709,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
 
     public void setPath(TugRoute path) {
-        if (!this.path.isEmpty() && !this.path.equals(path)){
-            this.nextStop = 0;
+        if (!this.path.equals(path)) {
+            this.routeProgress = 0.0D;
         }
         this.path = path;
-    }
-
-    private void incrementStop() {
-        if (this.path.size() == 1) {
-            nextStop = 0;
-        } else if (!this.path.isEmpty()) {
-            nextStop = (nextStop + 1) % (this.path.size());
-        }
+        this.routeTrack = TugRouteTrack.from(path);
     }
 
     @Override
@@ -747,6 +745,190 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     @Override
     public void setTrain(Train<VesselEntity> train) {
         linkingHandler.train = train;
+    }
+
+    public boolean hasCompiledRouteTrack() {
+        return routeTrack != null && routeTrack.isUsable();
+    }
+
+    private double getRouteCruiseSpeed() {
+        return ShippingConfig.Server.TUG_BASE_SPEED.get() * 0.04D;
+    }
+
+    public int getVisitedRouteNodeCount() {
+        if (path == null || path.isEmpty() || !hasCompiledRouteTrack()) {
+            return 0;
+        }
+
+        double completionRatio = routeTrack.getTotalLength() <= 0.0D ? 0.0D : routeProgress / routeTrack.getTotalLength();
+        return Mth.clamp((int) Math.floor(completionRatio * path.size()) + 1, 1, path.size());
+    }
+
+    public boolean updateFollowerOnRoute(VesselEntity follower) {
+        if (!hasCompiledRouteTrack()) {
+            return false;
+        }
+
+        Optional<RouteBodyPose> poseOptional = solveFollowerPoseOnRoute(follower);
+        if (poseOptional.isEmpty()) {
+            return false;
+        }
+
+        RouteBodyPose pose = poseOptional.get();
+        Vec3 target = pose.center();
+        Vec3 forward = pose.forward();
+        double desiredYaw = computeRouteYaw(forward);
+        Vec3 currentPosition = follower.position();
+        double horizontalError = horizontalDistance(currentPosition, target);
+
+        Vec3 correctedPosition;
+        if (horizontalError > FOLLOWER_HARD_SNAP_DISTANCE) {
+            correctedPosition = new Vec3(target.x, currentPosition.y, target.z);
+        } else {
+            correctedPosition = new Vec3(
+                    Mth.lerp(FOLLOWER_CORRECTION_BLEND, currentPosition.x, target.x),
+                    currentPosition.y,
+                    Mth.lerp(FOLLOWER_CORRECTION_BLEND, currentPosition.z, target.z)
+            );
+        }
+
+        follower.moveTo(correctedPosition.x, follower.getY(), correctedPosition.z, (float) desiredYaw, follower.getXRot());
+        follower.setDeltaMovement(forward.scale(getRouteCruiseSpeed()));
+
+        return true;
+    }
+
+    private Optional<RouteBodyPose> solveFollowerPoseOnRoute(VesselEntity follower) {
+        if (this.isDocked()) {
+            Optional<RouteBodyPose> dockedPose = solveDockedFollowerPose(follower);
+            if (dockedPose.isPresent()) {
+                return dockedPose;
+            }
+        }
+
+        OptionalDouble frontDistanceOptional = getDistanceToFollowerFrontCoupler(follower);
+        if (frontDistanceOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        double frontDistance = frontDistanceOptional.getAsDouble();
+        double rearDistance = frontDistance + getBodyLengthOnRoute(follower);
+        TugRouteTrack.Sample frontSample = routeTrack.sample(routeProgress - frontDistance);
+        TugRouteTrack.Sample rearSample = routeTrack.sample(routeProgress - rearDistance);
+
+        Vec3 axis = frontSample.position().subtract(rearSample.position());
+        Vec3 horizontalAxis = new Vec3(axis.x, 0.0D, axis.z);
+        Vec3 forward;
+        if (horizontalAxis.lengthSqr() > 1.0E-4D) {
+            forward = horizontalAxis.normalize();
+        } else {
+            Vec3 tangent = frontSample.tangent();
+            forward = new Vec3(tangent.x, 0.0D, tangent.z).normalize();
+        }
+
+        if (forward.lengthSqr() <= 1.0E-4D) {
+            return Optional.empty();
+        }
+
+        double rearOffset = getRearCouplerOffset(follower);
+        Vec3 center = rearSample.position().add(forward.scale(rearOffset));
+        return Optional.of(new RouteBodyPose(center, forward));
+    }
+
+    private Optional<RouteBodyPose> solveDockedFollowerPose(VesselEntity follower) {
+        int followerIndex = getFollowerOrdinal(follower);
+        if (followerIndex < 1) {
+            return Optional.empty();
+        }
+
+        Vec3 forward = getTrainLineForward();
+        DockingStationBlockEntity headDock = findAdjacentDock();
+        if (headDock != null) {
+            List<DockingStationBlockEntity> followerDocks = headDock.getFollowerDocks(this.getDirection());
+            int dockIndex = followerIndex - 1;
+            if (dockIndex < followerDocks.size()) {
+                Vec3 dockCenter = followerDocks.get(dockIndex).getVehicleCenterPos();
+                return Optional.of(new RouteBodyPose(new Vec3(dockCenter.x, this.getY(), dockCenter.z), forward));
+            }
+        }
+
+        OptionalDouble frontDistanceOptional = getDistanceToFollowerFrontCoupler(follower);
+        if (frontDistanceOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        double centerDistance = frontDistanceOptional.getAsDouble() + getRearCouplerOffset(follower);
+        Vec3 center = this.position().subtract(forward.scale(centerDistance));
+        return Optional.of(new RouteBodyPose(new Vec3(center.x, this.getY(), center.z), forward));
+    }
+
+    private OptionalDouble getDistanceToFollowerFrontCoupler(VesselEntity target) {
+        double distance = getRearCouplerOffset(this);
+        Optional<VesselEntity> current = this.getFollower();
+        VesselEntity previous = this;
+        while (current.isPresent()) {
+            VesselEntity currentFollower = current.get();
+            distance += getCouplerGap(previous, currentFollower) + getFrontCouplerOffset(currentFollower);
+            if (currentFollower == target) {
+                return OptionalDouble.of(distance);
+            }
+            distance += getRearCouplerOffset(currentFollower);
+            previous = currentFollower;
+            current = currentFollower.getFollower();
+        }
+        return OptionalDouble.empty();
+    }
+
+    private int getFollowerOrdinal(VesselEntity target) {
+        int ordinal = 1;
+        Optional<VesselEntity> current = this.getFollower();
+        while (current.isPresent()) {
+            if (current.get() == target) {
+                return ordinal;
+            }
+            current = current.get().getFollower();
+            ordinal++;
+        }
+        return -1;
+    }
+
+    private double getBodyLengthOnRoute(VesselEntity vessel) {
+        return getFrontCouplerOffset(vessel) + getRearCouplerOffset(vessel);
+    }
+
+    private double getFrontCouplerOffset(VesselEntity vessel) {
+        return getCouplerHalfLength(vessel);
+    }
+
+    private double getRearCouplerOffset(VesselEntity vessel) {
+        if (vessel == this) {
+            return TUG_REAR_COUPLER_OFFSET;
+        }
+        return getCouplerHalfLength(vessel);
+    }
+
+    private double getCouplerGap(VesselEntity leader, VesselEntity follower) {
+        return leader == this ? HEAD_COUPLER_GAP : BODY_COUPLER_GAP;
+    }
+
+    private double getCouplerHalfLength(VesselEntity vessel) {
+        return Math.max(0.55D, vessel.getBbWidth() * 0.9D);
+    }
+
+    private Vec3 getTrainLineForward() {
+        Direction direction = this.getDirection();
+        return new Vec3(direction.getStepX(), 0.0D, direction.getStepZ());
+    }
+
+    private static double horizontalDistance(Vec3 from, Vec3 to) {
+        return Math.hypot(from.x - to.x, from.z - to.z);
+    }
+
+    private static float computeRouteYaw(Vec3 velocity) {
+        return (float) (Mth.atan2(velocity.z, velocity.x) * 180.0D / Math.PI) - 90.0F;
+    }
+
+    private record RouteBodyPose(Vec3 center, Vec3 forward) {
     }
 
     @Override

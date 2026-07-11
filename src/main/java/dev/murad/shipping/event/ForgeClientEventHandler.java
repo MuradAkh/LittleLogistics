@@ -38,13 +38,33 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.OptionalDouble;
+import java.util.Set;
 
 /**
  * Forge-wide event bus
  */
 @EventBusSubscriber(modid = ShippingMod.MOD_ID, value = Dist.CLIENT)
 public class ForgeClientEventHandler {
+    private static final double TUG_ROUTE_SURFACE_Y_OFFSET = 1.015D;
+    private static final double TUG_ROUTE_RAIL_OFFSET = 0.22D;
+    private static final double TUG_ROUTE_ARROW_LENGTH = 0.34D;
+    private static final double TUG_ROUTE_ARROW_WIDTH = 0.26D;
+    private static final double TUG_ROUTE_ARROW_SPACING = 4.0D;
+    private static final double TUG_ROUTE_LABEL_Y_OFFSET = 0.22D;
+    private static final double TUG_ROUTE_NODE_CLIP_DISTANCE = 0.5D;
+
+    private record PreviewPoint(Vec3 position, boolean isNode, boolean isCorner) {
+    }
+
+    private record PreviewSegment(Vec3 from, Vec3 to, Vec3 forward, Vec3 side, double length) {
+    }
+
+    private record RailPort(Vec3 position, Vec3 side) {
+    }
 
     public static class ModRenderType extends RenderType {
         public static final RenderType LINES = create("lines", DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, false, false,
@@ -164,54 +184,304 @@ public class ForgeClientEventHandler {
                 return false;
             }
 
-            var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
-            var camPos = camera.getPosition();
-            var pose = event.getPoseStack();
-            var buffer = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
-
-            TugRoute route = TugRouteItem.getRoute(stack);
-            double baseY = player.level().getSeaLevel();
-
-            // Draw connecting lines between consecutive waypoints
-            var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
-            for (int i = 0, routeSize = route.size(); i < routeSize; i++) {
-                TugRouteNode from = route.get(i);
-                TugRouteNode to = route.get((i + 1) % routeSize);
-                double fx = from.getX() + 0.5, fz = from.getZ() + 0.5;
-                double tx = to.getX() + 0.5, tz = to.getZ() + 0.5;
-                Vec3 midpoint = new Vec3((fx + tx) / 2.0, baseY, (fz + tz) / 2.0);
-                float connAlpha = RouteMarkerRenderer.computeAlpha(midpoint, camPos);
-                // Last-to-first closing segment is dimmer
-                if (i == route.size() - 1) connAlpha *= 0.4f;
-                RouteMarkerRenderer.renderConnection(pose, lineBuffer, camPos,
-                        fx, baseY, fz, tx, baseY, tz,
-                        1.0f, 0.6f, 0.2f, connAlpha);
-            }
-
-            // Draw markers for each waypoint
-            for (int i = 0, routeSize = route.size(); i < routeSize; i++) {
-                TugRouteNode node = route.get(i);
-                double wx = node.getX() + 0.5;
-                double wz = node.getZ() + 0.5;
-                float alpha = RouteMarkerRenderer.computeAlpha(new Vec3(wx, baseY, wz), camPos);
-                if (alpha <= 0.0f) continue;
-
-                // Stem
-                RouteMarkerRenderer.renderStem(pose, buffer.getBuffer(ModRenderType.LINES), camPos,
-                        wx, baseY, wz, 1.0f, 0.6f, 0.2f, alpha);
-                // Diamond marker
-                RouteMarkerRenderer.renderMarker(pose, buffer.getBuffer(ModRenderType.MARKER_TRIANGLES), camera, camPos,
-                        wx, baseY, wz, 1.0f, 0.6f, 0.2f, alpha);
-                // Label
-                RouteMarkerRenderer.renderLabel(pose, buffer, camera, camPos,
-                        wx, baseY, wz, node.getDisplayName(i), alpha);
-            }
-
-            buffer.endBatch();
+            renderTugRoutePreview(event, stack);
         } else {
             return false;
         }
         return true;
+    }
+
+    private static void renderTugRoutePreview(RenderLevelStageEvent event, ItemStack stack) {
+        var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
+        var camPos = camera.getPosition();
+        var pose = event.getPoseStack();
+        var buffer = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
+        TugRoute route = TugRouteItem.getRoute(stack);
+        List<PreviewPoint> previewPoints = flattenTugRoutePreviewPoints(route);
+
+        double travelled = 0.0D;
+        double nextArrowDistance = TUG_ROUTE_ARROW_SPACING * 0.5D;
+        for (int pointIndex = 1; pointIndex < previewPoints.size(); pointIndex++) {
+            PreviewPoint from = previewPoints.get(pointIndex - 1);
+            PreviewPoint to = previewPoints.get(pointIndex);
+            PreviewSegment segment = trimPreviewSegment(from, to);
+            if (segment == null) {
+                travelled += from.position().distanceTo(to.position());
+                continue;
+            }
+
+            Vec3 leftFrom = segment.from().add(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            Vec3 leftTo = segment.to().add(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            Vec3 rightFrom = segment.from().subtract(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            Vec3 rightTo = segment.to().subtract(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            float railAlpha = RouteMarkerRenderer.computeAlpha(segment.from().add(segment.to()).scale(0.5D), camPos);
+            if (railAlpha > 0.0f) {
+                var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
+                RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, leftFrom, leftTo, 1.0f, 0.6f, 0.2f, railAlpha);
+                RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, rightFrom, rightTo, 1.0f, 0.6f, 0.2f, railAlpha);
+            }
+
+            double segmentLength = segment.length();
+            while (segmentLength > 1.0E-6D && travelled + segmentLength >= nextArrowDistance) {
+                double ratio = (nextArrowDistance - travelled) / segmentLength;
+                Vec3 arrowCenter = segment.from().lerp(segment.to(), ratio);
+                float arrowAlpha = RouteMarkerRenderer.computeAlpha(arrowCenter, camPos);
+                if (arrowAlpha > 0.0f && isArrowClearOfCorners(arrowCenter, segment.forward(), segment.side(), previewPoints)) {
+                    renderTugRouteArrow(pose, buffer.getBuffer(ModRenderType.LINES), camPos, arrowCenter, segment.forward(), segment.side(), arrowAlpha);
+                }
+                nextArrowDistance += TUG_ROUTE_ARROW_SPACING;
+            }
+
+            travelled += segmentLength;
+        }
+
+        renderNonNodeCorners(pose, buffer, camPos, previewPoints);
+
+        for (int i = 0, routeSize = route.size(); i < routeSize; i++) {
+            TugRouteNode node = route.get(i);
+            Vec3 nodePos = toWaterSurface(Vec3.atCenterOf(node.toBlockPos()));
+            float alpha = RouteMarkerRenderer.computeAlpha(nodePos, camPos);
+            if (alpha <= 0.0f) {
+                continue;
+            }
+            var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
+            RouteMarkerRenderer.renderStem(pose, lineBuffer, camPos,
+                    nodePos.x, node.toBlockPos().getY(), nodePos.z, 1.0f, 0.6f, 0.2f, alpha);
+            renderTugRouteNodeBounds(pose, lineBuffer, camPos, node.toBlockPos(), alpha);
+            RouteMarkerRenderer.renderLabelAtY(pose, buffer, camera, camPos,
+                    nodePos.x, nodePos.y + TUG_ROUTE_LABEL_Y_OFFSET, nodePos.z,
+                    node.getDisplayName(i), alpha);
+        }
+
+        renderTargetedTugRouteWater(pose, buffer.getBuffer(ModRenderType.LINES), camPos);
+
+        buffer.endBatch();
+    }
+
+    private static void renderTargetedTugRouteWater(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer lineBuffer,
+                                                     Vec3 camPos) {
+        Player player = Minecraft.getInstance().player;
+        if (player == null) {
+            return;
+        }
+
+        TugRouteItem.getTargetedWaypoint(player.level(), player).ifPresent(pos -> {
+            double y = pos.getY() + TUG_ROUTE_SURFACE_Y_OFFSET;
+            Vec3 northWest = new Vec3(pos.getX(), y, pos.getZ());
+            Vec3 northEast = new Vec3(pos.getX() + 1.0D, y, pos.getZ());
+            Vec3 southEast = new Vec3(pos.getX() + 1.0D, y, pos.getZ() + 1.0D);
+            Vec3 southWest = new Vec3(pos.getX(), y, pos.getZ() + 1.0D);
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, northWest, northEast, 1.0f, 0.1f, 0.1f, 1.0f);
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, northEast, southEast, 1.0f, 0.1f, 0.1f, 1.0f);
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, southEast, southWest, 1.0f, 0.1f, 0.1f, 1.0f);
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, southWest, northWest, 1.0f, 0.1f, 0.1f, 1.0f);
+        });
+    }
+
+    private static List<PreviewPoint> flattenTugRoutePreviewPoints(TugRoute route) {
+        Set<BlockPos> nodePositions = getTugRouteNodePositions(route);
+        List<PreviewPoint> rawPoints = new ArrayList<>();
+        if (!route.getSegments().isEmpty()) {
+            for (TugRouteSegment segment : route.getSegments()) {
+                List<TugRoutePoint> points = segment.getPoints();
+                for (int i = 0; i < points.size(); i++) {
+                    if (!rawPoints.isEmpty() && i == 0) {
+                        continue;
+                    }
+                    TugRoutePoint point = points.get(i);
+                    rawPoints.add(new PreviewPoint(
+                            toWaterSurface(point.toVec3Center()),
+                            nodePositions.contains(point.toBlockPos()),
+                            false
+                    ));
+                }
+            }
+            return markCornerPoints(rawPoints);
+        }
+
+        for (TugRouteNode node : route) {
+            rawPoints.add(new PreviewPoint(toWaterSurface(Vec3.atCenterOf(node.toBlockPos())), true, false));
+        }
+        if (rawPoints.size() > 1) {
+            rawPoints.add(rawPoints.getFirst());
+        }
+        return markCornerPoints(rawPoints);
+    }
+
+    private static void renderNonNodeCorners(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos, List<PreviewPoint> previewPoints) {
+        for (int i = 1; i < previewPoints.size() - 1; i++) {
+            PreviewPoint corner = previewPoints.get(i);
+            if (!corner.isCorner() || corner.isNode()) {
+                continue;
+            }
+
+            RailPort incomingPort = getCornerEntryPort(previewPoints.get(i - 1), corner);
+            RailPort outgoingPort = getCornerExitPort(corner, previewPoints.get(i + 1));
+            if (incomingPort == null || outgoingPort == null) {
+                continue;
+            }
+
+            Vec3 incomingLeft = incomingPort.position().add(incomingPort.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            Vec3 incomingRight = incomingPort.position().subtract(incomingPort.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            Vec3 outgoingLeft = outgoingPort.position().add(outgoingPort.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            Vec3 outgoingRight = outgoingPort.position().subtract(outgoingPort.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            float alpha = RouteMarkerRenderer.computeAlpha(corner.position(), camPos);
+            if (alpha <= 0.0f) {
+                continue;
+            }
+
+            var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, incomingLeft, outgoingLeft, 1.0f, 0.6f, 0.2f, alpha);
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, incomingRight, outgoingRight, 1.0f, 0.6f, 0.2f, alpha);
+        }
+    }
+
+    private static List<PreviewPoint> markCornerPoints(List<PreviewPoint> points) {
+        if (points.size() < 3) {
+            return points;
+        }
+
+        List<PreviewPoint> marked = new ArrayList<>(points.size());
+        for (int i = 0; i < points.size(); i++) {
+            PreviewPoint point = points.get(i);
+            boolean isCorner = false;
+            if (i > 0 && i < points.size() - 1 && !point.isNode()) {
+                isCorner = isTurnPoint(points.get(i - 1).position(), point.position(), points.get(i + 1).position());
+            }
+            marked.add(new PreviewPoint(point.position(), point.isNode(), isCorner));
+        }
+        return marked;
+    }
+
+    private static boolean isTurnPoint(Vec3 previous, Vec3 current, Vec3 next) {
+        Vec3 incoming = current.subtract(previous);
+        Vec3 outgoing = next.subtract(current);
+        Vec3 incomingHorizontal = new Vec3(incoming.x, 0.0D, incoming.z);
+        Vec3 outgoingHorizontal = new Vec3(outgoing.x, 0.0D, outgoing.z);
+        if (incomingHorizontal.lengthSqr() <= 1.0E-4D || outgoingHorizontal.lengthSqr() <= 1.0E-4D) {
+            return false;
+        }
+        return incomingHorizontal.normalize().dot(outgoingHorizontal.normalize()) < 0.999D;
+    }
+
+    private static Set<BlockPos> getTugRouteNodePositions(TugRoute route) {
+        Set<BlockPos> nodePositions = new HashSet<>();
+        for (TugRouteNode node : route) {
+            nodePositions.add(node.toBlockPos());
+        }
+        return nodePositions;
+    }
+
+    private static Vec3 toWaterSurface(Vec3 centerPoint) {
+        return new Vec3(centerPoint.x, Math.floor(centerPoint.y) + TUG_ROUTE_SURFACE_Y_OFFSET, centerPoint.z);
+    }
+
+    @Nullable
+    private static RailPort getCornerEntryPort(PreviewPoint previous, PreviewPoint corner) {
+        Vec3 forward = horizontalDirection(previous.position(), corner.position());
+        if (forward == null) {
+            return null;
+        }
+        return new RailPort(
+                corner.position().subtract(forward.scale(TUG_ROUTE_NODE_CLIP_DISTANCE)),
+                new Vec3(-forward.z, 0.0D, forward.x)
+        );
+    }
+
+    @Nullable
+    private static RailPort getCornerExitPort(PreviewPoint corner, PreviewPoint next) {
+        Vec3 forward = horizontalDirection(corner.position(), next.position());
+        if (forward == null) {
+            return null;
+        }
+        return new RailPort(
+                corner.position().add(forward.scale(TUG_ROUTE_NODE_CLIP_DISTANCE)),
+                new Vec3(-forward.z, 0.0D, forward.x)
+        );
+    }
+
+    private static boolean isArrowClearOfCorners(Vec3 center, Vec3 forward, Vec3 side, List<PreviewPoint> previewPoints) {
+        Vec3 tip = center.add(forward.scale(TUG_ROUTE_ARROW_LENGTH * 0.5D));
+        Vec3 base = center.subtract(forward.scale(TUG_ROUTE_ARROW_LENGTH * 0.5D));
+        Vec3 left = base.add(side.scale(TUG_ROUTE_ARROW_WIDTH * 0.5D));
+        Vec3 right = base.subtract(side.scale(TUG_ROUTE_ARROW_WIDTH * 0.5D));
+        return isOutsideCornerExclusion(center, previewPoints)
+                && isOutsideCornerExclusion(tip, previewPoints)
+                && isOutsideCornerExclusion(left, previewPoints)
+                && isOutsideCornerExclusion(right, previewPoints);
+    }
+
+    private static boolean isOutsideCornerExclusion(Vec3 position, List<PreviewPoint> previewPoints) {
+        int blockX = (int) Math.floor(position.x);
+        int blockZ = (int) Math.floor(position.z);
+        for (PreviewPoint point : previewPoints) {
+            if (!point.isCorner() || point.isNode()) {
+                continue;
+            }
+
+            int cornerX = (int) Math.floor(point.position().x);
+            int cornerZ = (int) Math.floor(point.position().z);
+            if (Math.abs(blockX - cornerX) + Math.abs(blockZ - cornerZ) <= 1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Nullable
+    private static Vec3 horizontalDirection(Vec3 from, Vec3 to) {
+        Vec3 delta = to.subtract(from);
+        Vec3 horizontal = new Vec3(delta.x, 0.0D, delta.z);
+        return horizontal.lengthSqr() <= 1.0E-4D ? null : horizontal.normalize();
+    }
+
+    @Nullable
+    private static PreviewSegment trimPreviewSegment(PreviewPoint rawFrom, PreviewPoint rawTo) {
+        Vec3 delta = rawTo.position().subtract(rawFrom.position());
+        Vec3 horizontal = new Vec3(delta.x, 0.0D, delta.z);
+        if (horizontal.lengthSqr() <= 1.0E-4D) {
+            return null;
+        }
+
+        Vec3 forward = horizontal.normalize();
+        Vec3 side = new Vec3(-forward.z, 0.0D, forward.x);
+        Vec3 from = rawFrom.position();
+        Vec3 to = rawTo.position();
+        if (rawFrom.isNode() || rawFrom.isCorner()) {
+            from = from.add(forward.scale(TUG_ROUTE_NODE_CLIP_DISTANCE));
+        }
+        if (rawTo.isNode() || rawTo.isCorner()) {
+            to = to.subtract(forward.scale(TUG_ROUTE_NODE_CLIP_DISTANCE));
+        }
+
+        double length = from.distanceTo(to);
+        if (length <= 1.0E-4D) {
+            return null;
+        }
+        return new PreviewSegment(from, to, forward, side, length);
+    }
+
+    private static void renderTugRouteNodeBounds(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer lineBuffer,
+                                                 Vec3 camPos, BlockPos pos, float alpha) {
+        double y = pos.getY() + TUG_ROUTE_SURFACE_Y_OFFSET;
+        Vec3 nw = new Vec3(pos.getX(), y, pos.getZ());
+        Vec3 ne = new Vec3(pos.getX() + 1.0D, y, pos.getZ());
+        Vec3 se = new Vec3(pos.getX() + 1.0D, y, pos.getZ() + 1.0D);
+        Vec3 sw = new Vec3(pos.getX(), y, pos.getZ() + 1.0D);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, nw, ne, 1.0f, 0.6f, 0.2f, alpha);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, ne, se, 1.0f, 0.6f, 0.2f, alpha);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, se, sw, 1.0f, 0.6f, 0.2f, alpha);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, sw, nw, 1.0f, 0.6f, 0.2f, alpha);
+    }
+
+    private static void renderTugRouteArrow(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer lineBuffer, Vec3 camPos,
+                                            Vec3 center, Vec3 forward, Vec3 side, float alpha) {
+        Vec3 tip = center.add(forward.scale(TUG_ROUTE_ARROW_LENGTH * 0.5D));
+        Vec3 base = center.subtract(forward.scale(TUG_ROUTE_ARROW_LENGTH * 0.5D));
+        Vec3 left = base.add(side.scale(TUG_ROUTE_ARROW_WIDTH * 0.5D));
+        Vec3 right = base.subtract(side.scale(TUG_ROUTE_ARROW_WIDTH * 0.5D));
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, left, tip, 1.0f, 0.6f, 0.2f, alpha);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, right, tip, 1.0f, 0.6f, 0.2f, alpha);
     }
 
     @SubscribeEvent

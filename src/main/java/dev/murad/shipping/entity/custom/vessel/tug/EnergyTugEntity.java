@@ -105,7 +105,7 @@ public class EnergyTugEntity extends AbstractTugEntity {
                 .withCapacity(internalBattery::getMaxEnergyStored)
                 .withLit(() -> internalBattery.getEnergyStored() > 0) // has energy
                 .withId(this.getId())
-                .withVisitedSize(() -> nextStop)
+                .withVisitedSize(this::getVisitedRouteNodeCount)
                 .withOn(() -> engineOn)
                 .withCanMove(enrollmentHandler::mayMove)
                 .withRouteSize(() -> path != null ? path.size() : 0)

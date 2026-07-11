@@ -60,6 +60,7 @@ public class ShippingConfig {
         public static final ModConfigSpec.ConfigValue<Double> STEAM_TUG_FUEL_MULTIPLIER;
 
         public static final ModConfigSpec.ConfigValue<Integer> TUG_PATHFINDING_MULTIPLIER;
+        public static final ModConfigSpec.ConfigValue<Integer> TUG_ROUTE_MAX_SEGMENT_LENGTH;
         public static final ModConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_CAPACITY;
         public static final ModConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_ENERGY_USAGE;
         public static final ModConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_MAX_CHARGE_RATE;
@@ -132,6 +133,10 @@ public class ShippingConfig {
                 TUG_PATHFINDING_MULTIPLIER =
                         BUILDER.comment("Multiplier for tug pathfinding search space, high values may impact performance. Default 1.")
                                 .defineInRange("tugPathfindMult", 1, 1, 10);
+
+                TUG_ROUTE_MAX_SEGMENT_LENGTH =
+                        BUILDER.comment("Maximum Euclidean distance, in blocks, between two tug route waypoints. Default 96.")
+                                .defineInRange("tugRouteMaxSegmentLength", 96, 4, 1024);
 
                 STEAM_TUG_FUEL_MULTIPLIER =
                         BUILDER.comment("Increases the burn duration of Steam tug fuel by N times when compared to furnace, must be >= 0.01. Default 4.0.")

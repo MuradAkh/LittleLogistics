@@ -7,7 +7,6 @@ import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.network.client.VehicleTrackerClientPacket;
 import dev.murad.shipping.network.client.VehicleTrackerPacketHandler;
 import dev.murad.shipping.setup.ModItems;
-import dev.murad.shipping.util.TugRoute;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -105,7 +104,7 @@ public class NetworkHandler {
 
             CompoundTag routeTag = packet.tag();
             LOGGER.info(routeTag);
-            TugRouteItem.saveRoute(TugRoute.fromNBT(routeTag), heldStack);
+            TugRouteItem.compileAndSave(player.level(), heldStack, dev.murad.shipping.util.TugRoute.fromNBT(routeTag), player);
         });
     }
 
