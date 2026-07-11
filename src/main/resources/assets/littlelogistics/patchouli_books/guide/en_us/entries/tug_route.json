@@ -10,7 +10,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "Point at a navigable water block and right click to add a node to the back of the tug route (cannot add to the middle). Right click an existing node to remove it. The targeted water block is highlighted yellow, and nodes are indicated with beams while the item is held."
+      "text": "Point at navigable water and right click to create an in-progress tug route. Hover node 0 to preview the route in green, then right click it to complete the loop. On a completed route, hover and right click a yellow segment to insert a waypoint. Right click existing nodes to remove them."
     }
   ]
 }

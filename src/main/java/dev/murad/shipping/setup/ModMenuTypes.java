@@ -8,7 +8,6 @@ import dev.murad.shipping.entity.custom.train.locomotive.EnergyLocomotiveEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.SteamLocomotiveEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.EnergyTugEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.SteamTugEntity;
-import dev.murad.shipping.item.container.TugRouteContainer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SimpleContainerData;
@@ -49,15 +48,6 @@ public class ModMenuTypes {
                     () -> IMenuTypeExtension.create(
                             (windowId, inv, data) ->
                                     new EnergyHeadVehicleContainer<>(windowId, inv.player.level(), new EnergyHeadVehicleDataAccessor(makeIntArray(data)), inv, inv.player)));
-
-    public static final DeferredHolder<MenuType<?>, MenuType<TugRouteContainer>> TUG_ROUTE_CONTAINER =
-            Registration.CONTAINERS.register("tug_route_container",
-                    () -> IMenuTypeExtension.create(
-                            (windowId, inv, data) ->
-                                    new TugRouteContainer(windowId, inv.player.level(), new TugRouteScreenDataAccessor(makeIntArray(data)), inv, inv.player)));
-
-
-
 
     public static final DeferredHolder<MenuType<?>, MenuType<DockingStationMenu>> DOCKING_STATION =
             Registration.CONTAINERS.register("docking_station",

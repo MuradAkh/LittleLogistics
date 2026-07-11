@@ -63,14 +63,6 @@
   "screen.littlelogistics.energy_tug": "能量拖船",
   "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
 
-  "screen.littlelogistics.tug_route": "拖船线路配置器",
-  "screen.littlelogistics.tug_route.rename_button": "重命名节点",
-  "screen.littlelogistics.tug_route.up_button": "上移节点",
-  "screen.littlelogistics.tug_route.down_button": "下移节点",
-  "screen.littlelogistics.tug_route.delete_button": "移除节点",
-  "screen.littlelogistics.tug_route.rename": "重命名 %s",
-  "screen.littlelogistics.tug_route.confirm": "保存",
-
   "screen.littlelogistics.locomotive.route": "已到访：",
   "screen.littlelogistics.locomotive.on": "启动发动机",
   "screen.littlelogistics.locomotive.off": "停止发动机",

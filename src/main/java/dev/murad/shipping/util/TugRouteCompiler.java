@@ -65,7 +65,20 @@ public final class TugRouteCompiler {
     }
 
     public static CompileResult compile(Level level, TugRoute route, double maxSegmentDistance) {
+        RouteCompileSession session = createCompileSession(level, route, maxSegmentDistance);
+        while (session.getStatus() == PreviewPathStatus.SEARCHING) {
+            session.advance(Integer.MAX_VALUE);
+        }
+        return session.getResult();
+    }
+
+    /**
+     * Retained as a reference implementation while the resumable compiler is adopted.
+     */
+    @SuppressWarnings("unused")
+    private static CompileResult compileLegacy(Level level, TugRoute route, double maxSegmentDistance) {
         TugRoute compiled = route.copy();
+        compiled.markComplete();
         compiled.setDimension(level.dimension().location().toString());
         compiled.setSegments(List.of());
 
@@ -123,6 +136,68 @@ public final class TugRouteCompiler {
             : "Could not compile a non-intersecting tug rail for this route.");
     }
 
+    /**
+     * Compiles the already-defined portion of an in-progress route without joining its final node back to node zero.
+     */
+    public static CompileResult compileOpen(Level level, TugRoute route, double maxSegmentDistance) {
+        TugRoute compiled = route.copy();
+        compiled.beginAppending();
+        compiled.setDimension(level.dimension().location().toString());
+        compiled.setSegments(List.of());
+
+        if (compiled.isEmpty()) {
+            return CompileResult.success(compiled);
+        }
+
+        List<TugRouteNode> anchoredNodes = new ArrayList<>();
+        for (TugRouteNode node : compiled) {
+            Optional<BlockPos> anchor = resolveWaypointAnchor(level, node.toBlockPos());
+            if (anchor.isEmpty()) {
+                return CompileResult.failure("Waypoint at " + node.getDisplayCoords() + " is not on navigable water.");
+            }
+            anchoredNodes.add(new TugRouteNode(node.getName(), anchor.get().getX(), anchor.get().getY(), anchor.get().getZ()));
+        }
+        compiled.clear();
+        compiled.addAll(anchoredNodes);
+        compiled.beginAppending();
+
+        if (compiled.size() == 1) {
+            return CompileResult.success(compiled);
+        }
+
+        for (int i = 0; i < compiled.size() - 1; i++) {
+            if (Math.sqrt(compiled.get(i).toBlockPos().distSqr(compiled.get(i + 1).toBlockPos())) > maxSegmentDistance) {
+                return CompileResult.failure("Waypoint " + (i + 1) + " is too far from waypoint " + (i + 2) + ".");
+            }
+        }
+
+        List<TugRouteSegment> segments = new ArrayList<>();
+        Set<BlockPos> occupied = new HashSet<>();
+        for (int i = 0; i < compiled.size() - 1; i++) {
+            BlockPos start = compiled.get(i).toBlockPos();
+            BlockPos goal = compiled.get(i + 1).toBlockPos();
+            Set<BlockPos> blockedWaypoints = new HashSet<>();
+            for (TugRouteNode node : compiled) {
+                blockedWaypoints.add(node.toBlockPos());
+            }
+            blockedWaypoints.remove(start);
+            blockedWaypoints.remove(goal);
+
+            Optional<PathResult> segment = pathfind(level, start, goal, null, null, null, occupied, blockedWaypoints);
+            if (segment.isEmpty()) {
+                return CompileResult.failure("Could not find a water path between waypoint " + (i + 1) + " and waypoint " + (i + 2) + ".");
+            }
+            TugRouteSegment compiledSegment = segment.get().segment();
+            segments.add(compiledSegment);
+            for (TugRoutePoint point : compiledSegment.getPoints()) {
+                occupied.add(point.toBlockPos());
+            }
+        }
+
+        compiled.setSegments(segments);
+        return CompileResult.success(compiled);
+    }
+
     public static Optional<BlockPos> resolveWaypointAnchor(Level level, BlockPos pos) {
         if (isNavigableWaypoint(level, pos)) {
             return Optional.of(pos);
@@ -156,7 +231,7 @@ public final class TugRouteCompiler {
      */
     public static PreviewPathfinder createPreviewPathfinder(Level level, BlockPos start, BlockPos goal,
                                                             Set<BlockPos> occupied, Set<BlockPos> blockedWaypoints) {
-        return new PreviewPathfinder(level, start, goal, occupied, blockedWaypoints);
+        return new PreviewPathfinder(level, start, goal, null, null, null, occupied, blockedWaypoints);
     }
 
     public static final class PreviewPathfinder {
@@ -165,6 +240,12 @@ public final class TugRouteCompiler {
         private final BlockPos goal;
         private final Set<BlockPos> occupied;
         private final Set<BlockPos> blockedWaypoints;
+        @Nullable
+        private final Direction startIncomingDirection;
+        @Nullable
+        private final Direction forcedFirstDirection;
+        @Nullable
+        private final Direction goalNextDirection;
         private final PriorityQueue<SearchNode> openSet = new PriorityQueue<>(Comparator.comparingDouble(SearchNode::fScore));
         private final Map<SearchState, Double> gScores = new HashMap<>();
         private final Map<SearchState, SearchState> cameFrom = new HashMap<>();
@@ -174,22 +255,36 @@ public final class TugRouteCompiler {
         private PreviewPathStatus status;
         @Nullable
         private TugRouteSegment result;
+        @Nullable
+        private Direction arrivalDirection;
 
-        private PreviewPathfinder(Level level, BlockPos start, BlockPos goal, Set<BlockPos> occupied, Set<BlockPos> blockedWaypoints) {
+        private PreviewPathfinder(Level level, BlockPos start, BlockPos goal, @Nullable Direction startIncomingDirection,
+                                  @Nullable Direction forcedFirstDirection, @Nullable Direction goalNextDirection,
+                                  Set<BlockPos> occupied, Set<BlockPos> blockedWaypoints) {
             this.level = level;
             this.start = start.immutable();
             this.goal = goal.immutable();
             this.occupied = Set.copyOf(occupied);
             this.blockedWaypoints = Set.copyOf(blockedWaypoints);
+            this.startIncomingDirection = startIncomingDirection;
+            this.forcedFirstDirection = forcedFirstDirection;
+            this.goalNextDirection = goalNextDirection;
             this.visitedLimit = BASE_VISITED_LIMIT * ShippingConfig.Server.TUG_PATHFINDING_MULTIPLIER.get();
 
-            if (start.equals(goal)) {
+            if (start.equals(goal) && isGoalArrivalValid(startIncomingDirection, goalNextDirection)) {
                 this.result = new TugRouteSegment(List.of(new TugRoutePoint(start)));
+                this.arrivalDirection = startIncomingDirection;
                 this.status = PreviewPathStatus.FOUND;
                 return;
             }
 
-            SearchState startState = new SearchState(this.start, null);
+            if (forcedFirstDirection != null && startIncomingDirection != null
+                && forcedFirstDirection == startIncomingDirection.getOpposite()) {
+                this.status = PreviewPathStatus.FAILED;
+                return;
+            }
+
+            SearchState startState = new SearchState(this.start, startIncomingDirection);
             this.gScores.put(startState, 0.0D);
             this.bestPositionScores.put(this.start, 0.0D);
             this.openSet.add(new SearchNode(startState, 0.0D, heuristic(this.start, this.goal)));
@@ -211,12 +306,19 @@ public final class TugRouteCompiler {
 
                 SearchState currentState = current.state();
                 if (currentState.pos().equals(this.goal)) {
-                    this.result = reconstructPath(currentState, this.cameFrom).segment();
-                    this.status = PreviewPathStatus.FOUND;
-                    return this.status;
+                    if (isGoalArrivalValid(currentState.incomingDirection(), this.goalNextDirection)) {
+                        this.result = reconstructPath(currentState, this.cameFrom).segment();
+                        this.arrivalDirection = currentState.incomingDirection();
+                        this.status = PreviewPathStatus.FOUND;
+                        return this.status;
+                    }
+                    continue;
                 }
 
                 for (Direction direction : Direction.Plane.HORIZONTAL) {
+                    if (this.forcedFirstDirection != null && currentState.pos().equals(this.start) && direction != this.forcedFirstDirection) {
+                        continue;
+                    }
                     if (currentState.incomingDirection() != null && direction == currentState.incomingDirection().getOpposite()) {
                         continue;
                     }
@@ -264,6 +366,161 @@ public final class TugRouteCompiler {
         public Optional<TugRouteSegment> getResult() {
             return Optional.ofNullable(this.result);
         }
+
+        @Nullable
+        public Direction getArrivalDirection() {
+            return this.arrivalDirection;
+        }
+    }
+
+    /**
+     * Resumable form of the closed-route compiler. It deliberately follows the same segment order,
+     * initial-direction trials, occupancy rules, and turn constraints as a saved route compilation.
+     */
+    public static final class RouteCompileSession {
+        private final Level level;
+        private final double maxSegmentDistance;
+        private final TugRoute compiled;
+        private final List<Direction> initialDirections;
+        private final Set<BlockPos> waypointPositions;
+        private final List<TugRouteSegment> segments = new ArrayList<>();
+        private final Set<BlockPos> occupied = new HashSet<>();
+        private int initialDirectionIndex;
+        private int segmentIndex;
+        @Nullable
+        private Direction incomingDirection;
+        @Nullable
+        private PreviewPathfinder activePathfinder;
+        private PreviewPathStatus status = PreviewPathStatus.SEARCHING;
+        @Nullable
+        private CompileResult result;
+
+        private RouteCompileSession(Level level, TugRoute route, double maxSegmentDistance) {
+            this.level = level;
+            this.maxSegmentDistance = maxSegmentDistance;
+            this.compiled = route.copy();
+            this.compiled.markComplete();
+            this.compiled.setDimension(level.dimension().location().toString());
+            this.compiled.setSegments(List.of());
+
+            if (compiled.isEmpty()) {
+                this.initialDirections = List.of();
+                this.waypointPositions = Set.of();
+                succeed();
+                return;
+            }
+
+            List<TugRouteNode> anchoredNodes = new ArrayList<>();
+            for (TugRouteNode node : compiled) {
+                Optional<BlockPos> anchor = resolveWaypointAnchor(level, node.toBlockPos());
+                if (anchor.isEmpty()) {
+                    this.initialDirections = List.of();
+                    this.waypointPositions = Set.of();
+                    fail("Waypoint at " + node.getDisplayCoords() + " is not on navigable water.");
+                    return;
+                }
+                anchoredNodes.add(new TugRouteNode(node.getName(), anchor.get().getX(), anchor.get().getY(), anchor.get().getZ()));
+            }
+            compiled.clear();
+            compiled.addAll(anchoredNodes);
+
+            if (compiled.size() == 1) {
+                this.initialDirections = List.of();
+                this.waypointPositions = Set.of();
+                succeed();
+                return;
+            }
+
+            for (int i = 0; i < compiled.size(); i++) {
+                if (Math.sqrt(compiled.get(i).toBlockPos().distSqr(compiled.get((i + 1) % compiled.size()).toBlockPos())) > maxSegmentDistance) {
+                    this.initialDirections = List.of();
+                    this.waypointPositions = Set.of();
+                    fail("Waypoint " + (i + 1) + " is too far from waypoint " + (((i + 1) % compiled.size()) + 1) + ".");
+                    return;
+                }
+            }
+
+            this.waypointPositions = new HashSet<>();
+            for (TugRouteNode node : compiled) {
+                this.waypointPositions.add(node.toBlockPos());
+            }
+            this.initialDirections = getInitialDirections(level, compiled.getFirst().toBlockPos(), compiled.get(1).toBlockPos());
+            if (this.initialDirections.isEmpty()) {
+                fail("Could not find a navigable departure from waypoint 1.");
+            }
+        }
+
+        public PreviewPathStatus advance(int nodeBudget) {
+            if (status != PreviewPathStatus.SEARCHING) return status;
+
+            if (activePathfinder == null) {
+                beginSegment();
+            }
+            if (status != PreviewPathStatus.SEARCHING) return status;
+
+            PreviewPathStatus pathStatus = activePathfinder.advance(nodeBudget);
+            if (pathStatus == PreviewPathStatus.SEARCHING) return status;
+            if (pathStatus == PreviewPathStatus.FAILED) {
+                restartWithNextInitialDirection();
+                return status;
+            }
+
+            TugRouteSegment segment = activePathfinder.getResult().orElseThrow();
+            segments.add(segment);
+            incomingDirection = activePathfinder.getArrivalDirection();
+            for (TugRoutePoint point : segment.getPoints()) occupied.add(point.toBlockPos());
+            segmentIndex++;
+            activePathfinder = null;
+            if (segmentIndex == compiled.size()) succeed();
+            return status;
+        }
+
+        private void beginSegment() {
+            if (initialDirectionIndex >= initialDirections.size()) {
+                fail("Could not compile a non-intersecting tug rail for this route.");
+                return;
+            }
+            BlockPos start = compiled.get(segmentIndex).toBlockPos();
+            BlockPos goal = compiled.get((segmentIndex + 1) % compiled.size()).toBlockPos();
+            Set<BlockPos> blocked = new HashSet<>(waypointPositions);
+            blocked.remove(start);
+            blocked.remove(goal);
+            Direction initial = initialDirections.get(initialDirectionIndex);
+            activePathfinder = new PreviewPathfinder(level, start, goal, incomingDirection,
+                segmentIndex == 0 ? initial : null,
+                segmentIndex == compiled.size() - 1 ? initial : null,
+                occupied, blocked);
+        }
+
+        private void restartWithNextInitialDirection() {
+            initialDirectionIndex++;
+            segmentIndex = 0;
+            incomingDirection = null;
+            activePathfinder = null;
+            segments.clear();
+            occupied.clear();
+            if (initialDirectionIndex >= initialDirections.size()) {
+                fail("Could not compile a non-intersecting tug rail for this route.");
+            }
+        }
+
+        private void succeed() {
+            compiled.setSegments(segments);
+            result = CompileResult.success(compiled);
+            status = PreviewPathStatus.FOUND;
+        }
+
+        private void fail(String error) {
+            result = CompileResult.failure(error);
+            status = PreviewPathStatus.FAILED;
+        }
+
+        public PreviewPathStatus getStatus() { return status; }
+        public CompileResult getResult() { return result; }
+    }
+
+    public static RouteCompileSession createCompileSession(Level level, TugRoute route, double maxSegmentDistance) {
+        return new RouteCompileSession(level, route, maxSegmentDistance);
     }
 
     private static SegmentCompileResult compileSegments(Level level, TugRoute route, Set<BlockPos> waypointPositions, Direction initialDirection) {

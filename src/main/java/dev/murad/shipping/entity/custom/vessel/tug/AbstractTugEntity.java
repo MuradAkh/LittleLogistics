@@ -177,7 +177,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
             @Override
             public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-                return stack.getItem() instanceof TugRouteItem;
+                return stack.getItem() instanceof TugRouteItem && TugRouteItem.getRoute(stack).isComplete();
             }
         };
     }
@@ -348,7 +348,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private void tickRouteCheck() {
         if (contentsChanged) {
             ItemStack stack = routeItemHandler.getStackInSlot(0);
-            this.setPath(TugRouteItem.getRoute(stack));
+            TugRoute route = TugRouteItem.getRoute(stack);
+            this.setPath(route.isComplete() ? route : new TugRoute());
             contentsChanged = false;
         }
     }
@@ -709,6 +710,9 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
 
     public void setPath(TugRoute path) {
+        if (!path.isComplete()) {
+            path = new TugRoute();
+        }
         if (!this.path.equals(path)) {
             this.routeProgress = 0.0D;
         }

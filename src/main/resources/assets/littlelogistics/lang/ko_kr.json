@@ -63,14 +63,6 @@
     "screen.littlelogistics.energy_tug": "에너지 예인선",
     "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
 
-    "screen.littlelogistics.tug_route": "예인선 경로 구성장치",
-    "screen.littlelogistics.tug_route.rename_button": "노드 이름 바꾸기",
-    "screen.littlelogistics.tug_route.up_button": "노드를 위로 이동",
-    "screen.littlelogistics.tug_route.down_button": "노드를 아래로 이동",
-    "screen.littlelogistics.tug_route.delete_button": "노드 삭제",
-    "screen.littlelogistics.tug_route.rename": "%s 이름 바꾸기",
-    "screen.littlelogistics.tug_route.confirm": "저장",
-
     "screen.littlelogistics.locomotive.route": "방문:",
     "screen.littlelogistics.locomotive.on": "엔진 시동",
     "screen.littlelogistics.locomotive.off": "엔진 정지",

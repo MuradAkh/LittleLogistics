@@ -79,7 +79,13 @@ public class ForgeClientEventHandler {
         @Nullable
         private TugRouteCompiler.PreviewPathfinder pathfinder;
         @Nullable
+        private TugRouteCompiler.RouteCompileSession compileSession;
+        @Nullable
+        private TugRouteCompiler.PreviewPathfinder returnPathfinder;
+        @Nullable
         private TugRouteSegment segment;
+        @Nullable
+        private TugRouteSegment returnSegment;
         private boolean finished;
 
         private PendingTugRoutePreview(Level level, TugRoute route, BlockPos target, long targetSince) {
@@ -151,7 +157,9 @@ public class ForgeClientEventHandler {
 
         TugRoute route = TugRouteItem.getRoute(routeStack);
         Optional<BlockPos> target = TugRouteItem.getTargetedWaypoint(player.level(), player);
-        if (route.isEmpty() || target.isEmpty() || route.stream().anyMatch(node -> node.isAt(target.get()))) {
+        boolean completing = target.isPresent() && isCompletionTarget(route, target.get());
+        if (!route.isInProgress() || route.isEmpty() || target.isEmpty()
+            || (route.stream().anyMatch(node -> node.isAt(target.get())) && !completing)) {
             pendingTugRoutePreview = null;
             return;
         }
@@ -180,11 +188,21 @@ public class ForgeClientEventHandler {
             return;
         }
 
+        if (preview.route.isInserting() || isCompletionTarget(preview.route, preview.target)) {
+            advanceFullRoutePreview(preview);
+            return;
+        }
+
         if (preview.pathfinder == null) {
-            BlockPos start = preview.route.getLast().toBlockPos();
+            int insertionIndex = preview.route.getNextInsertionIndex();
+            boolean insertingIntoSegment = preview.route.isInserting();
+            BlockPos start = preview.route.get(insertionIndex > 0 ? insertionIndex - 1 : preview.route.size() - 1).toBlockPos();
+            BlockPos next = insertingIntoSegment
+                ? preview.route.get(insertionIndex < preview.route.size() ? insertionIndex : 0).toBlockPos()
+                : null;
             double maxSegmentLength = ShippingConfig.Server.TUG_ROUTE_MAX_SEGMENT_LENGTH.get();
             if (Math.sqrt(start.distSqr(preview.target)) > maxSegmentLength
-                || Math.sqrt(preview.route.getFirst().toBlockPos().distSqr(preview.target)) > maxSegmentLength) {
+                || (next != null && Math.sqrt(next.distSqr(preview.target)) > maxSegmentLength)) {
                 preview.finished = true;
                 return;
             }
@@ -196,21 +214,87 @@ public class ForgeClientEventHandler {
                 getOccupiedPreviewBlocks(preview.route),
                 getBlockedPreviewWaypoints(preview.route, start)
             );
+            if (insertingIntoSegment) {
+                preview.returnPathfinder = TugRouteCompiler.createPreviewPathfinder(
+                    preview.level,
+                    preview.target,
+                    next,
+                    getOccupiedPreviewBlocks(preview.route),
+                    getBlockedPreviewWaypoints(preview.route, preview.target, next)
+                );
+            }
         }
 
-        TugRouteCompiler.PreviewPathStatus status = preview.pathfinder.advance(TUG_ROUTE_PREVIEW_NODES_PER_TICK);
+        int pathBudget = preview.returnPathfinder == null ? TUG_ROUTE_PREVIEW_NODES_PER_TICK : TUG_ROUTE_PREVIEW_NODES_PER_TICK / 2;
+        TugRouteCompiler.PreviewPathStatus status = preview.pathfinder.advance(pathBudget);
         if (status == TugRouteCompiler.PreviewPathStatus.FOUND) {
-            preview.segment = preview.pathfinder.getResult().orElse(null);
-            preview.finished = true;
+            if (preview.returnPathfinder == null) {
+                preview.segment = preview.pathfinder.getResult().orElse(null);
+                preview.finished = true;
+                return;
+            }
         } else if (status == TugRouteCompiler.PreviewPathStatus.FAILED) {
             preview.finished = true;
+            return;
         }
+
+        if (preview.returnPathfinder != null) {
+            TugRouteCompiler.PreviewPathStatus returnStatus = preview.returnPathfinder.advance(pathBudget);
+            if (returnStatus == TugRouteCompiler.PreviewPathStatus.FAILED) {
+                preview.finished = true;
+            } else if (status == TugRouteCompiler.PreviewPathStatus.FOUND
+                && returnStatus == TugRouteCompiler.PreviewPathStatus.FOUND) {
+                preview.segment = preview.pathfinder.getResult().orElse(null);
+                preview.returnSegment = preview.returnPathfinder.getResult().orElse(null);
+                preview.finished = true;
+            }
+        }
+    }
+
+    private static void advanceFullRoutePreview(PendingTugRoutePreview preview) {
+        boolean completing = isCompletionTarget(preview.route, preview.target);
+        if (preview.compileSession == null) {
+            TugRoute candidate = preview.route.copy();
+            if (!completing) {
+                candidate.add(candidate.getNextInsertionIndex(), TugRouteNode.fromBlockPos(preview.target));
+            }
+            preview.compileSession = TugRouteCompiler.createCompileSession(
+                preview.level,
+                candidate,
+                ShippingConfig.Server.TUG_ROUTE_MAX_SEGMENT_LENGTH.get()
+            );
+        }
+
+        TugRouteCompiler.PreviewPathStatus status = preview.compileSession.advance(TUG_ROUTE_PREVIEW_NODES_PER_TICK);
+        if (status == TugRouteCompiler.PreviewPathStatus.SEARCHING) {
+            return;
+        }
+        if (status == TugRouteCompiler.PreviewPathStatus.FAILED) {
+            preview.finished = true;
+            return;
+        }
+
+        TugRoute compiled = preview.compileSession.getResult().route();
+        if (completing) {
+            preview.segment = compiled.getSegments().get(compiled.size() - 1);
+            preview.finished = true;
+            return;
+        }
+        int insertionIndex = preview.route.getNextInsertionIndex();
+        preview.segment = compiled.getSegments().get(insertionIndex - 1);
+        preview.returnSegment = compiled.getSegments().get(insertionIndex);
+        preview.finished = true;
     }
 
     private static Set<BlockPos> getOccupiedPreviewBlocks(TugRoute route) {
         Set<BlockPos> occupied = new HashSet<>();
-        int retainedSegmentCount = Math.max(0, route.getSegments().size() - 1);
-        for (int segmentIndex = 0; segmentIndex < retainedSegmentCount; segmentIndex++) {
+        int replacedSegment = route.isInserting() && route.getNextInsertionIndex() > 0
+            ? route.getNextInsertionIndex() - 1
+            : -1;
+        for (int segmentIndex = 0; segmentIndex < route.getSegments().size(); segmentIndex++) {
+            if (segmentIndex == replacedSegment) {
+                continue;
+            }
             for (TugRoutePoint point : route.getSegments().get(segmentIndex).getPoints()) {
                 occupied.add(point.toBlockPos());
             }
@@ -218,9 +302,11 @@ public class ForgeClientEventHandler {
         return occupied;
     }
 
-    private static Set<BlockPos> getBlockedPreviewWaypoints(TugRoute route, BlockPos start) {
+    private static Set<BlockPos> getBlockedPreviewWaypoints(TugRoute route, BlockPos... allowed) {
         Set<BlockPos> blocked = getTugRouteNodePositions(route);
-        blocked.remove(start);
+        for (BlockPos pos : allowed) {
+            blocked.remove(pos);
+        }
         return blocked;
     }
 
@@ -320,6 +406,11 @@ public class ForgeClientEventHandler {
         var buffer = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
         TugRoute route = TugRouteItem.getRoute(stack);
         List<PreviewPoint> previewPoints = flattenTugRoutePreviewPoints(route);
+        Set<BlockPos> replacedSegmentPoints = getReplacedSegmentPoints(route);
+        boolean completionTarget = isCompletionTarget(route);
+        float routeRed = completionTarget ? 0.2f : 1.0f;
+        float routeGreen = completionTarget ? 1.0f : 0.6f;
+        float routeBlue = 0.2f;
 
         double travelled = 0.0D;
         double nextArrowDistance = TUG_ROUTE_ARROW_SPACING * 0.5D;
@@ -336,11 +427,16 @@ public class ForgeClientEventHandler {
             Vec3 leftTo = segment.to().add(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
             Vec3 rightFrom = segment.from().subtract(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
             Vec3 rightTo = segment.to().subtract(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            boolean isReplacedSegment = replacedSegmentPoints.contains(toBlockPos(from.position()))
+                && replacedSegmentPoints.contains(toBlockPos(to.position()));
+            float segmentRed = isReplacedSegment ? 0.0f : routeRed;
+            float segmentGreen = isReplacedSegment ? 0.0f : routeGreen;
+            float segmentBlue = isReplacedSegment ? 0.0f : routeBlue;
             float railAlpha = RouteMarkerRenderer.computeAlpha(segment.from().add(segment.to()).scale(0.5D), camPos);
             if (railAlpha > 0.0f) {
                 var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
-                RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, leftFrom, leftTo, 1.0f, 0.6f, 0.2f, railAlpha);
-                RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, rightFrom, rightTo, 1.0f, 0.6f, 0.2f, railAlpha);
+                RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, leftFrom, leftTo, segmentRed, segmentGreen, segmentBlue, railAlpha);
+                RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, rightFrom, rightTo, segmentRed, segmentGreen, segmentBlue, railAlpha);
             }
 
             double segmentLength = segment.length();
@@ -349,7 +445,7 @@ public class ForgeClientEventHandler {
                 Vec3 arrowCenter = segment.from().lerp(segment.to(), ratio);
                 float arrowAlpha = RouteMarkerRenderer.computeAlpha(arrowCenter, camPos);
                 if (arrowAlpha > 0.0f && isArrowClearOfCorners(arrowCenter, segment.forward(), segment.side(), previewPoints)) {
-                    renderTugRouteArrow(pose, buffer.getBuffer(ModRenderType.LINES), camPos, arrowCenter, segment.forward(), segment.side(), 1.0f, 0.6f, 0.2f, arrowAlpha);
+                    renderTugRouteArrow(pose, buffer.getBuffer(ModRenderType.LINES), camPos, arrowCenter, segment.forward(), segment.side(), segmentRed, segmentGreen, segmentBlue, arrowAlpha);
                 }
                 nextArrowDistance += TUG_ROUTE_ARROW_SPACING;
             }
@@ -357,7 +453,14 @@ public class ForgeClientEventHandler {
             travelled += segmentLength;
         }
 
-        renderNonNodeCorners(pose, buffer, camPos, previewPoints, 1.0f, 0.6f, 0.2f);
+        renderNonNodeCorners(pose, buffer, camPos, previewPoints, routeRed, routeGreen, routeBlue);
+
+        if (route.isInserting() && route.getNextInsertionIndex() > 0) {
+            int replacedSegmentIndex = route.getNextInsertionIndex() - 1;
+            if (replacedSegmentIndex < route.getSegments().size()) {
+                renderTugRouteSegment(pose, buffer, camPos, route.getSegments().get(replacedSegmentIndex), 0.0f, 0.0f, 0.0f);
+            }
+        }
 
         for (int i = 0, routeSize = route.size(); i < routeSize; i++) {
             TugRouteNode node = route.get(i);
@@ -367,9 +470,7 @@ public class ForgeClientEventHandler {
                 continue;
             }
             var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
-            RouteMarkerRenderer.renderStem(pose, lineBuffer, camPos,
-                    nodePos.x, node.toBlockPos().getY(), nodePos.z, 1.0f, 0.6f, 0.2f, alpha);
-            renderTugRouteNodeBounds(pose, lineBuffer, camPos, node.toBlockPos(), alpha);
+            renderTugRouteNodeBounds(pose, lineBuffer, camPos, node.toBlockPos(), routeRed, routeGreen, routeBlue, alpha);
             RouteMarkerRenderer.renderLabelAtY(pose, buffer, camera, camPos,
                     nodePos.x, nodePos.y + TUG_ROUTE_LABEL_Y_OFFSET, nodePos.z,
                     node.getDisplayName(i), alpha);
@@ -383,6 +484,47 @@ public class ForgeClientEventHandler {
         buffer.endBatch();
     }
 
+    private static boolean isCompletionTarget(TugRoute route) {
+        Player player = Minecraft.getInstance().player;
+        return player != null
+            && TugRouteItem.getTargetedWaypoint(player.level(), player)
+                .map(pos -> isCompletionTarget(route, pos))
+                .orElse(false);
+    }
+
+    private static boolean isCompletionTarget(TugRoute route, BlockPos target) {
+        return route.isInProgress()
+            && !route.isInserting()
+            && route.getNextInsertionIndex() == route.size()
+            && route.size() >= 2
+            && route.getFirst().isAt(target);
+    }
+
+    private static Set<BlockPos> getReplacedSegmentPoints(TugRoute route) {
+        if (!route.isInserting() || route.getNextInsertionIndex() <= 0) {
+            return Set.of();
+        }
+
+        int segmentIndex = route.getNextInsertionIndex() - 1;
+        if (segmentIndex >= route.getSegments().size()) {
+            return Set.of();
+        }
+
+        Set<BlockPos> points = new HashSet<>();
+        for (TugRoutePoint point : route.getSegments().get(segmentIndex).getPoints()) {
+            points.add(point.toBlockPos());
+        }
+        return points;
+    }
+
+    private static BlockPos toBlockPos(Vec3 position) {
+        return new BlockPos(
+            (int) Math.floor(position.x),
+            (int) Math.floor(position.y - TUG_ROUTE_SURFACE_Y_OFFSET),
+            (int) Math.floor(position.z)
+        );
+    }
+
     private static void renderTargetedTugRouteWater(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos,
                                                      TugRoute route) {
         Player player = Minecraft.getInstance().player;
@@ -393,7 +535,22 @@ public class ForgeClientEventHandler {
         TugRouteItem.getTargetedWaypoint(player.level(), player).ifPresent(pos -> {
             var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
             if (route.stream().anyMatch(node -> node.isAt(pos))) {
+                if (route.isInProgress() && !route.isInserting() && route.getNextInsertionIndex() == route.size() && route.size() >= 2
+                    && route.getFirst().isAt(pos)) {
+                    renderTugRouteNodeBounds(pose, lineBuffer, camPos, pos, 0.2f, 1.0f, 0.2f, 1.0f);
+                    getPendingTugRouteSegment(player.level(), route, pos).ifPresent(segment ->
+                        renderTugRouteSegment(pose, buffer, camPos, segment, 0.2f, 1.0f, 0.2f)
+                    );
+                    return;
+                }
                 renderTugRouteRemovalTarget(pose, lineBuffer, camPos, pos);
+                return;
+            }
+
+            if (route.isComplete()) {
+                TugRouteItem.findSegmentAt(route, pos).ifPresent(segmentIndex ->
+                    renderPendingTugRouteSegment(pose, buffer, camPos, route.getSegments().get(segmentIndex))
+                );
                 return;
             }
 
@@ -411,7 +568,14 @@ public class ForgeClientEventHandler {
             RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, southEast, southWest, red, green, blue, 1.0f);
             RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, southWest, northWest, red, green, blue, 1.0f);
 
+            if (isPendingTugRoutePreviewLoading(player.level(), route, pos)) {
+                renderTugRouteLoadingSpinner(pose, lineBuffer, camPos, pos, player.level().getGameTime());
+            }
+
             getPendingTugRouteSegment(player.level(), route, pos).ifPresent(segment ->
+                renderPendingTugRouteSegment(pose, buffer, camPos, segment)
+            );
+            getPendingTugRouteReturnSegment(player.level(), route, pos).ifPresent(segment ->
                 renderPendingTugRouteSegment(pose, buffer, camPos, segment)
             );
         });
@@ -422,6 +586,28 @@ public class ForgeClientEventHandler {
             && pendingTugRoutePreview.matches(level, route, target)
             && pendingTugRoutePreview.finished
             && pendingTugRoutePreview.segment == null;
+    }
+
+    private static boolean isPendingTugRoutePreviewLoading(Level level, TugRoute route, BlockPos target) {
+        return pendingTugRoutePreview != null
+            && pendingTugRoutePreview.matches(level, route, target)
+            && pendingTugRoutePreview.compileSession != null
+            && pendingTugRoutePreview.compileSession.getStatus() == TugRouteCompiler.PreviewPathStatus.SEARCHING;
+    }
+
+    private static void renderTugRouteLoadingSpinner(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer lineBuffer,
+                                                      Vec3 camPos, BlockPos pos, long gameTime) {
+        double y = pos.getY() + TUG_ROUTE_SURFACE_Y_OFFSET + 0.002D;
+        Vec3 center = new Vec3(pos.getX() + 0.5D, y, pos.getZ() + 0.5D);
+        int activeSpoke = (int) ((gameTime / 2L) % 8L);
+        for (int spoke = 0; spoke < 8; spoke++) {
+            double angle = spoke * (Math.PI / 4.0D);
+            Vec3 direction = new Vec3(Math.cos(angle), 0.0D, Math.sin(angle));
+            float brightness = spoke == activeSpoke ? 1.0f : 0.35f;
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos,
+                center.add(direction.scale(0.10D)), center.add(direction.scale(0.28D)),
+                1.0f, 1.0f, 0.3f, brightness);
+        }
     }
 
     private static void renderTugRouteRemovalTarget(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer lineBuffer,
@@ -445,7 +631,7 @@ public class ForgeClientEventHandler {
     }
 
     private static Optional<TugRouteSegment> getPendingTugRouteSegment(Level level, TugRoute route, BlockPos target) {
-        if (route.isEmpty() || route.stream().anyMatch(node -> node.isAt(target))) {
+        if (route.isEmpty() || (route.stream().anyMatch(node -> node.isAt(target)) && !isCompletionTarget(route, target))) {
             return Optional.empty();
         }
 
@@ -455,8 +641,20 @@ public class ForgeClientEventHandler {
         return Optional.ofNullable(pendingTugRoutePreview.segment);
     }
 
+    private static Optional<TugRouteSegment> getPendingTugRouteReturnSegment(Level level, TugRoute route, BlockPos target) {
+        if (pendingTugRoutePreview == null || !pendingTugRoutePreview.matches(level, route, target)) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(pendingTugRoutePreview.returnSegment);
+    }
+
     private static void renderPendingTugRouteSegment(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos,
                                                       TugRouteSegment segment) {
+        renderTugRouteSegment(pose, buffer, camPos, segment, 1.0f, 1.0f, 0.3f);
+    }
+
+    private static void renderTugRouteSegment(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos,
+                                              TugRouteSegment segment, float red, float green, float blue) {
         List<TugRoutePoint> points = segment.getPoints();
         if (points.size() < 2) {
             return;
@@ -483,12 +681,12 @@ public class ForgeClientEventHandler {
             float alpha = RouteMarkerRenderer.computeAlpha(previewSegment.from().add(previewSegment.to()).scale(0.5D), camPos);
             if (alpha > 0.0f) {
                 var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
-                RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, leftFrom, leftTo, 1.0f, 1.0f, 0.3f, alpha);
-                RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, rightFrom, rightTo, 1.0f, 1.0f, 0.3f, alpha);
+                RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, leftFrom, leftTo, red, green, blue, alpha);
+                RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, rightFrom, rightTo, red, green, blue, alpha);
             }
         }
 
-        renderNonNodeCorners(pose, buffer, camPos, previewPoints, 1.0f, 1.0f, 0.3f);
+        renderNonNodeCorners(pose, buffer, camPos, previewPoints, red, green, blue);
     }
 
     private static List<PreviewPoint> flattenTugRoutePreviewPoints(TugRoute route) {
@@ -515,7 +713,7 @@ public class ForgeClientEventHandler {
         for (TugRouteNode node : route) {
             rawPoints.add(new PreviewPoint(toWaterSurface(Vec3.atCenterOf(node.toBlockPos())), true, false));
         }
-        if (rawPoints.size() > 1) {
+        if (route.isComplete() && rawPoints.size() > 1) {
             rawPoints.add(rawPoints.getFirst());
         }
         return markCornerPoints(rawPoints);
@@ -619,17 +817,17 @@ public class ForgeClientEventHandler {
         Vec3 base = center.subtract(forward.scale(TUG_ROUTE_ARROW_LENGTH * 0.5D));
         Vec3 left = base.add(side.scale(TUG_ROUTE_ARROW_WIDTH * 0.5D));
         Vec3 right = base.subtract(side.scale(TUG_ROUTE_ARROW_WIDTH * 0.5D));
-        return isOutsideCornerExclusion(center, previewPoints)
-                && isOutsideCornerExclusion(tip, previewPoints)
-                && isOutsideCornerExclusion(left, previewPoints)
-                && isOutsideCornerExclusion(right, previewPoints);
+        return isOutsideMarkerExclusion(center, previewPoints)
+                && isOutsideMarkerExclusion(tip, previewPoints)
+                && isOutsideMarkerExclusion(left, previewPoints)
+                && isOutsideMarkerExclusion(right, previewPoints);
     }
 
-    private static boolean isOutsideCornerExclusion(Vec3 position, List<PreviewPoint> previewPoints) {
+    private static boolean isOutsideMarkerExclusion(Vec3 position, List<PreviewPoint> previewPoints) {
         int blockX = (int) Math.floor(position.x);
         int blockZ = (int) Math.floor(position.z);
         for (PreviewPoint point : previewPoints) {
-            if (!point.isCorner() || point.isNode()) {
+            if (!point.isCorner() && !point.isNode()) {
                 continue;
             }
 
@@ -676,16 +874,16 @@ public class ForgeClientEventHandler {
     }
 
     private static void renderTugRouteNodeBounds(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer lineBuffer,
-                                                 Vec3 camPos, BlockPos pos, float alpha) {
+                                                 Vec3 camPos, BlockPos pos, float red, float green, float blue, float alpha) {
         double y = pos.getY() + TUG_ROUTE_SURFACE_Y_OFFSET;
         Vec3 nw = new Vec3(pos.getX(), y, pos.getZ());
         Vec3 ne = new Vec3(pos.getX() + 1.0D, y, pos.getZ());
         Vec3 se = new Vec3(pos.getX() + 1.0D, y, pos.getZ() + 1.0D);
         Vec3 sw = new Vec3(pos.getX(), y, pos.getZ() + 1.0D);
-        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, nw, ne, 1.0f, 0.6f, 0.2f, alpha);
-        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, ne, se, 1.0f, 0.6f, 0.2f, alpha);
-        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, se, sw, 1.0f, 0.6f, 0.2f, alpha);
-        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, sw, nw, 1.0f, 0.6f, 0.2f, alpha);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, nw, ne, red, green, blue, alpha);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, ne, se, red, green, blue, alpha);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, se, sw, red, green, blue, alpha);
+        RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, sw, nw, red, green, blue, alpha);
     }
 
     private static void renderTugRouteArrow(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer lineBuffer, Vec3 camPos,

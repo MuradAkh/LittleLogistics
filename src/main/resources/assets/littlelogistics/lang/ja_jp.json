@@ -63,14 +63,6 @@
   "screen.littlelogistics.energy_tug": "電気曳船",
   "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
 
-  "screen.littlelogistics.tug_route": "航路指定機",
-  "screen.littlelogistics.tug_route.rename_button": "ノードの名前を変更",
-  "screen.littlelogistics.tug_route.up_button": "ノードの順番を上に移動",
-  "screen.littlelogistics.tug_route.down_button": "ノードの順番を下に移動",
-  "screen.littlelogistics.tug_route.delete_button": "ノードを削除",
-  "screen.littlelogistics.tug_route.rename": "名前を%sに変更",
-  "screen.littlelogistics.tug_route.confirm": "保存",
-
   "screen.littlelogistics.locomotive.route": "目的地:",
   "screen.littlelogistics.locomotive.on": "動力起動",
   "screen.littlelogistics.locomotive.off": "動力停止",

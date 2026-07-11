@@ -67,14 +67,6 @@
   "screen.littlelogistics.energy_tug": "Energy Tug",
   "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
 
-  "screen.littlelogistics.tug_route": "Tug Route Configurator",
-  "screen.littlelogistics.tug_route.rename_button": "Rename node",
-  "screen.littlelogistics.tug_route.up_button": "Move node up",
-  "screen.littlelogistics.tug_route.down_button": "Move node down",
-  "screen.littlelogistics.tug_route.delete_button": "Remove node",
-  "screen.littlelogistics.tug_route.rename": "Renaming %s",
-  "screen.littlelogistics.tug_route.confirm": "Save",
-
   "screen.littlelogistics.locomotive.route": "Visited:",
   "screen.littlelogistics.locomotive.on": "Start Engine",
   "screen.littlelogistics.locomotive.off": "Halt Engine",
@@ -90,7 +82,7 @@
   "global.littlelogistics.no_connected_inventory_car": "This train car requires a connected inventory behind it but none was provided. Link additional train car that provide inventory behind this one, such as a Chest Car.",
   "global.littlelogistics.connected_inventory": "This barge has %s connected inventories",
 
-  "item.littlelogistics.tug_route.description": "Point at water and right click to add a node at the end of the route; right click an existing node to remove it. Shift right click to bring up menu.",
+  "item.littlelogistics.tug_route.description": "Right click water to create or edit a tug route. Hover node 0 to complete an in-progress route; select a completed segment to insert a waypoint.",
   "item.littlelogistics.tug_route.num_nodes": "Route Nodes: %s",
   "item.littlelogistics.tug_route.added": "Added Route Node X:%s Z:%s",
   "item.littlelogistics.tug_route.removed": "Removed Route Node X:%s Z:%s",

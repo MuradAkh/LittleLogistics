@@ -63,14 +63,6 @@
   "screen.littlelogistics.energy_tug": "Remorqueur Électrique",
   "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
 
-  "screen.littlelogistics.tug_route": "Tug Route Configurator",
-  "screen.littlelogistics.tug_route.rename_button": "Rename node",
-  "screen.littlelogistics.tug_route.up_button": "Move node up",
-  "screen.littlelogistics.tug_route.down_button": "Move node down",
-  "screen.littlelogistics.tug_route.delete_button": "Remove node",
-  "screen.littlelogistics.tug_route.rename": "Renaming %s",
-  "screen.littlelogistics.tug_route.confirm": "Save",
-
   "screen.littlelogistics.locomotive.route": "Visited:",
   "screen.littlelogistics.locomotive.on": "Start Engine",
   "screen.littlelogistics.locomotive.off": "Halt Engine",

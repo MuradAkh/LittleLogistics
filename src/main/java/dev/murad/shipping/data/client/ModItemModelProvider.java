@@ -44,7 +44,10 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "tug_route")
                 .override()
                 .model(builder(itemGenerated, "tug_route_empty"))
-                .predicate(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "routestate"), 1f).end();
+                .predicate(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "routestate"), 1f).end()
+                .override()
+                .model(builder(itemGenerated, "tug_route_empty"))
+                .predicate(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "routestate"), 2f).end();
 
         builder(itemGenerated, "spring")
                 .override()

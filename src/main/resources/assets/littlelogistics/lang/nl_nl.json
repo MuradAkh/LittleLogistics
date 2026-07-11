@@ -63,14 +63,6 @@
   "screen.littlelogistics.energy_tug": "Elektrische Sleepboot",
   "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
 
-  "screen.littlelogistics.tug_route": "Sleepboot Route Configurator",
-  "screen.littlelogistics.tug_route.rename_button": "Hernoem Tussenstop",
-  "screen.littlelogistics.tug_route.up_button": "Verplaats Tussenstop omhoog",
-  "screen.littlelogistics.tug_route.down_button": "Verplaats Tussenstop omlaag",
-  "screen.littlelogistics.tug_route.delete_button": "Verwijder Tussenstop",
-  "screen.littlelogistics.tug_route.rename": "%s Hernoemen",
-  "screen.littlelogistics.tug_route.confirm": "Opslaan",
-
   "screen.littlelogistics.locomotive.route": "Visited:",
   "screen.littlelogistics.locomotive.on": "Start Engine",
   "screen.littlelogistics.locomotive.off": "Halt Engine",

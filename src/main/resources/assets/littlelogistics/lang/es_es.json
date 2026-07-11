@@ -63,14 +63,6 @@
   "screen.littlelogistics.energy_tug": "Remolcador eléctrico",
   "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
 
-  "screen.littlelogistics.tug_route": "Configurador de rutas de remolcadores",
-  "screen.littlelogistics.tug_route.rename_button": "Renombrar nodo",
-  "screen.littlelogistics.tug_route.up_button": "Mover nodo arriba",
-  "screen.littlelogistics.tug_route.down_button": "Mover nodo abajo",
-  "screen.littlelogistics.tug_route.delete_button": "Eliminar nodo",
-  "screen.littlelogistics.tug_route.rename": "Renombrar %s",
-  "screen.littlelogistics.tug_route.confirm": "Guardar",
-
   "screen.littlelogistics.locomotive.route": "Visitado:",
   "screen.littlelogistics.locomotive.on": "Encender motor",
   "screen.littlelogistics.locomotive.off": "Detener motor",
