@@ -6,9 +6,14 @@ import net.minecraft.world.phys.Vec3;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class TugRouteTrack {
     public record Sample(Vec3 position, Vec3 tangent) {
+    }
+
+    /** Closest point on the compiled polyline, expressed as route distance. */
+    public record Projection(double distanceAlongTrack, double distanceToTrack) {
     }
 
     private final List<Vec3> points;
@@ -87,5 +92,36 @@ public class TugRouteTrack {
         Vec3 from = points.get(points.size() - 2);
         Vec3 to = points.get(points.size() - 1);
         return new Sample(to, to.subtract(from).normalize());
+    }
+
+    public Optional<Projection> project(Vec3 position) {
+        if (!isUsable()) {
+            return Optional.empty();
+        }
+
+        double closestDistanceSquared = Double.POSITIVE_INFINITY;
+        double closestDistanceAlongTrack = 0.0D;
+        for (int i = 1; i < points.size(); i++) {
+            Vec3 from = points.get(i - 1);
+            Vec3 to = points.get(i);
+            Vec3 segment = to.subtract(from);
+            double segmentLengthSquared = segment.lengthSqr();
+            if (segmentLengthSquared <= 1.0E-8D) {
+                continue;
+            }
+
+            double progress = Mth.clamp(position.subtract(from).dot(segment) / segmentLengthSquared, 0.0D, 1.0D);
+            Vec3 closestPoint = from.add(segment.scale(progress));
+            double distanceSquared = position.distanceToSqr(closestPoint);
+            if (distanceSquared < closestDistanceSquared) {
+                closestDistanceSquared = distanceSquared;
+                double segmentLength = Math.sqrt(segmentLengthSquared);
+                closestDistanceAlongTrack = cumulativeLengths.get(i - 1) + progress * segmentLength;
+            }
+        }
+
+        return closestDistanceSquared == Double.POSITIVE_INFINITY
+                ? Optional.empty()
+                : Optional.of(new Projection(closestDistanceAlongTrack, Math.sqrt(closestDistanceSquared)));
     }
 }

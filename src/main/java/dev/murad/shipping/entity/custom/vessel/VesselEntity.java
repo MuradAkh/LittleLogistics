@@ -273,7 +273,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     public void doChainMath(){
         linkingHandler.leader.ifPresent((dominant) -> {
                 if (dominant.getTrain().getTug().filter(AbstractTugEntity.class::isInstance).map(AbstractTugEntity.class::cast)
-                        .map(tug -> tug.updateFollowerOnRoute(this))
+                        .map(tug -> tug.updateFollowerForDocking(this) || tug.updateFollowerOnRoute(this))
                         .orElse(false)) {
                     checkInsideBlocks();
                     return;

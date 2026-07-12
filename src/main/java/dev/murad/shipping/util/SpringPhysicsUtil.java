@@ -24,7 +24,6 @@ SOFTWARE.
 
 package dev.murad.shipping.util;
 
-import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
@@ -51,24 +50,42 @@ public class SpringPhysicsUtil {
     public static <T extends Entity & LinkableEntity<T>> void adjustSpringedEntities(T dominant, T dominated) {
         if (dominated.distanceTo(dominant) > 20) {
             dominated.removeDominant();
+            return;
         }
 
-        double distSq = dominant.distanceToSqr(dominated);
-        double maxDstSq = dominant.getTrain().getTug().map(tug -> ((AbstractTugEntity) tug).isDocked() ? 1 : 1.2).orElse(1.2);
+        pullLinkedEntities(dominant, dominated, WaterConvoyGeometry.CRUISING_CENTER_SPACING);
+    }
 
+    /**
+     * A water link only transmits tension.  In particular, opening a docked
+     * convoy to its larger cruising spacing must not push a follower backwards.
+     */
+    public static <T extends Entity & LinkableEntity<T>> void pullLinkedEntities(T dominant, T dominated, double targetDistance) {
         Vec3 frontAnchor = dominant.position();
         Vec3 backAnchor = dominated.position();
-        double dist = Math.sqrt(distSq);
+        Vec3 between = frontAnchor.subtract(backAnchor);
+        double dist = between.length();
+        if (dist <= 1.0E-4D) {
+            return;
+        }
+
         double dx = (frontAnchor.x - backAnchor.x) / dist;
         double dy = (frontAnchor.y - backAnchor.y) / dist;
         double dz = (frontAnchor.z - backAnchor.z) / dist;
         final double alpha = 0.5;
 
-
         float targetYaw = SpringPhysicsUtil.computeTargetYaw(dominated.getYRot(), frontAnchor, backAnchor);
         dominated.setYRot((float) ((alpha * dominated.getYRot() + targetYaw * (1f - alpha)) % 360));
-        double k = dominant instanceof AbstractTugEntity ? 0.3 : 0.4;
-        double l0 = maxDstSq;
-        dominated.setDeltaMovement(k * (dist - l0) * dx, k * (dist - l0) * dy, k * (dist - l0) * dz);
+
+        if (dist <= targetDistance) {
+            Vec3 current = dominated.getDeltaMovement();
+            dominated.setDeltaMovement(0.0D, current.y, 0.0D);
+            return;
+        }
+
+        double excess = dist - targetDistance;
+        double leaderSpeed = dominant.getDeltaMovement().length();
+        double pullSpeed = Math.min(0.25D, Math.max(0.03D, leaderSpeed) + excess * 0.35D);
+        dominated.setDeltaMovement(pullSpeed * dx, pullSpeed * dy, pullSpeed * dz);
     }
 }

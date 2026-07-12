@@ -100,15 +100,17 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.STRING);
     private static final String ROUTE_PROGRESS_TAG = "route_progress";
     private static final double ROUTE_LOOKAHEAD = 0.8D;
-    private static final double TUG_REAR_COUPLER_OFFSET = 0.22D;
-    private static final double HEAD_COUPLER_GAP = 0.05D;
-    private static final double BODY_COUPLER_GAP = 0.20D;
     private static final double FOLLOWER_CORRECTION_BLEND = 0.65D;
     private static final double FOLLOWER_HARD_SNAP_DISTANCE = 4.0D;
+    private static final double DOCK_SETTLE_STEP = 0.08D;
+    private static final double DOCK_SETTLE_EPSILON = 0.02D;
+    private static final double DOCK_CLEAR_DISTANCE = 0.75D;
+    private static final double ROUTE_REBASE_MAX_DISTANCE = 1.0D;
 
     /** A tug may only rediscover docks while approaching; a session owns exact dock positions. */
     private enum DockingState {
         APPROACHING,
+        SETTLING,
         DOCKED,
         DEPARTING
     }
@@ -407,6 +409,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private void tickCheckDock() {
         switch (dockingState) {
             case APPROACHING -> tryBeginDocking();
+            case SETTLING -> tickSettlingSession();
             case DOCKED -> tickDockedSession();
             case DEPARTING -> tickDeparture();
         }
@@ -446,11 +449,26 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         }
 
         dockingSession = new DockingSession(dock.getBlockPos(), dock.getVehicleBlockPos(), heading);
-        dockingState = DockingState.DOCKED;
         docked = true;
         occupyFollowerDocks(dockingSession, dock);
         snapToDock(dock);
+        rebaseRouteProgressAtDock();
+        dockingState = dockingSession.followerDockPositions.isEmpty() ? DockingState.DOCKED : DockingState.SETTLING;
         onDock();
+    }
+
+    private void tickSettlingSession() {
+        DockingSession session = dockingSession;
+        DockingStationBlockEntity headDock = session == null ? null : getDockAt(session.headDockPos);
+        if (session == null || headDock == null || !isDockChainHolding(session, headDock)) {
+            beginDeparture();
+            return;
+        }
+
+        snapToDock(headDock);
+        if (areAssignedFollowersSettled(session)) {
+            dockingState = DockingState.DOCKED;
+        }
     }
 
     private void tickDockedSession() {
@@ -463,10 +481,35 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         snapToDock(headDock);
     }
 
+    private boolean areAssignedFollowersSettled(DockingSession session) {
+        for (Map.Entry<UUID, BlockPos> entry : session.followerDockPositions.entrySet()) {
+            Entity entity = findEntity(entry.getKey());
+            DockingStationBlockEntity dock = getDockAt(entry.getValue());
+            if (entity == null || dock == null) {
+                return false;
+            }
+            if (horizontalDistance(entity.position(), dock.getVehicleCenterPos()) > DOCK_SETTLE_EPSILON) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void snapToDock(DockingStationBlockEntity dock) {
         Vec3 center = dock.getVehicleCenterPos();
         this.setDeltaMovement(Vec3.ZERO);
         this.moveTo(center.x, getY(), center.z, dockingSession.heading.toYRot(), getXRot());
+    }
+
+    /** Keep route-based follower targets continuous with the snapped dock pose. */
+    private void rebaseRouteProgressAtDock() {
+        if (!hasCompiledRouteTrack()) {
+            return;
+        }
+
+        routeTrack.project(this.position())
+                .filter(projection -> projection.distanceToTrack() <= ROUTE_REBASE_MAX_DISTANCE)
+                .ifPresent(projection -> routeProgress = projection.distanceAlongTrack());
     }
 
     private boolean isDockChainHolding(DockingSession session, DockingStationBlockEntity headDock) {
@@ -517,7 +560,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     private void tickDeparture() {
         DockingSession session = dockingSession;
-        if (session == null || hasClearedDockPort(session)) {
+        if (session == null || hasConvoyClearedDock(session)) {
             dockingSession = null;
             dockingState = DockingState.APPROACHING;
             return;
@@ -525,16 +568,31 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         this.setYRot(session.heading.toYRot());
     }
 
-    private boolean hasClearedDockPort(DockingSession session) {
-        double dx = this.getX() - (session.portPos.getX() + 0.5D);
-        double dz = this.getZ() - (session.portPos.getZ() + 0.5D);
-        return dx * dx + dz * dz > 1.0D;
+    private boolean hasConvoyClearedDock(DockingSession session) {
+        if (horizontalDistance(this.position(), Vec3.atCenterOf(session.portPos)) <= WaterConvoyGeometry.DOCKED_CENTER_SPACING) {
+            return false;
+        }
+
+        for (Map.Entry<UUID, BlockPos> entry : session.followerDockPositions.entrySet()) {
+            Entity follower = findEntity(entry.getKey());
+            DockingStationBlockEntity dock = getDockAt(entry.getValue());
+            if (follower == null || dock == null
+                    || horizontalDistance(follower.position(), dock.getVehicleCenterPos()) <= DOCK_CLEAR_DISTANCE) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Nullable
     private DockingStationBlockEntity getDockAt(BlockPos pos) {
         BlockEntity be = level().getBlockEntity(pos);
         return be instanceof DockingStationBlockEntity dock ? dock : null;
+    }
+
+    @Nullable
+    private Entity findEntity(UUID uuid) {
+        return level() instanceof ServerLevel serverLevel ? serverLevel.getEntity(uuid) : null;
     }
 
     protected void makeSmoke() {
@@ -811,6 +869,64 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         return Mth.clamp((int) Math.floor(completionRatio * path.size()) + 1, 1, path.size());
     }
 
+    /**
+     * Docking owns follower motion while a convoy is settling, parked, or
+     * leaving.  Route positioning must not overwrite those explicit poses.
+     */
+    public boolean updateFollowerForDocking(VesselEntity follower) {
+        DockingSession session = dockingSession;
+        if (session == null) {
+            return false;
+        }
+
+        if (dockingState == DockingState.SETTLING || dockingState == DockingState.DOCKED) {
+            BlockPos dockPos = session.followerDockPositions.get(follower.getUUID());
+            DockingStationBlockEntity dock = dockPos == null ? null : getDockAt(dockPos);
+            if (dock == null) {
+                return false;
+            }
+
+            Vec3 target = dock.getVehicleCenterPos();
+            if (dockingState == DockingState.SETTLING) {
+                settleFollowerIntoDock(follower, target, session.heading);
+            } else {
+                parkFollowerAtDock(follower, target, session.heading);
+            }
+            return true;
+        }
+
+        if (dockingState == DockingState.DEPARTING) {
+            return follower.getLeader().map(leader -> {
+                SpringPhysicsUtil.pullLinkedEntities(
+                        leader,
+                        follower,
+                        WaterConvoyGeometry.cruisingCenterSpacing(leader, follower));
+                return true;
+            }).orElse(false);
+        }
+
+        return false;
+    }
+
+    private void settleFollowerIntoDock(VesselEntity follower, Vec3 target, Direction heading) {
+        Vec3 current = follower.position();
+        Vec3 offset = new Vec3(target.x - current.x, 0.0D, target.z - current.z);
+        double distance = offset.length();
+        if (distance <= DOCK_SETTLE_EPSILON) {
+            parkFollowerAtDock(follower, target, heading);
+            return;
+        }
+
+        Vec3 step = offset.scale(Math.min(DOCK_SETTLE_STEP, distance) / distance);
+        follower.setDeltaMovement(Vec3.ZERO);
+        follower.moveTo(current.x + step.x, follower.getY(), current.z + step.z, heading.toYRot(), follower.getXRot());
+    }
+
+    private void parkFollowerAtDock(VesselEntity follower, Vec3 target, Direction heading) {
+        follower.setDeltaMovement(Vec3.ZERO);
+        follower.moveTo(target.x, follower.getY(), target.z, heading.toYRot(), follower.getXRot());
+    }
+
     public boolean updateFollowerOnRoute(VesselEntity follower) {
         if (!hasCompiledRouteTrack()) {
             return false;
@@ -846,22 +962,16 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     private Optional<RouteBodyPose> solveFollowerPoseOnRoute(VesselEntity follower) {
-        if (this.isDocked()) {
-            Optional<RouteBodyPose> dockedPose = solveDockedFollowerPose(follower);
-            if (dockedPose.isPresent()) {
-                return dockedPose;
-            }
-        }
-
-        OptionalDouble frontDistanceOptional = getDistanceToFollowerFrontCoupler(follower);
-        if (frontDistanceOptional.isEmpty()) {
+        OptionalDouble centerDistanceOptional = getDistanceToFollowerCenter(follower);
+        if (centerDistanceOptional.isEmpty()) {
             return Optional.empty();
         }
 
-        double frontDistance = frontDistanceOptional.getAsDouble();
-        double rearDistance = frontDistance + getBodyLengthOnRoute(follower);
-        TugRouteTrack.Sample frontSample = routeTrack.sample(routeProgress - frontDistance);
-        TugRouteTrack.Sample rearSample = routeTrack.sample(routeProgress - rearDistance);
+        double centerDistance = centerDistanceOptional.getAsDouble();
+        double halfLength = WaterConvoyGeometry.routeBodyHalfLength(follower);
+        TugRouteTrack.Sample frontSample = routeTrack.sample(routeProgress - centerDistance + halfLength);
+        TugRouteTrack.Sample rearSample = routeTrack.sample(routeProgress - centerDistance - halfLength);
+        TugRouteTrack.Sample centerSample = routeTrack.sample(routeProgress - centerDistance);
 
         Vec3 axis = frontSample.position().subtract(rearSample.position());
         Vec3 horizontalAxis = new Vec3(axis.x, 0.0D, axis.z);
@@ -877,94 +987,23 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             return Optional.empty();
         }
 
-        double rearOffset = getRearCouplerOffset(follower);
-        Vec3 center = rearSample.position().add(forward.scale(rearOffset));
-        return Optional.of(new RouteBodyPose(center, forward));
+        return Optional.of(new RouteBodyPose(centerSample.position(), forward));
     }
 
-    private Optional<RouteBodyPose> solveDockedFollowerPose(VesselEntity follower) {
-        int followerIndex = getFollowerOrdinal(follower);
-        if (followerIndex < 1) {
-            return Optional.empty();
-        }
-
-        Vec3 forward = getTrainLineForward();
-        DockingSession session = dockingSession;
-        if (session != null) {
-            BlockPos dockPos = session.followerDockPositions.get(follower.getUUID());
-            DockingStationBlockEntity dock = dockPos == null ? null : getDockAt(dockPos);
-            if (dock != null) {
-                Vec3 dockCenter = dock.getVehicleCenterPos();
-                return Optional.of(new RouteBodyPose(new Vec3(dockCenter.x, this.getY(), dockCenter.z), forward));
-            }
-        }
-
-        OptionalDouble frontDistanceOptional = getDistanceToFollowerFrontCoupler(follower);
-        if (frontDistanceOptional.isEmpty()) {
-            return Optional.empty();
-        }
-
-        double centerDistance = frontDistanceOptional.getAsDouble() + getRearCouplerOffset(follower);
-        Vec3 center = this.position().subtract(forward.scale(centerDistance));
-        return Optional.of(new RouteBodyPose(new Vec3(center.x, this.getY(), center.z), forward));
-    }
-
-    private OptionalDouble getDistanceToFollowerFrontCoupler(VesselEntity target) {
-        double distance = getRearCouplerOffset(this);
+    private OptionalDouble getDistanceToFollowerCenter(VesselEntity target) {
+        double distance = 0.0D;
         Optional<VesselEntity> current = this.getFollower();
         VesselEntity previous = this;
         while (current.isPresent()) {
             VesselEntity currentFollower = current.get();
-            distance += getCouplerGap(previous, currentFollower) + getFrontCouplerOffset(currentFollower);
+            distance += WaterConvoyGeometry.cruisingCenterSpacing(previous, currentFollower);
             if (currentFollower == target) {
                 return OptionalDouble.of(distance);
             }
-            distance += getRearCouplerOffset(currentFollower);
             previous = currentFollower;
             current = currentFollower.getFollower();
         }
         return OptionalDouble.empty();
-    }
-
-    private int getFollowerOrdinal(VesselEntity target) {
-        int ordinal = 1;
-        Optional<VesselEntity> current = this.getFollower();
-        while (current.isPresent()) {
-            if (current.get() == target) {
-                return ordinal;
-            }
-            current = current.get().getFollower();
-            ordinal++;
-        }
-        return -1;
-    }
-
-    private double getBodyLengthOnRoute(VesselEntity vessel) {
-        return getFrontCouplerOffset(vessel) + getRearCouplerOffset(vessel);
-    }
-
-    private double getFrontCouplerOffset(VesselEntity vessel) {
-        return getCouplerHalfLength(vessel);
-    }
-
-    private double getRearCouplerOffset(VesselEntity vessel) {
-        if (vessel == this) {
-            return TUG_REAR_COUPLER_OFFSET;
-        }
-        return getCouplerHalfLength(vessel);
-    }
-
-    private double getCouplerGap(VesselEntity leader, VesselEntity follower) {
-        return leader == this ? HEAD_COUPLER_GAP : BODY_COUPLER_GAP;
-    }
-
-    private double getCouplerHalfLength(VesselEntity vessel) {
-        return Math.max(0.55D, vessel.getBbWidth() * 0.9D);
-    }
-
-    private Vec3 getTrainLineForward() {
-        Direction direction = dockingSession != null ? dockingSession.heading : this.getDirection();
-        return new Vec3(direction.getStepX(), 0.0D, direction.getStepZ());
     }
 
     private static double horizontalDistance(Vec3 from, Vec3 to) {

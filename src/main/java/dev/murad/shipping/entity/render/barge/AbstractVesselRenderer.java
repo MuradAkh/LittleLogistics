@@ -143,6 +143,10 @@ public abstract class AbstractVesselRenderer<T extends VesselEntity> extends Ent
         return getModelYoffset() + 0.07D;
     }
 
+    /**
+     * This is intentionally smaller than the physical vehicle half-length.
+     * It leaves room for the chain at both normal and one-block dock spacing.
+     */
     protected double getAttachmentOffset() {
         return 0.20D;
     }
