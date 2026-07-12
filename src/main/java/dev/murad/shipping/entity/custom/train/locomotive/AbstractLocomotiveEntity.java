@@ -23,6 +23,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -66,6 +67,12 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     private static final String CONSIST_TAG = "consist";
     private static final int CONSIST_RECONNECT_TIMEOUT = 600;
+    private static final String PORTAL_WAIT_TAG = "portalWait";
+
+    /* True from loco portal crossing until all consist wagons arrive. Suppresses the unowned-loco
+       stall in tickReconnect so the loco keeps running; cleared when all wagons arrive or after 400 ticks. */
+    private boolean waitingForPortalWagons = false;
+    private int portalWaitTicks = 0;
 
     private List<UUID> consistUUIDs = new ArrayList<>();
     private final Map<UUID, Integer> reconnectAttempts = new HashMap<>();
@@ -143,10 +150,73 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     @Override
     public void remove(RemovalReason r) {
-        if(!this.level().isClientSide && r != RemovalReason.UNLOADED_TO_CHUNK){
-            this.spawnAtLocation(routeItemHandler.getStackInSlot(0));
+        if (!this.level().isClientSide) {
+            if (r != RemovalReason.UNLOADED_TO_CHUNK && r != RemovalReason.CHANGED_DIMENSION) {
+                this.spawnAtLocation(routeItemHandler.getStackInSlot(0));
+            }
+            /* Release wagons on any removal except CHANGED_DIMENSION; clearing forced velocity
+               lets them coast under vanilla physics instead of staying locked at portal speed. */
+            if (waitingForPortalWagons && r != RemovalReason.CHANGED_DIMENSION
+                    && level() instanceof ServerLevel serverLevel) {
+                releasePortalWagons(serverLevel);
+            }
         }
         super.remove(r);
+    }
+
+    private void releasePortalWagons(ServerLevel level) {
+        for (ServerLevel otherLevel : level.getServer().getAllLevels()) {
+            if (otherLevel == level) continue;
+            for (int i = 1; i < consistUUIDs.size(); i++) {
+                Entity e = otherLevel.getEntity(consistUUIDs.get(i));
+                if (e instanceof AbstractTrainCarEntity wagon) {
+                    wagon.setForcedPortalVelocity(null);
+                }
+            }
+        }
+    }
+
+    @Override
+    public Entity changeDimension(DimensionTransition transition) {
+        // Capture velocity before super.changeDimension; vanilla rotates deltaMovement 90° when source and destination portal axes differ.
+        Vec3 preCrossVelocity = getDeltaMovement();
+
+        if (!level().isClientSide) {
+            if (getFollower().isPresent()) {
+                /* Assign forced velocity to every wagon so they keep moving toward the portal at loco
+                   speed. The chain link breaks when the loco crosses, so wagons would stall without this. */
+                double speed = Math.max(preCrossVelocity.horizontalDistance(), 0.2);
+                Vec3 portalVelocity = new Vec3(
+                    getDirection().getStepX() * speed,
+                    0,
+                    getDirection().getStepZ() * speed
+                );
+                Optional<AbstractTrainCarEntity> cur = getFollower();
+                while (cur.isPresent()) {
+                    cur.get().setForcedPortalVelocity(portalVelocity);
+                    cur = cur.get().getFollower();
+                }
+                waitingForPortalWagons = true;
+            }
+        }
+
+        Entity result = super.changeDimension(transition);
+        if (result instanceof AbstractLocomotiveEntity locoResult) {
+            // Skip the enrollment freeze (enrollMe = 5) set on load; it's for the server-restart race condition, not portal crossings.
+            locoResult.enrollmentHandler.skipPortalArrivalFreeze();
+            /* Clear waitForDominated so tickLoad() doesn't stall the loco every tick. Wagons are still
+               in the source dimension, so linkingHandler sees follower=empty + waitForDominated=true → stall() loop. */
+            locoResult.linkingHandler.clearWaitForDominated();
+
+            // Restore pre-crossing velocity and yaw; vanilla changes both when portal axes differ.
+            if (preCrossVelocity.horizontalDistanceSqr() > 1e-6) {
+                locoResult.setDeltaMovement(preCrossVelocity);
+                float yaw = RailHelper.directionFromVelocity(preCrossVelocity).toYRot();
+                locoResult.setYRot(yaw);
+                locoResult.yRotO = yaw;
+            }
+        }
+        return result;
     }
 
     @Override
@@ -660,8 +730,35 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     // =========================================================================
 
     private void tickConsist(ServerLevel level) {
+        tickPortalWait(level);
         tickReconnect(level);
         rebuildConsistList();
+    }
+
+    private void tickPortalWait(ServerLevel level) {
+        if (!waitingForPortalWagons) return;
+        portalWaitTicks++;
+
+        // Propagate loco velocity to wagons still in the source dimension; if the loco is blocked, wagons stop too.
+        Vec3 currentVelocity = new Vec3(getDeltaMovement().x, 0, getDeltaMovement().z);
+        for (ServerLevel otherLevel : level.getServer().getAllLevels()) {
+            if (otherLevel == level) continue;
+            for (int i = 1; i < consistUUIDs.size(); i++) {
+                Entity e = otherLevel.getEntity(consistUUIDs.get(i));
+                if (e instanceof AbstractTrainCarEntity wagon) {
+                    wagon.updateForcedPortalVelocity(currentVelocity);
+                }
+            }
+        }
+
+        boolean allArrived = consistUUIDs.stream().skip(1).allMatch(uuid -> {
+            Entity e = level.getEntity(uuid);
+            return e != null && !e.isRemoved();
+        });
+        if (allArrived || portalWaitTicks > 400) {
+            waitingForPortalWagons = false;
+            portalWaitTicks = 0;
+        }
     }
 
     private void tickReconnect(ServerLevel level) {
@@ -710,6 +807,11 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                 if (curr.getLeader().map(Entity::isRemoved).orElse(true)) {
                     prev.setDominated(curr);
                     curr.setDominant(prev);
+                    /* Clear waitForDominated on the newly connected wagon. If left set, the wagon
+                       delegates stall() to the loco every tick until its own follower arrives. */
+                    if (waitingForPortalWagons) {
+                        curr.clearFollowerWait();
+                    }
                 }
             }
 
@@ -718,7 +820,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
         consistUUIDs = updated;
 
-        if (hadUnloaded && !hasOwner()) {
+        if (hadUnloaded && !hasOwner() && !waitingForPortalWagons) {
             stall();
         }
     }
@@ -772,6 +874,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         if (consistUUIDs.isEmpty()) {
             consistUUIDs.add(this.getUUID());
         }
+        waitingForPortalWagons = compound.getBoolean(PORTAL_WAIT_TAG);
     }
 
     @Override
@@ -787,6 +890,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             consistTag.add(StringTag.valueOf(uuid.toString()));
         }
         compound.put(CONSIST_TAG, consistTag);
+        compound.putBoolean(PORTAL_WAIT_TAG, waitingForPortalWagons);
     }
 
     // duplicate due to linking issues

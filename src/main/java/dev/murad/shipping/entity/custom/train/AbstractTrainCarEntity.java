@@ -40,7 +40,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import dev.murad.shipping.block.rail.PortalRail;
 import net.minecraft.world.level.block.BaseRailBlock;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
@@ -79,6 +81,16 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     public void setFrozen(boolean frozen) {
         this.frozen = frozen;
     }
+
+    public void clearFollowerWait() {
+        linkingHandler.clearWaitForDominated();
+    }
+
+    /* Non-null while this wagon must keep moving toward a portal. Applied every tick, overriding
+       chain math and friction. Cleared when the entity crosses; the new instance starts null. */
+    @Getter @Setter
+    private Vec3 forcedPortalVelocity = null;
+    private int forcedPortalVelocityTicks = 0;
 
     private static final Map<RailShape, Pair<Vec3i, Vec3i>> EXITS = Util.make(Maps.newEnumMap(RailShape.class), (enumMap) -> {
         Vec3i west = Direction.WEST.getNormal();
@@ -132,8 +144,19 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     protected Optional<RailShape> getRailShape() {
         for (var pos : Arrays.asList(getOnPos().above(), getOnPos())) {
             var state = level().getBlockState(pos);
-            if (state.getBlock() instanceof BaseRailBlock railBlock) {
+            if (state.getBlock() instanceof BaseRailBlock) {
                 return Optional.of(railHelper.getShape(pos));
+            }
+            /* No rail exists inside the portal block. The adjacent PortalRail defines the axis;
+               returning its shape prevents accelerate() from stalling and stops the ascending-slope
+               check from resetting position every tick. */
+            if (state.is(Blocks.NETHER_PORTAL)) {
+                for (Direction dir : Direction.Plane.HORIZONTAL) {
+                    BlockPos adj = pos.relative(dir);
+                    if (level().getBlockState(adj).getBlock() instanceof PortalRail) {
+                        return Optional.of(railHelper.getShape(adj));
+                    }
+                }
             }
         }
         return Optional.empty();
@@ -233,7 +256,31 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         this.setYRot(yrot);
         if (!level().isClientSide) {
             doChainMath();
+            applyForcedPortalVelocity();
         }
+    }
+
+    /* Refreshes the forced velocity and resets the timeout. Called every tick by the
+       locomotive while it's alive in the other dimension. */
+    public void updateForcedPortalVelocity(Vec3 velocity) {
+        this.forcedPortalVelocity = velocity;
+        this.forcedPortalVelocityTicks = 0;
+    }
+
+    private void applyForcedPortalVelocity() {
+        if (forcedPortalVelocity == null) return;
+        setDeltaMovement(forcedPortalVelocity);
+        // Self-clear after 600 ticks if the loco disappears without calling releasePortalWagons (e.g. server crash).
+        if (++forcedPortalVelocityTicks > 600) {
+            forcedPortalVelocity = null;
+            forcedPortalVelocityTicks = 0;
+        }
+    }
+
+    @Override
+    public int getDimensionChangingDelay() {
+        // 40 ticks (2 s) prevents an immediate return trip; without this the entity spawns inside the portal block and re-enters on the next tick.
+        return 40;
     }
 
     @Override
@@ -256,6 +303,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     @Override
     public void push(Entity pEntity) {
         if (!this.level().isClientSide) {
+            if (forcedPortalVelocity != null) return;
             // not perfect, doesn't work when a mob stand in the way without moving, but works well enough underwater to keep this
             if (pEntity instanceof LivingEntity l && l.getVehicle() == null){
                 if (this instanceof StallingCapability s) {
@@ -488,8 +536,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     @Override
     public void remove(RemovalReason r) {
-        // Only sever chain links on permanent removal. Chunk unloads are temporary —
-        // the head entity's consist list will reconnect when the chunk reloads.
+        // Only sever links on permanent removal; UNLOADED_TO_CHUNK is temporary and tickReconnect will relink when the chunk reloads.
         if (r != RemovalReason.UNLOADED_TO_CHUNK) {
             handleLinkableKill();
         }

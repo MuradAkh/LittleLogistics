@@ -4,6 +4,7 @@ import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.block.dockingstation.DockingStationBlock;
 import dev.murad.shipping.block.dockingstation.DockingStationPart;
 import dev.murad.shipping.block.guiderail.CornerGuideRailBlock;
+import dev.murad.shipping.block.rail.PortalRail;
 import dev.murad.shipping.block.rail.SwitchRail;
 import dev.murad.shipping.block.vesseldetector.VesselDetectorBlock;
 import dev.murad.shipping.setup.ModBlocks;
@@ -130,6 +131,21 @@ public class ModBlockStateProvider extends BlockStateProvider {
                         .withExistingParent("junction_rail", mcLoc("rail_flat"))
                         .texture("rail", getBlTx("junction_rail")))
                 .build());
+
+        ModelFile portalRailModel = models().getExistingFile(modLoc("block/portal_rail"));
+        getVariantBuilder(ModBlocks.PORTAL_RAIL.get()).forAllStates(state -> {
+            Direction facing = state.getValue(PortalRail.PORTAL_FACING);
+            int yRot = switch (facing) {
+                case NORTH -> 0;
+                case EAST  -> 90;
+                case SOUTH -> 180;
+                default    -> 270; // WEST
+            };
+            return ConfiguredModel.builder()
+                    .modelFile(portalRailModel)
+                    .rotationY(yRot)
+                    .build();
+        });
 
         // --- Docking Station ---
         // Models are hand-crafted in src/main/resources; just reference them.
