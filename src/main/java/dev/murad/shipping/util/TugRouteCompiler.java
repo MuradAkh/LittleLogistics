@@ -1,6 +1,7 @@
 package dev.murad.shipping.util;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.block.dockingstation.DockingStationBlockEntity;
 import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.setup.ModBlocks;
 import net.minecraft.core.BlockPos;
@@ -25,6 +26,9 @@ import java.util.Set;
 public final class TugRouteCompiler {
     private static final int BASE_VISITED_LIMIT = 4096;
     private static final double TURN_PENALTY = 0.35D;
+    private static final double SHALLOW_TURN_PENALTY = TURN_PENALTY * 2.0D;
+    private static final double WIDE_TURN_PENALTY = TURN_PENALTY * 4.0D;
+    private static final double DIAGONAL_COST = Math.sqrt(2.0D);
 
     private TugRouteCompiler() {
     }
@@ -45,13 +49,70 @@ public final class TugRouteCompiler {
         FAILED
     }
 
-    private record SearchState(BlockPos pos, @Nullable Direction incomingDirection) {
+    /**
+     * Route compilation operates on water-cell centres.  Minecraft's {@link Direction}
+     * cannot express diagonal movement, so keep the complete heading set local to the
+     * compiler rather than leaking it into persisted route data.
+     */
+    enum RouteHeading {
+        NORTH(0, -1, Direction.NORTH),
+        EAST(1, 0, Direction.EAST),
+        SOUTH(0, 1, Direction.SOUTH),
+        WEST(-1, 0, Direction.WEST),
+        NORTH_EAST(1, -1, null),
+        SOUTH_EAST(1, 1, null),
+        SOUTH_WEST(-1, 1, null),
+        NORTH_WEST(-1, -1, null);
+
+        private final int stepX;
+        private final int stepZ;
+        @Nullable
+        private final Direction cardinalDirection;
+
+        RouteHeading(int stepX, int stepZ, @Nullable Direction cardinalDirection) {
+            this.stepX = stepX;
+            this.stepZ = stepZ;
+            this.cardinalDirection = cardinalDirection;
+        }
+
+        public BlockPos move(BlockPos pos) {
+            return pos.offset(stepX, 0, stepZ);
+        }
+
+        public boolean isDiagonal() {
+            return cardinalDirection == null;
+        }
+
+        public double travelCost() {
+            return isDiagonal() ? DIAGONAL_COST : 1.0D;
+        }
+
+        @Nullable
+        public Direction cardinalDirection() {
+            return cardinalDirection;
+        }
+
+        public RouteHeading opposite() {
+            return switch (this) {
+                case NORTH -> SOUTH;
+                case EAST -> WEST;
+                case SOUTH -> NORTH;
+                case WEST -> EAST;
+                case NORTH_EAST -> SOUTH_WEST;
+                case SOUTH_EAST -> NORTH_WEST;
+                case SOUTH_WEST -> NORTH_EAST;
+                case NORTH_WEST -> SOUTH_EAST;
+            };
+        }
+    }
+
+    private record SearchState(BlockPos pos, @Nullable RouteHeading incomingDirection) {
     }
 
     private record SearchNode(SearchState state, double gScore, double fScore) {
     }
 
-    private record PathResult(TugRouteSegment segment, @Nullable Direction arrivalDirection) {
+    private record PathResult(TugRouteSegment segment, @Nullable RouteHeading arrivalDirection) {
     }
 
     private record SegmentCompileResult(boolean success, List<TugRouteSegment> segments, @Nullable String error) {
@@ -116,13 +177,13 @@ public final class TugRouteCompiler {
             waypointPositions.add(node.toBlockPos());
         }
 
-        List<Direction> initialDirections = getInitialDirections(level, compiled.getFirst().toBlockPos(), compiled.get(1).toBlockPos());
+        List<RouteHeading> initialDirections = getInitialDirections(level, compiled.getFirst().toBlockPos(), compiled.get(1).toBlockPos());
         if (initialDirections.isEmpty()) {
             return CompileResult.failure("Could not find a navigable departure from waypoint 1.");
         }
 
         String lastError = null;
-        for (Direction initialDirection : initialDirections) {
+        for (RouteHeading initialDirection : initialDirections) {
             SegmentCompileResult segmentResult = compileSegments(level, compiled, waypointPositions, initialDirection);
             if (segmentResult.success()) {
                 compiled.setSegments(segmentResult.segments());
@@ -241,25 +302,24 @@ public final class TugRouteCompiler {
         private final Set<BlockPos> occupied;
         private final Set<BlockPos> blockedWaypoints;
         @Nullable
-        private final Direction startIncomingDirection;
+        private final RouteHeading startIncomingDirection;
         @Nullable
-        private final Direction forcedFirstDirection;
+        private final RouteHeading forcedFirstDirection;
         @Nullable
-        private final Direction goalNextDirection;
+        private final RouteHeading goalNextDirection;
         private final PriorityQueue<SearchNode> openSet = new PriorityQueue<>(Comparator.comparingDouble(SearchNode::fScore));
         private final Map<SearchState, Double> gScores = new HashMap<>();
         private final Map<SearchState, SearchState> cameFrom = new HashMap<>();
-        private final Map<BlockPos, Double> bestPositionScores = new HashMap<>();
         private final Set<SearchState> closed = new HashSet<>();
         private final int visitedLimit;
         private PreviewPathStatus status;
         @Nullable
         private TugRouteSegment result;
         @Nullable
-        private Direction arrivalDirection;
+        private RouteHeading arrivalDirection;
 
-        private PreviewPathfinder(Level level, BlockPos start, BlockPos goal, @Nullable Direction startIncomingDirection,
-                                  @Nullable Direction forcedFirstDirection, @Nullable Direction goalNextDirection,
+        private PreviewPathfinder(Level level, BlockPos start, BlockPos goal, @Nullable RouteHeading startIncomingDirection,
+                                  @Nullable RouteHeading forcedFirstDirection, @Nullable RouteHeading goalNextDirection,
                                   Set<BlockPos> occupied, Set<BlockPos> blockedWaypoints) {
             this.level = level;
             this.start = start.immutable();
@@ -278,15 +338,13 @@ public final class TugRouteCompiler {
                 return;
             }
 
-            if (forcedFirstDirection != null && startIncomingDirection != null
-                && forcedFirstDirection == startIncomingDirection.getOpposite()) {
+            if (forcedFirstDirection != null && !isHeadingTransitionAllowed(startIncomingDirection, forcedFirstDirection)) {
                 this.status = PreviewPathStatus.FAILED;
                 return;
             }
 
             SearchState startState = new SearchState(this.start, startIncomingDirection);
             this.gScores.put(startState, 0.0D);
-            this.bestPositionScores.put(this.start, 0.0D);
             this.openSet.add(new SearchNode(startState, 0.0D, heuristic(this.start, this.goal)));
             this.status = PreviewPathStatus.SEARCHING;
         }
@@ -315,40 +373,31 @@ public final class TugRouteCompiler {
                     continue;
                 }
 
-                for (Direction direction : Direction.Plane.HORIZONTAL) {
+                for (RouteHeading direction : RouteHeading.values()) {
                     if (this.forcedFirstDirection != null && currentState.pos().equals(this.start) && direction != this.forcedFirstDirection) {
                         continue;
                     }
-                    if (currentState.incomingDirection() != null && direction == currentState.incomingDirection().getOpposite()) {
+                    if (!isHeadingTransitionAllowed(currentState.incomingDirection(), direction)) {
                         continue;
                     }
 
-                    BlockPos neighbor = currentState.pos().relative(direction);
-                    if (!isNavigable(this.level, neighbor) || isOppositeGuideRail(this.level, neighbor, direction)) {
+                    BlockPos neighbor = direction.move(currentState.pos());
+                    if (!isStepNavigable(this.level, currentState.pos(), direction)) {
                         continue;
                     }
-                    if (this.blockedWaypoints.contains(neighbor)) {
-                        continue;
-                    }
-                    if (this.occupied.contains(neighbor) && !neighbor.equals(this.goal) && !neighbor.equals(this.start)) {
+                    if (isStepBlocked(currentState.pos(), direction, this.occupied, this.blockedWaypoints, this.start, this.goal)) {
                         continue;
                     }
 
-                    double tentativeScore = current.gScore() + 1.0D + getLandPenalty(this.level, neighbor)
+                    double tentativeScore = current.gScore() + direction.travelCost() + getLandPenalty(this.level, neighbor)
                         + getTurnPenalty(currentState.incomingDirection(), direction);
                     SearchState neighborState = new SearchState(neighbor, direction);
                     if (tentativeScore >= this.gScores.getOrDefault(neighborState, Double.MAX_VALUE)) {
                         continue;
                     }
-                    if (!neighbor.equals(this.goal) && tentativeScore >= this.bestPositionScores.getOrDefault(neighbor, Double.MAX_VALUE)) {
-                        continue;
-                    }
 
                     this.cameFrom.put(neighborState, currentState);
                     this.gScores.put(neighborState, tentativeScore);
-                    if (!neighbor.equals(this.goal)) {
-                        this.bestPositionScores.put(neighbor, tentativeScore);
-                    }
                     this.openSet.add(new SearchNode(neighborState, tentativeScore, tentativeScore + heuristic(neighbor, this.goal)));
                 }
             }
@@ -368,7 +417,7 @@ public final class TugRouteCompiler {
         }
 
         @Nullable
-        public Direction getArrivalDirection() {
+        public RouteHeading getArrivalDirection() {
             return this.arrivalDirection;
         }
     }
@@ -381,14 +430,14 @@ public final class TugRouteCompiler {
         private final Level level;
         private final double maxSegmentDistance;
         private final TugRoute compiled;
-        private final List<Direction> initialDirections;
+        private final List<RouteHeading> initialDirections;
         private final Set<BlockPos> waypointPositions;
         private final List<TugRouteSegment> segments = new ArrayList<>();
         private final Set<BlockPos> occupied = new HashSet<>();
         private int initialDirectionIndex;
         private int segmentIndex;
         @Nullable
-        private Direction incomingDirection;
+        private RouteHeading incomingDirection;
         @Nullable
         private PreviewPathfinder activePathfinder;
         private PreviewPathStatus status = PreviewPathStatus.SEARCHING;
@@ -485,7 +534,7 @@ public final class TugRouteCompiler {
             Set<BlockPos> blocked = new HashSet<>(waypointPositions);
             blocked.remove(start);
             blocked.remove(goal);
-            Direction initial = initialDirections.get(initialDirectionIndex);
+            RouteHeading initial = initialDirections.get(initialDirectionIndex);
             activePathfinder = new PreviewPathfinder(level, start, goal, incomingDirection,
                 segmentIndex == 0 ? initial : null,
                 segmentIndex == compiled.size() - 1 ? initial : null,
@@ -523,10 +572,10 @@ public final class TugRouteCompiler {
         return new RouteCompileSession(level, route, maxSegmentDistance);
     }
 
-    private static SegmentCompileResult compileSegments(Level level, TugRoute route, Set<BlockPos> waypointPositions, Direction initialDirection) {
+    private static SegmentCompileResult compileSegments(Level level, TugRoute route, Set<BlockPos> waypointPositions, RouteHeading initialDirection) {
         List<TugRouteSegment> segments = new ArrayList<>();
         Set<BlockPos> occupied = new HashSet<>();
-        @Nullable Direction incomingDirection = null;
+        @Nullable RouteHeading incomingDirection = null;
 
         for (int i = 0; i < route.size(); i++) {
             BlockPos start = route.get(i).toBlockPos();
@@ -535,8 +584,8 @@ public final class TugRouteCompiler {
             blockedWaypoints.remove(start);
             blockedWaypoints.remove(goal);
 
-            Direction forcedFirstDirection = i == 0 ? initialDirection : null;
-            Direction goalNextDirection = i == route.size() - 1 ? initialDirection : null;
+            RouteHeading forcedFirstDirection = i == 0 ? initialDirection : null;
+            RouteHeading goalNextDirection = i == route.size() - 1 ? initialDirection : null;
             Optional<PathResult> segment = pathfind(level, start, goal, incomingDirection, forcedFirstDirection, goalNextDirection, occupied, blockedWaypoints);
             if (segment.isEmpty()) {
                 return SegmentCompileResult.failure("Could not find a non-intersecting water path between waypoint "
@@ -555,25 +604,24 @@ public final class TugRouteCompiler {
         return SegmentCompileResult.success(segments);
     }
 
-    private static List<Direction> getInitialDirections(Level level, BlockPos start, BlockPos goal) {
-        List<Direction> directions = new ArrayList<>();
-        for (Direction direction : Direction.Plane.HORIZONTAL) {
-            BlockPos neighbor = start.relative(direction);
-            if (!isNavigable(level, neighbor) || isOppositeGuideRail(level, neighbor, direction)) {
+    private static List<RouteHeading> getInitialDirections(Level level, BlockPos start, BlockPos goal) {
+        List<RouteHeading> directions = new ArrayList<>();
+        for (RouteHeading direction : RouteHeading.values()) {
+            if (!isStepNavigable(level, start, direction)) {
                 continue;
             }
             directions.add(direction);
         }
-        directions.sort(Comparator.comparingDouble(direction -> heuristic(start.relative(direction), goal)));
+        directions.sort(Comparator.comparingDouble(direction -> heuristic(direction.move(start), goal)));
         return directions;
     }
 
     private static Optional<PathResult> pathfind(Level level,
                                                  BlockPos start,
                                                  BlockPos goal,
-                                                 @Nullable Direction startIncomingDirection,
-                                                 @Nullable Direction forcedFirstDirection,
-                                                 @Nullable Direction goalNextDirection,
+                                                 @Nullable RouteHeading startIncomingDirection,
+                                                 @Nullable RouteHeading forcedFirstDirection,
+                                                 @Nullable RouteHeading goalNextDirection,
                                                  Set<BlockPos> occupied,
                                                  Set<BlockPos> blockedWaypoints) {
         if (start.equals(goal)) {
@@ -582,19 +630,17 @@ public final class TugRouteCompiler {
                 : Optional.empty();
         }
 
-        if (forcedFirstDirection != null && startIncomingDirection != null && forcedFirstDirection == startIncomingDirection.getOpposite()) {
+        if (forcedFirstDirection != null && !isHeadingTransitionAllowed(startIncomingDirection, forcedFirstDirection)) {
             return Optional.empty();
         }
 
         PriorityQueue<SearchNode> openSet = new PriorityQueue<>(Comparator.comparingDouble(SearchNode::fScore));
         Map<SearchState, Double> gScores = new HashMap<>();
         Map<SearchState, SearchState> cameFrom = new HashMap<>();
-        Map<BlockPos, Double> bestPositionScores = new HashMap<>();
         Set<SearchState> closed = new HashSet<>();
 
         SearchState startState = new SearchState(start, startIncomingDirection);
         gScores.put(startState, 0.0D);
-        bestPositionScores.put(start, 0.0D);
         openSet.add(new SearchNode(startState, 0.0D, heuristic(start, goal)));
 
         int visitedLimit = BASE_VISITED_LIMIT * ShippingConfig.Server.TUG_PATHFINDING_MULTIPLIER.get();
@@ -612,39 +658,29 @@ public final class TugRouteCompiler {
                 continue;
             }
 
-            for (Direction direction : Direction.Plane.HORIZONTAL) {
+            for (RouteHeading direction : RouteHeading.values()) {
                 if (forcedFirstDirection != null && currentState.pos().equals(start) && direction != forcedFirstDirection) {
                     continue;
                 }
-                if (currentState.incomingDirection() != null && direction == currentState.incomingDirection().getOpposite()) {
+                if (!isHeadingTransitionAllowed(currentState.incomingDirection(), direction)) {
                     continue;
                 }
 
-                BlockPos neighbor = currentState.pos().relative(direction);
-                if (!isNavigable(level, neighbor) || isOppositeGuideRail(level, neighbor, direction)) {
-                    continue;
-                }
-                if (blockedWaypoints.contains(neighbor)) {
-                    continue;
-                }
-                if (occupied.contains(neighbor) && !neighbor.equals(goal) && !neighbor.equals(start)) {
+                BlockPos neighbor = direction.move(currentState.pos());
+                if (!isStepNavigable(level, currentState.pos(), direction)
+                    || isStepBlocked(currentState.pos(), direction, occupied, blockedWaypoints, start, goal)) {
                     continue;
                 }
 
-                double tentativeScore = current.gScore() + 1.0D + getLandPenalty(level, neighbor) + getTurnPenalty(currentState.incomingDirection(), direction);
+                double tentativeScore = current.gScore() + direction.travelCost() + getLandPenalty(level, neighbor)
+                    + getTurnPenalty(currentState.incomingDirection(), direction);
                 SearchState neighborState = new SearchState(neighbor, direction);
                 if (tentativeScore >= gScores.getOrDefault(neighborState, Double.MAX_VALUE)) {
-                    continue;
-                }
-                if (!neighbor.equals(goal) && tentativeScore >= bestPositionScores.getOrDefault(neighbor, Double.MAX_VALUE)) {
                     continue;
                 }
 
                 cameFrom.put(neighborState, currentState);
                 gScores.put(neighborState, tentativeScore);
-                if (!neighbor.equals(goal)) {
-                    bestPositionScores.put(neighbor, tentativeScore);
-                }
                 openSet.add(new SearchNode(neighborState, tentativeScore, tentativeScore + heuristic(neighbor, goal)));
             }
         }
@@ -667,7 +703,95 @@ public final class TugRouteCompiler {
         return new PathResult(new TugRouteSegment(points), goalState.incomingDirection());
     }
 
-    private static boolean isOppositeGuideRail(Level level, BlockPos pos, Direction direction) {
+    /**
+     * Checks the water-cell transition rather than only its destination.  A diagonal
+     * may not squeeze through a blocked corner: both cardinal cells that form the
+     * other sides of its square must also be open water.  Guide rails and dock ports
+     * deliberately remain cardinal-only because their direction semantics are
+     * expressed with Minecraft's four-way {@link Direction}.
+     */
+    private static boolean isStepNavigable(Level level, BlockPos from, RouteHeading heading) {
+        BlockPos destination = heading.move(from);
+        if (!isNavigable(level, destination)) {
+            return false;
+        }
+
+        if (!heading.isDiagonal()) {
+            return !isOppositeGuideRail(level, destination, heading);
+        }
+
+        BlockPos xSide = from.offset(heading.stepX, 0, 0);
+        BlockPos zSide = from.offset(0, 0, heading.stepZ);
+        return isNavigable(level, xSide)
+            && isNavigable(level, zSide)
+            && !isCardinalOnlyCell(level, from)
+            && !isCardinalOnlyCell(level, destination)
+            && !isCardinalOnlyCell(level, xSide)
+            && !isCardinalOnlyCell(level, zSide);
+    }
+
+    /**
+     * Existing compiled route cells are reserved.  Diagonal side cells are reserved
+     * too, which prevents a later diagonal from crossing another diagonal through
+     * the centre of a water block square.
+     */
+    private static boolean isStepBlocked(BlockPos from, RouteHeading heading, Set<BlockPos> occupied,
+                                         Set<BlockPos> blockedWaypoints, BlockPos start, BlockPos goal) {
+        BlockPos destination = heading.move(from);
+        if (blockedWaypoints.contains(destination)
+            || (occupied.contains(destination) && !destination.equals(start) && !destination.equals(goal))) {
+            return true;
+        }
+
+        if (!heading.isDiagonal()) {
+            return false;
+        }
+
+        BlockPos xSide = from.offset(heading.stepX, 0, 0);
+        BlockPos zSide = from.offset(0, 0, heading.stepZ);
+        return blockedWaypoints.contains(xSide)
+            || blockedWaypoints.contains(zSide)
+            || occupied.contains(xSide)
+            || occupied.contains(zSide);
+    }
+
+    private static boolean isCardinalOnlyCell(Level level, BlockPos pos) {
+        return hasTugGuideRail(level, pos) || isDockApproachCell(level, pos);
+    }
+
+    private static boolean hasTugGuideRail(Level level, BlockPos pos) {
+        return level.getBlockState(pos.below()).is(ModBlocks.GUIDE_RAIL_TUG.get());
+    }
+
+    /**
+     * Docking accepts a four-way vehicle heading.  The controller normally sits next
+     * to the water port, and may be one block above it, so identify the port by X/Z
+     * just as tug docking does.
+     */
+    private static boolean isDockApproachCell(Level level, BlockPos pos) {
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            BlockPos controllerPos = pos.relative(direction);
+            if (isDockPort(level, controllerPos, pos) || isDockPort(level, controllerPos.above(), pos)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isDockPort(Level level, BlockPos controllerPos, BlockPos waterPos) {
+        BlockEntity blockEntity = level.getBlockEntity(controllerPos);
+        if (!(blockEntity instanceof DockingStationBlockEntity dock)) {
+            return false;
+        }
+        BlockPos port = dock.getVehicleBlockPos();
+        return port.getX() == waterPos.getX() && port.getZ() == waterPos.getZ();
+    }
+
+    private static boolean isOppositeGuideRail(Level level, BlockPos pos, RouteHeading heading) {
+        Direction direction = heading.cardinalDirection();
+        if (direction == null) {
+            return false;
+        }
         BlockState state = level.getBlockState(pos.below());
         if (!state.is(ModBlocks.GUIDE_RAIL_TUG.get())) {
             return false;
@@ -676,20 +800,42 @@ public final class TugRouteCompiler {
     }
 
     private static double heuristic(BlockPos pos, BlockPos goal) {
-        return Math.abs(goal.getX() - pos.getX()) + Math.abs(goal.getZ() - pos.getZ());
+        double xDistance = Math.abs(goal.getX() - pos.getX());
+        double zDistance = Math.abs(goal.getZ() - pos.getZ());
+        double diagonalDistance = Math.min(xDistance, zDistance);
+        return Math.max(xDistance, zDistance) + (DIAGONAL_COST - 1.0D) * diagonalDistance;
     }
 
-    private static double getTurnPenalty(@Nullable Direction incomingDirection, Direction nextDirection) {
+    static double getTurnPenalty(@Nullable RouteHeading incomingDirection, RouteHeading nextDirection) {
         if (incomingDirection == null || incomingDirection == nextDirection) {
             return 0.0D;
         }
-        return TURN_PENALTY;
+        int directionDotProduct = headingDotProduct(incomingDirection, nextDirection);
+        if (directionDotProduct > 0) {
+            return SHALLOW_TURN_PENALTY;
+        }
+        return directionDotProduct == 0 ? TURN_PENALTY : WIDE_TURN_PENALTY;
     }
 
-    private static boolean isGoalArrivalValid(@Nullable Direction arrivalDirection, @Nullable Direction goalNextDirection) {
+    /**
+     * An eight-way grid needs 45-degree transitions to combine cardinal and diagonal
+     * travel.  They are discouraged by {@link #getTurnPenalty(RouteHeading, RouteHeading)},
+     * rather than forbidden; only immediate reversals are invalid.
+     */
+    static boolean isHeadingTransitionAllowed(@Nullable RouteHeading incomingDirection, RouteHeading nextDirection) {
+        if (incomingDirection == null || incomingDirection == nextDirection) {
+            return true;
+        }
+        return incomingDirection.opposite() != nextDirection;
+    }
+
+    private static int headingDotProduct(RouteHeading first, RouteHeading second) {
+        return first.stepX * second.stepX + first.stepZ * second.stepZ;
+    }
+
+    private static boolean isGoalArrivalValid(@Nullable RouteHeading arrivalDirection, @Nullable RouteHeading goalNextDirection) {
         return goalNextDirection == null
-            || arrivalDirection == null
-            || arrivalDirection != goalNextDirection.getOpposite();
+            || isHeadingTransitionAllowed(arrivalDirection, goalNextDirection);
     }
 
     private static double getLandPenalty(Level level, BlockPos pos) {
