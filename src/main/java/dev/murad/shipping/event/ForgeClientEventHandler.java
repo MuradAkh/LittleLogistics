@@ -10,6 +10,7 @@ import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.item.LocoRouteItem;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.network.client.EntityPosition;
+import dev.murad.shipping.network.client.TugRouteTrackerData;
 import dev.murad.shipping.network.client.VehicleTrackerPacketHandler;
 import dev.murad.shipping.setup.EntityItemMap;
 import dev.murad.shipping.setup.ModItems;
@@ -27,6 +28,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
@@ -41,8 +43,11 @@ import net.neoforged.fml.common.EventBusSubscriber;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.Set;
@@ -61,6 +66,7 @@ public class ForgeClientEventHandler {
     private static final double TUG_ROUTE_NODE_CLIP_DISTANCE = 0.5D;
     private static final int TUG_ROUTE_PREVIEW_DEBOUNCE_TICKS = 3;
     private static final int TUG_ROUTE_PREVIEW_NODES_PER_TICK = 256;
+    private static final int MAX_TRACKED_TUG_ROUTE_VERTICES_PER_FRAME = 16_000;
 
     private record PreviewPoint(Vec3 position, boolean isNode, boolean isCorner) {
     }
@@ -896,6 +902,173 @@ public class ForgeClientEventHandler {
         RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, right, tip, red, green, blue, alpha);
     }
 
+    /** Draws cached, render-only route snapshots. The route-item editor overlay remains separate. */
+    private static void renderTrackedTugRoutes(RenderLevelStageEvent event, Player player, Vec3 camPos) {
+        if (!ShippingConfig.Client.SHOW_WRENCH_TUG_ROUTES.get()
+            || !player.level().dimension().toString().equals(VehicleTrackerPacketHandler.tugRouteDimension)
+            || VehicleTrackerPacketHandler.tugRoutes.isEmpty()) {
+            return;
+        }
+
+        Map<Integer, EntityPosition> positions = new HashMap<>();
+        for (EntityPosition position : VehicleTrackerPacketHandler.toRender) {
+            positions.put(position.id(), position);
+        }
+
+        List<TugRouteTrackerData> routes = new ArrayList<>();
+        for (TugRouteTrackerData route : VehicleTrackerPacketHandler.tugRoutes.values()) {
+            if (positions.containsKey(route.entityId()) && isTrackedRouteNearCamera(route, camPos)) {
+                routes.add(route);
+            }
+        }
+        routes.sort(Comparator.comparingDouble(route -> positions.get(route.entityId()).pos().distanceToSqr(camPos)));
+
+        MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(new ByteBufferBuilder(16_384));
+        int remainingVertices = MAX_TRACKED_TUG_ROUTE_VERTICES_PER_FRAME;
+        for (TugRouteTrackerData route : routes) {
+            remainingVertices = renderTrackedTugRoute(event.getPoseStack(), buffer, camPos, route, remainingVertices);
+            if (remainingVertices <= 0) {
+                break;
+            }
+        }
+        buffer.endBatch();
+    }
+
+    private static boolean isTrackedRouteNearCamera(TugRouteTrackerData route, Vec3 camPos) {
+        if (route.pathVertices().isEmpty()) {
+            return false;
+        }
+
+        double minX = Double.MAX_VALUE;
+        double minY = Double.MAX_VALUE;
+        double minZ = Double.MAX_VALUE;
+        double maxX = -Double.MAX_VALUE;
+        double maxY = -Double.MAX_VALUE;
+        double maxZ = -Double.MAX_VALUE;
+        for (BlockPos point : route.pathVertices()) {
+            minX = Math.min(minX, point.getX());
+            minY = Math.min(minY, point.getY());
+            minZ = Math.min(minZ, point.getZ());
+            maxX = Math.max(maxX, point.getX() + 1.0D);
+            maxY = Math.max(maxY, point.getY() + 1.0D);
+            maxZ = Math.max(maxZ, point.getZ() + 1.0D);
+        }
+        double dx = Math.max(minX - camPos.x, Math.max(0.0D, camPos.x - maxX));
+        double dy = Math.max(minY - camPos.y, Math.max(0.0D, camPos.y - maxY));
+        double dz = Math.max(minZ - camPos.z, Math.max(0.0D, camPos.z - maxZ));
+        return dx * dx + dy * dy + dz * dz <= 128.0D * 128.0D;
+    }
+
+    private static int renderTrackedTugRoute(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos,
+                                               TugRouteTrackerData route, int remainingVertices) {
+        if (route.pathVertices().size() < 2) {
+            return remainingVertices;
+        }
+
+        Set<BlockPos> waypointPositions = new HashSet<>(route.waypointPositions());
+        List<PreviewPoint> points = new ArrayList<>(route.pathVertices().size());
+        for (BlockPos point : route.pathVertices()) {
+            points.add(new PreviewPoint(toWaterSurface(Vec3.atCenterOf(point)), waypointPositions.contains(point), false));
+        }
+        points = markCornerPoints(points);
+
+        int colour = DyeColor.byId(route.dyeColorId()).getTextureDiffuseColor();
+        float red = ((colour >> 16) & 0xFF) / 255.0F;
+        float green = ((colour >> 8) & 0xFF) / 255.0F;
+        float blue = (colour & 0xFF) / 255.0F;
+
+        for (int pointIndex = 1; pointIndex < points.size() && remainingVertices >= 4; pointIndex++) {
+            PreviewSegment segment = trimPreviewSegment(points.get(pointIndex - 1), points.get(pointIndex));
+            if (segment == null) {
+                continue;
+            }
+
+            float alpha = getTrackedSegmentAlpha(segment, camPos);
+            if (alpha <= 0.0F) {
+                continue;
+            }
+
+            var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
+            Vec3 leftFrom = segment.from().add(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            Vec3 leftTo = segment.to().add(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            Vec3 rightFrom = segment.from().subtract(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            Vec3 rightTo = segment.to().subtract(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, leftFrom, leftTo, red, green, blue, alpha);
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, rightFrom, rightTo, red, green, blue, alpha);
+            remainingVertices -= 4;
+            remainingVertices = renderTrackedTugRouteArrows(pose, lineBuffer, camPos, segment, red, green, blue, remainingVertices);
+        }
+
+        for (int index = 1; index < points.size() - 1 && remainingVertices >= 4; index++) {
+            PreviewPoint corner = points.get(index);
+            if (!corner.isCorner() || corner.isNode()) {
+                continue;
+            }
+            RailPort incoming = getCornerEntryPort(points.get(index - 1), corner);
+            RailPort outgoing = getCornerExitPort(corner, points.get(index + 1));
+            if (incoming == null || outgoing == null) {
+                continue;
+            }
+            float alpha = RouteMarkerRenderer.computeAlpha(corner.position(), camPos);
+            if (alpha <= 0.0F) {
+                continue;
+            }
+            var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos,
+                incoming.position().add(incoming.side().scale(TUG_ROUTE_RAIL_OFFSET)),
+                outgoing.position().add(outgoing.side().scale(TUG_ROUTE_RAIL_OFFSET)), red, green, blue, alpha);
+            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos,
+                incoming.position().subtract(incoming.side().scale(TUG_ROUTE_RAIL_OFFSET)),
+                outgoing.position().subtract(outgoing.side().scale(TUG_ROUTE_RAIL_OFFSET)), red, green, blue, alpha);
+            remainingVertices -= 4;
+        }
+
+        for (BlockPos waypoint : route.waypointPositions()) {
+            if (remainingVertices < 8) {
+                break;
+            }
+            float alpha = RouteMarkerRenderer.computeAlpha(toWaterSurface(Vec3.atCenterOf(waypoint)), camPos);
+            if (alpha <= 0.0F) {
+                continue;
+            }
+            renderTugRouteNodeBounds(pose, buffer.getBuffer(ModRenderType.LINES), camPos, waypoint, red, green, blue, alpha);
+            remainingVertices -= 8;
+        }
+        return remainingVertices;
+    }
+
+    private static float getTrackedSegmentAlpha(PreviewSegment segment, Vec3 camPos) {
+        Vec3 direction = segment.to().subtract(segment.from());
+        double lengthSqr = direction.lengthSqr();
+        if (lengthSqr <= 1.0E-6D) {
+            return 0.0F;
+        }
+        double progress = Math.clamp(camPos.subtract(segment.from()).dot(direction) / lengthSqr, 0.0D, 1.0D);
+        Vec3 closest = segment.from().add(direction.scale(progress));
+        return RouteMarkerRenderer.computeAlpha(closest, camPos);
+    }
+
+    private static int renderTrackedTugRouteArrows(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer lineBuffer,
+                                                    Vec3 camPos, PreviewSegment segment, float red, float green, float blue,
+                                                    int remainingVertices) {
+        double projection = camPos.subtract(segment.from()).dot(segment.forward());
+        double firstVisible = Math.max(0.0D, projection - 128.0D);
+        double lastVisible = Math.min(segment.length(), projection + 128.0D);
+        double firstArrow = Math.ceil((firstVisible - TUG_ROUTE_ARROW_SPACING * 0.5D) / TUG_ROUTE_ARROW_SPACING)
+            * TUG_ROUTE_ARROW_SPACING + TUG_ROUTE_ARROW_SPACING * 0.5D;
+
+        for (double distance = firstArrow; distance <= lastVisible && remainingVertices >= 4; distance += TUG_ROUTE_ARROW_SPACING) {
+            Vec3 center = segment.from().add(segment.forward().scale(distance));
+            float alpha = RouteMarkerRenderer.computeAlpha(center, camPos);
+            if (alpha <= 0.0F) {
+                continue;
+            }
+            renderTugRouteArrow(pose, lineBuffer, camPos, center, segment.forward(), segment.side(), red, green, blue, alpha);
+            remainingVertices -= 4;
+        }
+        return remainingVertices;
+    }
+
     @SubscribeEvent
     public static void onRenderWorldLast(RenderLevelStageEvent event) {
         if(!event.getStage().equals(RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS)){
@@ -915,9 +1088,11 @@ public class ForgeClientEventHandler {
 
         // Only render registered vehicles when conductors wrench is on the mainhand
         if (mainStack.getItem().equals(ModItems.CONDUCTORS_WRENCH.get()) && player.level().dimension().toString().equals(VehicleTrackerPacketHandler.toRenderDimension)){
-            MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
             var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
             Vec3 camPos = camera.getPosition();
+            renderTrackedTugRoutes(event, player, camPos);
+
+            MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
 
             for(EntityPosition position : VehicleTrackerPacketHandler.toRender){
                 @Nullable

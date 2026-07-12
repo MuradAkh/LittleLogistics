@@ -28,6 +28,7 @@ public class ShippingConfig {
         public static final ModConfigSpec.ConfigValue<Double> TUG_SMOKE_MODIFIER;
         public static final ModConfigSpec.ConfigValue<Double> LOCO_SMOKE_MODIFIER;
         public static final ModConfigSpec.ConfigValue<Boolean> DISABLE_ROUTE_MARKERS;
+        public static final ModConfigSpec.ConfigValue<Boolean> SHOW_WRENCH_TUG_ROUTES;
 
         static {
             BUILDER.push("general");
@@ -42,6 +43,10 @@ public class ShippingConfig {
             DISABLE_ROUTE_MARKERS =
                     BUILDER.comment("Disable in-world route waypoint markers when holding a route item. Default false.")
                             .define("disableRouteMarkers", false);
+
+            SHOW_WRENCH_TUG_ROUTES =
+                    BUILDER.comment("Show nearby registered tug routes while holding the Conductor's Wrench. Default true.")
+                            .define("showWrenchTugRoutes", true);
             BUILDER.pop();
 
             SPEC = BUILDER.build();

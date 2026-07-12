@@ -71,9 +71,15 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     // CONTAINER STUFF
     protected final ItemStackHandler routeItemHandler = createRouteItemHandler();
+    private long routeOverlayRevision;
 
     public ItemStackHandler getRouteItemHandler() {
         return routeItemHandler;
+    }
+
+    /** Incremented whenever the installed route stack changes, for cheap wrench-overlay sync checks. */
+    public long getRouteOverlayRevision() {
+        return routeOverlayRevision;
     }
     protected boolean contentsChanged = false;
     protected boolean docked = false;
@@ -196,6 +202,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             @Override
             protected void onContentsChanged(int slot) {
                 contentsChanged = true;
+                routeOverlayRevision++;
             }
 
             @Override
@@ -640,7 +647,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             var color = DyeColor.getColor(player.getItemInHand(hand));
 
             if (color != null) {
-                this.getEntityData().set(COLOR_DATA, color.getId());
+                this.setColor(color.getId());
             } else {
                 ((ServerPlayer) player).openMenu(createContainerProvider(), getDataAccessor()::write);
             }

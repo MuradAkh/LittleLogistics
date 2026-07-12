@@ -5,6 +5,7 @@ import dev.murad.shipping.block.dockingstation.DockingStationBlockEntity;
 import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.network.client.VehicleTrackerClientPacket;
 import dev.murad.shipping.network.client.VehicleTrackerPacketHandler;
+import dev.murad.shipping.network.client.TugRouteTrackerClientPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -17,7 +18,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 public class NetworkHandler {
     @SubscribeEvent
     public static void onRegisterPayloadHandlers(RegisterPayloadHandlersEvent event) {
-        final PayloadRegistrar registrar = event.registrar(ShippingMod.MOD_ID).versioned("1");
+        final PayloadRegistrar registrar = event.registrar(ShippingMod.MOD_ID).versioned("2");
 
         // Client → Server packets
         registrar.playToServer(
@@ -51,6 +52,11 @@ public class NetworkHandler {
                 VehicleTrackerClientPacket.TYPE,
                 VehicleTrackerClientPacket.STREAM_CODEC,
                 NetworkHandler::handleVehicleTracker
+        );
+        registrar.playToClient(
+                TugRouteTrackerClientPacket.TYPE,
+                TugRouteTrackerClientPacket.STREAM_CODEC,
+                NetworkHandler::handleTugRouteTracker
         );
     }
 
@@ -131,5 +137,9 @@ public class NetworkHandler {
             VehicleTrackerPacketHandler.toRender = packet.parse();
             VehicleTrackerPacketHandler.toRenderDimension = packet.dimension();
         });
+    }
+
+    private static void handleTugRouteTracker(TugRouteTrackerClientPacket packet, IPayloadContext context) {
+        context.enqueueWork(() -> VehicleTrackerPacketHandler.setTugRoutes(packet));
     }
 }

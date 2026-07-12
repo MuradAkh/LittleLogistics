@@ -1,7 +1,10 @@
 package dev.murad.shipping.global;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
 import dev.murad.shipping.network.client.EntityPosition;
+import dev.murad.shipping.network.client.TugRouteTrackerClientPacket;
+import dev.murad.shipping.network.client.TugRouteTrackerData;
 import dev.murad.shipping.network.client.VehicleTrackerClientPacket;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
@@ -15,6 +18,7 @@ import net.minecraft.server.level.TicketType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -29,18 +33,28 @@ import java.util.stream.Collectors;
 public class PlayerTrainChunkManager extends SavedData {
     private final static TicketType<UUID> TRAVEL_TICKET = TicketType.create("littlelogistics:travelticket", UUID::compareTo);
     private final static TicketType<UUID> LOAD_TICKET = TicketType.create("littlelogistics:loadticket", UUID::compareTo, 500);
+    private static final double WRENCH_TUG_ROUTE_SYNC_DISTANCE = 160.0D;
+    private static final double WRENCH_TUG_ROUTE_SYNC_DISTANCE_SQR = WRENCH_TUG_ROUTE_SYNC_DISTANCE * WRENCH_TUG_ROUTE_SYNC_DISTANCE;
+    private static final int WRENCH_TUG_ROUTE_SNAPSHOT_INTERVAL = 10;
+    private static final int MAX_WRENCH_TUG_ROUTE_VERTICES = 16_384;
     private final Set<Entity> enrolled = new HashSet<>();
     private final Set<ChunkPos> tickets = new HashSet<>();
     private final Set<ChunkPos> toLoad = new HashSet<>();
     private final int loadLevel = ShippingConfig.Server.CHUNK_LOADING_LEVEL.get();
     private boolean changed = false;
     private boolean active = false;
+    private boolean wrenchTugRouteSnapshotActive;
+    private int wrenchTugRouteSnapshotTimer;
+    private Map<UUID, TugRouteTrackerState> lastWrenchTugRouteStates = Map.of();
     @Getter
     private int numVehicles = 0;
     @Getter
     private final UUID uuid;
     @Getter
     private final ServerLevel level;
+
+    private record TugRouteTrackerState(int entityId, int dyeColorId, long routeRevision, int distanceBucket) {
+    }
 
     public static PlayerTrainChunkManager get(ServerLevel level, UUID uuid){
         DimensionDataStorage storage = level.getDataStorage();
@@ -88,6 +102,7 @@ public class PlayerTrainChunkManager extends SavedData {
     }
 
     public void deactivate(){
+        resetTugRouteTracker();
         updateToLoad();
         numVehicles = enrolled.size();
         enrolled.clear();
@@ -97,6 +112,7 @@ public class PlayerTrainChunkManager extends SavedData {
     }
 
     public void activate(){
+        resetTugRouteTracker();
         active = true;
         level.getServer().execute(() -> {
             toLoad.forEach(chunkPos -> level.getChunkSource().addRegionTicket(LOAD_TICKET, chunkPos, 2, uuid));
@@ -142,6 +158,9 @@ public class PlayerTrainChunkManager extends SavedData {
         Player player = level.getPlayerByUUID(uuid);
         if(player instanceof ServerPlayer serverPlayer && serverPlayer.getItemInHand(InteractionHand.MAIN_HAND).getItem().equals(ModItems.CONDUCTORS_WRENCH.get())) {
             PacketDistributor.sendToPlayer(serverPlayer, VehicleTrackerClientPacket.of(getEntityPositions(), level.dimension().toString()));
+            tickTugRouteTracker(serverPlayer);
+        } else {
+            resetTugRouteTracker();
         }
 
         if(this.changed || changed || enrolled.stream()
@@ -157,6 +176,59 @@ public class PlayerTrainChunkManager extends SavedData {
         return enrolled.stream().map(entity ->
                 new EntityPosition(entity.getType().toString(), entity.getId(), entity.position(), new Vec3(entity.xOld, entity.yOld, entity.zOld)))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Positions need to be fresh every tick, but complete tug routes are static. Send a full
+     * replacement snapshot only when a nearby tug's visible route state changes.
+     */
+    private void tickTugRouteTracker(ServerPlayer player) {
+        boolean firstSnapshot = !wrenchTugRouteSnapshotActive;
+        if (!firstSnapshot && ++wrenchTugRouteSnapshotTimer < WRENCH_TUG_ROUTE_SNAPSHOT_INTERVAL) {
+            return;
+        }
+        wrenchTugRouteSnapshotTimer = 0;
+
+        List<AbstractTugEntity> nearbyTugs = enrolled.stream()
+            .filter(AbstractTugEntity.class::isInstance)
+            .map(AbstractTugEntity.class::cast)
+            .filter(tug -> tug.distanceToSqr(player) <= WRENCH_TUG_ROUTE_SYNC_DISTANCE_SQR)
+            .sorted(Comparator.comparingDouble(tug -> tug.distanceToSqr(player)))
+            .toList();
+
+        Map<UUID, TugRouteTrackerState> visibleStates = new HashMap<>();
+        for (AbstractTugEntity tug : nearbyTugs) {
+            int dyeColorId = tug.getColor() == null ? DyeColor.RED.getId() : tug.getColor();
+            int distanceBucket = (int) (Math.sqrt(tug.distanceToSqr(player)) / 16.0D);
+            visibleStates.put(tug.getUUID(), new TugRouteTrackerState(tug.getId(), dyeColorId,
+                tug.getRouteOverlayRevision(), distanceBucket));
+        }
+
+        if (!firstSnapshot && visibleStates.equals(lastWrenchTugRouteStates)) {
+            return;
+        }
+
+        int remainingVertices = MAX_WRENCH_TUG_ROUTE_VERTICES;
+        List<TugRouteTrackerData> routes = new ArrayList<>();
+        for (AbstractTugEntity tug : nearbyTugs) {
+            Optional<TugRouteTrackerData> route = TugRouteTrackerData.fromTug(tug);
+            if (route.isEmpty() || route.get().pathVertices().size() > remainingVertices) {
+                continue;
+            }
+            routes.add(route.get());
+            remainingVertices -= route.get().pathVertices().size();
+        }
+
+        PacketDistributor.sendToPlayer(player,
+            new TugRouteTrackerClientPacket(level.dimension().toString(), routes));
+        lastWrenchTugRouteStates = Map.copyOf(visibleStates);
+        wrenchTugRouteSnapshotActive = true;
+    }
+
+    private void resetTugRouteTracker() {
+        wrenchTugRouteSnapshotActive = false;
+        wrenchTugRouteSnapshotTimer = 0;
+        lastWrenchTugRouteStates = Map.of();
     }
 
     private void onChanged() {
