@@ -280,8 +280,14 @@ public class DockingStationBlockEntity extends BlockEntity {
         return true;
     }
 
-    public void occupyDock(Entity vehicle) {
-        if (!colorMatches(vehicle)) return;
+    /**
+     * Acquires this dock for {@code vehicle}. A dock is never silently stolen:
+     * callers must handle a failed acquisition before changing their own state.
+     */
+    public boolean tryOccupyDock(Entity vehicle) {
+        if (!colorMatches(vehicle)) return false;
+        if (dockedVehicle != null && dockedVehicle != vehicle) return false;
+        if (dockedVehicle == vehicle) return true;
 
         this.dockedVehicle = vehicle;
         this.occupied = true;
@@ -300,6 +306,12 @@ public class DockingStationBlockEntity extends BlockEntity {
         setChanged();
         syncToClient();
         if (level != null) level.invalidateCapabilities(worldPosition);
+        return true;
+    }
+
+    /** Retained for existing callers that do not yet need acquisition feedback. */
+    public void occupyDock(Entity vehicle) {
+        tryOccupyDock(vehicle);
     }
 
     public void vacateDock() {
@@ -312,6 +324,20 @@ public class DockingStationBlockEntity extends BlockEntity {
         setChanged();
         syncToClient();
         if (level != null) level.invalidateCapabilities(worldPosition);
+    }
+
+    /** Releases this dock only when it is still owned by the supplied vehicle. */
+    public boolean vacateDock(Entity vehicle) {
+        if (dockedVehicle != vehicle) return false;
+        vacateDock();
+        return true;
+    }
+
+    /** UUID variant for releasing a persisted docking assignment after an entity reload. */
+    public boolean vacateDock(UUID vehicleId) {
+        if (dockedVehicle == null || !dockedVehicle.getUUID().equals(vehicleId)) return false;
+        vacateDock();
+        return true;
     }
 
     // =========================================================================
