@@ -389,7 +389,7 @@ public final class TugRouteCompiler {
                         continue;
                     }
 
-                    double tentativeScore = current.gScore() + direction.travelCost() + getLandPenalty(this.level, neighbor)
+                    double tentativeScore = current.gScore() + direction.travelCost()
                         + getTurnPenalty(currentState.incomingDirection(), direction);
                     SearchState neighborState = new SearchState(neighbor, direction);
                     if (tentativeScore >= this.gScores.getOrDefault(neighborState, Double.MAX_VALUE)) {
@@ -672,7 +672,7 @@ public final class TugRouteCompiler {
                     continue;
                 }
 
-                double tentativeScore = current.gScore() + direction.travelCost() + getLandPenalty(level, neighbor)
+                double tentativeScore = current.gScore() + direction.travelCost()
                     + getTurnPenalty(currentState.incomingDirection(), direction);
                 SearchState neighborState = new SearchState(neighbor, direction);
                 if (tentativeScore >= gScores.getOrDefault(neighborState, Double.MAX_VALUE)) {
@@ -836,32 +836,6 @@ public final class TugRouteCompiler {
     private static boolean isGoalArrivalValid(@Nullable RouteHeading arrivalDirection, @Nullable RouteHeading goalNextDirection) {
         return goalNextDirection == null
             || isHeadingTransitionAllowed(arrivalDirection, goalNextDirection);
-    }
-
-    private static double getLandPenalty(Level level, BlockPos pos) {
-        double penalty = 0.0D;
-        for (BlockPos neighbor : List.of(
-            pos.east(),
-            pos.west(),
-            pos.north(),
-            pos.south(),
-            pos.north().east(),
-            pos.north().west(),
-            pos.south().east(),
-            pos.south().west()
-        )) {
-            FluidState fluid = level.getFluidState(neighbor);
-            if (!fluid.is(FluidTags.WATER)) {
-                penalty = 5.0D;
-            }
-
-            BlockState state = level.getBlockState(neighbor);
-            BlockEntity blockEntity = level.getBlockEntity(neighbor);
-            if (state.is(ModBlocks.GUIDE_RAIL_CORNER.get()) || state.is(ModBlocks.DOCKING_STATION.get()) || blockEntity != null) {
-                return 0.0D;
-            }
-        }
-        return penalty;
     }
 
     private static boolean isNavigable(Level level, BlockPos pos) {
