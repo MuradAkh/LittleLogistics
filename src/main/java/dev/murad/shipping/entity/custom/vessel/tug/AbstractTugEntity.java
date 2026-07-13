@@ -56,11 +56,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
@@ -93,7 +95,16 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     protected boolean engineOn = true;
 
     public void setEngineOn(boolean engineOn) {
-        this.engineOn = engineOn;
+        if (!engineOn) {
+            this.engineOn = false;
+            clearRouteApproach();
+            return;
+        }
+
+        // Route inventory changes are normally consumed on the next AI tick.  Do it now as
+        // well so a player cannot start an approach using the route that was just replaced.
+        tickRouteCheck();
+        beginRouteApproach();
     }
 
     private DockingState dockingState = DockingState.APPROACHING;
@@ -112,6 +123,22 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private static final double DOCK_SETTLE_EPSILON = 0.02D;
     private static final double DOCK_CLEAR_DISTANCE = 0.75D;
     private static final double ROUTE_REBASE_MAX_DISTANCE = 1.0D;
+    private static final double ROUTE_JOIN_DISTANCE = 1.25D;
+    private static final int ROUTE_APPROACH_SEARCH_BUDGET = 256;
+
+    /** Runtime-only path used to reach an installed route.  It is never written to the route item. */
+    @Nullable
+    private TugRouteTrack approachTrack;
+    private double approachProgress;
+    private double approachRouteProgress;
+    @Nullable
+    private TugRouteCompiler.PreviewPathfinder approachSearch;
+    private List<ApproachTarget> approachTargets = List.of();
+    private int approachTargetIndex;
+    private boolean restartRouteApproachAfterLoad;
+
+    private record ApproachTarget(BlockPos position, double routeProgress) {
+    }
 
     /** A tug may only rediscover docks while approaching; a session owns exact dock positions. */
     private enum DockingState {
@@ -203,6 +230,10 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             protected void onContentsChanged(int slot) {
                 contentsChanged = true;
                 routeOverlayRevision++;
+                // A route change must never make the tug jump to the new route's first point.
+                // It has to calculate a fresh approach when the player starts the engine again.
+                AbstractTugEntity.this.engineOn = false;
+                clearRouteApproach();
             }
 
             @Override
@@ -234,7 +265,10 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             routeItemHandler.deserializeNBT(this.registryAccess(), compound.getCompound("routeHandler"));
         }
         routeProgress = compound.contains(ROUTE_PROGRESS_TAG) ? compound.getDouble(ROUTE_PROGRESS_TAG) : 0.0D;
-        engineOn = !compound.contains("engineOn") || compound.getBoolean("engineOn");
+        restartRouteApproachAfterLoad = !compound.contains("engineOn") || compound.getBoolean("engineOn");
+        // A persisted route must be joined from the tug's current water position after loading.
+        // Defer the request until tickRouteCheck has rebuilt its compiled track.
+        engineOn = false;
         contentsChanged = true;
         enrollmentHandler.load(compound);
         consistUUIDs.clear();
@@ -382,6 +416,114 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             this.setPath(route.isComplete() ? route : new TugRoute());
             contentsChanged = false;
         }
+    }
+
+    /**
+     * Starts a server-side, resumable search from the tug's current water cell to a route waypoint.
+     * The saved route remains untouched; this only builds a temporary lead-in for this engine start.
+     */
+    private void beginRouteApproach() {
+        clearRouteApproach();
+        engineOn = false;
+
+        if (!hasCompiledRouteTrack()) {
+            return;
+        }
+
+        // If the tug is already on the route, resume at that exact point rather than visiting a waypoint.
+        Optional<TugRouteTrack.Projection> projection = routeTrack.project(this.position());
+        if (projection.filter(value -> value.distanceToTrack() <= ROUTE_JOIN_DISTANCE).isPresent()) {
+            routeProgress = projection.get().distanceAlongTrack();
+            engineOn = true;
+            return;
+        }
+
+        Optional<BlockPos> start = TugRouteCompiler.resolveWaypointAnchor(this.level(), this.blockPosition());
+        if (start.isEmpty()) {
+            return;
+        }
+
+        approachTargets = collectApproachTargets(start.get());
+        if (approachTargets.isEmpty()) {
+            return;
+        }
+
+        approachTargetIndex = 0;
+        beginNextApproachSearch(start.get());
+    }
+
+    private List<ApproachTarget> collectApproachTargets(BlockPos start) {
+        Map<BlockPos, Double> targets = new HashMap<>();
+        for (TugRouteNode node : path) {
+            BlockPos target = node.toBlockPos().immutable();
+            routeTrack.project(Vec3.atCenterOf(target))
+                .ifPresent(projection -> targets.putIfAbsent(target, projection.distanceAlongTrack()));
+        }
+
+        return targets.entrySet().stream()
+            .map(entry -> new ApproachTarget(entry.getKey(), entry.getValue()))
+            .sorted(Comparator.comparingDouble(target -> target.position().distSqr(start)))
+            .toList();
+    }
+
+    private void beginNextApproachSearch(BlockPos start) {
+        if (approachTargetIndex >= approachTargets.size()) {
+            clearRouteApproach();
+            // No reachable entry exists, so the requested engine start fails.
+            engineOn = false;
+            return;
+        }
+
+        ApproachTarget target = approachTargets.get(approachTargetIndex);
+        approachSearch = TugRouteCompiler.createPreviewPathfinder(this.level(), start, target.position(), Set.of(), Set.of());
+    }
+
+    /** Returns true while an approach is still being calculated, so normal route movement stays paused. */
+    private boolean tickRouteApproachSearch() {
+        if (approachSearch == null) {
+            return false;
+        }
+
+        TugRouteCompiler.PreviewPathStatus status = approachSearch.advance(ROUTE_APPROACH_SEARCH_BUDGET);
+        if (status == TugRouteCompiler.PreviewPathStatus.SEARCHING) {
+            return true;
+        }
+
+        if (status == TugRouteCompiler.PreviewPathStatus.FOUND) {
+            TugRouteSegment segment = approachSearch.getResult().orElseThrow();
+            ApproachTarget target = approachTargets.get(approachTargetIndex);
+            approachTrack = TugRouteTrack.from(new TugRoute(null, List.of(), List.of(segment)));
+            approachProgress = 0.0D;
+            approachRouteProgress = target.routeProgress();
+            approachSearch = null;
+
+            // A zero-length approach means that the route entry is already under the tug.
+            if (approachTrack == null) {
+                routeProgress = approachRouteProgress;
+            }
+            engineOn = true;
+            return true;
+        }
+
+        approachSearch = null;
+        approachTargetIndex++;
+        Optional<BlockPos> start = TugRouteCompiler.resolveWaypointAnchor(this.level(), this.blockPosition());
+        if (start.isEmpty()) {
+            clearRouteApproach();
+            engineOn = false;
+        } else {
+            beginNextApproachSearch(start.get());
+        }
+        return true;
+    }
+
+    private void clearRouteApproach() {
+        approachTrack = null;
+        approachProgress = 0.0D;
+        approachRouteProgress = 0.0D;
+        approachSearch = null;
+        approachTargets = List.of();
+        approachTargetIndex = 0;
     }
 
     protected abstract boolean tickFuel();
@@ -686,13 +828,19 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         public void tick() {
             if(!AbstractTugEntity.this.level().isClientSide) {
                 tickRouteCheck();
+                if (restartRouteApproachAfterLoad) {
+                    restartRouteApproachAfterLoad = false;
+                    beginRouteApproach();
+                }
                 tickCheckDock();
 
                 if (AbstractTugEntity.this.level() instanceof ServerLevel serverLevel) {
                     tickConsist(serverLevel);
                 }
 
-                followPath();
+                if (!tickRouteApproachSearch()) {
+                    followPath();
+                }
                 if (!hasCompiledRouteTrack()) {
                     followGuideRail();
                 }
@@ -780,9 +928,20 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             navigation.stop();
 
             double speed = getRouteCruiseSpeed();
-            routeProgress = routeTrack.wrapDistance(routeProgress + speed);
-            TugRouteTrack.Sample current = routeTrack.sample(routeProgress);
-            TugRouteTrack.Sample lookAhead = routeTrack.sample(routeProgress + ROUTE_LOOKAHEAD);
+            TugRouteTrack activeTrack = approachTrack != null ? approachTrack : routeTrack;
+            boolean approachingRoute = approachTrack != null;
+            if (approachingRoute) {
+                approachProgress = Math.min(approachProgress + speed, activeTrack.getTotalLength());
+            } else {
+                routeProgress = routeTrack.wrapDistance(routeProgress + speed);
+            }
+            double activeProgress = approachingRoute ? approachProgress : routeProgress;
+            TugRouteTrack.Sample current = approachingRoute
+                ? activeTrack.sampleClamped(activeProgress)
+                : activeTrack.sample(activeProgress);
+            TugRouteTrack.Sample lookAhead = approachingRoute
+                ? activeTrack.sampleClamped(activeProgress + ROUTE_LOOKAHEAD)
+                : activeTrack.sample(activeProgress + ROUTE_LOOKAHEAD);
             Vec3 desiredDirection = lookAhead.position().subtract(this.position());
             Vec3 horizontalDirection = new Vec3(desiredDirection.x, 0.0D, desiredDirection.z);
 
@@ -793,8 +952,11 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
                 this.setYRot(computeRouteYaw(desiredVelocity));
             }
 
-            if (this.position().distanceTo(current.position()) > 2.0D) {
-                this.moveTo(current.position().x, this.getY(), current.position().z, this.getYRot(), this.getXRot());
+            if (approachingRoute && approachProgress >= activeTrack.getTotalLength()
+                && horizontalDistance(this.position(), current.position()) <= ROUTE_JOIN_DISTANCE) {
+                double joinedRouteProgress = approachRouteProgress;
+                clearRouteApproach();
+                routeProgress = joinedRouteProgress;
             }
         } else {
             entityData.set(INDEPENDENT_MOTION, false);
@@ -935,7 +1097,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     public boolean updateFollowerOnRoute(VesselEntity follower) {
-        if (!hasCompiledRouteTrack()) {
+        if (!hasCompiledRouteTrack() || approachTrack != null || approachSearch != null) {
             return false;
         }
 
@@ -951,16 +1113,14 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         Vec3 currentPosition = follower.position();
         double horizontalError = horizontalDistance(currentPosition, target);
 
-        Vec3 correctedPosition;
         if (horizontalError > FOLLOWER_HARD_SNAP_DISTANCE) {
-            correctedPosition = new Vec3(target.x, currentPosition.y, target.z);
-        } else {
-            correctedPosition = new Vec3(
-                    Mth.lerp(FOLLOWER_CORRECTION_BLEND, currentPosition.x, target.x),
-                    currentPosition.y,
-                    Mth.lerp(FOLLOWER_CORRECTION_BLEND, currentPosition.z, target.z)
-            );
+            return false;
         }
+        Vec3 correctedPosition = new Vec3(
+                Mth.lerp(FOLLOWER_CORRECTION_BLEND, currentPosition.x, target.x),
+                currentPosition.y,
+                Mth.lerp(FOLLOWER_CORRECTION_BLEND, currentPosition.z, target.z)
+        );
 
         follower.moveTo(correctedPosition.x, follower.getY(), correctedPosition.z, (float) desiredYaw, follower.getXRot());
         follower.setDeltaMovement(forward.scale(getRouteCruiseSpeed()));

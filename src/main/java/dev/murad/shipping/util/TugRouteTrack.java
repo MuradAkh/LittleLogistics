@@ -75,15 +75,23 @@ public class TugRouteTrack {
     }
 
     public Sample sample(double distance) {
-        double wrapped = wrapDistance(distance);
+        return sampleAt(wrapDistance(distance));
+    }
+
+    /** Samples an open lead-in path without wrapping its end back to its start. */
+    public Sample sampleClamped(double distance) {
+        return sampleAt(Mth.clamp(distance, 0.0D, totalLength));
+    }
+
+    private Sample sampleAt(double distance) {
         for (int i = 1; i < cumulativeLengths.size(); i++) {
             double segmentEnd = cumulativeLengths.get(i);
-            if (wrapped <= segmentEnd) {
+            if (distance <= segmentEnd) {
                 Vec3 from = points.get(i - 1);
                 Vec3 to = points.get(i);
                 double segmentStart = cumulativeLengths.get(i - 1);
                 double segmentLength = segmentEnd - segmentStart;
-                double ratio = segmentLength <= 0.0D ? 0.0D : Mth.clamp((wrapped - segmentStart) / segmentLength, 0.0D, 1.0D);
+                double ratio = segmentLength <= 0.0D ? 0.0D : Mth.clamp((distance - segmentStart) / segmentLength, 0.0D, 1.0D);
                 Vec3 tangent = to.subtract(from).normalize();
                 return new Sample(MathUtil.lerp(from, to, ratio), tangent);
             }
