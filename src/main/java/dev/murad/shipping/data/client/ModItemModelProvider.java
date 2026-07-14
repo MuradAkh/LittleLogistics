@@ -41,12 +41,12 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "fluid_car");
         builder(itemGenerated, "seater_car");
         builder(itemGenerated, "book");
-        builder(itemGenerated, "tug_route")
+        getBuilder("tug_route").parent(itemGenerated).texture("layer0", "item/tug_route_blank")
                 .override()
-                .model(builder(itemGenerated, "tug_route_empty"))
+                .model(builder(itemGenerated, "tug_route_incomplete"))
                 .predicate(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "routestate"), 1f).end()
                 .override()
-                .model(builder(itemGenerated, "tug_route_empty"))
+                .model(getBuilder("tug_route_complete").parent(itemGenerated).texture("layer0", "item/tug_route"))
                 .predicate(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "routestate"), 2f).end();
 
         builder(itemGenerated, "spring")
@@ -66,12 +66,12 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "receiver_component");
         builder(itemGenerated, "transmitter_component");
 
-        builder(itemGenerated, "locomotive_route")
+        getBuilder("locomotive_route").parent(itemGenerated).texture("layer0", "item/locomotive_route_blank")
                 .override()
-                .model(builder(itemGenerated, "locomotive_route_empty"))
+                .model(builder(itemGenerated, "locomotive_route_incomplete"))
                 .predicate(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "locoroutestate"), 1f).end()
                 .override()
-                .model(builder(itemGenerated, "locomotive_route_empty"))
+                .model(getBuilder("locomotive_route_complete").parent(itemGenerated).texture("layer0", "item/locomotive_route"))
                 .predicate(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "locoroutestate"), 2f).end();
     }
 

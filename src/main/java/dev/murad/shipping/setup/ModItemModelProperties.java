@@ -17,17 +17,17 @@ public class ModItemModelProperties {
         ItemProperties.register(ModItems.TUG_ROUTE.get(),
                 ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "routestate"), (stack, world, entity, i) ->
                         switch (TugRouteItem.getRoute(stack).getState()) {
-                            case BLANK -> 1.0f;
-                            case IN_PROGRESS -> 2.0f;
-                            case COMPLETE -> 0.0f;
+                            case BLANK -> 0.0f;
+                            case IN_PROGRESS -> 1.0f;
+                            case COMPLETE -> 2.0f;
                         });
 
         ItemProperties.register(ModItems.LOCO_ROUTE.get(),
                 ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "locoroutestate"), (stack, world, entity, i) ->
                         switch (LocoRouteItem.getRoute(stack).getState()) {
-                            case BLANK -> 1.0f;
-                            case IN_PROGRESS -> 2.0f;
-                            case COMPLETE -> 0.0f;
+                            case BLANK -> 0.0f;
+                            case IN_PROGRESS -> 1.0f;
+                            case COMPLETE -> 2.0f;
                         });
     }
 }
