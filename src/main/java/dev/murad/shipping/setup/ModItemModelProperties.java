@@ -24,6 +24,10 @@ public class ModItemModelProperties {
 
         ItemProperties.register(ModItems.LOCO_ROUTE.get(),
                 ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "locoroutestate"), (stack, world, entity, i) ->
-                        LocoRouteItem.getRoute(stack).isEmpty() ? 1 : 0);
+                        switch (LocoRouteItem.getRoute(stack).getState()) {
+                            case BLANK -> 1.0f;
+                            case IN_PROGRESS -> 2.0f;
+                            case COMPLETE -> 0.0f;
+                        });
     }
 }

@@ -2,14 +2,11 @@ package dev.murad.shipping.util;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -83,6 +80,10 @@ public class LocoRouteNode {
         return this.name != null;
     }
 
+    public String getDisplayName(int index) {
+        return hasCustomName() ? (index + 1) + ". " + name : (index + 1) + ". Node";
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -129,6 +130,10 @@ public class LocoRouteNode {
 
     public static LocoRouteNode fromBlocKPos(BlockPos pos) {
         return new LocoRouteNode(null, pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    public static LocoRouteNode fromBlockPos(BlockPos pos) {
+        return fromBlocKPos(pos);
     }
 
     public BlockPos toBlockPos() {

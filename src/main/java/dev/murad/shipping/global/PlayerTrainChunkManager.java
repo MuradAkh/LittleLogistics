@@ -2,6 +2,9 @@ package dev.murad.shipping.global;
 
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.entity.custom.vessel.tug.AbstractTugEntity;
+import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
+import dev.murad.shipping.network.client.LocoRouteTrackerClientPacket;
+import dev.murad.shipping.network.client.LocoRouteTrackerData;
 import dev.murad.shipping.network.client.EntityPosition;
 import dev.murad.shipping.network.client.TugRouteTrackerClientPacket;
 import dev.murad.shipping.network.client.TugRouteTrackerData;
@@ -46,6 +49,9 @@ public class PlayerTrainChunkManager extends SavedData {
     private boolean wrenchTugRouteSnapshotActive;
     private int wrenchTugRouteSnapshotTimer;
     private Map<UUID, TugRouteTrackerState> lastWrenchTugRouteStates = Map.of();
+    private boolean wrenchLocoRouteSnapshotActive;
+    private int wrenchLocoRouteSnapshotTimer;
+    private Map<UUID, TugRouteTrackerState> lastWrenchLocoRouteStates = Map.of();
     @Getter
     private int numVehicles = 0;
     @Getter
@@ -159,6 +165,7 @@ public class PlayerTrainChunkManager extends SavedData {
         if(player instanceof ServerPlayer serverPlayer && serverPlayer.getItemInHand(InteractionHand.MAIN_HAND).getItem().equals(ModItems.CONDUCTORS_WRENCH.get())) {
             PacketDistributor.sendToPlayer(serverPlayer, VehicleTrackerClientPacket.of(getEntityPositions(), level.dimension().toString()));
             tickTugRouteTracker(serverPlayer);
+            tickLocoRouteTracker(serverPlayer);
         } else {
             resetTugRouteTracker();
         }
@@ -229,6 +236,43 @@ public class PlayerTrainChunkManager extends SavedData {
         wrenchTugRouteSnapshotActive = false;
         wrenchTugRouteSnapshotTimer = 0;
         lastWrenchTugRouteStates = Map.of();
+        wrenchLocoRouteSnapshotActive = false;
+        wrenchLocoRouteSnapshotTimer = 0;
+        lastWrenchLocoRouteStates = Map.of();
+    }
+
+    private void tickLocoRouteTracker(ServerPlayer player) {
+        boolean firstSnapshot = !wrenchLocoRouteSnapshotActive;
+        if (!firstSnapshot && ++wrenchLocoRouteSnapshotTimer < WRENCH_TUG_ROUTE_SNAPSHOT_INTERVAL) return;
+        wrenchLocoRouteSnapshotTimer = 0;
+
+        List<AbstractLocomotiveEntity> nearbyLocos = enrolled.stream()
+            .filter(AbstractLocomotiveEntity.class::isInstance)
+            .map(AbstractLocomotiveEntity.class::cast)
+            .filter(loco -> loco.distanceToSqr(player) <= WRENCH_TUG_ROUTE_SYNC_DISTANCE_SQR)
+            .sorted(Comparator.comparingDouble(loco -> loco.distanceToSqr(player)))
+            .toList();
+        Map<UUID, TugRouteTrackerState> visibleStates = new HashMap<>();
+        for (AbstractLocomotiveEntity loco : nearbyLocos) {
+            int dyeColorId = loco.getColor() == null ? DyeColor.RED.getId() : loco.getColor();
+            int distanceBucket = (int) (Math.sqrt(loco.distanceToSqr(player)) / 16.0D);
+            visibleStates.put(loco.getUUID(), new TugRouteTrackerState(loco.getId(), dyeColorId,
+                loco.getRouteOverlayRevision(), distanceBucket));
+        }
+        if (!firstSnapshot && visibleStates.equals(lastWrenchLocoRouteStates)) return;
+
+        int remainingVertices = MAX_WRENCH_TUG_ROUTE_VERTICES;
+        List<LocoRouteTrackerData> routes = new ArrayList<>();
+        for (AbstractLocomotiveEntity loco : nearbyLocos) {
+            Optional<LocoRouteTrackerData> route = LocoRouteTrackerData.fromLocomotive(loco);
+            if (route.isEmpty() || route.get().pathVertices().size() > remainingVertices) continue;
+            routes.add(route.get());
+            remainingVertices -= route.get().pathVertices().size();
+        }
+        PacketDistributor.sendToPlayer(player,
+            new LocoRouteTrackerClientPacket(level.dimension().toString(), routes));
+        lastWrenchLocoRouteStates = Map.copyOf(visibleStates);
+        wrenchLocoRouteSnapshotActive = true;
     }
 
     private void onChanged() {

@@ -69,7 +69,10 @@ public class ModItemModelProvider extends ItemModelProvider {
         builder(itemGenerated, "locomotive_route")
                 .override()
                 .model(builder(itemGenerated, "locomotive_route_empty"))
-                .predicate(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "locoroutestate"), 1f).end();
+                .predicate(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "locoroutestate"), 1f).end()
+                .override()
+                .model(builder(itemGenerated, "locomotive_route_empty"))
+                .predicate(ResourceLocation.fromNamespaceAndPath(ShippingMod.MOD_ID, "locoroutestate"), 2f).end();
     }
 
 

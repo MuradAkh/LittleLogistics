@@ -3,149 +3,185 @@ package dev.murad.shipping.entity.navigation;
 import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.util.LocoRoute;
-import dev.murad.shipping.util.LocoRouteNode;
+import dev.murad.shipping.util.LocoRouteSegment;
+import dev.murad.shipping.util.LocoRouteStep;
 import dev.murad.shipping.util.RailHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntArrayTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.stream.Collectors;
 
+/** Executes the directed, precompiled rail traversal stored in a locomotive route item. */
 public class LocomotiveNavigator {
-    private final Set<BlockPos> routeNodes;
-    private final Set<BlockPos> visitedNodes;
-    private final HashMap<BlockPos, Direction> decisionCache;
+    private static final String SEGMENT_TAG = "segment";
+    private static final String STEP_TAG = "step";
+    private static final String SYNCHRONIZED_TAG = "synchronized";
+    private static final String INVALID_TAG = "invalid";
 
     private final AbstractLocomotiveEntity locomotive;
-
-    private static final String ROUTE_TAG = "route";
-    private static final String VISITED_TAG = "visited";
-
-    public int getRouteSize(){
-        return routeNodes.size();
-    }
-
-    public int getVisitedSize(){
-        return visitedNodes.size();
-    }
-
-
-    private void reset(){
-        this.visitedNodes.clear();
-        this.routeNodes.clear();
-        this.decisionCache.clear();
-    }
+    private LocoRoute route = new LocoRoute();
+    private int segmentIndex;
+    private int stepIndex;
+    private boolean synchronizedToRoute;
+    private boolean invalidRoute;
 
     public LocomotiveNavigator(AbstractLocomotiveEntity locomotive) {
         this.locomotive = locomotive;
-        this.decisionCache = new HashMap<>();
-        this.visitedNodes = new HashSet<>();
-        this.routeNodes = new HashSet<>();
-        reset();
     }
 
-    private Optional<Direction> getDirectionFromHorizontalOffset(int x, int z) {
-        if (x > 0) return Optional.of(Direction.EAST);
-        if (x < 0) return Optional.of(Direction.WEST);
-        if (z > 0) return Optional.of(Direction.SOUTH);
-        if (z < 0) return Optional.of(Direction.NORTH);
-        return Optional.empty();
+    public int getRouteSize() {
+        return route.size();
     }
 
-    public void serverTick(){
-        RailHelper.getRail(locomotive.getOnPos().above(), locomotive.level()).ifPresent(railPos ->{
-            if(routeNodes.contains(railPos)){
-                visitedNodes.add(railPos);
-            }
-            if(visitedNodes.size() == routeNodes.size()){
-                visitedNodes.clear();
-            }
-            decisionCache.remove(railPos);
+    /** The current completed waypoint count used by the engine screen. */
+    public int getVisitedSize() {
+        return synchronizedToRoute ? segmentIndex : 0;
+    }
 
-            // guaranteed not null on serverside
-            BlockPos oldHorizontalBlockPos = locomotive.getOldHorizontalBlockPos();
-            BlockPos blockPos = locomotive.getBlockPos();
+    public boolean isRouteInvalid() {
+        return invalidRoute;
+    }
 
-            // figure out direction the locomotive came from.
-            BlockPos offset = new BlockPos(
-                    blockPos.getX() - oldHorizontalBlockPos.getX(),
-                    blockPos.getY() - oldHorizontalBlockPos.getY(),
-                    blockPos.getZ() - oldHorizontalBlockPos.getZ()
-            );
-            Optional<Direction> moveDirOpt = getDirectionFromHorizontalOffset(offset.getX(), offset.getZ());
-            Direction moveDir = moveDirOpt.orElse(locomotive.getDirection());
+    public void serverTick() {
+        if (!route.isUsable()) return;
+        if (invalidRoute) {
+            locomotive.stall();
+            return;
+        }
 
-            locomotive.getRailHelper().getNext(railPos, moveDir).ifPresent(pair -> {
-                var nextRail = pair.getFirst();
-                var prevExitTaken = pair.getSecond();
-                var state = locomotive.level().getBlockState(nextRail);
-                if (state.getBlock() instanceof MultiShapeRail s && s.isAutomaticSwitching()){
-                    var choices = s.getExitDirections(state, prevExitTaken.getOpposite()).stream().toList();
-                    if (choices.size() == 1) {
-                        s.setRailState(state, locomotive.level(), nextRail, prevExitTaken.getOpposite(), choices.get(0));
-                    } else if(choices.size() > 1 && !routeNodes.isEmpty()) {
-                        Set<BlockPos> potential = new HashSet<>(routeNodes);
-                        potential.removeAll(visitedNodes);
-                        if(!decisionCache.containsKey(nextRail)){
-                            var decision = locomotive.getRailHelper()
-                                   .pickCheaperDir(choices, nextRail,
-                                           RailHelper.samePositionHeuristicSet(potential), locomotive.level());
-                            decisionCache.put(nextRail, decision);
-                        };
-                        s.setRailState(state, locomotive.level(), nextRail, prevExitTaken.getOpposite(), decisionCache.get(nextRail));
-                    }
+        RailHelper.getRail(locomotive.getOnPos().above(), locomotive.level()).ifPresent(railPos -> {
+            Direction travelDirection = getTravelDirection();
+            LocoRouteStep step = locateCurrentStep(railPos, travelDirection);
+            if (step == null) return;
+
+            BlockState state = locomotive.level().getBlockState(railPos);
+            if (state.getBlock() instanceof MultiShapeRail rail) {
+                Direction input = step.incomingDirection().getOpposite();
+                if (rail.isAutomaticSwitching()) {
+                    boolean applied = rail.setRailState(state, locomotive.level(), railPos, input, step.outgoingDirection());
+                    if (!applied) invalidate();
+                } else if (!rail.getExitDirections(state, input).contains(step.outgoingDirection())) {
+                    // Redstone/manual rails remain under player control; a changed state must
+                    // stop this precompiled route rather than make it choose another branch.
+                    invalidate();
                 }
-            });
+            }
         });
     }
 
-    public void updateWithLocoRouteItem(LocoRoute route) {
-        Set<BlockPos> newRouteNodes = route.stream().map(LocoRouteNode::toBlockPos).collect(Collectors.toSet());
-        if (newRouteNodes.equals(routeNodes)) return;
+    private Direction getTravelDirection() {
+        BlockPos old = locomotive.getOldHorizontalBlockPos();
+        BlockPos current = locomotive.getBlockPos();
+        int x = current.getX() - old.getX();
+        int z = current.getZ() - old.getZ();
+        if (x > 0) return Direction.EAST;
+        if (x < 0) return Direction.WEST;
+        if (z > 0) return Direction.SOUTH;
+        if (z < 0) return Direction.NORTH;
+        return locomotive.getDirection();
+    }
 
-        reset();
-        routeNodes.addAll(newRouteNodes);
+    @Nullable
+    private LocoRouteStep locateCurrentStep(BlockPos railPos, Direction travelDirection) {
+        if (!synchronizedToRoute) {
+            synchronizeAt(railPos, travelDirection);
+            if (!synchronizedToRoute) return null;
+        }
+
+        // The train normally reaches exactly one expected rail per tick.  The loop also
+        // handles a hitch across a rail boundary without attempting to re-pathfind.
+        for (int attempts = 0; attempts < 2; attempts++) {
+            LocoRouteSegment segment = route.getSegments().get(segmentIndex);
+            if (stepIndex < segment.getSteps().size()) {
+                LocoRouteStep expected = segment.getSteps().get(stepIndex);
+                if (expected.railPos().equals(railPos)) {
+                    if (expected.incomingDirection() != travelDirection) {
+                        invalidate();
+                        return null;
+                    }
+                    return expected;
+                }
+
+                if (stepIndex + 1 < segment.getSteps().size()) {
+                    LocoRouteStep next = segment.getSteps().get(stepIndex + 1);
+                    if (next.railPos().equals(railPos) && next.incomingDirection() == travelDirection) {
+                        stepIndex++;
+                        continue;
+                    }
+                }
+            }
+
+            BlockPos destination = route.get((segmentIndex + 1) % route.size()).toBlockPos();
+            if (destination.equals(railPos) && segment.getArrivalDirection() == travelDirection) {
+                segmentIndex = (segmentIndex + 1) % route.getSegments().size();
+                stepIndex = 0;
+                continue;
+            }
+            invalidate();
+            return null;
+        }
+        invalidate();
+        return null;
+    }
+
+    private void synchronizeAt(BlockPos railPos, Direction travelDirection) {
+        for (int segment = 0; segment < route.getSegments().size(); segment++) {
+            ListLoop:
+            for (int step = 0; step < route.getSegments().get(segment).getSteps().size(); step++) {
+                LocoRouteStep candidate = route.getSegments().get(segment).getSteps().get(step);
+                if (candidate.railPos().equals(railPos) && candidate.incomingDirection() == travelDirection) {
+                    segmentIndex = segment;
+                    stepIndex = step;
+                    synchronizedToRoute = true;
+                    break ListLoop;
+                }
+            }
+            if (synchronizedToRoute) return;
+        }
+
+        // A train can be parked precisely at a waypoint before it enters the next segment.
+        for (int segment = 0; segment < route.getSegments().size(); segment++) {
+            LocoRouteSegment candidate = route.getSegments().get(segment);
+            if (!route.get(segment).toBlockPos().equals(railPos) || candidate.getSteps().isEmpty()) continue;
+            if (candidate.getStartIncomingDirection() == travelDirection) {
+                segmentIndex = segment;
+                stepIndex = 0;
+                synchronizedToRoute = true;
+                return;
+            }
+        }
+    }
+
+    private void invalidate() {
+        invalidRoute = true;
+        locomotive.stall();
+    }
+
+    public void updateWithLocoRouteItem(LocoRoute newRoute) {
+        if (newRoute.equals(route)) return;
+        route = newRoute.copy();
+        segmentIndex = 0;
+        stepIndex = 0;
+        synchronizedToRoute = false;
+        invalidRoute = false;
     }
 
     public void loadFromNbt(@Nullable CompoundTag tag) {
-        reset();
         if (tag == null) return;
-
-        routeNodes.addAll(convertTagToSet(tag.getList(ROUTE_TAG, Tag.TAG_INT_ARRAY)));
-        visitedNodes.addAll(convertTagToSet(tag.getList(VISITED_TAG, Tag.TAG_INT_ARRAY)));
+        segmentIndex = Math.max(0, tag.getInt(SEGMENT_TAG));
+        stepIndex = Math.max(0, tag.getInt(STEP_TAG));
+        synchronizedToRoute = tag.getBoolean(SYNCHRONIZED_TAG);
+        invalidRoute = tag.getBoolean(INVALID_TAG);
     }
 
-    public CompoundTag saveToNbt(){
+    public CompoundTag saveToNbt() {
         CompoundTag tag = new CompoundTag();
-        tag.put(ROUTE_TAG, convertSetToTag(routeNodes));
-        tag.put(VISITED_TAG, convertSetToTag(visitedNodes));
+        tag.putInt(SEGMENT_TAG, segmentIndex);
+        tag.putInt(STEP_TAG, stepIndex);
+        tag.putBoolean(SYNCHRONIZED_TAG, synchronizedToRoute);
+        tag.putBoolean(INVALID_TAG, invalidRoute);
         return tag;
     }
-
-    private static Set<BlockPos> convertTagToSet(@Nullable ListTag tag) {
-        if (tag == null) return new HashSet<>();
-        HashSet<BlockPos> set = new HashSet<>();
-
-        for (int i = 0; i < tag.size(); i++) {
-            int[] pos = tag.getIntArray(i);
-            if (pos.length != 3) continue;
-            set.add(new BlockPos(pos[0], pos[1], pos[2]));
-        }
-        return set;
-    }
-
-    private static ListTag convertSetToTag(Set<BlockPos> set) {
-        ListTag tag = new ListTag();
-        for (BlockPos pos : set) {
-            tag.add(new IntArrayTag(List.of(pos.getX(), pos.getY(), pos.getZ())));
-        }
-        return tag;
-    }
-
-
 }

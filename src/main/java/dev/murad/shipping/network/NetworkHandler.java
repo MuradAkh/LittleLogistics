@@ -6,6 +6,7 @@ import dev.murad.shipping.entity.custom.HeadVehicle;
 import dev.murad.shipping.network.client.VehicleTrackerClientPacket;
 import dev.murad.shipping.network.client.VehicleTrackerPacketHandler;
 import dev.murad.shipping.network.client.TugRouteTrackerClientPacket;
+import dev.murad.shipping.network.client.LocoRouteTrackerClientPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -18,7 +19,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 public class NetworkHandler {
     @SubscribeEvent
     public static void onRegisterPayloadHandlers(RegisterPayloadHandlersEvent event) {
-        final PayloadRegistrar registrar = event.registrar(ShippingMod.MOD_ID).versioned("2");
+        final PayloadRegistrar registrar = event.registrar(ShippingMod.MOD_ID).versioned("3");
 
         // Client → Server packets
         registrar.playToServer(
@@ -57,6 +58,11 @@ public class NetworkHandler {
                 TugRouteTrackerClientPacket.TYPE,
                 TugRouteTrackerClientPacket.STREAM_CODEC,
                 NetworkHandler::handleTugRouteTracker
+        );
+        registrar.playToClient(
+                LocoRouteTrackerClientPacket.TYPE,
+                LocoRouteTrackerClientPacket.STREAM_CODEC,
+                NetworkHandler::handleLocoRouteTracker
         );
     }
 
@@ -141,5 +147,9 @@ public class NetworkHandler {
 
     private static void handleTugRouteTracker(TugRouteTrackerClientPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> VehicleTrackerPacketHandler.setTugRoutes(packet));
+    }
+
+    private static void handleLocoRouteTracker(LocoRouteTrackerClientPacket packet, IPayloadContext context) {
+        context.enqueueWork(() -> VehicleTrackerPacketHandler.setLocoRoutes(packet));
     }
 }

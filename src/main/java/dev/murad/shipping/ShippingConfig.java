@@ -29,6 +29,7 @@ public class ShippingConfig {
         public static final ModConfigSpec.ConfigValue<Double> LOCO_SMOKE_MODIFIER;
         public static final ModConfigSpec.ConfigValue<Boolean> DISABLE_ROUTE_MARKERS;
         public static final ModConfigSpec.ConfigValue<Boolean> SHOW_WRENCH_TUG_ROUTES;
+        public static final ModConfigSpec.ConfigValue<Boolean> SHOW_WRENCH_LOCO_ROUTES;
 
         static {
             BUILDER.push("general");
@@ -47,6 +48,10 @@ public class ShippingConfig {
             SHOW_WRENCH_TUG_ROUTES =
                     BUILDER.comment("Show nearby registered tug routes while holding the Conductor's Wrench. Default true.")
                             .define("showWrenchTugRoutes", true);
+
+            SHOW_WRENCH_LOCO_ROUTES =
+                    BUILDER.comment("Show nearby registered locomotive routes while holding the Conductor's Wrench. Default true.")
+                            .define("showWrenchLocoRoutes", true);
             BUILDER.pop();
 
             SPEC = BUILDER.build();

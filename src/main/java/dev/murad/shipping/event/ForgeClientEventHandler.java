@@ -11,18 +11,19 @@ import dev.murad.shipping.item.LocoRouteItem;
 import dev.murad.shipping.item.TugRouteItem;
 import dev.murad.shipping.network.client.EntityPosition;
 import dev.murad.shipping.network.client.TugRouteTrackerData;
+import dev.murad.shipping.network.client.LocoRouteTrackerData;
 import dev.murad.shipping.network.client.VehicleTrackerPacketHandler;
 import dev.murad.shipping.setup.EntityItemMap;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -30,8 +31,9 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.state.properties.RailShape;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
@@ -67,6 +69,10 @@ public class ForgeClientEventHandler {
     private static final int TUG_ROUTE_PREVIEW_DEBOUNCE_TICKS = 3;
     private static final int TUG_ROUTE_PREVIEW_NODES_PER_TICK = 256;
     private static final int MAX_TRACKED_TUG_ROUTE_VERTICES_PER_FRAME = 16_000;
+    private static final int LOCO_ROUTE_PREVIEW_DEBOUNCE_TICKS = 3;
+    private static final int LOCO_ROUTE_PREVIEW_NODES_PER_TICK = 256;
+    private static final double LOCO_ROUTE_HEIGHT = 0.18D;
+    private static final double LOCO_ROUTE_CORNER_CLIP_DISTANCE = 0.20D;
 
     private record PreviewPoint(Vec3 position, boolean isNode, boolean isCorner) {
     }
@@ -75,6 +81,18 @@ public class ForgeClientEventHandler {
     }
 
     private record RailPort(Vec3 position, Vec3 side) {
+    }
+
+    private record RouteColour(float red, float green, float blue) {
+    }
+
+    private record LocoRenderPoint(Vec3 position, boolean isWaypoint) {
+    }
+
+    private enum LocoPreviewMode {
+        APPEND,
+        COMPLETE,
+        INSERT
     }
 
     private static final class PendingTugRoutePreview {
@@ -106,8 +124,56 @@ public class ForgeClientEventHandler {
         }
     }
 
+    private static final class PendingLocoRoutePreview {
+        private final Level level;
+        private final LocoRoute route;
+        private final BlockPos target;
+        private final long targetSince;
+        private final LocoPreviewMode mode;
+        private final int segmentIndex;
+        @Nullable private LocoRouteCompiler.PreviewPathfinder pathfinder;
+        private final List<LocoReplacementPreview> replacements = new ArrayList<>();
+        @Nullable private LocoRouteSegment before;
+        @Nullable private LocoRouteSegment after;
+        private boolean initialized;
+        private boolean finished;
+
+        private PendingLocoRoutePreview(Level level, LocoRoute route, BlockPos target, long targetSince,
+                                        LocoPreviewMode mode, int segmentIndex) {
+            this.level = level;
+            this.route = route.copy();
+            this.target = target.immutable();
+            this.targetSince = targetSince;
+            this.mode = mode;
+            this.segmentIndex = segmentIndex;
+        }
+
+        private boolean matches(Level level, LocoRoute route, BlockPos target, LocoPreviewMode mode, int segmentIndex) {
+            return this.level == level && this.route.equals(route) && this.target.equals(target)
+                && this.mode == mode && this.segmentIndex == segmentIndex;
+        }
+    }
+
+    private static final class LocoReplacementPreview {
+        private final Direction midpoint;
+        private final LocoRouteCompiler.PreviewPathfinder before;
+        @Nullable private LocoRouteCompiler.PreviewPathfinder after;
+
+        private LocoReplacementPreview(Direction midpoint, LocoRouteCompiler.PreviewPathfinder before) {
+            this.midpoint = midpoint;
+            this.before = before;
+        }
+
+        private boolean isTerminal() {
+            return before.getStatus() == LocoRouteCompiler.PreviewStatus.FAILED
+                || after != null && after.getStatus() != LocoRouteCompiler.PreviewStatus.SEARCHING;
+        }
+    }
+
     @Nullable
     private static PendingTugRoutePreview pendingTugRoutePreview;
+    @Nullable
+    private static PendingLocoRoutePreview pendingLocoRoutePreview;
     private static boolean renderedTugRouteTargetPreview;
 
     public static class ModRenderType extends RenderType {
@@ -145,6 +211,7 @@ public class ForgeClientEventHandler {
     public static void onWorldUnload(LevelEvent.Unload event) {
         VehicleTrackerPacketHandler.flush();
         pendingTugRoutePreview = null;
+        pendingLocoRoutePreview = null;
     }
 
     @SubscribeEvent
@@ -152,9 +219,15 @@ public class ForgeClientEventHandler {
         Player player = Minecraft.getInstance().player;
         if (player == null || ShippingConfig.Client.DISABLE_ROUTE_MARKERS.get()) {
             pendingTugRoutePreview = null;
+            pendingLocoRoutePreview = null;
             return;
         }
 
+        tickTugRoutePreview(player);
+        tickLocoRoutePreview(player);
+    }
+
+    private static void tickTugRoutePreview(Player player) {
         ItemStack routeStack = getHeldTugRoute(player);
         if (routeStack.isEmpty()) {
             pendingTugRoutePreview = null;
@@ -179,6 +252,54 @@ public class ForgeClientEventHandler {
         advancePendingTugRoutePreview(pendingTugRoutePreview);
     }
 
+    private static void tickLocoRoutePreview(Player player) {
+        ItemStack routeStack = getHeldLocoRoute(player);
+        if (routeStack.isEmpty()) {
+            pendingLocoRoutePreview = null;
+            return;
+        }
+        Optional<BlockPos> target = getReachableLocoTarget(player);
+        if (target.isEmpty()) {
+            pendingLocoRoutePreview = null;
+            return;
+        }
+
+        LocoRoute route = LocoRouteItem.getRoute(routeStack);
+        int nodeIndex = findLocoNodeIndex(route, target.get());
+        LocoPreviewMode mode;
+        int segmentIndex;
+        if (route.isInserting()) {
+            if (nodeIndex >= 0) {
+                pendingLocoRoutePreview = null;
+                return;
+            }
+            mode = LocoPreviewMode.INSERT;
+            segmentIndex = route.getNextInsertionIndex() - 1;
+            if (segmentIndex < 0 || segmentIndex >= route.getSegments().size()) {
+                pendingLocoRoutePreview = null;
+                return;
+            }
+        } else if (isLocoCompletionTarget(route, target.get())) {
+            mode = LocoPreviewMode.COMPLETE;
+            segmentIndex = route.size() - 1;
+        } else if (route.isInProgress() && nodeIndex < 0 && !route.isEmpty()) {
+            mode = LocoPreviewMode.APPEND;
+            segmentIndex = route.getSegments().size();
+        } else {
+            pendingLocoRoutePreview = null;
+            return;
+        }
+
+        BlockPos targetPos = target.get();
+        if (pendingLocoRoutePreview == null
+            || !pendingLocoRoutePreview.matches(player.level(), route, targetPos, mode, segmentIndex)) {
+            pendingLocoRoutePreview = new PendingLocoRoutePreview(player.level(), route, targetPos,
+                player.level().getGameTime(), mode, segmentIndex);
+            return;
+        }
+        advancePendingLocoRoutePreview(pendingLocoRoutePreview);
+    }
+
     private static ItemStack getHeldTugRoute(Player player) {
         ItemStack mainHand = player.getItemInHand(InteractionHand.MAIN_HAND);
         if (mainHand.getItem().equals(ModItems.TUG_ROUTE.get())) {
@@ -187,6 +308,119 @@ public class ForgeClientEventHandler {
 
         ItemStack offHand = player.getItemInHand(InteractionHand.OFF_HAND);
         return offHand.getItem().equals(ModItems.TUG_ROUTE.get()) ? offHand : ItemStack.EMPTY;
+    }
+
+    private static ItemStack getHeldLocoRoute(Player player) {
+        ItemStack mainHand = player.getItemInHand(InteractionHand.MAIN_HAND);
+        if (mainHand.getItem().equals(ModItems.LOCO_ROUTE.get())) return mainHand;
+        ItemStack offHand = player.getItemInHand(InteractionHand.OFF_HAND);
+        return offHand.getItem().equals(ModItems.LOCO_ROUTE.get()) ? offHand : ItemStack.EMPTY;
+    }
+
+    /** Keeps visual targets within the exact block-interaction range used for a use-on-block action. */
+    private static Optional<BlockPos> getReachableLocoTarget(Player player) {
+        if (!(Minecraft.getInstance().hitResult instanceof BlockHitResult hit)
+            || !player.canInteractWithBlock(hit.getBlockPos(), 0.0D)) {
+            return Optional.empty();
+        }
+        return LocoRouteItem.getTargetedRail(player.level(), hit.getBlockPos());
+    }
+
+    private static int findLocoNodeIndex(LocoRoute route, BlockPos target) {
+        for (int index = 0; index < route.size(); index++) {
+            if (route.get(index).isAt(target)) return index;
+        }
+        return -1;
+    }
+
+    private static boolean isLocoCompletionTarget(LocoRoute route, BlockPos target) {
+        return route.isInProgress() && !route.isInserting() && route.size() >= 2
+            && route.getNextInsertionIndex() == route.size() && route.getFirst().isAt(target);
+    }
+
+    private static void advancePendingLocoRoutePreview(PendingLocoRoutePreview preview) {
+        if (preview.finished || preview.level.getGameTime() - preview.targetSince < LOCO_ROUTE_PREVIEW_DEBOUNCE_TICKS) return;
+        if (!preview.initialized) initializePendingLocoRoutePreview(preview);
+        if (preview.finished) return;
+
+        if (preview.mode == LocoPreviewMode.APPEND || preview.mode == LocoPreviewMode.COMPLETE) {
+            LocoRouteCompiler.PreviewStatus status = preview.pathfinder.advance(LOCO_ROUTE_PREVIEW_NODES_PER_TICK);
+            if (status == LocoRouteCompiler.PreviewStatus.FOUND) {
+                preview.before = preview.pathfinder.getResult().orElse(null);
+                preview.finished = true;
+            } else if (status == LocoRouteCompiler.PreviewStatus.FAILED) {
+                preview.finished = true;
+            }
+            return;
+        }
+
+        int budgetPerSearch = Math.max(1, LOCO_ROUTE_PREVIEW_NODES_PER_TICK / (preview.replacements.size() * 2));
+        for (LocoReplacementPreview candidate : preview.replacements) {
+            if (candidate.before.getStatus() == LocoRouteCompiler.PreviewStatus.SEARCHING) {
+                LocoRouteCompiler.PreviewStatus status = candidate.before.advance(budgetPerSearch);
+                if (status == LocoRouteCompiler.PreviewStatus.FOUND) {
+                    BlockPos end = preview.route.get((preview.segmentIndex + 1) % preview.route.size()).toBlockPos();
+                    LocoRouteSegment original = preview.route.getSegments().get(preview.segmentIndex);
+                    candidate.after = LocoRouteCompiler.createPreviewPathfinder(preview.level, preview.target, end,
+                        candidate.midpoint, original.getArrivalDirection());
+                }
+            }
+            if (candidate.after != null && candidate.after.getStatus() == LocoRouteCompiler.PreviewStatus.SEARCHING) {
+                candidate.after.advance(budgetPerSearch);
+            }
+        }
+
+        if (preview.replacements.stream().allMatch(LocoReplacementPreview::isTerminal)) {
+            LocoReplacementPreview best = null;
+            for (LocoReplacementPreview candidate : preview.replacements) {
+                if (candidate.after == null || candidate.after.getStatus() != LocoRouteCompiler.PreviewStatus.FOUND) continue;
+                if (best == null || candidate.before.getResult().orElseThrow().getSteps().size()
+                    + candidate.after.getResult().orElseThrow().getSteps().size()
+                    < best.before.getResult().orElseThrow().getSteps().size()
+                    + best.after.getResult().orElseThrow().getSteps().size()) {
+                    best = candidate;
+                }
+            }
+            if (best != null) {
+                preview.before = best.before.getResult().orElseThrow();
+                preview.after = best.after.getResult().orElseThrow();
+            }
+            preview.finished = true;
+        }
+    }
+
+    private static void initializePendingLocoRoutePreview(PendingLocoRoutePreview preview) {
+        preview.initialized = true;
+        if (preview.mode == LocoPreviewMode.APPEND) {
+            BlockPos start = preview.route.getLast().toBlockPos();
+            Direction incoming = preview.route.getSegments().isEmpty()
+                ? null : preview.route.getSegments().getLast().getArrivalDirection();
+            preview.pathfinder = LocoRouteCompiler.createPreviewPathfinder(preview.level, start, preview.target, incoming, null);
+            return;
+        }
+        if (preview.mode == LocoPreviewMode.COMPLETE) {
+            LocoRouteSegment first = preview.route.getSegments().getFirst();
+            LocoRouteSegment last = preview.route.getSegments().getLast();
+            preview.pathfinder = LocoRouteCompiler.createPreviewPathfinder(preview.level,
+                preview.route.getLast().toBlockPos(), preview.target, last.getArrivalDirection(),
+                first.getStartIncomingDirection());
+            return;
+        }
+
+        LocoRouteSegment original = preview.route.getSegments().get(preview.segmentIndex);
+        Optional<LocoRouteCompiler.SegmentSplit> split = LocoRouteCompiler.splitAt(original, preview.target);
+        if (split.isPresent()) {
+            preview.before = split.get().before();
+            preview.after = split.get().after();
+            preview.finished = true;
+            return;
+        }
+        BlockPos start = preview.route.get(preview.segmentIndex).toBlockPos();
+        for (Direction midpoint : List.of(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST)) {
+            preview.replacements.add(new LocoReplacementPreview(midpoint,
+                LocoRouteCompiler.createPreviewPathfinder(preview.level, start, preview.target,
+                    original.getStartIncomingDirection(), midpoint)));
+        }
     }
 
     private static void advancePendingTugRoutePreview(PendingTugRoutePreview preview) {
@@ -325,72 +559,15 @@ public class ForgeClientEventHandler {
             if (ShippingConfig.Client.DISABLE_ROUTE_MARKERS.get()) {
                 return false;
             }
-            var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
-            var camPos = camera.getPosition();
+            var camPos = Minecraft.getInstance().getEntityRenderDispatcher().camera.getPosition();
             var pose = event.getPoseStack();
-            var buffer = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
+            var buffer = MultiBufferSource.immediate(new ByteBufferBuilder(16_384));
+            LocoRoute locoRoute = LocoRouteItem.getRoute(stack);
 
-            int index = 0;
-            for (var node : LocoRouteItem.getRoute(stack)) {
-                var block = node.toBlockPos();
-                double wx = block.getX() + 0.5;
-                double wz = block.getZ() + 0.5;
-                float alpha = RouteMarkerRenderer.computeAlpha(new Vec3(wx, block.getY(), wz), camPos);
-                if (alpha <= 0.0f) { index++; continue; }
-
-                // Stem + diamond marker (yellow)
-                var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
-                RouteMarkerRenderer.renderStem(pose, lineBuffer, camPos, wx, block.getY(), wz,
-                        1.0f, 1.0f, 0.3f, alpha);
-                var triBuffer = buffer.getBuffer(ModRenderType.MARKER_TRIANGLES);
-                RouteMarkerRenderer.renderMarker(pose, triBuffer, camera, camPos, wx, block.getY(), wz,
-                        1.0f, 1.0f, 0.3f, alpha);
-
-                // Rail surface box (keep existing rail shape rendering)
-                pose.pushPose();
-                {
-                    var shape = RailHelper.getRail(block, player.level())
-                            .map(pos -> RailHelper.getShape(pos, player.level()))
-                            .orElse(RailShape.EAST_WEST);
-                    double baseY = (shape.isAscending() ? 0.1 : 0);
-                    double baseX = 0;
-                    double baseZ = 0;
-                    var rotation = Axis.ZP.rotationDegrees(0);
-                    switch (shape) {
-                        case ASCENDING_EAST -> {
-                            baseX = 0.2;
-                            rotation = Axis.ZP.rotationDegrees(45);
-                        }
-                        case ASCENDING_WEST -> {
-                            baseX = 0.1;
-                            baseY += 0.7;
-                            rotation = Axis.ZP.rotationDegrees(-45);
-                        }
-                        case ASCENDING_NORTH -> {
-                            baseZ = 0.1;
-                            baseY += 0.7;
-                            rotation = Axis.XP.rotationDegrees(45);
-                        }
-                        case ASCENDING_SOUTH -> {
-                            baseZ = 0.2;
-                            rotation = Axis.XP.rotationDegrees(-45);
-                        }
-                    }
-
-                    pose.translate(block.getX() + baseX - camPos.x, block.getY() + baseY - camPos.y, block.getZ() + baseZ - camPos.z);
-                    pose.mulPose(rotation);
-
-                    AABB a = new AABB(0, 0, 0, 1, 0.2, 1);
-                    LevelRenderer.renderLineBox(pose, buffer.getBuffer(ModRenderType.LINES), a, 1.0f, 1.0f, 0.3f, 0.5f * alpha);
-                }
-                pose.popPose();
-
-                // Label
-                String label = node.hasCustomName() ? node.getName() : String.valueOf(index + 1);
-                RouteMarkerRenderer.renderLabel(pose, buffer, camera, camPos, wx, block.getY(), wz, label, alpha);
-
-                index++;
-            }
+            renderLocoRoutePath(pose, buffer, camPos, player.level(), locoRoute);
+            renderLocoRouteNodes(pose, buffer, camPos, player.level(), locoRoute, new RouteColour(1.0F, 0.6F, 0.2F));
+            renderPendingLocoRoutePreview(pose, buffer, camPos, locoRoute, player.level());
+            renderLocoRouteTarget(pose, buffer, camPos, player, locoRoute);
 
             buffer.endBatch();
         } else if (stack.getItem().equals(ModItems.TUG_ROUTE.get())){
@@ -403,6 +580,231 @@ public class ForgeClientEventHandler {
             return false;
         }
         return true;
+    }
+
+    /** Renders stored rail traversal as the same double-line, directional language as tug routes. */
+    private static void renderLocoRoutePath(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos,
+                                            Level level, LocoRoute route) {
+        if (route.getSegments().isEmpty() || route.isEmpty()) return;
+        int selectedSegment = route.isInserting() ? route.getNextInsertionIndex() - 1 : -1;
+        for (int segmentIndex = 0; segmentIndex < route.getSegments().size(); segmentIndex++) {
+            RouteColour colour = segmentIndex == selectedSegment
+                ? new RouteColour(0.0F, 0.0F, 0.0F) : new RouteColour(1.0F, 0.6F, 0.2F);
+            renderLocoSegment(pose, buffer, camPos, level, route.get(segmentIndex % route.size()).toBlockPos(),
+                route.getSegments().get(segmentIndex), route.get((segmentIndex + 1) % route.size()).toBlockPos(), colour);
+        }
+    }
+
+    private static void renderLocoSegment(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos,
+                                          Level level, BlockPos start, LocoRouteSegment segment, BlockPos end,
+                                          RouteColour colour) {
+        List<LocoRenderPoint> points = new ArrayList<>();
+        if (segment.getSteps().isEmpty()) {
+            addLocoRenderPoint(points, locoRailCenter(level, start), true);
+        }
+        for (int index = 0; index < segment.getSteps().size(); index++) {
+            LocoRouteStep step = segment.getSteps().get(index);
+            Direction highDirection = getAscendingHighDirection(level, step.railPos());
+            boolean firstStep = index == 0;
+            if (highDirection != null) {
+                addLocoRenderPoint(points, locoRailPort(step.railPos(), step.incomingDirection().getOpposite(), highDirection), firstStep);
+                addLocoRenderPoint(points, locoRailPort(step.railPos(), step.outgoingDirection(), highDirection), false);
+            } else {
+                addLocoRenderPoint(points, locoRailCenter(level, step.railPos()), firstStep);
+            }
+        }
+        Direction endHighDirection = getAscendingHighDirection(level, end);
+        Vec3 endPoint = endHighDirection == null
+            ? locoRailCenter(level, end)
+            : locoRailPort(end, segment.getArrivalDirection().getOpposite(), endHighDirection);
+        addLocoRenderPoint(points, endPoint, true);
+        renderLocoRoutePolyline(pose, buffer, camPos, points, colour);
+    }
+
+    /** Draws a compact miter at each ordinary rail turn, leaving route waypoints as hard boundaries. */
+    private static void renderLocoRoutePolyline(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos,
+                                                List<LocoRenderPoint> points, RouteColour colour) {
+        List<PreviewSegment> segments = new ArrayList<>(Math.max(0, points.size() - 1));
+        for (int index = 1; index < points.size(); index++) {
+            PreviewSegment segment = trimLocoRouteSegment(points, index);
+            segments.add(segment);
+            if (segment != null) {
+                renderLocoRouteLink(pose, buffer, camPos, segment, colour, index % 4 == 0);
+            }
+        }
+        for (int pointIndex = 1; pointIndex < points.size() - 1; pointIndex++) {
+            if (!isLocoRouteCorner(points, pointIndex)) continue;
+            PreviewSegment incoming = segments.get(pointIndex - 1);
+            PreviewSegment outgoing = segments.get(pointIndex);
+            if (incoming == null || outgoing == null) continue;
+            float alpha = RouteMarkerRenderer.computeAlpha(points.get(pointIndex).position(), camPos);
+            if (alpha <= 0.0F) continue;
+            var lines = buffer.getBuffer(ModRenderType.LINES);
+            RouteMarkerRenderer.renderLine(pose, lines, camPos,
+                incoming.to().add(incoming.side().scale(TUG_ROUTE_RAIL_OFFSET)),
+                outgoing.from().add(outgoing.side().scale(TUG_ROUTE_RAIL_OFFSET)),
+                colour.red(), colour.green(), colour.blue(), alpha);
+            RouteMarkerRenderer.renderLine(pose, lines, camPos,
+                incoming.to().subtract(incoming.side().scale(TUG_ROUTE_RAIL_OFFSET)),
+                outgoing.from().subtract(outgoing.side().scale(TUG_ROUTE_RAIL_OFFSET)),
+                colour.red(), colour.green(), colour.blue(), alpha);
+        }
+    }
+
+    @Nullable
+    private static PreviewSegment trimLocoRouteSegment(List<LocoRenderPoint> points, int endIndex) {
+        LocoRenderPoint rawFrom = points.get(endIndex - 1);
+        LocoRenderPoint rawTo = points.get(endIndex);
+        Vec3 delta = rawTo.position().subtract(rawFrom.position());
+        Vec3 horizontal = new Vec3(delta.x, 0.0D, delta.z);
+        if (delta.lengthSqr() <= 1.0E-6D || horizontal.lengthSqr() <= 1.0E-6D) return null;
+        Vec3 forward = delta.normalize();
+        Vec3 side = new Vec3(-horizontal.z, 0.0D, horizontal.x).normalize();
+        double clip = Math.min(LOCO_ROUTE_CORNER_CLIP_DISTANCE, delta.length() * 0.30D);
+        Vec3 from = isLocoRouteCorner(points, endIndex - 1) ? rawFrom.position().add(forward.scale(clip)) : rawFrom.position();
+        Vec3 to = isLocoRouteCorner(points, endIndex) ? rawTo.position().subtract(forward.scale(clip)) : rawTo.position();
+        double length = from.distanceTo(to);
+        return length <= 1.0E-4D ? null : new PreviewSegment(from, to, forward, side, length);
+    }
+
+    private static boolean isLocoRouteCorner(List<LocoRenderPoint> points, int pointIndex) {
+        if (pointIndex <= 0 || pointIndex >= points.size() - 1 || points.get(pointIndex).isWaypoint()) return false;
+        Vec3 incoming = points.get(pointIndex).position().subtract(points.get(pointIndex - 1).position());
+        Vec3 outgoing = points.get(pointIndex + 1).position().subtract(points.get(pointIndex).position());
+        Vec3 incomingHorizontal = new Vec3(incoming.x, 0.0D, incoming.z);
+        Vec3 outgoingHorizontal = new Vec3(outgoing.x, 0.0D, outgoing.z);
+        return incomingHorizontal.lengthSqr() > 1.0E-4D && outgoingHorizontal.lengthSqr() > 1.0E-4D
+            && incomingHorizontal.normalize().dot(outgoingHorizontal.normalize()) < 0.999D;
+    }
+
+    private static void renderLocoRouteLink(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos,
+                                            PreviewSegment segment, RouteColour colour, boolean drawArrow) {
+        float alpha = RouteMarkerRenderer.computeAlpha(segment.from().add(segment.to()).scale(0.5D), camPos);
+        if (alpha <= 0.0F) return;
+        var lines = buffer.getBuffer(ModRenderType.LINES);
+        RouteMarkerRenderer.renderLine(pose, lines, camPos, segment.from().add(segment.side().scale(TUG_ROUTE_RAIL_OFFSET)),
+            segment.to().add(segment.side().scale(TUG_ROUTE_RAIL_OFFSET)), colour.red(), colour.green(), colour.blue(), alpha);
+        RouteMarkerRenderer.renderLine(pose, lines, camPos, segment.from().subtract(segment.side().scale(TUG_ROUTE_RAIL_OFFSET)),
+            segment.to().subtract(segment.side().scale(TUG_ROUTE_RAIL_OFFSET)), colour.red(), colour.green(), colour.blue(), alpha);
+        if (drawArrow) {
+            renderTugRouteArrow(pose, lines, camPos, segment.from().lerp(segment.to(), 0.5D), segment.forward(), segment.side(),
+                colour.red(), colour.green(), colour.blue(), alpha);
+        }
+    }
+
+    private static void addLocoRenderPoint(List<LocoRenderPoint> points, Vec3 position, boolean waypoint) {
+        if (!points.isEmpty() && points.getLast().position().distanceToSqr(position) < 1.0E-8D) {
+            if (waypoint && !points.getLast().isWaypoint()) {
+                points.set(points.size() - 1, new LocoRenderPoint(position, true));
+            }
+            return;
+        }
+        points.add(new LocoRenderPoint(position, waypoint));
+    }
+
+    @Nullable
+    private static Direction getAscendingHighDirection(Level level, BlockPos pos) {
+        if (!level.hasChunkAt(pos) || !(level.getBlockState(pos).getBlock() instanceof BaseRailBlock)) return null;
+        RailShape shape = RailHelper.getShape(pos, level);
+        return switch (shape) {
+            case ASCENDING_EAST -> Direction.EAST;
+            case ASCENDING_WEST -> Direction.WEST;
+            case ASCENDING_NORTH -> Direction.NORTH;
+            case ASCENDING_SOUTH -> Direction.SOUTH;
+            default -> null;
+        };
+    }
+
+    private static Vec3 locoRailCenter(Level level, BlockPos pos) {
+        double slopeMidpoint = getAscendingHighDirection(level, pos) == null ? 0.0D : 0.5D;
+        return new Vec3(pos.getX() + 0.5D, pos.getY() + LOCO_ROUTE_HEIGHT + slopeMidpoint, pos.getZ() + 0.5D);
+    }
+
+    private static Vec3 locoRailPort(BlockPos pos, Direction edge, Direction highDirection) {
+        return new Vec3(pos.getX() + 0.5D + edge.getStepX() * 0.5D,
+            pos.getY() + LOCO_ROUTE_HEIGHT + (edge == highDirection ? 1.0D : 0.0D),
+            pos.getZ() + 0.5D + edge.getStepZ() * 0.5D);
+    }
+
+    private static List<LocoRenderPoint> getTrackedLocoRenderPoints(Level level, List<BlockPos> vertices,
+                                                                      List<BlockPos> waypoints) {
+        Set<BlockPos> waypointPositions = new HashSet<>(waypoints);
+        List<LocoRenderPoint> points = new ArrayList<>();
+        for (int index = 0; index < vertices.size(); index++) {
+            BlockPos pos = vertices.get(index);
+            Direction incoming = index > 0 ? getHorizontalDirection(vertices.get(index - 1), pos) : null;
+            Direction outgoing = index + 1 < vertices.size() ? getHorizontalDirection(pos, vertices.get(index + 1)) : null;
+            Direction highDirection = getAscendingHighDirection(level, pos);
+            boolean waypoint = waypointPositions.contains(pos);
+            if (highDirection != null && incoming != null && outgoing != null) {
+                addLocoRenderPoint(points, locoRailPort(pos, incoming.getOpposite(), highDirection), waypoint);
+                addLocoRenderPoint(points, locoRailPort(pos, outgoing, highDirection), waypoint);
+            } else {
+                addLocoRenderPoint(points, locoRailCenter(level, pos), waypoint);
+            }
+        }
+        return points;
+    }
+
+    @Nullable
+    private static Direction getHorizontalDirection(BlockPos from, BlockPos to) {
+        int deltaX = to.getX() - from.getX();
+        int deltaZ = to.getZ() - from.getZ();
+        if (Math.abs(deltaX) > Math.abs(deltaZ)) return deltaX > 0 ? Direction.EAST : Direction.WEST;
+        if (Math.abs(deltaZ) > 0) return deltaZ > 0 ? Direction.SOUTH : Direction.NORTH;
+        return null;
+    }
+
+    private static void renderLocoRouteNodes(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos,
+                                             Level level, LocoRoute route, RouteColour colour) {
+        for (LocoRouteNode node : route) {
+            renderLocoRouteNodeBounds(pose, buffer.getBuffer(ModRenderType.LINES), camPos, level, node.toBlockPos(), colour);
+        }
+    }
+
+    private static void renderLocoRouteTarget(PoseStack pose, MultiBufferSource.BufferSource buffer,
+                                              Vec3 camPos, Player player, LocoRoute route) {
+        getReachableLocoTarget(player).ifPresent(target -> {
+            boolean node = route.stream().anyMatch(routeNode -> routeNode.isAt(target));
+            boolean segment = !node && LocoRouteItem.findSegmentAt(route, target).isPresent();
+            boolean completion = isLocoCompletionTarget(route, target);
+            RouteColour colour;
+            if (node) colour = completion ? new RouteColour(0.2F, 1.0F, 0.2F) : new RouteColour(0.0F, 0.0F, 0.0F);
+            else if (route.isInserting() || route.isInProgress()) colour = new RouteColour(1.0F, 1.0F, 0.2F);
+            else if (segment) colour = new RouteColour(1.0F, 1.0F, 0.2F);
+            else return;
+            renderLocoRouteNodeBounds(pose, buffer.getBuffer(ModRenderType.LINES), camPos, player.level(), target, colour);
+        });
+    }
+
+    private static void renderPendingLocoRoutePreview(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos,
+                                                       LocoRoute route, Level level) {
+        PendingLocoRoutePreview preview = pendingLocoRoutePreview;
+        if (preview == null || !preview.finished || preview.before == null || preview.level != level
+            || !preview.route.equals(route)) return;
+        RouteColour colour = preview.mode == LocoPreviewMode.COMPLETE
+            ? new RouteColour(0.2F, 1.0F, 0.2F) : new RouteColour(1.0F, 1.0F, 0.2F);
+        if (preview.mode == LocoPreviewMode.APPEND || preview.mode == LocoPreviewMode.COMPLETE) {
+            renderLocoSegment(pose, buffer, camPos, level, route.getLast().toBlockPos(), preview.before, preview.target, colour);
+            return;
+        }
+        BlockPos start = route.get(preview.segmentIndex).toBlockPos();
+        BlockPos end = route.get((preview.segmentIndex + 1) % route.size()).toBlockPos();
+        renderLocoSegment(pose, buffer, camPos, level, start, preview.before, preview.target, colour);
+        if (preview.after != null) renderLocoSegment(pose, buffer, camPos, level, preview.target, preview.after, end, colour);
+    }
+
+    private static void renderLocoRouteNodeBounds(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer lines,
+                                                   Vec3 camPos, Level level, BlockPos pos, RouteColour colour) {
+        double y = locoRailCenter(level, pos).y + 0.01D;
+        Vec3 northWest = new Vec3(pos.getX() + 0.1D, y, pos.getZ() + 0.1D);
+        Vec3 northEast = new Vec3(pos.getX() + 0.9D, y, pos.getZ() + 0.1D);
+        Vec3 southEast = new Vec3(pos.getX() + 0.9D, y, pos.getZ() + 0.9D);
+        Vec3 southWest = new Vec3(pos.getX() + 0.1D, y, pos.getZ() + 0.9D);
+        RouteMarkerRenderer.renderLine(pose, lines, camPos, northWest, northEast, colour.red(), colour.green(), colour.blue(), 1.0F);
+        RouteMarkerRenderer.renderLine(pose, lines, camPos, northEast, southEast, colour.red(), colour.green(), colour.blue(), 1.0F);
+        RouteMarkerRenderer.renderLine(pose, lines, camPos, southEast, southWest, colour.red(), colour.green(), colour.blue(), 1.0F);
+        RouteMarkerRenderer.renderLine(pose, lines, camPos, southWest, northWest, colour.red(), colour.green(), colour.blue(), 1.0F);
     }
 
     private static void renderTugRoutePreview(RenderLevelStageEvent event, ItemStack stack) {
@@ -1069,6 +1471,31 @@ public class ForgeClientEventHandler {
         return remainingVertices;
     }
 
+    private static void renderTrackedLocoRoutes(RenderLevelStageEvent event, Vec3 camPos) {
+        if (!ShippingConfig.Client.SHOW_WRENCH_LOCO_ROUTES.get()
+            || !Minecraft.getInstance().level.dimension().toString().equals(VehicleTrackerPacketHandler.locoRouteDimension)
+            || VehicleTrackerPacketHandler.locoRoutes.isEmpty()) {
+            return;
+        }
+        MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(new ByteBufferBuilder(16_384));
+        for (LocoRouteTrackerData route : VehicleTrackerPacketHandler.locoRoutes.values()) {
+            int colour = DyeColor.byId(route.dyeColorId()).getTextureDiffuseColor();
+            RouteColour routeColour = new RouteColour(
+                ((colour >> 16) & 0xFF) / 255.0F,
+                ((colour >> 8) & 0xFF) / 255.0F,
+                (colour & 0xFF) / 255.0F
+            );
+            Level level = Minecraft.getInstance().level;
+            renderLocoRoutePolyline(event.getPoseStack(), buffer, camPos,
+                getTrackedLocoRenderPoints(level, route.pathVertices(), route.waypointPositions()), routeColour);
+            for (BlockPos waypoint : route.waypointPositions()) {
+                renderLocoRouteNodeBounds(event.getPoseStack(), buffer.getBuffer(ModRenderType.LINES), camPos,
+                    level, waypoint, routeColour);
+            }
+        }
+        buffer.endBatch();
+    }
+
     @SubscribeEvent
     public static void onRenderWorldLast(RenderLevelStageEvent event) {
         if(!event.getStage().equals(RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS)){
@@ -1091,6 +1518,7 @@ public class ForgeClientEventHandler {
             var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
             Vec3 camPos = camera.getPosition();
             renderTrackedTugRoutes(event, player, camPos);
+            renderTrackedLocoRoutes(event, camPos);
 
             MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
 

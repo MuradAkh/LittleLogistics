@@ -98,9 +98,15 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
 
     protected ItemStackHandler routeItemHandler = createLocoRouteItemHandler();
+    /** Incremented when the installed route changes, for inexpensive wrench-overlay snapshots. */
+    private long routeOverlayRevision;
 
     public ItemStackHandler getRouteItemHandler() {
         return routeItemHandler;
+    }
+
+    public long getRouteOverlayRevision() {
+        return routeOverlayRevision;
     }
 
     private static final String NAVIGATOR_TAG = "navigator";
@@ -175,12 +181,13 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
             @Override
             protected void onContentsChanged(int slot) {
+                routeOverlayRevision++;
                 updateNavigatorFromItem();
             }
 
             @Override
             public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-                return stack.getItem() instanceof LocoRouteItem;
+                return stack.getItem() instanceof LocoRouteItem && LocoRouteItem.getRoute(stack).isUsable();
             }
         };
     }
@@ -756,9 +763,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             engineOn = compound.getBoolean("eo");
         }
         routeItemHandler.deserializeNBT(this.registryAccess(), compound.getCompound(LOCO_ROUTE_INV_TAG));
-        navigator.loadFromNbt(compound.getCompound(NAVIGATOR_TAG));
         enrollmentHandler.load(compound);
         updateNavigatorFromItem();
+        navigator.loadFromNbt(compound.getCompound(NAVIGATOR_TAG));
         consistUUIDs.clear();
         reconnectAttempts.clear();
         if (compound.contains(CONSIST_TAG, Tag.TAG_LIST)) {

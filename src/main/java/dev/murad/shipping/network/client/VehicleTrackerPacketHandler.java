@@ -10,6 +10,8 @@ public class VehicleTrackerPacketHandler {
     public static String toRenderDimension = "";
     public static Map<Integer, TugRouteTrackerData> tugRoutes = new HashMap<>();
     public static String tugRouteDimension = "";
+    public static Map<Integer, LocoRouteTrackerData> locoRoutes = new HashMap<>();
+    public static String locoRouteDimension = "";
 
     public static void setTugRoutes(TugRouteTrackerClientPacket packet) {
         Map<Integer, TugRouteTrackerData> routes = new HashMap<>();
@@ -20,10 +22,19 @@ public class VehicleTrackerPacketHandler {
         tugRouteDimension = packet.dimension();
     }
 
+    public static void setLocoRoutes(LocoRouteTrackerClientPacket packet) {
+        Map<Integer, LocoRouteTrackerData> routes = new HashMap<>();
+        for (LocoRouteTrackerData route : packet.routes()) routes.put(route.entityId(), route);
+        locoRoutes = routes;
+        locoRouteDimension = packet.dimension();
+    }
+
     public static void flush() {
         toRender.clear();
         tugRoutes.clear();
+        locoRoutes.clear();
         toRenderDimension = "";
         tugRouteDimension = "";
+        locoRouteDimension = "";
     }
 }
