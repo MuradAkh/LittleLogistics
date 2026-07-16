@@ -2,7 +2,6 @@ package dev.murad.shipping.entity.container;
 
 import dev.murad.shipping.entity.accessor.HeadVehicleDataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
-import dev.murad.shipping.network.EnrollVehiclePacket;
 import dev.murad.shipping.network.SetEnginePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -58,14 +57,6 @@ public abstract class AbstractHeadVehicleContainer<T extends HeadVehicleDataAcce
 
     public void setEngine(boolean state){
         PacketDistributor.sendToServer(new SetEnginePacket(entity.getId(), state));
-    }
-
-    public void enroll(){
-        PacketDistributor.sendToServer(new EnrollVehiclePacket(entity.getId()));
-    }
-
-    public String getOwner(){
-        return entity.owner();
     }
 
     public boolean canMove(){

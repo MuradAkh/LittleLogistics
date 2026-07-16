@@ -6,6 +6,7 @@ import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
+import dev.murad.shipping.global.VehicleRegistrationData;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.*;
 import dev.murad.shipping.entity.custom.vessel.VesselEntity;
@@ -44,6 +45,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -69,7 +71,7 @@ import java.util.stream.IntStream;
 
 public abstract class AbstractTugEntity extends VesselEntity implements LinkableEntityHead<VesselEntity>, Container, WorldlyContainer, HeadVehicle, StallingCapability {
 
-    protected final ChunkManagerEnrollmentHandler enrollmentHandler;
+    protected final VehicleOwnership ownership;
 
     // CONTAINER STUFF
     protected final ItemStackHandler routeItemHandler = createRouteItemHandler();
@@ -114,7 +116,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private double routeProgress = 0.0D;
     private VehicleFrontPart frontHitbox;
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.STRING);
     private static final String ROUTE_PROGRESS_TAG = "route_progress";
     private static final double ROUTE_LOOKAHEAD = 0.8D;
     private static final double FOLLOWER_CORRECTION_BLEND = 0.65D;
@@ -190,7 +191,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         linkingHandler.train = (new Train<>(this));
         this.path = new TugRoute();
         frontHitbox = new VehicleFrontPart(this);
-        enrollmentHandler = new ChunkManagerEnrollmentHandler(this);
+        ownership = new VehicleOwnership(this);
         // Seed consist list with just self; extended when barges are linked
         consistUUIDs.add(this.getUUID());
     }
@@ -244,11 +245,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Override
-    public String owner() {
-        return entityData.get(OWNER);
-    }
-
-    @Override
     public boolean isPushedByFluid() {
         return true;
     }
@@ -270,7 +266,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         // Defer the request until tickRouteCheck has rebuilt its compiled track.
         engineOn = false;
         contentsChanged = true;
-        enrollmentHandler.load(compound);
+        ownership.load(compound);
         consistUUIDs.clear();
         reconnectAttempts.clear();
         if (compound.contains(CONSIST_TAG, Tag.TAG_LIST)) {
@@ -292,7 +288,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         compound.putDouble(ROUTE_PROGRESS_TAG, routeProgress);
         compound.putBoolean("engineOn", engineOn);
         compound.put("routeHandler", routeItemHandler.serializeNBT(this.registryAccess()));
-        enrollmentHandler.save(compound);
+        ownership.save(compound);
         // Persist consist list — rebuild from live chain first so new spring links are captured
         rebuildConsistList();
         ListTag consistTag = new ListTag();
@@ -799,11 +795,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     @Override
-    public void enroll(UUID uuid) {
-        enrollmentHandler.enroll(uuid);
-    }
-
-    @Override
     public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
 
@@ -887,9 +878,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         }
 
         if(!this.level().isClientSide) {
-            enrollmentHandler.tick();
-            enrollmentHandler.getPlayerName().ifPresent(name ->
-                    entityData.set(OWNER, name));
+            ownership.tick();
         }
 
         super.tick();
@@ -968,14 +957,13 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     }
 
     public boolean shouldFreezeTrain() {
-        return !enrollmentHandler.mayMove() || (this.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(VesselEntity::isFrozen);
+        return !ownership.mayMove() || (this.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(VesselEntity::isFrozen);
     }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(INDEPENDENT_MOTION, false);
-        builder.define(OWNER, "");
     }
 
 
@@ -1008,7 +996,30 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     @Override
     public boolean hasOwner(){
-        return enrollmentHandler.hasOwner();
+        return ownership.hasOwner();
+    }
+
+    @Override
+    public Optional<UUID> getOwnerUUID() {
+        return ownership.owner();
+    }
+
+    @Override
+    public void setOwner(UUID uuid) {
+        ownership.assign(uuid);
+    }
+
+    @Override
+    public boolean isManagedServiceActive() {
+        return engineOn && routeTrack != null && routeTrack.isUsable();
+    }
+
+    @Override
+    public List<ChunkPos> getUpcomingRouteChunks(int maxSteps) {
+        if (approachTrack != null) {
+            return approachTrack.upcomingChunks(approachProgress, maxSteps, false);
+        }
+        return routeTrack == null ? List.of() : routeTrack.upcomingChunks(routeProgress, maxSteps, true);
     }
 
     @Override
@@ -1187,6 +1198,9 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     @Override
     public void remove(RemovalReason r) {
         if (!this.level().isClientSide && r != RemovalReason.UNLOADED_TO_CHUNK) {
+            if (this.level() instanceof ServerLevel level) {
+                VehicleRegistrationData.get(level.getServer()).unregister(this.getUUID());
+            }
             var stack = new ItemStack(this.getDropItem());
             if (this.hasCustomName()) {
                 stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, this.getCustomName());

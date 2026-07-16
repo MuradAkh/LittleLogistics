@@ -66,14 +66,6 @@
   "screen.littlelogistics.locomotive.route": "Visitado:",
   "screen.littlelogistics.locomotive.on": "Encender motor",
   "screen.littlelogistics.locomotive.off": "Detener motor",
-  "screen.littlelogistics.locomotive.register": "Register",
-  "screen.littlelogistics.locomotive.registration": "Registration",
-  "screen.littlelogistics.locomotive.register_info": "Registered vehicles can travel without chunkloaders",
-  "screen.littlelogistics.locomotive.frozen": "As per server config, this vehicle is frozen as the owner is offline",
-
-  "global.littlelogistics.locomotive.register_success": "Maximum number of registered vehicles reached: %s",
-  "global.littlelogistics.locomotive.register_fail": "Successfully registered the vehicle, vehicles registered: %s/%s",
-
   "global.littlelogistics.no_connected_inventory_barge": "This barge requires a connected inventory behind it but none was provided. Link additional barges that provide inventory behind this one, such as a Chest Barge.",
   "global.littlelogistics.no_connected_inventory_car": "This barge requires a connected inventory behind it but none was provided. Link additional barges that provide inventory behind this one, such as a Chest Car.",
   "global.littlelogistics.connected_inventory": "This barge has %s connected inventories",

@@ -1,5 +1,6 @@
 package dev.murad.shipping.item;
 
+import dev.murad.shipping.entity.custom.HeadVehicle;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -58,7 +59,12 @@ public class VesselItem extends Item {
                     return InteractionResultHolder.fail(itemstack);
                 } else {
                     if (!world.isClientSide) {
-                        world.addFreshEntity(entity);
+                        if (!world.addFreshEntity(entity)) {
+                            return InteractionResultHolder.fail(itemstack);
+                        }
+                        if (entity instanceof HeadVehicle headVehicle) {
+                            headVehicle.setOwner(player.getUUID());
+                        }
                         if (!player.getAbilities().instabuild) {
                             itemstack.shrink(1);
                         }

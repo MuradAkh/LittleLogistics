@@ -66,7 +66,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
                 .withRouteSize(() -> navigator.getRouteSize())
                 .withVisitedSize(() -> navigator.getVisitedSize())
                 .withLit(this::isLit)
-                .withCanMove(enrollmentHandler::mayMove)
+                .withCanMove(ownership::mayMove)
                 .build();
     }
 

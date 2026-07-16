@@ -107,7 +107,7 @@ public class EnergyLocomotiveEntity extends AbstractLocomotiveEntity implements 
                 .withOn(() -> engineOn)
                 .withRouteSize(() -> navigator.getRouteSize())
                 .withVisitedSize(() -> navigator.getVisitedSize())
-                .withCanMove(enrollmentHandler::mayMove)
+                .withCanMove(ownership::mayMove)
                 .build();
     }
 

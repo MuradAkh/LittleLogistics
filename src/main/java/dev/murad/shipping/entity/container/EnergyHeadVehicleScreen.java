@@ -40,8 +40,6 @@ public class EnergyHeadVehicleScreen<T extends Entity & HeadVehicle> extends Abs
 
     @Override
     protected void renderBg(@NotNull GuiGraphics graphics, float partialTicks, int x, int y) {
-        super.renderBg(graphics, partialTicks, x, y);
-
         int i = this.getGuiLeft();
         int j = this.getGuiTop();
 

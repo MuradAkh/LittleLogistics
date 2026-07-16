@@ -107,7 +107,7 @@ public class EnergyTugEntity extends AbstractTugEntity {
                 .withId(this.getId())
                 .withVisitedSize(this::getVisitedRouteNodeCount)
                 .withOn(() -> engineOn)
-                .withCanMove(enrollmentHandler::mayMove)
+                .withCanMove(ownership::mayMove)
                 .withRouteSize(() -> path != null ? path.size() : 0)
                 .build();
     }

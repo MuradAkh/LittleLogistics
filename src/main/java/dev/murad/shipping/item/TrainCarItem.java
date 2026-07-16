@@ -116,7 +116,12 @@ public class TrainCarItem extends Item {
                         l.flip();
                 }
 
-                level.addFreshEntity(abstractminecart);
+                if (!level.addFreshEntity(abstractminecart)) {
+                    return InteractionResult.FAIL;
+                }
+                if (pContext.getPlayer() != null && abstractminecart instanceof AbstractLocomotiveEntity locomotive) {
+                    locomotive.setOwner(pContext.getPlayer().getUUID());
+                }
                 level.gameEvent(pContext.getPlayer(), GameEvent.ENTITY_PLACE, blockpos);
             }
 

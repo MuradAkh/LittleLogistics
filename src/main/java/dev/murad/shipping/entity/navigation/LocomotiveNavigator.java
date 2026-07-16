@@ -10,6 +10,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.ChunkPos;
+
+import java.util.LinkedHashSet;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -42,6 +46,34 @@ public class LocomotiveNavigator {
 
     public boolean isRouteInvalid() {
         return invalidRoute;
+    }
+
+    public boolean hasUsableRoute() {
+        return route.isUsable();
+    }
+
+    public List<ChunkPos> getUpcomingChunks(int maxSteps) {
+        if (!route.isUsable() || invalidRoute || !synchronizedToRoute || maxSteps <= 0) {
+            return List.of();
+        }
+
+        LinkedHashSet<ChunkPos> chunks = new LinkedHashSet<>();
+        int segment = segmentIndex;
+        int step = stepIndex;
+        int visited = 0;
+        int safety = Math.max(maxSteps, 1) + route.getSegments().size() * 2;
+        while (visited < maxSteps && safety-- > 0) {
+            LocoRouteSegment current = route.getSegments().get(segment);
+            if (step < current.getSteps().size()) {
+                chunks.add(new ChunkPos(current.getSteps().get(step).railPos()));
+                step++;
+                visited++;
+            } else {
+                segment = (segment + 1) % route.getSegments().size();
+                step = 0;
+            }
+        }
+        return List.copyOf(chunks);
     }
 
     public void serverTick() {

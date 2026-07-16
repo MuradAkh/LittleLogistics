@@ -76,7 +76,7 @@ public class SteamTugEntity extends AbstractTugEntity {
                 .withVisitedSize(this::getVisitedRouteNodeCount)
                 .withOn(() -> engineOn)
                 .withRouteSize(() -> path != null ? path.size() : 0)
-                .withCanMove(enrollmentHandler::mayMove)
+                .withCanMove(ownership::mayMove)
                 .build();
     }
 

@@ -28,11 +28,6 @@ public class NetworkHandler {
                 NetworkHandler::handleSetEngine
         );
         registrar.playToServer(
-                EnrollVehiclePacket.TYPE,
-                EnrollVehiclePacket.STREAM_CODEC,
-                NetworkHandler::handleEnrollVehicle
-        );
-        registrar.playToServer(
                 SetDockConfigPacket.TYPE,
                 SetDockConfigPacket.STREAM_CODEC,
                 NetworkHandler::handleSetDockConfig
@@ -74,16 +69,6 @@ public class NetworkHandler {
             var loco = serverPlayer.level().getEntity(packet.locoId());
             if (loco != null && loco.distanceTo(serverPlayer) < 6 && loco instanceof HeadVehicle l) {
                 l.setEngineOn(packet.state());
-            }
-        });
-    }
-
-    private static void handleEnrollVehicle(EnrollVehiclePacket packet, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            ServerPlayer serverPlayer = (ServerPlayer) context.player();
-            var loco = serverPlayer.level().getEntity(packet.locoId());
-            if (loco != null && loco.distanceTo(serverPlayer) < 6 && loco instanceof HeadVehicle l) {
-                l.enroll(serverPlayer.getUUID());
             }
         });
     }

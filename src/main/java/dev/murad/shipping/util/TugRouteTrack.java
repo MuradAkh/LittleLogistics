@@ -1,11 +1,14 @@
 package dev.murad.shipping.util;
 
 import net.minecraft.util.Mth;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 
 public class TugRouteTrack {
@@ -81,6 +84,16 @@ public class TugRouteTrack {
     /** Samples an open lead-in path without wrapping its end back to its start. */
     public Sample sampleClamped(double distance) {
         return sampleAt(Mth.clamp(distance, 0.0D, totalLength));
+    }
+
+    public List<ChunkPos> upcomingChunks(double startDistance, int maxSteps, boolean wrap) {
+        LinkedHashSet<ChunkPos> chunks = new LinkedHashSet<>();
+        int steps = Math.min(maxSteps, Math.max(1, (int) Math.ceil(totalLength)));
+        for (int offset = 0; offset <= steps; offset++) {
+            Sample sample = wrap ? sample(startDistance + offset) : sampleClamped(startDistance + offset);
+            chunks.add(new ChunkPos(BlockPos.containing(sample.position())));
+        }
+        return List.copyOf(chunks);
     }
 
     private Sample sampleAt(double distance) {

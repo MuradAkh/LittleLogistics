@@ -26,8 +26,6 @@ public class SteamHeadVehicleScreen<T extends Entity & HeadVehicle> extends Abst
 
     @Override
     protected void renderBg(@NotNull GuiGraphics graphics, float partialTicks, int x, int y) {
-        super.renderBg(graphics, partialTicks, x, y);
-
         int i = this.getGuiLeft();
         int j = this.getGuiTop();
 

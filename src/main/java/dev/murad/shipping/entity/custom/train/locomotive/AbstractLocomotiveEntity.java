@@ -6,6 +6,7 @@ import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
+import dev.murad.shipping.global.VehicleRegistrationData;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.entity.custom.vessel.tug.VehicleFrontPart;
 import dev.murad.shipping.entity.navigation.LocomotiveNavigator;
@@ -38,6 +39,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.PoweredRailBlock;
@@ -73,7 +75,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     @Setter
     protected boolean engineOn = false;
 
-    protected final ChunkManagerEnrollmentHandler enrollmentHandler;
+    protected final VehicleOwnership ownership;
 
     private boolean independentMotion = false;
     private boolean docked = false;
@@ -113,7 +115,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     protected LocomotiveNavigator navigator = new LocomotiveNavigator(this);
 
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractLocomotiveEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(AbstractLocomotiveEntity.class, EntityDataSerializers.STRING);
     private int dockHoldTicks = 0;
     private int postUndockTicks = 0;
 
@@ -121,20 +122,15 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     public AbstractLocomotiveEntity(EntityType<?> type, Level world) {
         super(type, world);
         frontHitbox = new VehicleFrontPart(this);
-        enrollmentHandler = new ChunkManagerEnrollmentHandler(this);
+        ownership = new VehicleOwnership(this);
         consistUUIDs.add(this.getUUID());
     }
 
     public AbstractLocomotiveEntity(EntityType<?> type, Level level, Double x, Double y, Double z) {
         super(type, level, x, y, z);
         frontHitbox = new VehicleFrontPart(this);
-        enrollmentHandler = new ChunkManagerEnrollmentHandler(this);
+        ownership = new VehicleOwnership(this);
         consistUUIDs.add(this.getUUID());
-    }
-
-    @Override
-    public void enroll(UUID uuid) {
-        enrollmentHandler.enroll(uuid);
     }
 
     @Override
@@ -150,6 +146,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     @Override
     public void remove(RemovalReason r) {
         if(!this.level().isClientSide && r != RemovalReason.UNLOADED_TO_CHUNK){
+            if (this.level() instanceof ServerLevel level) {
+                VehicleRegistrationData.get(level.getServer()).unregister(this.getUUID());
+            }
             this.spawnAtLocation(routeItemHandler.getStackInSlot(0));
         }
         super.remove(r);
@@ -210,13 +209,28 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     @Override
-    public String owner() {
-        return entityData.get(OWNER);
+    public boolean hasOwner(){
+        return ownership.hasOwner();
     }
 
     @Override
-    public boolean hasOwner(){
-        return enrollmentHandler.hasOwner();
+    public Optional<UUID> getOwnerUUID() {
+        return ownership.owner();
+    }
+
+    @Override
+    public void setOwner(UUID uuid) {
+        ownership.assign(uuid);
+    }
+
+    @Override
+    public boolean isManagedServiceActive() {
+        return engineOn && navigator.hasUsableRoute();
+    }
+
+    @Override
+    public List<ChunkPos> getUpcomingRouteChunks(int maxSteps) {
+        return navigator.getUpcomingChunks(maxSteps);
     }
 
 
@@ -229,10 +243,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             if(remainingStallTime <= 0){
                 navigator.serverTick();
             }
-            enrollmentHandler.tick();
-            enrollmentHandler.getPlayerName().ifPresent(name ->
-                    entityData.set(OWNER, name)
-            );
+            ownership.tick();
             if (this.level() instanceof ServerLevel serverLevel) {
                 tickConsist(serverLevel);
             }
@@ -289,7 +300,6 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(INDEPENDENT_MOTION, false);
-        builder.define(OWNER, "");
     }
 
     private void tickMovement() {
@@ -579,7 +589,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     public boolean shouldFreezeTrain() {
-        return !enrollmentHandler.mayMove() || (this.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(AbstractTrainCarEntity::isFrozen);
+        return !ownership.mayMove() || (this.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(AbstractTrainCarEntity::isFrozen);
     }
 
     private void accelerate() {
@@ -763,7 +773,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             engineOn = compound.getBoolean("eo");
         }
         routeItemHandler.deserializeNBT(this.registryAccess(), compound.getCompound(LOCO_ROUTE_INV_TAG));
-        enrollmentHandler.load(compound);
+        ownership.load(compound);
         updateNavigatorFromItem();
         navigator.loadFromNbt(compound.getCompound(NAVIGATOR_TAG));
         consistUUIDs.clear();
@@ -787,7 +797,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         compound.putBoolean("eo", engineOn);
         compound.put(LOCO_ROUTE_INV_TAG, routeItemHandler.serializeNBT(this.registryAccess()));
         compound.put(NAVIGATOR_TAG, navigator.saveToNbt());
-        enrollmentHandler.save(compound);
+        ownership.save(compound);
         rebuildConsistList();
         ListTag consistTag = new ListTag();
         for (UUID uuid : consistUUIDs) {

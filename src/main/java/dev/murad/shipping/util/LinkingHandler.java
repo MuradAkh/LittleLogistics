@@ -2,6 +2,7 @@ package dev.murad.shipping.util;
 
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.custom.HeadVehicle;
+import dev.murad.shipping.global.VehicleRegistrationData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.nbt.CompoundTag;
@@ -77,13 +78,14 @@ public class LinkingHandler<T extends Entity & LinkableEntity<T>> {
     private void stallNonTicking() {
         if (follower.isEmpty()) return;
 
-        boolean skip = entity.getTrain()
+        boolean managed = entity.getTrain()
                 .getTug()
                 .filter(tug -> tug instanceof HeadVehicle)
-                .map(tug -> ((HeadVehicle) tug).hasOwner())
-                .orElse(true);
+                .map(tug -> VehicleRegistrationData.get(((ServerLevel) entity.level()).getServer())
+                    .isManaging((Entity) tug))
+                .orElse(false);
 
-        if (!skip && !((ServerLevel) entity.level()).isPositionEntityTicking(follower.get().blockPosition())) {
+        if (!managed && !((ServerLevel) entity.level()).isPositionEntityTicking(follower.get().blockPosition())) {
             if (entity instanceof StallingCapability s) {
                 s.stall();
             }

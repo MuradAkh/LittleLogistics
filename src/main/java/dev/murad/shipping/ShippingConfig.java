@@ -88,26 +88,30 @@ public class ShippingConfig {
 
 
         public static final ModConfigSpec.ConfigValue<Integer> CHUNK_LOADING_LEVEL;
-        public static final ModConfigSpec.ConfigValue<Boolean> DISABLE_CHUNK_MANAGEMENT;
-        public static final ModConfigSpec.ConfigValue<Integer> MAX_REGISTRERED_VEHICLES_PER_PLAYER;
+        public static final ModConfigSpec.ConfigValue<Boolean> MANAGED_VEHICLE_LOADING;
         public static final ModConfigSpec.ConfigValue<Boolean> OFFLINE_LOADING;
+        public static final ModConfigSpec.ConfigValue<Integer> ROUTE_LOOKAHEAD_SECONDS;
+        public static final ModConfigSpec.ConfigValue<Integer> CHUNK_RELEASE_GRACE_TICKS;
 
 
         static {
-            BUILDER.push("chunk management - requires restart");
-            BUILDER.comment("By default, little logistics allows players to register vehicles that will be loaded automatically. This is not regular chunkloading, no other ticking will happen in this chunks and no surrounding chunks will be loaded. A very minimal number of chunks will be loaded as \"border chunks\" where only LL entities are active by default.");
+            BUILDER.push("managed vehicle loading - requires restart");
+            BUILDER.comment("Tugs and locomotives placed by players are owned automatically. Active vehicles can load their consist footprint and a forward window of their compiled route. At level 0 only Little Logistics entities are ticked manually.");
 
             CHUNK_LOADING_LEVEL = BUILDER.comment("Chunkloading level, from low perf impact to high. 0: no ticking (except LL, recommended), 1: tile entity ticking, 2: entity ticking (regular).")
                             .defineInRange("chunkLoadingLevel", 0, 0, 2);
 
-            DISABLE_CHUNK_MANAGEMENT = BUILDER.comment("Completely disable the chunk management system.")
-                            .define("disableChunkManagement", false);
-
-            MAX_REGISTRERED_VEHICLES_PER_PLAYER = BUILDER.comment("Maximum number of vehicles (barges/cars don't count, only Tugs/Locos) the player is able to register. Lowering this number will not de-register vehicles but will prevent the player from registering more.")
-                    .defineInRange("maxVehiclesPerPlayer", 100, 0, 1000);
+            MANAGED_VEHICLE_LOADING = BUILDER.comment("Allow automatically owned tugs and locomotives to load the chunks required by their active compiled route.")
+                    .define("managedVehicleLoading", true);
 
             OFFLINE_LOADING = BUILDER.comment("Load vehicles even when the player is offline")
                     .define("offlineLoading", false);
+
+            ROUTE_LOOKAHEAD_SECONDS = BUILDER.comment("Approximate maximum-speed travel time to preload along an active compiled route.")
+                    .defineInRange("routeLookAheadSeconds", 8, 1, 60);
+
+            CHUNK_RELEASE_GRACE_TICKS = BUILDER.comment("Ticks to retain route chunks after they leave a vehicle's required window.")
+                    .defineInRange("chunkReleaseGraceTicks", 40, 0, 1200);
 
             BUILDER.pop();
             BUILDER.push("vessel");
