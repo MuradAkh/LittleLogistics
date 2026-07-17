@@ -55,10 +55,6 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
 
-    // Patchouli — temporarily disabled: 1.21.1-88-NEOFORGE not available on maven.blamejared.com (Gap L-10)
-    // runtimeOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
-    // compileOnly "vazkii.patchouli:Patchouli:${patchouli_version}:api"
-
     // Test mods for runtime
     runtimeOnly "maven.modrinth:emi:1.1.22+1.21.1+neoforge"
     runtimeOnly "maven.modrinth:pipez:neoforge-1.21.1-1.2.19"
@@ -96,7 +92,6 @@ tasks.named('processResources', ProcessResources).configure {
             "mod_license":              project.mod_license,
             "mc_version_range":         project.mc_version_range,
             "neo_version_range":        project.neo_version_range,
-            "patchouli_version_range":  project.patchouli_version_range,
             "version":                  project.mod_version
     ]
 

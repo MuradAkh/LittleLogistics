@@ -28,11 +28,3 @@ description='''${mod_description}'''
 
 [[mixins]]
 config="littlelogistics.mixins.json"
-
-# Patchouli temporarily disabled: 1.21.1-88-NEOFORGE not yet available (Gap L-10)
-# [[dependencies.${mod_id}]]
-#     modId="patchouli"
-#     type="optional"
-#     versionRange="${patchouli_version_range}"
-#     ordering="NONE"
-#     side="BOTH"

@@ -11,13 +11,6 @@ Check out the Bit-By-Bit Mischief of Mice!
 
 <br/>
 
-## In Game Book
-
-Install [Patchouli](https://www.curseforge.com/minecraft/mc-mods/patchouli) to get access to the in-game version of this guide. Can be crafted using a book, a chest, and a compass (shapeless).
-
-<img src="https://user-images.githubusercontent.com/31002977/151086871-fc13047b-a52a-4bb0-84f9-c4f7ab76e2c0.png" style="max-height:35vh;">
-
-
 ## Vessels
 
 There are two types of vessels in this mod: tugs and barges. Tugs can move the barges when chained, and barges and do all sort of stuff. Tugs can also be moved manually using leads.
