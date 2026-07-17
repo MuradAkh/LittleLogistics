@@ -2,7 +2,6 @@ package dev.murad.shipping.entity.custom.vessel.tug;
 
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.dockingstation.DockingStationBlockEntity;
-import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
 import dev.murad.shipping.entity.custom.HeadVehicle;
@@ -46,9 +45,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.entity.PartEntity;
 import net.neoforged.neoforge.items.ItemStackHandler;
@@ -832,10 +829,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
                 if (!tickRouteApproachSearch()) {
                     followPath();
                 }
-                if (!hasCompiledRouteTrack()) {
-                    followGuideRail();
-                }
-                // Route/guide motion may update yaw while the tug is clearing the dock.
+                // Route motion may update yaw while the tug is clearing the dock.
                 // Keep its dock-facing heading until it has crossed the spatial exit boundary.
                 if (dockingState == DockingState.DEPARTING && dockingSession != null) {
                     setYRot(dockingSession.heading.toYRot());
@@ -882,26 +876,6 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         }
 
         super.tick();
-    }
-
-    private void followGuideRail(){
-        // do not follow guide rail if stalled
-        if (this.isDocked() || this.isFrozen() || this.isStalled()) {
-            return;
-        }
-
-        List<BlockState> belowList = Arrays.asList(this.level().getBlockState(getOnPos().below()),
-                this.level().getBlockState(getOnPos().below().below()));
-        BlockState water = this.level().getBlockState(getOnPos());
-        for (BlockState below : belowList) {
-            if (below.is(ModBlocks.GUIDE_RAIL_TUG.get()) && water.is(Blocks.WATER)) {
-                Direction arrows = TugGuideRailBlock.getArrowsDirection(below);
-                this.setYRot(arrows.toYRot());
-                double modifier = 0.03;
-                this.setDeltaMovement(this.getDeltaMovement().add(
-                        new Vec3(arrows.getStepX() * modifier, 0, arrows.getStepZ() * modifier)));
-            }
-        }
     }
 
     // todo: someone said you could prevent mobs from getting stuck on blocks by override this

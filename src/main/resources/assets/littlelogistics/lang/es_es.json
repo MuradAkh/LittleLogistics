@@ -43,8 +43,6 @@
 
   "block.littlelogistics.tug_dock": "Muelle de remolcadores",
   "block.littlelogistics.barge_dock": "Muelle de barcas",
-  "block.littlelogistics.guide_rail_tug": "Riel de guía",
-  "block.littlelogistics.guide_rail_corner": "Riel de guía de esquina",
   "block.littlelogistics.vessel_charger": "Cargador eléctrico",
   "block.littlelogistics.fluid_hopper": "Tolva de fluidos",
   "block.littlelogistics.rapid_hopper": "Tolva rápida",

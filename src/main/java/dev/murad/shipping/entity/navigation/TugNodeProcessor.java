@@ -1,6 +1,5 @@
 package dev.murad.shipping.entity.navigation;
 
-import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.setup.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,21 +18,13 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
         super(false);
     }
 
-    private boolean isOppositeGuideRail(Node Node, Direction direction){
-        BlockState state = this.currentContext.level().getBlockState(Node.asBlockPos().below());
-        if (state.is(ModBlocks.GUIDE_RAIL_TUG.get())){
-            return TugGuideRailBlock.getArrowsDirection(state).getOpposite().equals(direction);
-        }
-        return false;
-    }
-
     @Override
     public int getNeighbors(Node[] p_222859_1_, Node p_222859_2_) {
         int i = 0;
 
         for(Direction direction : Arrays.asList(Direction.WEST, Direction.EAST, Direction.SOUTH, Direction.NORTH)) {
             Node Node = this.getWaterNode(p_222859_2_.x + direction.getStepX(), p_222859_2_.y + direction.getStepY(), p_222859_2_.z + direction.getStepZ());
-            if (Node != null && !Node.closed && !isOppositeGuideRail(Node, direction)) {
+            if (Node != null && !Node.closed) {
                 p_222859_1_[i++] = Node;
             }
         }
@@ -77,10 +68,7 @@ public class TugNodeProcessor extends SwimNodeEvaluator {
                 if(!this.currentContext.level().getFluidState(surr).is(Fluids.WATER)){
                     penalty = 5f;
                 }
-                if(
-                        this.currentContext.level().getBlockState(surr).is(ModBlocks.GUIDE_RAIL_CORNER.get()) ||
-                                this.currentContext.level().getBlockState(surr).is(ModBlocks.DOCKING_STATION.get())
-                ){
+                if (this.currentContext.level().getBlockState(surr).is(ModBlocks.DOCKING_STATION.get())) {
                     penalty = 0;
                     break;
                 }

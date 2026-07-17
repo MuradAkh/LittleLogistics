@@ -3,8 +3,6 @@ package dev.murad.shipping.setup;
 
 import com.google.common.collect.ImmutableList;
 import dev.murad.shipping.block.dockingstation.DockingStationBlock;
-import dev.murad.shipping.block.guiderail.CornerGuideRailBlock;
-import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.block.rail.*;
 import dev.murad.shipping.block.vesseldetector.VesselDetectorBlock;
 import dev.murad.shipping.util.MultiMap;
@@ -39,23 +37,9 @@ public class ModBlocks {
                     .sound(SoundType.METAL);
     private static BlockBehaviour.Properties RAIL_BLOCK_BEHAVIOUR = BlockBehaviour.Properties.ofFullCopy(Blocks.RAIL);
 
-    public static final DeferredHolder<Block, Block> GUIDE_RAIL_CORNER = register(
-            "guide_rail_corner",
-            () -> new CornerGuideRailBlock(METAL_BLOCK_BEHAVIOUR),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
-
     public static final DeferredHolder<Block, Block> VESSEL_DETECTOR = register(
             "vessel_detector",
             () -> new VesselDetectorBlock(METAL_BLOCK_BEHAVIOUR),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
-
-    public static final DeferredHolder<Block, Block> GUIDE_RAIL_TUG = register(
-            "guide_rail_tug",
-            () -> new TugGuideRailBlock(METAL_BLOCK_BEHAVIOUR),
             ImmutableList.of(
                     CreativeModeTabs.TOOLS_AND_UTILITIES,
                     CreativeModeTabs.REDSTONE_BLOCKS));

@@ -43,8 +43,6 @@
 
   "block.littlelogistics.tug_dock": "拖船码头",
   "block.littlelogistics.barge_dock": "驳船码头",
-  "block.littlelogistics.guide_rail_tug": "拖船导轨",
-  "block.littlelogistics.guide_rail_corner": "船舶转角导轨",
   "block.littlelogistics.vessel_charger": "载具充能器",
   "block.littlelogistics.fluid_hopper": "流体漏斗",
   "block.littlelogistics.rapid_hopper": "快速漏斗",

@@ -2,7 +2,6 @@ package dev.murad.shipping.util;
 
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.dockingstation.DockingStationBlockEntity;
-import dev.murad.shipping.block.guiderail.TugGuideRailBlock;
 import dev.murad.shipping.setup.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -706,8 +705,8 @@ public final class TugRouteCompiler {
     /**
      * Checks the water-cell transition rather than only its destination.  A diagonal
      * may not squeeze through a blocked corner: both cardinal cells that form the
-     * other sides of its square must also be open water.  Guide rails and dock ports
-     * deliberately remain cardinal-only because their direction semantics are
+     * other sides of its square must also be open water. Dock ports deliberately
+     * remain cardinal-only because their direction semantics are
      * expressed with Minecraft's four-way {@link Direction}.
      */
     private static boolean isStepNavigable(Level level, BlockPos from, RouteHeading heading) {
@@ -717,7 +716,7 @@ public final class TugRouteCompiler {
         }
 
         if (!heading.isDiagonal()) {
-            return !isOppositeGuideRail(level, destination, heading);
+            return true;
         }
 
         BlockPos xSide = from.offset(heading.stepX, 0, 0);
@@ -756,11 +755,7 @@ public final class TugRouteCompiler {
     }
 
     private static boolean isCardinalOnlyCell(Level level, BlockPos pos) {
-        return hasTugGuideRail(level, pos) || isDockApproachCell(level, pos);
-    }
-
-    private static boolean hasTugGuideRail(Level level, BlockPos pos) {
-        return level.getBlockState(pos.below()).is(ModBlocks.GUIDE_RAIL_TUG.get());
+        return isDockApproachCell(level, pos);
     }
 
     /**
@@ -785,18 +780,6 @@ public final class TugRouteCompiler {
         }
         BlockPos port = dock.getVehicleBlockPos();
         return port.getX() == waterPos.getX() && port.getZ() == waterPos.getZ();
-    }
-
-    private static boolean isOppositeGuideRail(Level level, BlockPos pos, RouteHeading heading) {
-        Direction direction = heading.cardinalDirection();
-        if (direction == null) {
-            return false;
-        }
-        BlockState state = level.getBlockState(pos.below());
-        if (!state.is(ModBlocks.GUIDE_RAIL_TUG.get())) {
-            return false;
-        }
-        return TugGuideRailBlock.getArrowsDirection(state).getOpposite() == direction;
     }
 
     private static double heuristic(BlockPos pos, BlockPos goal) {

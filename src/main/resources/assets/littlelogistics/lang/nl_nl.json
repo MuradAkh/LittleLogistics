@@ -43,8 +43,6 @@
 
   "block.littlelogistics.tug_dock": "Dok voor Sleepbot",
   "block.littlelogistics.barge_dock": "Dok voor Sleepaak",
-  "block.littlelogistics.guide_rail_tug": "Sleepboot Geleiderail",
-  "block.littlelogistics.guide_rail_corner": "Vaartuig Hoek Geleiderail",
   "block.littlelogistics.vessel_charger": "Vaartuig Oplader",
   "block.littlelogistics.fluid_hopper": "Vloeistof Trechter",
   "block.littlelogistics.rapid_hopper": "Snelle Trechter",

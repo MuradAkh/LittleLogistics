@@ -64,7 +64,6 @@ Steam variants burn fuel; energy variants use NeoForge Energy (`ReadWriteEnergyS
 - `energy/` - Vessel charger for energy vehicles
 - `rapidhopper/` - Fast item hopper
 - `vesseldetector/` - Redstone output when vessel passes
-- `guiderail/` - Guide rails for water navigation
 
 ### Client-Side
 
