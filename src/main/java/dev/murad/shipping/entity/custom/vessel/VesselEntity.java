@@ -164,10 +164,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         linkingHandler.addAdditionalSaveData(compound);
 
-        Integer color = getColor();
-        if (color != null) {
-            compound.putInt("Color", color);
-        }
+        compound.putInt("Color", getColor());
 
         super.addAdditionalSaveData(compound);
     }
@@ -175,7 +172,7 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        builder.define(COLOR_DATA, -1);
+        builder.define(COLOR_DATA, Colorable.DEFAULT_COLOR);
         LinkingHandler.defineSynchedData(builder, DOMINANT_ID, DOMINATED_ID);
     }
 
@@ -187,15 +184,12 @@ public abstract class VesselEntity extends WaterAnimal implements LinkableEntity
         }
     }
 
-    @Nullable
-    public Integer getColor() {
-        int color = this.getEntityData().get(COLOR_DATA);
-        return color == -1 ? null : color;
+    public int getColor() {
+        return this.getEntityData().get(COLOR_DATA);
     }
 
-    public void setColor(Integer color) {
-        if (color == null) color = -1;
-        this.getEntityData().set(COLOR_DATA, color);
+    public void setColor(int color) {
+        this.getEntityData().set(COLOR_DATA, Colorable.normalizeColor(color));
     }
 
     // reset speed to 1

@@ -1,6 +1,7 @@
 package dev.murad.shipping.entity.custom.train.locomotive;
 
 import dev.murad.shipping.ShippingConfig;
+import dev.murad.shipping.block.dockingstation.DockingStationBlock;
 import dev.murad.shipping.block.dockingstation.DockingStationBlockEntity;
 import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.capability.StallingCapability;
@@ -57,8 +58,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity implements LinkableEntityHead<AbstractTrainCarEntity>, ItemHandlerVanillaContainerWrapper, HeadVehicle, StallingCapability {
 
@@ -115,8 +114,31 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     protected LocomotiveNavigator navigator = new LocomotiveNavigator(this);
 
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractLocomotiveEntity.class, EntityDataSerializers.BOOLEAN);
-    private int dockHoldTicks = 0;
-    private int postUndockTicks = 0;
+    private static final double DOCK_CLEAR_DISTANCE = 0.75D;
+    private static final int DOCK_DEPARTURE_TIMEOUT = 100;
+    private DockingState dockingState = DockingState.APPROACHING;
+    @Nullable
+    private DockingSession dockingSession;
+
+    private enum DockingState {
+        APPROACHING,
+        DOCKED,
+        DEPARTING
+    }
+
+    private static final class DockingSession {
+        private final BlockPos headDockPos;
+        private final BlockPos portPos;
+        private final Direction heading;
+        private final Map<UUID, BlockPos> followerDockPositions = new HashMap<>();
+        private int departureTicks;
+
+        private DockingSession(BlockPos headDockPos, BlockPos portPos, Direction heading) {
+            this.headDockPos = headDockPos.immutable();
+            this.portPos = portPos.immutable();
+            this.heading = heading;
+        }
+    }
 
 
     public AbstractLocomotiveEntity(EntityType<?> type, Level world) {
@@ -416,73 +438,56 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     private void tickDockCheck() {
-        int x = (int) Math.floor(this.getX());
-        int y = (int) Math.floor(this.getY());
-        int z = (int) Math.floor(this.getZ());
-
-        boolean wasDocked = this.isDocked();
-
-        if (wasDocked && dockHoldTicks > 0) {
-            dockHoldTicks--;
-            this.setDeltaMovement(Vec3.ZERO);
-            this.moveTo(x + 0.5, getY(), z + 0.5);
-            return;
+        switch (dockingState) {
+            case APPROACHING -> tryBeginDocking();
+            case DOCKED -> tickDockedSession();
+            case DEPARTING -> tickDeparture();
         }
+    }
 
-        Function<Double, Double> prepCord =
-                (Double d) -> Math.abs(d - d.intValue());
-        Predicate<Double> aroundCentre =
-                (var i) -> prepCord.apply(i) < 0.8 && prepCord.apply(i) > 0.2;
+    private boolean isNearBlockCenter() {
+        double xFraction = this.getX() - Math.floor(this.getX());
+        double zFraction = this.getZ() - Math.floor(this.getZ());
+        return xFraction > 0.2D && xFraction < 0.8D
+                && zFraction > 0.2D && zFraction < 0.8D;
+    }
 
-        if (!aroundCentre.test(this.getX()) || !aroundCentre.test(this.getZ())) {
-            return;
-        }
-
-        if (postUndockTicks > 0) {
-            postUndockTicks--;
-            return;
-        }
+    private void tryBeginDocking() {
+        if (!isNearBlockCenter()) return;
 
         DockingStationBlockEntity dock = findDockAtPosition();
-
-        boolean shouldDock;
-        if (dock != null) {
-            if (!wasDocked) {
-                if (dock.shouldPassThrough(this.getDirection())) {
-                    shouldDock = false;
-                } else {
-                    shouldDock = true;
-                }
-            } else {
-                shouldDock = isDockChainHolding();
-            }
-        } else {
-            shouldDock = false;
+        Direction heading = this.getDirection();
+        if (dock == null || dock.shouldPassThrough(this, heading) || !dock.tryOccupyDock(this)) {
+            return;
         }
 
-        boolean changedDock = !wasDocked && shouldDock;
-        boolean changedUndock = wasDocked && !shouldDock;
+        dockingSession = new DockingSession(dock.getBlockPos(), dock.getVehicleBlockPos(), heading);
+        dockingState = DockingState.DOCKED;
+        docked = true;
+        occupyFollowerDocks(dockingSession, dock);
+        snapToDock(dock);
+        onDock();
+    }
 
-        if (shouldDock) {
-            if (changedDock && dock != null) {
-                dock.occupyDock(this);
-            }
-            // Refresh follower dock assignments each check cycle
-            // as followers may still be settling into position via spring physics
-            occupyFollowerDocks();
-            dockHoldTicks = dock != null ? 5 : 20;
-            this.dock(x + 0.5, getY(), z + 0.5);
-        } else {
-            if (changedUndock && dock != null) {
-                vacateAllDocks();
-                postUndockTicks = 10;
-            }
-            dockHoldTicks = 0;
-            this.undock();
+    private void tickDockedSession() {
+        DockingSession session = dockingSession;
+        DockingStationBlockEntity headDock = session == null ? null : getDockAt(session.headDockPos);
+        if (session != null && headDock != null) {
+            occupyFollowerDocks(session, headDock);
+            pruneInvalidFollowerAssignments(session);
         }
+        if (session == null || headDock == null || !headDock.isOccupiedBy(this)
+                || !isDockChainHolding(session, headDock)) {
+            beginDeparture();
+            return;
+        }
+        snapToDock(headDock);
+    }
 
-        if (changedDock) onDock();
-        if (changedUndock) onUndock();
+    private void snapToDock(DockingStationBlockEntity dock) {
+        Vec3 center = dock.getVehicleCenterPos();
+        this.setDeltaMovement(Vec3.ZERO);
+        this.moveTo(center.x, getY(), center.z);
     }
 
     @Nullable
@@ -493,55 +498,113 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         Direction forward = getDirection();
         for (Direction side : new Direction[]{forward.getClockWise(), forward.getCounterClockWise()}) {
             BlockEntity be = level().getBlockEntity(railPos.relative(side));
-            if (be instanceof DockingStationBlockEntity dbe) {
+            if (be instanceof DockingStationBlockEntity dbe
+                    && dbe.getVehicleBlockPos().equals(railPos)
+                    && forward.getAxis() != dbe.getBlockState().getValue(DockingStationBlock.FACING).getAxis()
+                    && dbe.canOccupyDock(this)) {
                 return dbe;
             }
         }
         return null;
     }
 
-    private boolean isDockChainHolding() {
-        DockingStationBlockEntity headDock = findDockAtPosition();
-        if (headDock == null) return false;
+    private boolean isDockChainHolding(DockingSession session, DockingStationBlockEntity headDock) {
         if (headDock.isHolding()) return true;
 
-        for (DockingStationBlockEntity dock : headDock.getFollowerDocks(this.getDirection())) {
-            if (dock.isHolding()) return true;
+        for (BlockPos pos : session.followerDockPositions.values()) {
+            DockingStationBlockEntity dock = getDockAt(pos);
+            if (dock != null && dock.isHolding()) return true;
         }
         return false;
     }
 
-    private void occupyFollowerDocks() {
-        DockingStationBlockEntity headDock = findDockAtPosition();
-        if (headDock == null) return;
-
-        // Get ordered dock chain behind the head dock
-        List<DockingStationBlockEntity> followerDocks = headDock.getFollowerDocks(this.getDirection());
-
-        // Walk follower vehicle chain and zip with dock chain by index
+    private void occupyFollowerDocks(DockingSession session, DockingStationBlockEntity headDock) {
+        List<DockingStationBlockEntity> followerDocks = headDock.getFollowerDocks(session.heading);
         Optional<AbstractTrainCarEntity> follower = this.getFollower();
         int index = 0;
         while (follower.isPresent() && index < followerDocks.size()) {
             DockingStationBlockEntity dock = followerDocks.get(index);
             Entity followerEntity = follower.get();
-            Entity current = dock.getDockedVehicle();
-            if (current != followerEntity) {
-                if (current != null) dock.vacateDock();
-                dock.occupyDock(followerEntity);
+            if (!session.followerDockPositions.containsKey(followerEntity.getUUID())
+                    && dock.tryOccupyDock(followerEntity)) {
+                session.followerDockPositions.put(
+                        followerEntity.getUUID(), dock.getBlockPos().immutable());
             }
             follower = follower.get().getFollower();
             index++;
         }
     }
 
-    private void vacateAllDocks() {
-        DockingStationBlockEntity headDock = findDockAtPosition();
-        if (headDock == null) return;
-        headDock.vacateDock();
+    private void pruneInvalidFollowerAssignments(DockingSession session) {
+        session.followerDockPositions.entrySet().removeIf(entry -> {
+            DockingStationBlockEntity dock = getDockAt(entry.getValue());
+            return dock == null || !dock.isOccupiedBy(entry.getKey());
+        });
+    }
 
-        for (DockingStationBlockEntity dock : headDock.getFollowerDocks(this.getDirection())) {
-            dock.vacateDock();
+    private void beginDeparture() {
+        DockingSession session = dockingSession;
+        if (session == null) {
+            dockingState = DockingState.APPROACHING;
+            this.undock();
+            return;
         }
+
+        DockingStationBlockEntity headDock = getDockAt(session.headDockPos);
+        if (headDock != null) headDock.vacateDock(this);
+        for (Map.Entry<UUID, BlockPos> entry : session.followerDockPositions.entrySet()) {
+            DockingStationBlockEntity followerDock = getDockAt(entry.getValue());
+            if (followerDock != null) {
+                followerDock.vacateDock(entry.getKey());
+            }
+        }
+
+        dockingState = DockingState.DEPARTING;
+        this.undock();
+        onUndock();
+    }
+
+    private void tickDeparture() {
+        DockingSession session = dockingSession;
+        if (session == null || hasConsistClearedDock(session)
+                || ++session.departureTicks >= DOCK_DEPARTURE_TIMEOUT) {
+            dockingSession = null;
+            dockingState = DockingState.APPROACHING;
+            return;
+        }
+        this.setYRot(session.heading.toYRot());
+    }
+
+    private boolean hasConsistClearedDock(DockingSession session) {
+        if (horizontalDistance(this.position(), Vec3.atCenterOf(session.portPos)) <= DOCK_CLEAR_DISTANCE) {
+            return false;
+        }
+        for (Map.Entry<UUID, BlockPos> entry : session.followerDockPositions.entrySet()) {
+            Entity follower = findEntity(entry.getKey());
+            DockingStationBlockEntity dock = getDockAt(entry.getValue());
+            if (follower != null && dock != null
+                    && horizontalDistance(follower.position(), dock.getVehicleCenterPos()) <= DOCK_CLEAR_DISTANCE) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static double horizontalDistance(Vec3 first, Vec3 second) {
+        double dx = first.x - second.x;
+        double dz = first.z - second.z;
+        return Math.sqrt(dx * dx + dz * dz);
+    }
+
+    @Nullable
+    private DockingStationBlockEntity getDockAt(BlockPos pos) {
+        BlockEntity be = level().getBlockEntity(pos);
+        return be instanceof DockingStationBlockEntity dock ? dock : null;
+    }
+
+    @Nullable
+    private Entity findEntity(UUID uuid) {
+        return level() instanceof ServerLevel serverLevel ? serverLevel.getEntity(uuid) : null;
     }
 
     private double getSpeedModifier(){

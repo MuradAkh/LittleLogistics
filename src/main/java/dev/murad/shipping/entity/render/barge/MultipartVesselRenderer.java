@@ -82,8 +82,7 @@ public class MultipartVesselRenderer<T extends VesselEntity> extends AbstractVes
     }
 
     protected void renderTrimModel(T vesselEntity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
-        var colorId = vesselEntity.getColor();
-        int color = (colorId == null ? DyeColor.RED : DyeColor.byId(colorId)).getTextureDiffuseColor();
+        int color = DyeColor.byId(vesselEntity.getColor()).getTextureDiffuseColor();
 
         trimModel.renderToBuffer(matrixStack,
                 buffer.getBuffer(trimModel.renderType(trimTextureLocation)),

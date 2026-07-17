@@ -120,6 +120,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private static final double DOCK_SETTLE_STEP = 0.08D;
     private static final double DOCK_SETTLE_EPSILON = 0.02D;
     private static final double DOCK_CLEAR_DISTANCE = 0.75D;
+    private static final int DOCK_DEPARTURE_TIMEOUT = 100;
     private static final double ROUTE_REBASE_MAX_DISTANCE = 1.0D;
     private static final double ROUTE_JOIN_DISTANCE = 1.25D;
     private static final int ROUTE_APPROACH_SEARCH_BUDGET = 256;
@@ -151,6 +152,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         private final BlockPos portPos;
         private final Direction heading;
         private final Map<UUID, BlockPos> followerDockPositions = new HashMap<>();
+        private int departureTicks;
 
         private DockingSession(BlockPos headDockPos, BlockPos portPos, Direction heading) {
             this.headDockPos = headDockPos.immutable();
@@ -565,7 +567,9 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             // which is typically one block higher than the water the tug occupies.
             for (BlockPos candidate : new BlockPos[]{pos.relative(dir), pos.above().relative(dir)}) {
                 BlockEntity be = level().getBlockEntity(candidate);
-                if (be instanceof DockingStationBlockEntity dockBE && isValidDockCandidate(dockBE)) {
+                if (be instanceof DockingStationBlockEntity dockBE
+                        && isValidDockCandidate(dockBE)
+                        && dockBE.canOccupyDock(this)) {
                     return dockBE;
                 }
             }
@@ -586,7 +590,7 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private void tryBeginDocking() {
         DockingStationBlockEntity dock = findAdjacentDock();
         Direction heading = getDockHeading();
-        if (dock == null || dock.shouldPassThrough(heading) || !dock.tryOccupyDock(this)) {
+        if (dock == null || dock.shouldPassThrough(this, heading) || !dock.tryOccupyDock(this)) {
             return;
         }
 
@@ -602,7 +606,9 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private void tickSettlingSession() {
         DockingSession session = dockingSession;
         DockingStationBlockEntity headDock = session == null ? null : getDockAt(session.headDockPos);
-        if (session == null || headDock == null || !isDockChainHolding(session, headDock)) {
+        if (session != null) pruneInvalidFollowerAssignments(session);
+        if (session == null || headDock == null || !headDock.isOccupiedBy(this)
+                || !isDockChainHolding(session, headDock)) {
             beginDeparture();
             return;
         }
@@ -616,7 +622,9 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private void tickDockedSession() {
         DockingSession session = dockingSession;
         DockingStationBlockEntity headDock = session == null ? null : getDockAt(session.headDockPos);
-        if (session == null || headDock == null || !isDockChainHolding(session, headDock)) {
+        if (session != null) pruneInvalidFollowerAssignments(session);
+        if (session == null || headDock == null || !headDock.isOccupiedBy(this)
+                || !isDockChainHolding(session, headDock)) {
             beginDeparture();
             return;
         }
@@ -663,6 +671,13 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         return false;
     }
 
+    private void pruneInvalidFollowerAssignments(DockingSession session) {
+        session.followerDockPositions.entrySet().removeIf(entry -> {
+            DockingStationBlockEntity dock = getDockAt(entry.getValue());
+            return dock == null || !dock.isOccupiedBy(entry.getKey());
+        });
+    }
+
     private void occupyFollowerDocks(DockingSession session, DockingStationBlockEntity headDock) {
         List<DockingStationBlockEntity> followerDocks = headDock.getFollowerDocks(session.heading);
         Optional<VesselEntity> follower = this.getFollower();
@@ -702,7 +717,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
 
     private void tickDeparture() {
         DockingSession session = dockingSession;
-        if (session == null || hasConvoyClearedDock(session)) {
+        if (session == null || hasConvoyClearedDock(session)
+                || ++session.departureTicks >= DOCK_DEPARTURE_TIMEOUT) {
             dockingSession = null;
             dockingState = DockingState.APPROACHING;
             return;
@@ -718,8 +734,8 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         for (Map.Entry<UUID, BlockPos> entry : session.followerDockPositions.entrySet()) {
             Entity follower = findEntity(entry.getKey());
             DockingStationBlockEntity dock = getDockAt(entry.getValue());
-            if (follower == null || dock == null
-                    || horizontalDistance(follower.position(), dock.getVehicleCenterPos()) <= DOCK_CLEAR_DISTANCE) {
+            if (follower != null && dock != null
+                    && horizontalDistance(follower.position(), dock.getVehicleCenterPos()) <= DOCK_CLEAR_DISTANCE) {
                 return false;
             }
         }
@@ -782,7 +798,12 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             var color = DyeColor.getColor(player.getItemInHand(hand));
 
             if (color != null) {
-                this.setColor(color.getId());
+                if (getColor() != color.getId()) {
+                    this.setColor(color.getId());
+                    if (!player.getAbilities().instabuild) {
+                        player.getItemInHand(hand).shrink(1);
+                    }
+                }
             } else {
                 ((ServerPlayer) player).openMenu(createContainerProvider(), getDataAccessor()::write);
             }

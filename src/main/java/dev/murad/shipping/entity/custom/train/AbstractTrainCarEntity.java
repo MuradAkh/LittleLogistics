@@ -155,15 +155,12 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         return getPickResult().getItem();
     }
 
-    @Nullable
-    public Integer getColor() {
-        int color = this.getEntityData().get(COLOR_DATA);
-        return color == -1 ? null : color;
+    public int getColor() {
+        return this.getEntityData().get(COLOR_DATA);
     }
 
-    public void setColor(Integer color) {
-        if (color == null) color = -1;
-        this.getEntityData().set(COLOR_DATA, color);
+    public void setColor(int color) {
+        this.getEntityData().set(COLOR_DATA, Colorable.normalizeColor(color));
     }
 
     @Override
@@ -175,7 +172,12 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
         if (color != null) {
             if (!level().isClientSide) {
-                this.getEntityData().set(COLOR_DATA, color.getId());
+                if (getColor() != color.getId()) {
+                    setColor(color.getId());
+                    if (!player.getAbilities().instabuild) {
+                        player.getItemInHand(hand).shrink(1);
+                    }
+                }
             }
             // don't interact *and* use current item
             return InteractionResult.sidedSuccess(this.level().isClientSide);
@@ -199,10 +201,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     protected void addAdditionalSaveData(@NotNull CompoundTag compound) {
         super.addAdditionalSaveData(compound);
 
-        Integer color = getColor();
-        if (color != null) {
-            compound.putInt("Color", color);
-        }
+        compound.putInt("Color", getColor());
 
         linkingHandler.addAdditionalSaveData(compound);
     }
@@ -212,7 +211,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         super.defineSynchedData(builder);
         builder.define(DOMINANT_ID, -1);
         builder.define(DOMINATED_ID, -1);
-        builder.define(COLOR_DATA, -1);
+        builder.define(COLOR_DATA, Colorable.DEFAULT_COLOR);
     }
 
 

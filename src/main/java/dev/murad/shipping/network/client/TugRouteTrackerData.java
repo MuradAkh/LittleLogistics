@@ -8,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.item.DyeColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,8 +56,7 @@ public record TugRouteTrackerData(int entityId, int dyeColorId, List<BlockPos> p
         }
 
         List<BlockPos> waypoints = route.stream().map(node -> node.toBlockPos().immutable()).toList();
-        int dyeColorId = tug.getColor() == null ? DyeColor.RED.getId() : tug.getColor();
-        return Optional.of(new TugRouteTrackerData(tug.getId(), dyeColorId, simplified, waypoints));
+        return Optional.of(new TugRouteTrackerData(tug.getId(), tug.getColor(), simplified, waypoints));
     }
 
     private static List<BlockPos> flattenPath(TugRoute route) {

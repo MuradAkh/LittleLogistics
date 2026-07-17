@@ -22,7 +22,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.Vec3;
@@ -221,8 +220,7 @@ public final class VehicleRegistrationData extends SavedData {
             .toList();
         Map<UUID, RouteState> states = new HashMap<>();
         for (AbstractTugEntity tug : tugs) {
-            int color = tug.getColor() == null ? DyeColor.RED.getId() : tug.getColor();
-            states.put(tug.getUUID(), new RouteState(tug.getId(), color, tug.getRouteOverlayRevision(),
+            states.put(tug.getUUID(), new RouteState(tug.getId(), tug.getColor(), tug.getRouteOverlayRevision(),
                 (int) (Math.sqrt(tug.distanceToSqr(player)) / 16.0D)));
         }
         if (states.equals(lastTugRoutes.get(player.getUUID()))) return;
@@ -250,8 +248,7 @@ public final class VehicleRegistrationData extends SavedData {
             .toList();
         Map<UUID, RouteState> states = new HashMap<>();
         for (AbstractLocomotiveEntity locomotive : locomotives) {
-            int color = locomotive.getColor() == null ? DyeColor.RED.getId() : locomotive.getColor();
-            states.put(locomotive.getUUID(), new RouteState(locomotive.getId(), color,
+            states.put(locomotive.getUUID(), new RouteState(locomotive.getId(), locomotive.getColor(),
                 locomotive.getRouteOverlayRevision(),
                 (int) (Math.sqrt(locomotive.distanceToSqr(player)) / 16.0D)));
         }

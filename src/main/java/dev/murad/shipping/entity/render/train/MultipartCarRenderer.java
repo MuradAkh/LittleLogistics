@@ -219,8 +219,7 @@ public class MultipartCarRenderer<T extends AbstractTrainCarEntity> extends Enti
     }
 
     protected void renderTrimModel(T entity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, int overlay) {
-        var colorId = entity.getColor();
-        int color = (colorId == null ? DyeColor.RED : DyeColor.byId(colorId)).getTextureDiffuseColor();
+        int color = DyeColor.byId(entity.getColor()).getTextureDiffuseColor();
 
         trimModel.renderToBuffer(matrixStack,
                 buffer.getBuffer(trimModel.renderType(trimTextureLocation)),

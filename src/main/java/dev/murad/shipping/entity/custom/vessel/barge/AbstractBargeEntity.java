@@ -47,7 +47,12 @@ public abstract class AbstractBargeEntity extends VesselEntity implements Stalli
             var color = DyeColor.getColor(player.getItemInHand(hand));
 
             if (color != null) {
-                this.getEntityData().set(COLOR_DATA, color.getId());
+                if (getColor() != color.getId()) {
+                    setColor(color.getId());
+                    if (!player.getAbilities().instabuild) {
+                        player.getItemInHand(hand).shrink(1);
+                    }
+                }
             } else {
                 doInteract(player);
             }

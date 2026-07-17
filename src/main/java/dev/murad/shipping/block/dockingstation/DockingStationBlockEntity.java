@@ -1,5 +1,6 @@
 package dev.murad.shipping.block.dockingstation;
 
+import dev.murad.shipping.entity.Colorable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -269,15 +270,41 @@ public class DockingStationBlockEntity extends BlockEntity {
     // Dock lifecycle
     // =========================================================================
 
-    private boolean colorMatches(Entity vehicle) {
-        if (vehicle instanceof dev.murad.shipping.entity.Colorable colorable) {
-            Integer vehicleColor = colorable.getColor();
-            if (vehicleColor != null && level != null) {
-                int dockColor = level.getBlockState(worldPosition).getValue(DockingStationBlock.COLOR);
-                if (vehicleColor != dockColor) return false;
-            }
+    public boolean colorMatches(Entity vehicle) {
+        return vehicle instanceof Colorable colorable
+                && Colorable.colorsMatch(
+                        colorable.getColor(),
+                        getBlockState().getValue(DockingStationBlock.COLOR));
+    }
+
+    private boolean hasValidOccupant() {
+        return dockedVehicle != null
+                && dockedVehicle.isAlive()
+                && dockedVehicle.level() == level
+                && colorMatches(dockedVehicle);
+    }
+
+    public boolean canOccupyDock(Entity vehicle) {
+        return vehicle.isAlive()
+                && vehicle.level() == level
+                && colorMatches(vehicle)
+                && (dockedVehicle == null || dockedVehicle == vehicle);
+    }
+
+    public boolean isOccupiedBy(Entity vehicle) {
+        return dockedVehicle == vehicle && hasValidOccupant();
+    }
+
+    public boolean isOccupiedBy(UUID vehicleId) {
+        return dockedVehicle != null
+                && dockedVehicle.getUUID().equals(vehicleId)
+                && hasValidOccupant();
+    }
+
+    public void revalidateOccupant() {
+        if (dockedVehicle != null && !hasValidOccupant()) {
+            vacateDock();
         }
-        return true;
     }
 
     /**
@@ -285,7 +312,7 @@ public class DockingStationBlockEntity extends BlockEntity {
      * callers must handle a failed acquisition before changing their own state.
      */
     public boolean tryOccupyDock(Entity vehicle) {
-        if (!colorMatches(vehicle)) return false;
+        if (!canOccupyDock(vehicle)) return false;
         if (dockedVehicle != null && dockedVehicle != vehicle) return false;
         if (dockedVehicle == vehicle) return true;
 
@@ -307,11 +334,6 @@ public class DockingStationBlockEntity extends BlockEntity {
         syncToClient();
         if (level != null) level.invalidateCapabilities(worldPosition);
         return true;
-    }
-
-    /** Retained for existing callers that do not yet need acquisition feedback. */
-    public void occupyDock(Entity vehicle) {
-        tryOccupyDock(vehicle);
     }
 
     public void vacateDock() {
@@ -345,9 +367,9 @@ public class DockingStationBlockEntity extends BlockEntity {
     // =========================================================================
 
     public boolean isHolding() {
+        if (!hasValidOccupant()) return false;
         if (redstoneMode == RedstoneMode.HOLD_WHILE_POWERED && isPowered()) return true;
         if (redstoneMode == RedstoneMode.DISABLE_WHILE_POWERED && isPowered()) return false;
-        if (dockedVehicle == null) return false;
         return ticksSinceLastTransfer < idleTimeoutTicks;
     }
 
@@ -369,14 +391,30 @@ public class DockingStationBlockEntity extends BlockEntity {
      * (e.g. a locomotive) should not stop here and instead pass through to let a
      * follower car dock.
      */
-    public boolean shouldPassThrough(Direction vehicleHeading) {
+    public boolean shouldPassThrough(Entity vehicle, Direction vehicleHeading) {
         if (level == null) return false;
         Direction facing = getBlockState().getValue(DockingStationBlock.FACING);
         Direction inward = facing.getOpposite();
         BlockPos vehiclePos = worldPosition.relative(inward);
-        BlockPos aheadControllerPos = vehiclePos.relative(vehicleHeading).relative(facing);
-        BlockEntity ahead = level.getBlockEntity(aheadControllerPos);
-        return ahead instanceof DockingStationBlockEntity;
+        BlockPos current = vehiclePos.relative(vehicleHeading);
+        while (true) {
+            BlockPos aheadControllerPos = current.relative(facing);
+            BlockEntity ahead = level.getBlockEntity(aheadControllerPos);
+            if (!(ahead instanceof DockingStationBlockEntity dock) || !isInSameDockLine(dock)) {
+                return false;
+            }
+            if (dock.canOccupyDock(vehicle)) {
+                return true;
+            }
+            current = current.relative(vehicleHeading);
+        }
+    }
+
+    private boolean isInSameDockLine(DockingStationBlockEntity other) {
+        return stationId != null
+                && stationId.equals(other.stationId)
+                && getBlockState().getValue(DockingStationBlock.FACING)
+                == other.getBlockState().getValue(DockingStationBlock.FACING);
     }
 
     /**
@@ -395,7 +433,7 @@ public class DockingStationBlockEntity extends BlockEntity {
         while (true) {
             BlockPos potentialController = current.relative(facing);
             BlockEntity be = level.getBlockEntity(potentialController);
-            if (be instanceof DockingStationBlockEntity dbe) {
+            if (be instanceof DockingStationBlockEntity dbe && isInSameDockLine(dbe)) {
                 docks.add(dbe);
                 current = current.relative(behind);
             } else {
@@ -418,6 +456,7 @@ public class DockingStationBlockEntity extends BlockEntity {
         if (be.needsStationInit && level instanceof ServerLevel serverLevel) {
             be.initStation(serverLevel);
         }
+        be.revalidateOccupant();
         if (be.dockedVehicle != null) {
             be.ticksSinceLastTransfer++;
         }
@@ -514,7 +553,9 @@ public class DockingStationBlockEntity extends BlockEntity {
     // =========================================================================
 
     @Nullable public Entity getDockedVehicle()     { return dockedVehicle; }
-    public boolean isOccupied()                    { return occupied; }
+    public boolean isOccupied() {
+        return level != null && level.isClientSide ? occupied : hasValidOccupant();
+    }
     public RedstoneMode getRedstoneMode()          { return redstoneMode; }
     public int getTicksSinceLastTransfer()         { return ticksSinceLastTransfer; }
     @Nullable public UUID getStationId()           { return stationId; }
@@ -537,12 +578,14 @@ public class DockingStationBlockEntity extends BlockEntity {
         public void connect(IItemHandler h)  { this.delegate = h; }
         public void disconnect()             { this.delegate = null; }
 
-        @Override public int getSlots() { return delegate != null ? delegate.getSlots() : 0; }
+        private boolean canTransfer() { return delegate != null && hasValidOccupant(); }
+
+        @Override public int getSlots() { return canTransfer() ? delegate.getSlots() : 0; }
         @Override public @Nonnull ItemStack getStackInSlot(int slot) {
-            return delegate != null ? delegate.getStackInSlot(slot) : ItemStack.EMPTY;
+            return canTransfer() ? delegate.getStackInSlot(slot) : ItemStack.EMPTY;
         }
         @Override public @Nonnull ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-            if (delegate == null) return stack;
+            if (!canTransfer()) return stack;
             ItemStack result = delegate.insertItem(slot, stack, simulate);
             if (!simulate && result.getCount() != stack.getCount()) {
                 notifyTransfer();
@@ -551,7 +594,7 @@ public class DockingStationBlockEntity extends BlockEntity {
             return result;
         }
         @Override public @Nonnull ItemStack extractItem(int slot, int amount, boolean simulate) {
-            if (delegate == null) return ItemStack.EMPTY;
+            if (!canTransfer()) return ItemStack.EMPTY;
             ItemStack result = delegate.extractItem(slot, amount, simulate);
             if (!simulate && !result.isEmpty()) {
                 notifyTransfer();
@@ -559,9 +602,9 @@ public class DockingStationBlockEntity extends BlockEntity {
             }
             return result;
         }
-        @Override public int getSlotLimit(int slot) { return delegate != null ? delegate.getSlotLimit(slot) : 0; }
+        @Override public int getSlotLimit(int slot) { return canTransfer() ? delegate.getSlotLimit(slot) : 0; }
         @Override public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-            return delegate != null && delegate.isItemValid(slot, stack);
+            return canTransfer() && delegate.isItemValid(slot, stack);
         }
     }
 
@@ -571,16 +614,18 @@ public class DockingStationBlockEntity extends BlockEntity {
         public void connect(IFluidHandler h) { this.delegate = h; }
         public void disconnect()             { this.delegate = null; }
 
-        @Override public int getTanks() { return delegate != null ? delegate.getTanks() : 0; }
+        private boolean canTransfer() { return delegate != null && hasValidOccupant(); }
+
+        @Override public int getTanks() { return canTransfer() ? delegate.getTanks() : 0; }
         @Override public @Nonnull FluidStack getFluidInTank(int tank) {
-            return delegate != null ? delegate.getFluidInTank(tank) : FluidStack.EMPTY;
+            return canTransfer() ? delegate.getFluidInTank(tank) : FluidStack.EMPTY;
         }
-        @Override public int getTankCapacity(int tank) { return delegate != null ? delegate.getTankCapacity(tank) : 0; }
+        @Override public int getTankCapacity(int tank) { return canTransfer() ? delegate.getTankCapacity(tank) : 0; }
         @Override public boolean isFluidValid(int tank, @Nonnull FluidStack stack) {
-            return delegate != null && delegate.isFluidValid(tank, stack);
+            return canTransfer() && delegate.isFluidValid(tank, stack);
         }
         @Override public int fill(@Nonnull FluidStack resource, FluidAction action) {
-            if (delegate == null) return 0;
+            if (!canTransfer()) return 0;
             int filled = delegate.fill(resource, action);
             if (action == FluidAction.EXECUTE && filled > 0) {
                 notifyTransfer();
@@ -589,7 +634,7 @@ public class DockingStationBlockEntity extends BlockEntity {
             return filled;
         }
         @Override public @Nonnull FluidStack drain(@Nonnull FluidStack resource, FluidAction action) {
-            if (delegate == null) return FluidStack.EMPTY;
+            if (!canTransfer()) return FluidStack.EMPTY;
             FluidStack drained = delegate.drain(resource, action);
             if (action == FluidAction.EXECUTE && !drained.isEmpty()) {
                 notifyTransfer();
@@ -598,7 +643,7 @@ public class DockingStationBlockEntity extends BlockEntity {
             return drained;
         }
         @Override public @Nonnull FluidStack drain(int maxDrain, FluidAction action) {
-            if (delegate == null) return FluidStack.EMPTY;
+            if (!canTransfer()) return FluidStack.EMPTY;
             FluidStack drained = delegate.drain(maxDrain, action);
             if (action == FluidAction.EXECUTE && !drained.isEmpty()) {
                 notifyTransfer();
@@ -614,8 +659,10 @@ public class DockingStationBlockEntity extends BlockEntity {
         public void connect(IEnergyStorage s) { this.delegate = s; }
         public void disconnect()              { this.delegate = null; }
 
+        private boolean canTransfer() { return delegate != null && hasValidOccupant(); }
+
         @Override public int receiveEnergy(int maxReceive, boolean simulate) {
-            if (delegate == null) return 0;
+            if (!canTransfer()) return 0;
             int received = delegate.receiveEnergy(maxReceive, simulate);
             if (!simulate && received > 0) {
                 notifyTransfer();
@@ -624,7 +671,7 @@ public class DockingStationBlockEntity extends BlockEntity {
             return received;
         }
         @Override public int extractEnergy(int maxExtract, boolean simulate) {
-            if (delegate == null) return 0;
+            if (!canTransfer()) return 0;
             int extracted = delegate.extractEnergy(maxExtract, simulate);
             if (!simulate && extracted > 0) {
                 notifyTransfer();
@@ -632,9 +679,9 @@ public class DockingStationBlockEntity extends BlockEntity {
             }
             return extracted;
         }
-        @Override public int getEnergyStored()    { return delegate != null ? delegate.getEnergyStored() : 0; }
-        @Override public int getMaxEnergyStored() { return delegate != null ? delegate.getMaxEnergyStored() : 0; }
-        @Override public boolean canExtract()     { return delegate != null && delegate.canExtract(); }
-        @Override public boolean canReceive()     { return delegate != null && delegate.canReceive(); }
+        @Override public int getEnergyStored()    { return canTransfer() ? delegate.getEnergyStored() : 0; }
+        @Override public int getMaxEnergyStored() { return canTransfer() ? delegate.getMaxEnergyStored() : 0; }
+        @Override public boolean canExtract()     { return canTransfer() && delegate.canExtract(); }
+        @Override public boolean canReceive()     { return canTransfer() && delegate.canReceive(); }
     }
 }

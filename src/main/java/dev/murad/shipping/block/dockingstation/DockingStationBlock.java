@@ -181,15 +181,24 @@ public class DockingStationBlock extends Block implements EntityBlock {
             if (!level.isClientSide) {
                 Direction facing = state.getValue(FACING);
                 BlockPos controllerPos = state.getValue(PART).controllerPos(pos, facing);
-                for (DockingStationPart part : DockingStationPart.values()) {
-                    BlockPos partPos = part.partPos(controllerPos, facing);
-                    BlockState partState = level.getBlockState(partPos);
-                    if (partState.is(this)) {
-                        level.setBlock(partPos, partState.setValue(COLOR, color.getId()), Block.UPDATE_ALL);
+                BlockState controllerState = level.getBlockState(controllerPos);
+                boolean changed = controllerState.is(this)
+                        && controllerState.getValue(COLOR) != color.getId();
+                if (changed) {
+                    for (DockingStationPart part : DockingStationPart.values()) {
+                        BlockPos partPos = part.partPos(controllerPos, facing);
+                        BlockState partState = level.getBlockState(partPos);
+                        if (partState.is(this)) {
+                            level.setBlock(partPos, partState.setValue(COLOR, color.getId()), Block.UPDATE_ALL);
+                        }
                     }
-                }
-                if (!player.getAbilities().instabuild) {
-                    stack.shrink(1);
+                    BlockEntity controller = level.getBlockEntity(controllerPos);
+                    if (controller instanceof DockingStationBlockEntity dock) {
+                        dock.revalidateOccupant();
+                    }
+                    if (!player.getAbilities().instabuild) {
+                        stack.shrink(1);
+                    }
                 }
             }
             return ItemInteractionResult.SUCCESS;

@@ -8,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.item.DyeColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,8 +44,7 @@ public record LocoRouteTrackerData(int entityId, int dyeColorId, List<BlockPos> 
             append(path, route.get((segmentIndex + 1) % route.size()).toBlockPos());
         }
         if (path.size() < 2 || path.size() > MAX_PATH_VERTICES) return Optional.empty();
-        int dyeColorId = locomotive.getColor() == null ? DyeColor.RED.getId() : locomotive.getColor();
-        return Optional.of(new LocoRouteTrackerData(locomotive.getId(), dyeColorId, path,
+        return Optional.of(new LocoRouteTrackerData(locomotive.getId(), locomotive.getColor(), path,
             route.stream().map(node -> node.toBlockPos().immutable()).toList()));
     }
 
