@@ -26,5 +26,12 @@ description='''${mod_description}'''
     ordering="NONE"
     side="BOTH"
 
+[[dependencies.${mod_id}]]
+    modId="ponder"
+    type="required"
+    versionRange="[1.0.82+mc1.21.1,)"
+    ordering="AFTER"
+    side="CLIENT"
+
 [[mixins]]
 config="littlelogistics.mixins.json"

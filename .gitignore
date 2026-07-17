@@ -21,6 +21,17 @@ build
 eclipse
 run
 */generated/*
+!src/generated/
+!src/generated/resources/
+src/generated/resources/*
+!src/generated/resources/assets/
+src/generated/resources/assets/*
+!src/generated/resources/assets/littlelogistics/
+src/generated/resources/assets/littlelogistics/*
+!src/generated/resources/assets/littlelogistics/ponder/
+src/generated/resources/assets/littlelogistics/ponder/*
+!src/generated/resources/assets/littlelogistics/ponder/train_linking.nbt
+!src/generated/resources/assets/littlelogistics/ponder/train_routing.nbt
 mcmodsrepo
 .factorypath
 

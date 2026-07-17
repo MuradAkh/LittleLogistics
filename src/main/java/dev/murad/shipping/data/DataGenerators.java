@@ -28,6 +28,7 @@ public final class DataGenerators {
         gen.addProvider(true, new ModItemTagsProvider(pack, lookupProvider, blockTags.contentsGetter(), existingFileHelper));
         gen.addProvider(true, new ModLootTableProvider(pack, lookupProvider));
         gen.addProvider(true, new ModRecipeProvider(pack, lookupProvider));
+        gen.addProvider(true, new PonderSceneProvider(pack));
     }
 
 }

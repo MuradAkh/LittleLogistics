@@ -107,5 +107,18 @@
 
   "subtitle.littlelogistics.steam_tug_whistle": "Steam tug whistles",
   "subtitle.littlelogistics.tug_docking": "Tug boat docks",
-  "subtitle.littlelogistics.tug_undocking": "Tug boat undocks"
+  "subtitle.littlelogistics.tug_undocking": "Tug boat undocks",
+
+  "littlelogistics.ponder.train_linking.header": "Linking Train Cars",
+  "littlelogistics.ponder.train_linking.text_1": "Use a Vehicle Chain to link two nearby train cars.",
+  "littlelogistics.ponder.train_linking.text_2": "Linked cars pull together until the Vehicle Chain is taut.",
+  "littlelogistics.ponder.train_linking.text_3": "A train can have one locomotive and any number of cars.",
+
+  "littlelogistics.ponder.train_routing.header": "Routing a Train",
+  "littlelogistics.ponder.train_routing.text_1": "Use the Conductor's Wrench to adjust junction rails.",
+  "littlelogistics.ponder.train_routing.text_2": "Right-click rails with a Locomotive Route to add waypoints in travel order.",
+  "littlelogistics.ponder.train_routing.text_3": "A waypoint beyond an Automatic T-Junction Rail determines which path the train follows.",
+  "littlelogistics.ponder.train_routing.text_4": "Click the first waypoint again to compile a repeating loop.",
+  "littlelogistics.ponder.train_routing.text_5": "Open the locomotive and place the completed route in its route slot.",
+  "littlelogistics.ponder.train_routing.text_6": "Start the engine to send the entire vehicle chain around the route."
 }

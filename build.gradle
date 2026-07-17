@@ -14,6 +14,9 @@ version = "mc${mc_version}-v${mod_version}"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
+// Publish Ponder and its required Flywheel runtime as nested Jar-in-Jar mods.
+jarJar.enable()
+
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += ['-Xmaxerrs', '9999']
 }
@@ -55,10 +58,22 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
 
+    // Compile against Ponder without adding its classes to Little Logistics itself.
+    compileOnly "net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${mc_version}"
+
+    jarJar("net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${mc_version}") {
+        transitive = false
+    }
+    jarJar("dev.engine-room.flywheel:flywheel-neoforge-${mc_version}:${flywheel_version}") {
+        transitive = false
+    }
+
     // Test mods for runtime
     runtimeOnly "maven.modrinth:emi:1.1.22+1.21.1+neoforge"
     runtimeOnly "maven.modrinth:pipez:neoforge-1.21.1-1.2.19"
     runtimeOnly "maven.modrinth:create:mc1.21.1-6.0.9"
+    // Nested mods are also declared normally so development runs load them directly.
+    runtimeOnly "net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${mc_version}"
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 }
 
@@ -67,6 +82,7 @@ test {
 }
 
 jar {
+    archiveClassifier = 'slim'
     manifest {
         attributes([
             "Specification-Title": mod_id,
@@ -78,6 +94,10 @@ jar {
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
+}
+
+tasks.named('jarJar').configure {
+    archiveClassifier = ''
 }
 
 tasks.named('processResources', ProcessResources).configure {
@@ -105,7 +125,7 @@ tasks.named('processResources', ProcessResources).configure {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact jar
+            artifact tasks.named('jarJar')
         }
     }
     repositories {
@@ -136,6 +156,10 @@ publishing {
 }
 
 repositories {
+    maven {
+        name = "Create"
+        url = "https://maven.createmod.net"
+    }
     maven {
         name = "Jared"
         url 'https://maven.blamejared.com'

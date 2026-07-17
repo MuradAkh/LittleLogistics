@@ -2,6 +2,7 @@ package dev.murad.shipping;
 
 import dev.murad.shipping.block.dockingstation.DockingStationBlock;
 import dev.murad.shipping.block.dockingstation.DockingStationScreen;
+import dev.murad.shipping.compatibility.ponder.LittleLogisticsPonderPlugin;
 import dev.murad.shipping.entity.container.*;
 import dev.murad.shipping.entity.custom.train.locomotive.EnergyLocomotiveEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.SteamLocomotiveEntity;
@@ -18,6 +19,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
@@ -49,7 +51,13 @@ public class ShippingMod
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
-        event.enqueueWork(ModItemModelProperties::register);
+        event.enqueueWork(() -> {
+            ModItemModelProperties.register();
+
+            if (ModList.get().isLoaded("ponder")) {
+                LittleLogisticsPonderPlugin.register();
+            }
+        });
     }
 
     private void registerTicketControllers(final RegisterTicketControllersEvent event) {
