@@ -56,5 +56,31 @@ public final class LittleLogisticsPonderPlugin implements PonderPlugin {
                         ModItems.BARREL_CAR.get(),
                         ModItems.FLUID_CAR.get())
                 .addStoryBoard("train_docking", TrainDockingScene::docking);
+
+        itemHelper.forComponents(
+                        ModItems.STEAM_TUG.get(),
+                        ModItems.ENERGY_TUG.get(),
+                        ModItems.CHEST_BARGE.get(),
+                        ModItems.BARREL_BARGE.get(),
+                        ModItems.FLUID_BARGE.get(),
+                        ModItems.FISHING_BARGE.get(),
+                        ModItems.SEATER_BARGE.get(),
+                        ModItems.VACUUM_BARGE.get())
+                .addStoryBoard("tug_linking", TugLinkingScene::linking);
+
+        itemHelper.forComponents(
+                        ModItems.STEAM_TUG.get(),
+                        ModItems.ENERGY_TUG.get(),
+                        ModItems.TUG_ROUTE.get())
+                .addStoryBoard("tug_routing", TugRoutingScene::routing);
+
+        itemHelper.forComponents(
+                        ModBlocks.DOCKING_STATION.get().asItem(),
+                        ModItems.STEAM_TUG.get(),
+                        ModItems.ENERGY_TUG.get(),
+                        ModItems.CHEST_BARGE.get(),
+                        ModItems.BARREL_BARGE.get(),
+                        ModItems.FLUID_BARGE.get())
+                .addStoryBoard("tug_docking", TugDockingScene::docking);
     }
 }

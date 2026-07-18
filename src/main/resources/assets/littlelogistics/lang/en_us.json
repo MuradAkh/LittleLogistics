@@ -134,5 +134,31 @@
   "littlelogistics.ponder.train_docking.text_9": "The attached hopper, pipe, pump, or cable controls whether cargo is loaded or unloaded.",
   "littlelogistics.ponder.train_docking.text_10": "Transfers reset the idle timer. The whole train waits while any occupied dock is still active.",
   "littlelogistics.ponder.train_docking.text_11": "Right-click a controller to configure its timeout, name, statistics, and redstone behavior.",
-  "littlelogistics.ponder.train_docking.text_12": "When every dock becomes idle, the train continues its journey."
+  "littlelogistics.ponder.train_docking.text_12": "When every dock becomes idle, the train continues its journey.",
+
+  "littlelogistics.ponder.tug_linking.header": "Linking Barges",
+  "littlelogistics.ponder.tug_linking.text_1": "Use a Vehicle Chain to link two nearby barges.",
+  "littlelogistics.ponder.tug_linking.text_2": "Linked vessels move together until the Vehicle Chain is taut.",
+  "littlelogistics.ponder.tug_linking.text_3": "A convoy can have one tug followed by any number of barges.",
+
+  "littlelogistics.ponder.tug_routing.header": "Routing a Tug",
+  "littlelogistics.ponder.tug_routing.text_1": "Right-click navigable water with a Tug Route to add waypoints in travel order.",
+  "littlelogistics.ponder.tug_routing.text_2": "The route calculates a navigable water path between each waypoint.",
+  "littlelogistics.ponder.tug_routing.text_3": "Place waypoints around obstacles to guide the path through open water.",
+  "littlelogistics.ponder.tug_routing.text_4": "Click the first waypoint again to complete the repeating loop.",
+  "littlelogistics.ponder.tug_routing.text_5": "Place the completed route in the tug's route slot.",
+  "littlelogistics.ponder.tug_routing.text_6": "Start the engine to send the entire convoy around the route.",
+
+  "littlelogistics.ponder.tug_docking.header": "Docking a Tug Convoy",
+  "littlelogistics.ponder.tug_docking.text_1": "Place a Docking Station on the bank beside a straight canal.",
+  "littlelogistics.ponder.tug_docking.text_2": "Adjacent docks form one station, with a position for the tug and each serviced barge.",
+  "littlelogistics.ponder.tug_docking.text_3": "The blue dock matches the blue barge, while the red dock matches the tug.",
+  "littlelogistics.ponder.tug_docking.text_4": "Connect automation to the controller face pointing away from the canal.",
+  "littlelogistics.ponder.tug_docking.text_5": "A matching convoy travelling through the canal docks automatically.",
+  "littlelogistics.ponder.tug_docking.text_6": "The tug claims the front dock while its linked barge settles into the dock behind it.",
+  "littlelogistics.ponder.tug_docking.text_7": "An occupied dock exposes the vessel's item, fluid, or energy storage.",
+  "littlelogistics.ponder.tug_docking.text_8": "The attached automation controls whether cargo is loaded or unloaded.",
+  "littlelogistics.ponder.tug_docking.text_9": "Transfers reset the idle timer, and any active dock holds the whole convoy.",
+  "littlelogistics.ponder.tug_docking.text_10": "Right-click a controller to configure its timeout, name, statistics, and redstone behavior.",
+  "littlelogistics.ponder.tug_docking.text_11": "When every dock becomes idle, the convoy continues its route."
 }

@@ -32,6 +32,9 @@ public final class PonderSceneProvider implements DataProvider {
             writeTrainLinkingScene(cachedOutput, scenePath("train_linking"));
             writeTrainRoutingScene(cachedOutput, scenePath("train_routing"));
             writeTrainDockingScene(cachedOutput, scenePath("train_docking"));
+            writeTugLinkingScene(cachedOutput, scenePath("tug_linking"));
+            writeTugRoutingScene(cachedOutput, scenePath("tug_routing"));
+            writeTugDockingScene(cachedOutput, scenePath("tug_docking"));
         });
     }
 
@@ -99,6 +102,37 @@ public final class PonderSceneProvider implements DataProvider {
         }
     }
 
+    private static void writeTugLinkingScene(CachedOutput cachedOutput, Path path) {
+        writeScene(cachedOutput, path, integerList(5, 2, 8), tugLinkingPalette(), tugLinkingBlocks());
+    }
+
+    private static void writeTugRoutingScene(CachedOutput cachedOutput, Path path) {
+        writeScene(cachedOutput, path, integerList(13, 2, 9), tugRoutingPalette(), tugRoutingBlocks());
+    }
+
+    private static void writeTugDockingScene(CachedOutput cachedOutput, Path path) {
+        writeScene(cachedOutput, path, integerList(12, 4, 6), tugDockingPalette(), tugDockingBlocks());
+    }
+
+    private static void writeScene(CachedOutput cachedOutput, Path path, ListTag size,
+                                   ListTag scenePalette, ListTag sceneBlocks) {
+        CompoundTag template = new CompoundTag();
+        template.put("size", size);
+        template.put("palette", scenePalette);
+        template.put("blocks", sceneBlocks);
+        template.put("entities", new ListTag());
+        template.putInt("DataVersion", SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+
+        try {
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            NbtIo.writeCompressed(template, output);
+            byte[] bytes = output.toByteArray();
+            cachedOutput.writeIfNeeded(path, bytes, Hashing.sha1().hashBytes(bytes));
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Failed to write Ponder scene " + path, exception);
+        }
+    }
+
     private static ListTag palette() {
         ListTag palette = new ListTag();
         palette.add(blockState("minecraft:polished_andesite"));
@@ -152,6 +186,48 @@ public final class PonderSceneProvider implements DataProvider {
         return palette;
     }
 
+    private static ListTag tugLinkingPalette() {
+        ListTag palette = new ListTag();
+        palette.add(blockState("minecraft:polished_andesite"));
+        palette.add(waterBlockState());
+        return palette;
+    }
+
+    private static ListTag tugRoutingPalette() {
+        ListTag palette = new ListTag();
+        palette.add(blockState("minecraft:polished_andesite"));
+        palette.add(waterBlockState());
+        return palette;
+    }
+
+    private static ListTag tugDockingPalette() {
+        ListTag palette = new ListTag();
+        palette.add(blockState("minecraft:polished_andesite"));
+        palette.add(waterBlockState());
+        palette.add(dockingStationBlockState("controller", "14"));
+        palette.add(dockingStationBlockState("left_top", "14"));
+        palette.add(dockingStationBlockState("bridge", "14"));
+        palette.add(dockingStationBlockState("controller", "11"));
+        palette.add(dockingStationBlockState("left_top", "11"));
+        palette.add(dockingStationBlockState("bridge", "11"));
+
+        CompoundTag hopper = blockState("minecraft:hopper");
+        CompoundTag hopperProperties = new CompoundTag();
+        hopperProperties.putString("enabled", "true");
+        hopperProperties.putString("facing", "south");
+        hopper.put("Properties", hopperProperties);
+        palette.add(hopper);
+
+        CompoundTag chest = blockState("minecraft:chest");
+        CompoundTag chestProperties = new CompoundTag();
+        chestProperties.putString("facing", "north");
+        chestProperties.putString("type", "single");
+        chestProperties.putString("waterlogged", "false");
+        chest.put("Properties", chestProperties);
+        palette.add(chest);
+        return palette;
+    }
+
     private static ListTag blocks() {
         ListTag blocks = new ListTag();
         for (int x = 0; x < 5; x++) {
@@ -167,8 +243,8 @@ public final class PonderSceneProvider implements DataProvider {
 
     private static ListTag routingBlocks() {
         ListTag blocks = new ListTag();
-        for (int x = 0; x < 15; x++) {
-            for (int z = 0; z < 15; z++) {
+        for (int x = 2; x <= 12; x++) {
+            for (int z = 2; z <= 8; z++) {
                 blocks.add(block(x, 0, z, 0));
             }
         }
@@ -212,6 +288,57 @@ public final class PonderSceneProvider implements DataProvider {
         return blocks;
     }
 
+    private static ListTag tugLinkingBlocks() {
+        ListTag blocks = new ListTag();
+        for (int x = 0; x < 5; x++) {
+            for (int z = 0; z < 8; z++) {
+                blocks.add(block(x, 0, z, 0));
+                blocks.add(block(x, 1, z, 1));
+            }
+        }
+        return blocks;
+    }
+
+    private static ListTag tugRoutingBlocks() {
+        ListTag blocks = new ListTag();
+        for (int x = 0; x < 13; x++) {
+            for (int z = 0; z < 9; z++) {
+                blocks.add(block(x, 0, z, 0));
+                boolean island = x >= 4 && x <= 8 && z >= 3 && z <= 5;
+                blocks.add(block(x, 1, z, island ? 0 : 1));
+            }
+        }
+        return blocks;
+    }
+
+    private static ListTag tugDockingBlocks() {
+        ListTag blocks = new ListTag();
+        for (int x = 0; x < 12; x++) {
+            for (int z = 0; z < 6; z++) {
+                blocks.add(block(x, 0, z, 0));
+            }
+
+            for (int z = 0; z <= 2; z++) {
+                blocks.add(block(x, 1, z, 0));
+            }
+
+            for (int z = 3; z < 6; z++) {
+                blocks.add(block(x, 1, z, 1));
+            }
+        }
+
+        for (int x : new int[] {6, 7}) {
+            int paletteOffset = x == 6 ? 3 : 0;
+            blocks.add(block(x, 2, 2, 2 + paletteOffset));
+            blocks.add(block(x, 3, 2, 3 + paletteOffset));
+            blocks.add(block(x, 3, 3, 4 + paletteOffset));
+        }
+
+        blocks.add(block(6, 2, 1, 8));
+        blocks.add(block(6, 3, 1, 9));
+        return blocks;
+    }
+
     private static CompoundTag block(int x, int y, int z, int state) {
         CompoundTag block = new CompoundTag();
         block.put("pos", integerList(x, y, z));
@@ -231,6 +358,14 @@ public final class PonderSceneProvider implements DataProvider {
         properties.putString("shape", shape);
         rail.put("Properties", properties);
         return rail;
+    }
+
+    private static CompoundTag waterBlockState() {
+        CompoundTag water = blockState("minecraft:water");
+        CompoundTag properties = new CompoundTag();
+        properties.putString("level", "0");
+        water.put("Properties", properties);
+        return water;
     }
 
     private static CompoundTag automaticTeeJunctionBlockState() {
