@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Current Little Logistics guide for Minecraft 1.21.1 and NeoForge.">
+  <title>Guide for 1.21 · Little Logistics</title>
+  <link rel="stylesheet" href="styles.css">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-5JCF04JZ2G"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-5JCF04JZ2G');
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="index.html">Little Logistics</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="guide-legacy.html">Guide 1.16–1.20</a>
+        <a href="guide-1-21.html" aria-current="page">Guide 1.21</a>
+        <a href="https://github.com/MuradAkh/LittleLogistics">GitHub</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="shell">
+    <header class="guide-hero">
+      <h1>Guide for Minecraft 1.21</h1>
+      <p class="lede">Build a convoy, give it a repeating route, and connect it to a coloured docking station. This guide covers the redesigned routing and automation systems in Little Logistics for Minecraft 1.21.1.</p>
+      <div class="notice"><strong>Upgrading an old world?</strong> Old docks, docking rails, Rapid Hoppers, Fluid Hoppers, Vehicle Chargers, water guide rails, and their layouts do not carry over. Rebuild those systems using the new Docking Station.</div>
+    </header>
+
+    <div class="guide-layout">
+      <aside class="toc" aria-label="Guide contents">
+        <p class="toc-title">On this page</p>
+        <ul>
+          <li><a href="#start">Getting started</a></li>
+          <li><a href="#ponders">In-game Ponder guides</a></li>
+          <li><a href="#linking">Linking vehicles</a></li>
+          <li><a href="#vessels">Tugs and barges</a></li>
+          <li><a href="#tug-routing">Tug routes</a></li>
+          <li><a href="#trains">Locomotives and cars</a></li>
+          <li><a href="#rail-network">Rail networks</a></li>
+          <li><a href="#train-routing">Locomotive routes</a></li>
+          <li><a href="#docking">Docking stations</a></li>
+          <li><a href="#automation">Automation</a></li>
+          <li><a href="#detector">Vehicle Detector</a></li>
+          <li><a href="#troubleshooting">Troubleshooting</a></li>
+        </ul>
+      </aside>
+
+      <article class="article">
+        <section id="start">
+          <h2>Getting started</h2>
+          <p>Little Logistics has two parallel transport systems:</p>
+          <ul>
+            <li><strong>Water convoys</strong> use a tug followed by barges.</li>
+            <li><strong>Trains</strong> use a locomotive followed by train cars.</li>
+          </ul>
+          <p>Both systems follow the same basic workflow:</p>
+          <ol class="steps">
+            <li>Place a tug or locomotive at the front.</li>
+            <li>Place the barges or train cars needed for the job.</li>
+            <li>Link them in travel order with Vehicle Chains.</li>
+            <li>Create and complete a repeating route.</li>
+            <li>Put the route item in the tug or locomotive's route slot.</li>
+            <li>Build coloured Docking Stations along that route.</li>
+            <li>Connect item, fluid, or energy automation to each station.</li>
+            <li>Fuel or charge the tug or locomotive and start its engine.</li>
+          </ol>
+
+          <h3>Steam and energy vehicles</h3>
+          <p><strong>Steam</strong> tugs and locomotives accept ordinary furnace fuel. <strong>Energy</strong> variants store NeoForge Energy and can receive power through a Docking Station. Energy vehicles also have a capacitor slot for emergency power away from a station.</p>
+
+          <h3>Recipes</h3>
+          <p>Use EMI, JEI, or another recipe viewer for crafting recipes. The guide focuses on operation and layout.</p>
+        </section>
+
+        <section id="ponders">
+          <h2>In-game Ponder guides</h2>
+          <p>Little Logistics includes animated Ponder tutorials when Ponder is available. These demonstrations show block placement, vehicle movement, and interactions directly inside Minecraft.</p>
+
+          <h3>Opening a Ponder</h3>
+          <ol class="steps">
+            <li>Open your inventory or recipe viewer.</li>
+            <li>Hover over a supported Little Logistics item.</li>
+            <li>Hold <strong>W</strong> when the item tooltip says it can be pondered.</li>
+            <li>Use the controls on the Ponder screen to pause, replay, or move between scenes.</li>
+          </ol>
+
+          <h3>Available tutorials</h3>
+          <ul>
+            <li><strong>Linking Train Cars</strong> — creating a train with a locomotive and Vehicle Chains.</li>
+            <li><strong>Routing a Train</strong> — creating an ordered rail loop and using automatic junctions.</li>
+            <li><strong>Docking a Train</strong> — placing coloured Docking Stations and connecting automation.</li>
+            <li><strong>Linking Barges</strong> — creating a tug convoy with Vehicle Chains.</li>
+            <li><strong>Routing a Tug</strong> — placing water waypoints and completing a repeating route.</li>
+            <li><strong>Docking a Tug Convoy</strong> — arranging coloured docks beside a canal and servicing barges.</li>
+          </ul>
+          <p>Ponders are attached to the relevant vehicles, route items, and Docking Station item. For example, hovering over a Tug Route offers the tug-routing tutorial, while hovering over a Docking Station offers the docking tutorials.</p>
+        </section>
+
+        <section id="linking">
+          <h2>Linking vehicles</h2>
+          <p>Use a <strong>Vehicle Chain</strong> to build a convoy or train. The first vehicle selected becomes the leader of the second.</p>
+          <ol class="steps">
+            <li>Hold a Vehicle Chain and right-click the tug or locomotive.</li>
+            <li>Right-click the first vehicle behind it.</li>
+            <li>Repeat from that vehicle to the next until every vehicle is linked.</li>
+          </ol>
+          <p>Each convoy or train should contain exactly one tug or locomotive. Put it at the front and add the other vehicles in the order they should travel and dock. Do not create loops.</p>
+          <p>Right-clicking in the air with a Vehicle Chain clears the vehicle you selected first. Linked vehicles move together and line up one block apart while docked.</p>
+
+          <h3>Linking a water convoy</h3>
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/149873611-dcc6af47-7d9d-4117-927e-3ee7216faae9.mp4" controls muted playsinline preload="metadata"></video>
+            <figcaption>Linking a tug and barges with Vehicle Chains.</figcaption>
+          </figure>
+
+          <h3>Linking a train</h3>
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/161364954-cadc86f3-3f6b-4017-9396-12a9e387adc3.mp4" controls muted playsinline preload="metadata"></video>
+            <figcaption>Linking a locomotive and train cars with Vehicle Chains.</figcaption>
+          </figure>
+
+          <div class="plain-card">
+            <h3>Plan your vehicles before building stations</h3>
+            <p>Each vehicle you want to service needs its own matching dock position. A locomotive with two cars therefore needs three adjacent Docking Stations at that stop.</p>
+          </div>
+        </section>
+
+        <section id="vessels">
+          <h2>Tugs and barges</h2>
+          <p>Tugs pull water convoys. Barges follow behind and provide storage or perform special jobs. Tugs can also be moved manually with a lead.</p>
+
+          <h3>Tugs</h3>
+          <table class="data-table">
+            <thead>
+              <tr><th>Vehicle</th><th>Use</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Steam Tug</td><td>Burns furnace fuel and pulls a barge convoy.</td></tr>
+              <tr><td>Energy Tug</td><td>Uses NeoForge Energy supplied through a matching Docking Station or a capacitor.</td></tr>
+            </tbody>
+          </table>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/150037890-3bd23e8c-8aea-4910-85c3-34ba49c7504c.png" alt="A Steam Tug travelling on water" loading="lazy">
+            <figcaption>Steam Tug.</figcaption>
+          </figure>
+
+          <h3>Barges</h3>
+          <table class="data-table">
+            <thead>
+              <tr><th>Vehicle</th><th>Use</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Chest Barge</td><td>General item storage with a chest-style appearance.</td></tr>
+              <tr><td>Barrel Barge</td><td>General item storage with a barrel-style appearance.</td></tr>
+              <tr><td>Fluid Tank Barge</td><td>Stores and transports fluids.</td></tr>
+              <tr><td>Seater Barge</td><td>Carries one player or mob.</td></tr>
+              <tr><td>Auto-Fishing Barge</td><td>Fishes while travelling through suitable open water.</td></tr>
+              <tr><td>Item Collection Barge</td><td>Collects nearby dropped items into linked inventory barges.</td></tr>
+            </tbody>
+          </table>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/150036819-99629a2b-d3db-4058-aa16-4bd7bed7b1ac.png" alt="A Chest Barge carrying cargo" loading="lazy">
+            <figcaption>Chest Barge.</figcaption>
+          </figure>
+
+          <h3>Auto-Fishing Barge</h3>
+          <p>The fishing barge deploys its nets in open water and periodically produces fishing loot. Deep water gives better results; shallow water reduces the catch rate and treasure chance. Repeatedly fishing in the same location causes an overfishing penalty, so use it on a long moving route rather than parking it in one spot.</p>
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/149857342-05ef5100-05de-4899-b92f-ddec2d7ccfaf.mp4" controls muted playsinline preload="metadata"></video>
+            <figcaption>Auto-Fishing Barge operating in open water.</figcaption>
+          </figure>
+
+          <h3>Item Collection Barge</h3>
+          <p>The Item Collection Barge searches a wide area around itself for dropped items and inserts them into compatible inventory barges in the same linked convoy. Right-click it to see how many connected inventories it can currently use.</p>
+
+          <h3>Vehicle colours</h3>
+          <p>Right-click any tug or barge with dye to change its colour. Colour is functional: a vehicle docks only at a Docking Station with the same colour.</p>
+        </section>
+
+        <section id="tug-routing">
+          <h2>Creating a tug route</h2>
+          <p>A Tug Route is an <strong>ordered, repeating loop</strong>. The item compiles a navigable water path between every pair of waypoints; the tug follows that compiled path rather than steering directly at isolated markers.</p>
+
+          <h3>Create the loop</h3>
+          <ol class="steps">
+            <li>Hold a Tug Route and point at navigable water within normal interaction range.</li>
+            <li>Right-click to place the first waypoint.</li>
+            <li>Continue right-clicking water to add waypoints in travel order.</li>
+            <li>Place waypoints around islands, shorelines, tight entrances, and other obstacles to guide pathfinding.</li>
+            <li>After adding at least two waypoints, click the first waypoint again to close and compile the repeating loop.</li>
+          </ol>
+          <p>Each new segment must be navigable and within the server's configured maximum waypoint distance. If compilation fails, the route item reports the problem without saving the invalid change.</p>
+
+          <h3>Edit an existing route</h3>
+          <ul>
+            <li><strong>Remove a waypoint:</strong> right-click the existing waypoint.</li>
+            <li><strong>Insert a waypoint:</strong> right-click a highlighted compiled segment, then right-click the new water waypoint.</li>
+            <li><strong>Append to an open route:</strong> continue selecting navigable water.</li>
+          </ul>
+          <p>While holding the route item, in-world markers and highlighted route lines show its nodes and compiled path. These markers can be disabled in the client configuration.</p>
+
+          <h3>Run the route</h3>
+          <ol class="steps">
+            <li>Open the tug.</li>
+            <li>Put the completed Tug Route in its route slot.</li>
+            <li>Add fuel or provide energy.</li>
+            <li>Start the engine.</li>
+          </ol>
+          <p>The tug repeats the loop and brings every linked barge with it. A route can be copied by crafting a configured route together with an empty Tug Route.</p>
+        </section>
+
+        <section id="trains">
+          <h2>Locomotives and train cars</h2>
+          <p>Little Logistics trains run on vanilla rails and the mod's junction rails, but use their own vehicles instead of minecarts.</p>
+
+          <h3>Locomotives</h3>
+          <table class="data-table">
+            <thead>
+              <tr><th>Vehicle</th><th>Use</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Steam Locomotive</td><td>Burns furnace fuel and pulls a train.</td></tr>
+              <tr><td>Energy Locomotive</td><td>Uses NeoForge Energy supplied through a matching Docking Station or capacitor.</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Train cars</h3>
+          <table class="data-table">
+            <thead>
+              <tr><th>Vehicle</th><th>Use</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Seater Train Car</td><td>Carries one player or mob.</td></tr>
+              <tr><td>Chest Train Car</td><td>General item storage with a chest-style appearance.</td></tr>
+              <tr><td>Barrel Train Car</td><td>General item storage with a barrel-style appearance.</td></tr>
+              <tr><td>Fluid Tank Train Car</td><td>Stores and transports fluids.</td></tr>
+            </tbody>
+          </table>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/161364792-2c2fb6e9-1b36-44b1-a901-aaef658818f4.png" alt="A standard Seater Train Car on rails" loading="lazy">
+            <figcaption>Standard Seater Train Car.</figcaption>
+          </figure>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/161364752-6eddd6b7-189f-4d4e-bd15-5e16130c4bee.png" alt="A Fluid Tank Train Car on rails" loading="lazy">
+            <figcaption>Fluid Tank Train Car.</figcaption>
+          </figure>
+          <p>Right-click a locomotive or train car with dye to recolour it. Match those colours when assigning Docking Stations.</p>
+        </section>
+
+        <section id="rail-network">
+          <h2>Building a rail network</h2>
+          <p>Normal track can use vanilla rails. Little Logistics adds junction blocks for branching networks.</p>
+
+          <h3>Switch Rail</h3>
+          <p>A two-way branch with one straight exit and one curved exit. The normal version changes with redstone. Right-click it while using the configure interaction to swap the branch orientation.</p>
+
+          <h3>T-Junction Rail</h3>
+          <p>A three-way junction. The normal version chooses its branch from redstone power.</p>
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/161364400-2ff1b9d3-bf43-4317-9e8d-3594ac5221af.mp4" controls muted playsinline preload="metadata"></video>
+            <figcaption>Controlling junction rails with redstone.</figcaption>
+          </figure>
+
+          <h3>Automatic Switch and T-Junction Rails</h3>
+          <p>Automatic variants ignore redstone branch selection and are configured by an approaching locomotive's compiled route. Place route waypoints beyond a junction so the compiler has a clear destination through the desired branch.</p>
+
+          <h3>Junction Rail</h3>
+          <p>A crossing-style rail for more complex intersections. Locomotive routes remember the exact path through the rail network.</p>
+
+          <h3>Conductor's Wrench</h3>
+          <p>Use the Conductor's Wrench to cycle flat vanilla rail shapes when laying out track. Holding it also reveals nearby registered tug and locomotive routes when route overlays are enabled in the client configuration.</p>
+        </section>
+
+        <section id="train-routing">
+          <h2>Creating a locomotive route</h2>
+          <p>A Locomotive Route is an <strong>ordered, compiled rail loop</strong>. It stores the actual directed rail steps between waypoints, including how the train passes through automatic junctions.</p>
+
+          <h3>Create the loop</h3>
+          <ol class="steps">
+            <li>Finish laying the connected rail network first.</li>
+            <li>Right-click a rail with a Locomotive Route to place the first waypoint.</li>
+            <li>Continue right-clicking rails to add waypoints in travel order.</li>
+            <li>Put waypoints beyond automatic junctions so the chosen branch is unambiguous.</li>
+            <li>After at least two connected waypoints, click the first waypoint again to compile the return segment and complete the repeating loop.</li>
+          </ol>
+          <p>If no valid directed rail path exists, the item reports an error and keeps the previous valid route.</p>
+
+          <h3>Edit an existing route</h3>
+          <ul>
+            <li><strong>Remove a waypoint:</strong> click that waypoint rail.</li>
+            <li><strong>Insert a waypoint:</strong> click a highlighted route segment, then click the rail that should become the new waypoint.</li>
+            <li><strong>Cancel an edit:</strong> sneak-right-click after selecting a route section.</li>
+          </ul>
+          <p>The route markers show waypoint order and the highlighted compiled path. Because the compiled steps are directional, changing rails after creating a route may invalidate it. Re-edit or recreate the affected route after changing the network.</p>
+
+          <h3>Run the route</h3>
+          <ol class="steps">
+            <li>Open the locomotive.</li>
+            <li>Put the completed Locomotive Route in its route slot.</li>
+            <li>Add fuel or provide energy.</li>
+            <li>Start the engine.</li>
+          </ol>
+          <p>The locomotive starts following the saved track loop, sets automatic junctions ahead of the train, and repeats the route. Copy a configured route by crafting it with an empty Locomotive Route.</p>
+
+          <h3>Locomotive collision avoidance</h3>
+          <p>Locomotives monitor other trains around junctions and adjust their movement to reduce conflicts on shared track.</p>
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/161364949-c6d1440a-4013-4d16-a6b1-fbd2482a75f0.mp4" controls muted playsinline preload="metadata"></video>
+            <figcaption>Two locomotives negotiating a shared junction.</figcaption>
+          </figure>
+        </section>
+
+        <section id="docking">
+          <h2>Docking stations</h2>
+          <p>The Docking Station replaces every old water dock, docking rail, specialised hopper, and charger. The same block services tugs, barges, locomotives, and train cars.</p>
+
+          <h3>Place a station</h3>
+          <ol class="steps">
+            <li>Choose a straight section of canal or track.</li>
+            <li>Place a Docking Station beside the vehicle path. It forms a five-block gantry over the path and needs clear space for the complete structure.</li>
+            <li>Place more Docking Stations directly beside it, all facing the same direction. Adjacent controllers join into one named station.</li>
+            <li>Include one dock position for the tug or locomotive and one for every follower that needs service.</li>
+            <li>Keep the controller faces pointing away from the canal or track so automation can connect from the outside.</li>
+          </ol>
+
+          <h3>Match vehicle colours</h3>
+          <p>New vehicles and docks are red by default. Right-click a vehicle with dye to recolour it. Right-click any part of a Docking Station with dye to recolour that dock. A dock accepts only a vehicle of the same colour.</p>
+          <p>Colours let one station assign different services to different positions. For example, a red tug can stop at a red energy dock while a blue Fluid Tank Barge settles at a blue fluid connection behind it.</p>
+
+          <h3>How a convoy parks</h3>
+          <p>The tug or locomotive passes earlier matching docks and stops at the front matching position. Its linked vehicles settle into the docks behind it. Each dock works separately, but any occupied dock can hold the whole convoy or train.</p>
+
+          <h3>Configure the station</h3>
+          <p>Right-click a Docking Station without an item to open its controller screen. Adjacent docks share a station name and cumulative statistics, while timeout and redstone behaviour are configured on each dock controller.</p>
+          <table class="data-table">
+            <thead>
+              <tr><th>Setting</th><th>Meaning</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Name</td><td>A custom name for the connected station group.</td></tr>
+              <tr><td>Timeout</td><td>Release after 1, 2, 5, 10, or 20 seconds without a transfer. The default is 5 seconds.</td></tr>
+              <tr><td>Ignore</td><td>Redstone has no special effect; the idle timer controls departure.</td></tr>
+              <tr><td>Hold (on)</td><td>A powered dock keeps the entire convoy or train waiting.</td></tr>
+              <tr><td>Off (on)</td><td>A powered dock does not hold the convoy or train.</td></tr>
+            </tbody>
+          </table>
+          <p>The screen records items, fluid, and energy loaded or unloaded, plus the number of vehicles docked. Every successful transfer resets that dock's idle timer. The convoy or train leaves only after all occupied docks stop holding it.</p>
+        </section>
+
+        <section id="automation">
+          <h2>Connecting automation</h2>
+          <p>An occupied Docking Station exposes the docked vehicle's storage through its controller. There is no station buffer and no load/unload toggle.</p>
+          <ul>
+            <li>Connect a hopper, item pipe, or other item transport to move cargo or fuel.</li>
+            <li>Connect a pump or fluid pipe to fill or drain a Fluid Tank Barge or Train Car.</li>
+            <li>Connect an energy cable to charge an Energy Tug or Energy Locomotive.</li>
+          </ul>
+          <p>The connected automation decides transfer direction. A pipe configured to extract unloads the vehicle; a pipe configured to insert loads it. When no compatible vehicle is present, the dock remains a safe, empty connection and accepts nothing.</p>
+
+          <div class="plain-card">
+            <h3>Vanilla hoppers still work as external automation</h3>
+            <p>The removed blocks are the mod's old Rapid Hopper and Fluid Hopper. A normal hopper may still connect to the Docking Station's item interface, but it is no longer placed in one special, version-specific dock layout.</p>
+          </div>
+        </section>
+
+        <section id="detector">
+          <h2>Vehicle Detector</h2>
+          <p>The Vehicle Detector emits a redstone signal when a Little Logistics vehicle enters its detection area. The output comes from the back of the block. Right-click the detector to display its range in the world.</p>
+          <p>Use detectors for signals, station indicators, crossings, or other redstone systems that should react to a passing convoy.</p>
+        </section>
+
+        <section id="troubleshooting">
+          <h2>Troubleshooting</h2>
+
+          <h3>The vehicle passes the station</h3>
+          <ul>
+            <li>Confirm the vehicle and intended dock have exactly the same dye colour.</li>
+            <li>Confirm the station faces the vehicle path and the gantry spans it.</li>
+            <li>Use a straight section of track or canal.</li>
+            <li>Make sure the vehicle order matches the order of coloured docks.</li>
+          </ul>
+
+          <h3>The convoy or train never leaves</h3>
+          <ul>
+            <li>Open each occupied dock and check its redstone mode.</li>
+            <li>Look for continuous item, fluid, or energy transfers resetting the timer.</li>
+            <li>Increase or reduce the timeout to suit the connected pipe speed.</li>
+            <li>Check whether a powered dock is set to Hold (on).</li>
+          </ul>
+
+          <h3>Automation does not connect</h3>
+          <ul>
+            <li>Connect to the controller side facing away from the track or canal.</li>
+            <li>Use an item, fluid, or energy connection appropriate for that vehicle.</li>
+            <li>Confirm a matching vehicle is fully docked before testing transfers.</li>
+            <li>Check whether the attached pipe is set to load or unload.</li>
+          </ul>
+
+          <h3>A route will not compile</h3>
+          <ul>
+            <li>For tugs, select navigable water and add intermediate waypoints around obstacles or across long distances.</li>
+            <li>For trains, make sure every waypoint is on a connected rail and the intended direction through each junction is possible.</li>
+            <li>Complete a loop only after adding at least two waypoints.</li>
+            <li>If the track or water path changed, recreate or edit the affected route section.</li>
+          </ul>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-row">
+      <span>Copyright &copy; 2026 Murad Akhundov and EDToaster.</span>
+      <span><a href="index.html">Home</a> · <a href="guide-legacy.html">Legacy guide</a></span>
+    </div>
+  </footer>
+</body>
+</html>

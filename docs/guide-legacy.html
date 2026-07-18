@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Archived Little Logistics guide for Minecraft 1.16 through 1.20.">
+  <title>Guide for 1.16–1.20 · Little Logistics</title>
+  <link rel="stylesheet" href="styles.css">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-5JCF04JZ2G"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-5JCF04JZ2G');
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="index.html">Little Logistics</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="guide-legacy.html" aria-current="page">Guide 1.16–1.20</a>
+        <a href="guide-1-21.html">Guide 1.21</a>
+        <a href="https://github.com/MuradAkh/LittleLogistics">GitHub</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="shell">
+    <header class="guide-hero">
+      <p class="eyebrow">Archived documentation</p>
+      <h1>Guide for Minecraft 1.16–1.20</h1>
+      <p class="lede">The original Little Logistics manual, preserved for older worlds and modpacks.</p>
+      <div class="notice"><strong>Do not use this guide for Minecraft 1.21.</strong> Docking, routing, linking, and vehicle automation were redesigned for the current NeoForge release. <a href="guide-1-21.html">Read the 1.21 guide instead.</a></div>
+    </header>
+
+    <div class="guide-layout">
+      <aside class="toc" aria-label="Guide contents">
+        <p class="toc-title">On this page</p>
+        <ul>
+          <li><a href="#legacy-overview">Overview and video</a></li>
+          <li><a href="#legacy-vessels">Vessels</a></li>
+          <li><a href="#legacy-linking">Vessel linking</a></li>
+          <li><a href="#legacy-water-rails">Water guide rails</a></li>
+          <li><a href="#legacy-water-docks">Vessel docking</a></li>
+          <li><a href="#legacy-trains">Trains</a></li>
+          <li><a href="#legacy-train-docks">Train docking</a></li>
+          <li><a href="#legacy-junctions">Junctions and routing</a></li>
+          <li><a href="#legacy-interfaces">Vehicle interfaces</a></li>
+        </ul>
+      </aside>
+
+      <article class="article">
+        <section id="legacy-overview">
+          <h2>Overview and video</h2>
+          <p>Little Logistics is a mod for Minecraft Forge focused on efficient, affordable, long-distance transport. This guide does not cover recipes; use JEI or a similar recipe viewer for crafting information.</p>
+
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/150042817-908a75b5-2802-4c83-a13d-0fbecc0ec94c.mp4" controls muted playsinline preload="metadata"></video>
+            <figcaption>Original Little Logistics overview.</figcaption>
+          </figure>
+
+          <h3>Video guide</h3>
+          <p>Bit-By-Bit by Mischief of Mice:</p>
+          <div class="video-frame">
+            <iframe src="https://www.youtube.com/embed/4hI99VUqczw" title="Mischief of Mice guide to Little Logistics" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+
+          <h3>In-game book</h3>
+          <p>Install <a href="https://www.curseforge.com/minecraft/mc-mods/patchouli">Patchouli</a> to access the in-game version of this legacy guide. The book is crafted shapelessly using a book, a chest, and a compass.</p>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/151086871-fc13047b-a52a-4bb0-84f9-c4f7ab76e2c0.png" alt="The legacy Little Logistics Patchouli guide book" loading="lazy">
+          </figure>
+        </section>
+
+        <section id="legacy-vessels">
+          <h2>Vessels</h2>
+          <p>There are two types of vessels: tugs and barges. Tugs move linked barges, while barges perform specialised jobs or carry cargo. Tugs can also be moved manually using leads.</p>
+
+          <h3>Tugs</h3>
+          <h4>Steam Tug</h4>
+          <p>A basic tugboat that operates on any furnace fuel. Fuel can be loaded with hoppers placed on top of tug docks.</p>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/150037890-3bd23e8c-8aea-4910-85c3-34ba49c7504c.png" alt="Legacy Steam Tug" loading="lazy">
+          </figure>
+
+          <h4>Energy Tug</h4>
+          <p>A tugboat powered by Forge Energy. It can be charged while docked with a Vehicle Charger. The tug has an extra capacitor slot, useful if it runs out of energy away from a station.</p>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/161363667-f74d6fb7-8fdb-40b5-9be7-f59017e08c38.png" alt="Legacy Energy Tug and Vehicle Charger" loading="lazy">
+          </figure>
+
+          <h4>Tug Route</h4>
+          <p>This item stores a route for the tug. When placed in the tug's route slot, the tug follows the route in order from node 0. Right-click at any coordinate to add a node to the back of the route. Right-click an existing node to remove it. Sneak-right-click to open the menu for reordering or renaming nodes. Copy a route by crafting it together with an empty route item.</p>
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/149873867-d83fec24-2a14-4774-b3f3-feaa08d27440.mp4" controls muted playsinline preload="metadata"></video>
+            <figcaption>Creating a legacy tug route.</figcaption>
+          </figure>
+
+          <h3>Barges</h3>
+          <h4>Chest Barge</h4>
+          <p>A simple cargo barge, similar to a vanilla chest minecart. It must be docked and part of a tug convoy to interface with hoppers.</p>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/150036819-99629a2b-d3db-4058-aa16-4bd7bed7b1ac.png" alt="Legacy Chest Barge" loading="lazy">
+          </figure>
+
+          <h4>Seater Barge</h4>
+          <p>A simple barge that seats one player.</p>
+
+          <h4>Auto-Fishing Barge</h4>
+          <p>Performs fishing passively using the vanilla fishing-rod loot table. It needs open water for its nets to deploy. It can be unloaded with hoppers and barge docks and must be docked as part of a tug convoy to interface with hoppers.</p>
+          <p>The barge has shallow-water and overfishing penalties, so it works best on long ocean routes. Yield is maximised when the water is at least 20 blocks deep. Overfishing is tracked per barge and block; routes of 200 blocks or more should be sufficient to avoid it.</p>
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/149857342-05ef5100-05de-4899-b92f-ddec2d7ccfaf.mp4" controls muted playsinline preload="metadata"></video>
+            <figcaption>The Auto-Fishing Barge at work.</figcaption>
+          </figure>
+
+          <h4>Chunk Loader Barge</h4>
+          <p>Keeps a 3×3 area of chunks centred on the entity loaded. Recommended for long-distance routes.</p>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/150036818-47fc4cfd-8dc0-470f-9f26-d4b16a3e0f6c.png" alt="Legacy Chunk Loader Barge" loading="lazy">
+          </figure>
+
+          <h4>Fluid Tank Barge</h4>
+          <p>Transports fluids and can be loaded or unloaded with Fluid Hoppers.</p>
+        </section>
+
+        <section id="legacy-linking">
+          <h2>Linking vessels</h2>
+          <p>Right-click vessels with a Vehicle Chain, in order, to create a convoy. A convoy can have only one tugboat and cannot contain loops.</p>
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/149873611-dcc6af47-7d9d-4117-927e-3ee7216faae9.mp4" controls muted playsinline preload="metadata"></video>
+            <figcaption>Linking a tug and barges with Vehicle Chains.</figcaption>
+          </figure>
+        </section>
+
+        <section id="legacy-water-rails">
+          <h2>Water guide rails</h2>
+          <h3>Tug Guide Rail</h3>
+          <p>Place it below a block of water. It works similarly to a vanilla powered rail and can force a tug to take a specific path. It does not affect barges. Sneak-right-click to rotate it.</p>
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/149873601-8dc6ea2b-f5d9-4cc7-992c-b40601eb093d.mp4" controls muted playsinline preload="metadata"></video>
+          </figure>
+
+          <h3>Vessel Corner Guide Rail</h3>
+          <p>Assists vessels around sharp corners. Use it near narrow-waterway entrances and old docks. It affects both tugs and barges. Sneak-right-click to flip direction. Do not place a full solid block directly above it; fences and signs are acceptable.</p>
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/161363613-bb064b66-32d8-48b8-9918-91e8eb92d6d2.mp4" controls muted playsinline preload="metadata"></video>
+          </figure>
+        </section>
+
+        <section id="legacy-water-docks">
+          <h2>Docking vessels</h2>
+          <p>Legacy versions have separate Tug Dock and Barge Dock blocks. A Tug Dock must be present for Barge Docks to work. Align the Tug Dock's top texture with a straight, gapless line of Barge Docks. Sneak-right-click the Tug Dock to reverse the docking direction.</p>
+          <p>The Tug Dock inserts into the tug in orange/output mode; place a hopper on top to extract. Barge Docks insert in orange/output mode and extract in blue/input mode. Sneak-right-click to switch modes. Place a hopper below the water block next to a Barge Dock to extract. Build the dock beside a one-block-wide canal, because wider canals may prevent accurate docking.</p>
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/161363642-3209e435-a297-4f91-9b9c-efd76e22858b.mp4" controls muted playsinline preload="metadata"></video>
+            <figcaption>The legacy Tug Dock and Barge Dock layout.</figcaption>
+          </figure>
+        </section>
+
+        <section id="legacy-trains">
+          <h2>Trains</h2>
+          <p>Little Logistics trains operate on vanilla rails but use custom linked vehicle entities instead of minecarts.</p>
+
+          <h3>Locomotives</h3>
+          <p>Locomotives pull train cars. A train should have exactly one locomotive.</p>
+          <h4>Steam Locomotive</h4>
+          <p>Operates on any furnace fuel and can be loaded with hoppers.</p>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/161364757-43ade5aa-5b68-4887-847f-ca245659c097.png" alt="Legacy Steam Locomotive" loading="lazy">
+          </figure>
+
+          <h4>Energy Locomotive</h4>
+          <p>Uses Forge Energy from any mod and can be charged with a Vehicle Charger.</p>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/161364755-4bff9f40-6469-4c3d-8b5d-a719518d06b3.png" alt="Legacy Energy Locomotive" loading="lazy">
+          </figure>
+
+          <h3>Train cars</h3>
+          <p>Train cars resemble minecarts but can be linked to locomotives and docked.</p>
+          <h4>Standard Train Car</h4>
+          <p>Seats one player or mob.</p>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/161364792-2c2fb6e9-1b36-44b1-a901-aaef658818f4.png" alt="Legacy standard Train Car" loading="lazy">
+          </figure>
+
+          <h4>Chunk Loader Train Car</h4>
+          <p>Loads a 3×3 chunk area while travelling. Speed limits are enforced to avoid server lag.</p>
+
+          <h4>Chest Train Car</h4>
+          <p>Works like a vanilla chest minecart and can be loaded or unloaded using vanilla hoppers or the Rapid Hopper from this mod.</p>
+
+          <h4>Fluid Tank Train Car</h4>
+          <p>Transports fluids and can be loaded or unloaded using Fluid Hoppers.</p>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/161364752-6eddd6b7-189f-4d4e-bd15-5e16130c4bee.png" alt="Legacy Fluid Tank Train Car" loading="lazy">
+          </figure>
+
+          <h3>Train linking</h3>
+          <p>Link trains with Vehicle Chains. Vehicle orientation updates automatically.</p>
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/161364954-cadc86f3-3f6b-4017-9396-12a9e387adc3.mp4" controls muted playsinline preload="metadata"></video>
+          </figure>
+        </section>
+
+        <section id="legacy-train-docks">
+          <h2>Train docking</h2>
+          <p>Dock trains using a combination of Locomotive Docking Rails and Train Car Docking Rails. Line up the docking rails as shown below, place unloaders below the rails, and loaders on either side. Blue mode unloads and orange mode loads.</p>
+          <p>The rails tell the locomotive to wait while anything remains to be transferred. A redstone signal applied to the Locomotive Docking Rail makes the locomotive wait regardless of transfer state.</p>
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/161363736-800f3b40-dd7c-49c9-98b1-3c16ba660063.mp4" controls muted playsinline preload="metadata"></video>
+          </figure>
+        </section>
+
+        <section id="legacy-junctions">
+          <h2>Junctions and routing</h2>
+          <h3>Redstone-controlled junction rails</h3>
+          <p>Standard Switch and T-Junction tracks can be switched with redstone. Powered rails work well when building loops.</p>
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/161364400-2ff1b9d3-bf43-4317-9e8d-3594ac5221af.mp4" controls muted playsinline preload="metadata"></video>
+          </figure>
+
+          <h3>Automatic junction rails and routing</h3>
+          <p>Automatic switch tracks are controlled by a locomotive carrying a route. When approaching an automatic junction, the locomotive looks for the closest unvisited waypoint and switches the track accordingly. Waypoints are configured with the Locomotive Route item and are not ordered in these releases.</p>
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/161399628-d34fe302-6bf4-4845-9ffd-3bb85e710d55.mp4" controls muted playsinline preload="metadata"></video>
+          </figure>
+
+          <h3>Locomotive collision avoidance</h3>
+          <p>Locomotives have built-in collision detection designed for junctions. Their AI assigns priority automatically to avoid collisions.</p>
+          <figure>
+            <video src="https://user-images.githubusercontent.com/31002977/161364949-c6d1440a-4013-4d16-a6b1-fbd2482a75f0.mp4" controls muted playsinline preload="metadata"></video>
+          </figure>
+
+          <h3>Locomotive speed</h3>
+          <p>Locomotives control their speed automatically. They travel faster on long straight track and slow down near docks, junctions, and corners.</p>
+        </section>
+
+        <section id="legacy-interfaces">
+          <h2>Interfacing with vehicles</h2>
+          <p>To complement vanilla hoppers, legacy Little Logistics releases include several specialised interface blocks.</p>
+
+          <h3>Rapid Hopper</h3>
+          <p>A vanilla-style hopper that transfers items eight times as fast.</p>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/161363836-315ae854-de67-405a-ae4e-971c09859c06.png" alt="Legacy Rapid Hopper" loading="lazy">
+          </figure>
+
+          <h3>Vehicle Charger</h3>
+          <p>Charges an Energy Tug or Energy Locomotive. Connect any Forge Energy cable to it, then place it on top of a dock or beside a rail.</p>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/161363667-f74d6fb7-8fdb-40b5-9be7-f59017e08c38.png" alt="Legacy Vehicle Charger" loading="lazy">
+          </figure>
+
+          <h3>Fluid Hopper</h3>
+          <p>A hopper for fluids. It imports from the top, exports from the sides, accepts buckets by right-click, and loads or unloads vessels through old docks.</p>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/161363814-8cc93a44-8bfc-410d-826c-0b5bd6442625.png" alt="Legacy Fluid Hopper" loading="lazy">
+          </figure>
+
+          <h3>Vehicle Detector</h3>
+          <p>Emits a redstone signal from the back when it detects a vehicle. Right-click to display its detection range.</p>
+          <figure>
+            <img src="https://user-images.githubusercontent.com/31002977/161403804-471698da-1b11-42b4-a0df-49463690a4aa.png" alt="Legacy Vehicle Detector" loading="lazy">
+          </figure>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-row">
+      <span>Copyright &copy; 2026 Murad Akhundov and EDToaster.</span>
+      <span><a href="index.html">Home</a> · <a href="guide-1-21.html">Current guide</a></span>
+    </div>
+  </footer>
+</body>
+</html>
