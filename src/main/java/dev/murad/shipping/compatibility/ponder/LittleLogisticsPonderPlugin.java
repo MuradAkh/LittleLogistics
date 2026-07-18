@@ -1,6 +1,7 @@
 package dev.murad.shipping.compatibility.ponder;
 
 import dev.murad.shipping.ShippingMod;
+import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModItems;
 import net.createmod.ponder.api.registration.PonderPlugin;
 import net.createmod.ponder.api.registration.PonderSceneRegistrationHelper;
@@ -46,5 +47,14 @@ public final class LittleLogisticsPonderPlugin implements PonderPlugin {
                         ModItems.ENERGY_LOCOMOTIVE.get(),
                         ModItems.LOCO_ROUTE.get())
                 .addStoryBoard("train_routing", TrainRoutingScene::routing);
+
+        itemHelper.forComponents(
+                        ModBlocks.DOCKING_STATION.get().asItem(),
+                        ModItems.STEAM_LOCOMOTIVE.get(),
+                        ModItems.ENERGY_LOCOMOTIVE.get(),
+                        ModItems.CHEST_CAR.get(),
+                        ModItems.BARREL_CAR.get(),
+                        ModItems.FLUID_CAR.get())
+                .addStoryBoard("train_docking", TrainDockingScene::docking);
     }
 }

@@ -32,6 +32,7 @@ src/generated/resources/assets/littlelogistics/*
 src/generated/resources/assets/littlelogistics/ponder/*
 !src/generated/resources/assets/littlelogistics/ponder/train_linking.nbt
 !src/generated/resources/assets/littlelogistics/ponder/train_routing.nbt
+!src/generated/resources/assets/littlelogistics/ponder/train_docking.nbt
 mcmodsrepo
 .factorypath
 

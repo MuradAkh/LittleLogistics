@@ -120,5 +120,19 @@
   "littlelogistics.ponder.train_routing.text_3": "A waypoint beyond an Automatic T-Junction Rail determines which path the train follows.",
   "littlelogistics.ponder.train_routing.text_4": "Click the first waypoint again to compile a repeating loop.",
   "littlelogistics.ponder.train_routing.text_5": "Open the locomotive and place the completed route in its route slot.",
-  "littlelogistics.ponder.train_routing.text_6": "Start the engine to send the entire vehicle chain around the route."
+  "littlelogistics.ponder.train_routing.text_6": "Start the engine to send the entire vehicle chain around the route.",
+
+  "littlelogistics.ponder.train_docking.header": "Docking a Train",
+  "littlelogistics.ponder.train_docking.text_1": "Place a Docking Station beside a straight section of track.",
+  "littlelogistics.ponder.train_docking.text_2": "Adjacent, equally-facing docks form one station. Include a position for the locomotive and each car you want to service.",
+  "littlelogistics.ponder.train_docking.text_3": "The locomotive passes the earlier position and stops at the front, aligning its linked car behind it.",
+  "littlelogistics.ponder.train_docking.text_4": "This blue dock matches the blue car, while the red dock matches the locomotive.",
+  "littlelogistics.ponder.train_docking.text_5": "Connect automation to the controller face pointing away from the track.",
+  "littlelogistics.ponder.train_docking.text_6": "An occupied dock exposes the vehicle's item, fluid, or energy storage.",
+  "littlelogistics.ponder.train_docking.text_7": "A matching train travelling through the station docks automatically.",
+  "littlelogistics.ponder.train_docking.text_8": "The locomotive claims the front dock while linked cars claim the matching docks behind it.",
+  "littlelogistics.ponder.train_docking.text_9": "The attached hopper, pipe, pump, or cable controls whether cargo is loaded or unloaded.",
+  "littlelogistics.ponder.train_docking.text_10": "Transfers reset the idle timer. The whole train waits while any occupied dock is still active.",
+  "littlelogistics.ponder.train_docking.text_11": "Right-click a controller to configure its timeout, name, statistics, and redstone behavior.",
+  "littlelogistics.ponder.train_docking.text_12": "When every dock becomes idle, the train continues its journey."
 }

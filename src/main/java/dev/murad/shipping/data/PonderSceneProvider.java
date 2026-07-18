@@ -31,6 +31,7 @@ public final class PonderSceneProvider implements DataProvider {
         return CompletableFuture.runAsync(() -> {
             writeTrainLinkingScene(cachedOutput, scenePath("train_linking"));
             writeTrainRoutingScene(cachedOutput, scenePath("train_routing"));
+            writeTrainDockingScene(cachedOutput, scenePath("train_docking"));
         });
     }
 
@@ -80,6 +81,24 @@ public final class PonderSceneProvider implements DataProvider {
         }
     }
 
+    private static void writeTrainDockingScene(CachedOutput cachedOutput, Path path) {
+        CompoundTag template = new CompoundTag();
+        template.put("size", integerList(12, 3, 7));
+        template.put("palette", dockingPalette());
+        template.put("blocks", dockingBlocks());
+        template.put("entities", new ListTag());
+        template.putInt("DataVersion", SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+
+        try {
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            NbtIo.writeCompressed(template, output);
+            byte[] bytes = output.toByteArray();
+            cachedOutput.writeIfNeeded(path, bytes, Hashing.sha1().hashBytes(bytes));
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Failed to write Ponder scene " + path, exception);
+        }
+    }
+
     private static ListTag palette() {
         ListTag palette = new ListTag();
         palette.add(blockState("minecraft:polished_andesite"));
@@ -102,6 +121,34 @@ public final class PonderSceneProvider implements DataProvider {
         palette.add(railBlockState("north_east"));
         palette.add(railBlockState("north_west"));
         palette.add(automaticTeeJunctionBlockState());
+        return palette;
+    }
+
+    private static ListTag dockingPalette() {
+        ListTag palette = new ListTag();
+        palette.add(blockState("minecraft:polished_andesite"));
+        palette.add(railBlockState("east_west"));
+        palette.add(dockingStationBlockState("controller", "14"));
+        palette.add(dockingStationBlockState("left_top", "14"));
+        palette.add(dockingStationBlockState("bridge", "14"));
+        palette.add(dockingStationBlockState("controller", "11"));
+        palette.add(dockingStationBlockState("left_top", "11"));
+        palette.add(dockingStationBlockState("bridge", "11"));
+
+        CompoundTag hopper = blockState("minecraft:hopper");
+        CompoundTag hopperProperties = new CompoundTag();
+        hopperProperties.putString("enabled", "true");
+        hopperProperties.putString("facing", "south");
+        hopper.put("Properties", hopperProperties);
+        palette.add(hopper);
+
+        CompoundTag chest = blockState("minecraft:chest");
+        CompoundTag chestProperties = new CompoundTag();
+        chestProperties.putString("facing", "north");
+        chestProperties.putString("type", "single");
+        chestProperties.putString("waterlogged", "false");
+        chest.put("Properties", chestProperties);
+        palette.add(chest);
         return palette;
     }
 
@@ -144,6 +191,27 @@ public final class PonderSceneProvider implements DataProvider {
         return blocks;
     }
 
+    private static ListTag dockingBlocks() {
+        ListTag blocks = new ListTag();
+        for (int x = 0; x < 12; x++) {
+            for (int z = 0; z < 7; z++) {
+                blocks.add(block(x, 0, z, 0));
+            }
+            blocks.add(block(x, 1, 3, 1));
+        }
+
+        for (int x : new int[] {6, 7}) {
+            int paletteOffset = x == 6 ? 3 : 0;
+            blocks.add(block(x, 1, 2, 2 + paletteOffset));
+            blocks.add(block(x, 2, 2, 3 + paletteOffset));
+            blocks.add(block(x, 2, 3, 4 + paletteOffset));
+        }
+
+        blocks.add(block(6, 1, 1, 8));
+        blocks.add(block(6, 2, 1, 9));
+        return blocks;
+    }
+
     private static CompoundTag block(int x, int y, int z, int state) {
         CompoundTag block = new CompoundTag();
         block.put("pos", integerList(x, y, z));
@@ -174,6 +242,16 @@ public final class PonderSceneProvider implements DataProvider {
         properties.putString("waterlogged", "false");
         junction.put("Properties", properties);
         return junction;
+    }
+
+    private static CompoundTag dockingStationBlockState(String part, String color) {
+        CompoundTag dockingStation = blockState("littlelogistics:docking_station");
+        CompoundTag properties = new CompoundTag();
+        properties.putString("color", color);
+        properties.putString("facing", "north");
+        properties.putString("part", part);
+        dockingStation.put("Properties", properties);
+        return dockingStation;
     }
 
     private static ListTag integerList(int... values) {
