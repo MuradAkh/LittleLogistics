@@ -59,6 +59,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class AbstractTrainCarEntity extends AbstractMinecart implements IAbstractMinecartExtension, LinkableEntity<AbstractTrainCarEntity>, Colorable {
     private static final String RAIL_TRAVEL_DIRECTION_TAG = "rail_travel_direction";
+    private static final String LAST_RAIL_POSITION_TAG = "last_rail_position";
 
     public static final EntityDataAccessor<Integer> COLOR_DATA = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
 
@@ -71,6 +72,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     private BlockPos lastRailPosition;
     @Nullable
     private Direction stableRailTravelDirection;
+    private boolean persistedRailPositionLoaded;
 
     public RailHelper getRailHelper() {
         return railHelper;
@@ -80,10 +82,30 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         return Optional.ofNullable(stableRailTravelDirection);
     }
 
+    /**
+     * Returns the direction appropriate for a rail currently being queried by vanilla movement.
+     * The queried rail may already be the next block even though this entity's end-of-tick tracker
+     * has not run yet.
+     */
+    public Optional<Direction> getRailTravelDirectionAt(BlockPos railPos) {
+        return RailDirectionResolver.resolveTrackedDirection(
+                lastRailPosition, stableRailTravelDirection, railPos);
+    }
+
     public void initializeRailTravelDirection(Direction direction) {
         if (direction.getAxis().isHorizontal()) {
             stableRailTravelDirection = direction;
         }
+    }
+
+    public boolean needsRailDirectionRecovery() {
+        return !persistedRailPositionLoaded;
+    }
+
+    public void recoverRailTravelDirection(Direction direction, BlockPos railPos) {
+        initializeRailTravelDirection(direction);
+        lastRailPosition = railPos.immutable();
+        persistedRailPositionLoaded = true;
     }
 
     private boolean frozen = false;
@@ -213,6 +235,10 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
             initializeRailTravelDirection(
                     Direction.from2DDataValue(compound.getInt(RAIL_TRAVEL_DIRECTION_TAG)));
         }
+        if (compound.contains(LAST_RAIL_POSITION_TAG, Tag.TAG_LONG)) {
+            lastRailPosition = BlockPos.of(compound.getLong(LAST_RAIL_POSITION_TAG));
+            persistedRailPositionLoaded = true;
+        }
 
         linkingHandler.readAdditionalSaveData(compound);
     }
@@ -224,6 +250,9 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         compound.putInt("Color", getColor());
         if (stableRailTravelDirection != null) {
             compound.putInt(RAIL_TRAVEL_DIRECTION_TAG, stableRailTravelDirection.get2DDataValue());
+        }
+        if (lastRailPosition != null) {
+            compound.putLong(LAST_RAIL_POSITION_TAG, lastRailPosition.asLong());
         }
 
         linkingHandler.addAdditionalSaveData(compound);
@@ -253,6 +282,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         tickYRot();
         var yrot = this.getYRot();
         tickVanilla();
+        tickRailTravelDirection();
         this.setYRot(yrot);
         if (!level().isClientSide) {
             doChainMath();

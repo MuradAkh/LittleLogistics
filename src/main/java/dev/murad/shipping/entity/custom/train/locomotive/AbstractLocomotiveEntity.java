@@ -67,6 +67,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     private static final String CONSIST_TAG = "consist";
     private static final int CONSIST_RECONNECT_TIMEOUT = 600;
+    private static final int LOAD_RECOVERY_TICKS = 5;
     private static final int COLLISION_LOOKAHEAD_STEPS = 5;
     private static final int LEGACY_COLLISION_TRAVERSE_LIMIT = COLLISION_LOOKAHEAD_STEPS - 1;
 
@@ -90,6 +91,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     private int collisionCheckCooldown = 0;
     private int remainingStallTime = 0;
     private boolean forceStallCheck = false;
+    private int loadRecoveryTicks;
 
     private BlockPos currentHorizontalBlockPos;
     @Nullable
@@ -269,24 +271,33 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
         if (!this.level().isClientSide) {
             tickOldBlockPos();
-            if(remainingStallTime <= 0){
-                navigator.serverTick();
-            }
             ownership.tick();
             if (this.level() instanceof ServerLevel serverLevel) {
                 tickConsist(serverLevel);
+            }
+            if (loadRecoveryTicks > 0) {
+                if (loadRecoveryTicks > 1) {
+                    loadRecoveryTicks--;
+                } else if (navigator.recoverAfterLoad()) {
+                    loadRecoveryTicks = 0;
+                }
+            } else if(remainingStallTime <= 0){
+                navigator.serverTick();
             }
         }
 
         tickYRot();
         var yrot = this.getYRot();
         tickVanilla();
+        tickRailTravelDirection();
         this.setYRot(yrot);
         if(linkingHandler.follower.isEmpty() && this.getDeltaMovement().length() > 0.05){
             this.setYRot(RailHelper.directionFromVelocity(getDeltaMovement()).toYRot());
         }
         if(!this.level().isClientSide){
-            tickDockCheck();
+            if (!isRecoveringAfterLoad()) {
+                tickDockCheck();
+            }
             tickMovement();
         }
 
@@ -332,6 +343,14 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     private void tickMovement() {
+        if (isRecoveringAfterLoad()) {
+            entityData.set(INDEPENDENT_MOTION, false);
+            this.setDeltaMovement(Vec3.ZERO);
+            this.setPos(xOld, yOld, zOld);
+            linkingHandler.train.asList().forEach(t -> t.setDeltaMovement(Vec3.ZERO));
+            return;
+        }
+
         if(remainingStallTime > 0){
             remainingStallTime--;
             if(remainingStallTime == 0)
@@ -673,7 +692,12 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     public boolean shouldFreezeTrain() {
-        return !ownership.mayMove() || (this.isStalled() && !docked) || linkingHandler.train.asList().stream().anyMatch(AbstractTrainCarEntity::isFrozen);
+        return isRecoveringAfterLoad() || !ownership.mayMove() || (this.isStalled() && !docked)
+                || linkingHandler.train.asList().stream().anyMatch(AbstractTrainCarEntity::isFrozen);
+    }
+
+    private boolean isRecoveringAfterLoad() {
+        return loadRecoveryTicks > 0;
     }
 
     private void accelerate() {
@@ -872,6 +896,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         }
         if (consistUUIDs.isEmpty()) {
             consistUUIDs.add(this.getUUID());
+        }
+        if (!level().isClientSide) {
+            loadRecoveryTicks = LOAD_RECOVERY_TICKS;
         }
     }
 

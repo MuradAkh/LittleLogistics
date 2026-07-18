@@ -49,6 +49,15 @@ class RailDirectionResolverTest {
     }
 
     @Test
+    void queriedNextRailOverridesStaleDirectionAtSaveBoundary() {
+        BlockPos curvedSwitch = JUNCTION.west();
+        assertEquals(Direction.EAST, RailDirectionResolver.resolveTrackedDirection(
+                curvedSwitch, Direction.NORTH, JUNCTION).orElseThrow());
+        assertEquals(Direction.NORTH, RailDirectionResolver.resolveTrackedDirection(
+                JUNCTION, Direction.NORTH, JUNCTION).orElseThrow());
+    }
+
+    @Test
     void tinyCouplingNoiseIsNotTreatedAsTravel() {
         assertTrue(RailDirectionResolver.directionFromMotion(
                 new Vec3(0.0001D, 0.0D, -0.0001D)).isEmpty());

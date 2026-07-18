@@ -6,12 +6,14 @@ import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntit
 import dev.murad.shipping.util.LocoRoute;
 import dev.murad.shipping.util.LocoRouteSegment;
 import dev.murad.shipping.util.LocoRouteStep;
+import dev.murad.shipping.util.RailDirectionResolver;
 import dev.murad.shipping.util.RailHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.phys.AABB;
 
 import java.util.LinkedHashSet;
 import java.util.HashMap;
@@ -19,6 +21,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -124,14 +127,103 @@ public class LocomotiveNavigator {
         });
     }
 
+    /**
+     * Reconstructs transient rail state after entities and block states have been loaded. The
+     * locomotive keeps the consist frozen until occupied automatic rails can be reserved.
+     */
+    public boolean recoverAfterLoad() {
+        tickReservations();
+        recoverMissingConsistDirections();
+        if (!reserveOccupiedAutomaticRails()) return false;
+        if (!route.isUsable() || invalidRoute) return true;
+
+        return RailHelper.getRail(locomotive.getOnPos().above(), locomotive.level())
+                .map(railPos -> {
+                    boolean wasSynchronized = synchronizedToRoute;
+                    Direction travelDirection = locomotive.getRailTravelDirectionAt(railPos)
+                            .orElse(locomotive.getDirection());
+                    synchronizedToRoute = false;
+                    synchronizeAt(railPos, travelDirection);
+                    if (wasSynchronized && !synchronizedToRoute) {
+                        invalidate();
+                        return true;
+                    }
+                    if (!synchronizedToRoute) return true;
+                    boolean configured = reserveAndConfigureUpcomingAutomaticRails();
+                    return configured || invalidRoute;
+                })
+                .orElse(true);
+    }
+
+    private void recoverMissingConsistDirections() {
+        List<AbstractTrainCarEntity> cars = locomotive.getTrain().asList();
+        for (int index = 0; index < cars.size(); index++) {
+            AbstractTrainCarEntity car = cars.get(index);
+            if (!car.needsRailDirectionRecovery()) continue;
+            BlockPos railPos = RailHelper.getRail(car.getOnPos().above(), car.level())
+                    .orElse(null);
+            if (railPos == null) continue;
+
+            Direction recovered = null;
+            if (index == 0) {
+                recovered = findRouteDirectionNearProgress(railPos).orElse(null);
+                if (recovered == null && cars.size() > 1) {
+                    recovered = RailDirectionResolver.directionFromMotion(
+                            car.position().subtract(cars.get(1).position())).orElse(null);
+                }
+            } else {
+                AbstractTrainCarEntity leader = cars.get(index - 1);
+                recovered = RailDirectionResolver.directionFromMotion(
+                        leader.position().subtract(car.position())).orElse(null);
+            }
+            if (recovered == null) {
+                recovered = car.getStableRailTravelDirection().orElse(car.getDirection());
+            }
+            car.recoverRailTravelDirection(recovered, railPos);
+        }
+    }
+
+    private Optional<Direction> findRouteDirectionNearProgress(BlockPos railPos) {
+        if (!route.isUsable()) return Optional.empty();
+        int segment = Math.floorMod(segmentIndex, route.getSegments().size());
+        LocoRouteSegment current = route.getSegments().get(segment);
+
+        for (int offset : new int[]{0, 1, -1, 2, -2}) {
+            int candidateIndex = stepIndex + offset;
+            if (candidateIndex < 0 || candidateIndex >= current.getSteps().size()) continue;
+            LocoRouteStep candidate = current.getSteps().get(candidateIndex);
+            if (candidate.railPos().equals(railPos)) {
+                return Optional.of(candidate.incomingDirection());
+            }
+        }
+
+        BlockPos destination = route.get((segment + 1) % route.size()).toBlockPos();
+        if (destination.equals(railPos)) {
+            return Optional.of(current.getArrivalDirection());
+        }
+
+        for (LocoRouteSegment routeSegment : route.getSegments()) {
+            for (LocoRouteStep candidate : routeSegment.getSteps()) {
+                if (candidate.railPos().equals(railPos)) {
+                    return Optional.of(candidate.incomingDirection());
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
     private boolean reserveAndConfigureUpcomingAutomaticRails() {
         long expiresAt = locomotive.level().getGameTime() + RESERVATION_TIMEOUT_TICKS;
+        Set<UUID> consistIds = currentConsistIds();
         for (LocoRouteStep step : getUpcomingSteps(AUTOMATIC_RAIL_LOOKAHEAD)) {
             BlockState state = locomotive.level().getBlockState(step.railPos());
             if (!(state.getBlock() instanceof MultiShapeRail rail) || !rail.isAutomaticSwitching()) {
                 continue;
             }
 
+            if (isOccupiedByAnotherConsist(step.railPos(), consistIds)) {
+                return false;
+            }
             if (!AutomaticRailReservations.acquire(
                     locomotive.level(), step.railPos(), locomotive.getUUID(), expiresAt)) {
                 return false;
@@ -147,6 +239,49 @@ public class LocomotiveNavigator {
             }
         }
         return true;
+    }
+
+    private boolean reserveOccupiedAutomaticRails() {
+        long expiresAt = locomotive.level().getGameTime() + RESERVATION_TIMEOUT_TICKS;
+        List<AbstractTrainCarEntity> cars = locomotive.getTrain().asList();
+        List<UUID> expectedOrder = locomotive.getExpectedConsistUUIDs();
+
+        for (int carIndex = 0; carIndex < cars.size(); carIndex++) {
+            AbstractTrainCarEntity car = cars.get(carIndex);
+            BlockPos railPos = RailHelper.getRail(car.getOnPos().above(), car.level())
+                    .orElse(null);
+            if (railPos == null) continue;
+            BlockState state = locomotive.level().getBlockState(railPos);
+            if (!(state.getBlock() instanceof MultiShapeRail rail) || !rail.isAutomaticSwitching()) {
+                continue;
+            }
+
+            if (!AutomaticRailReservations.acquire(
+                    locomotive.level(), railPos, locomotive.getUUID(), expiresAt)) {
+                return false;
+            }
+
+            ActiveReservation reservation = activeReservations.computeIfAbsent(
+                    railPos.immutable(), ignored -> new ActiveReservation(new HashSet<>(), expiresAt));
+            reservation.expiresAt = expiresAt;
+
+            int expectedIndex = expectedOrder.indexOf(car.getUUID());
+            if (expectedIndex >= 0) {
+                reservation.waitingFor.addAll(expectedOrder.subList(expectedIndex, expectedOrder.size()));
+            } else {
+                for (int followerIndex = carIndex; followerIndex < cars.size(); followerIndex++) {
+                    reservation.waitingFor.add(cars.get(followerIndex).getUUID());
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean isOccupiedByAnotherConsist(BlockPos railPos, Set<UUID> consistIds) {
+        return !locomotive.level().getEntitiesOfClass(
+                AbstractTrainCarEntity.class,
+                new AABB(railPos),
+                car -> !consistIds.contains(car.getUUID())).isEmpty();
     }
 
     private Set<UUID> currentConsistIds() {
@@ -195,7 +330,7 @@ public class LocomotiveNavigator {
         if (x < 0) return Direction.WEST;
         if (z > 0) return Direction.SOUTH;
         if (z < 0) return Direction.NORTH;
-        return locomotive.getDirection();
+        return locomotive.getStableRailTravelDirection().orElse(locomotive.getDirection());
     }
 
     @Nullable

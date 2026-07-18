@@ -33,6 +33,16 @@ public final class RailDirectionResolver {
         return Optional.of(RailHelper.directionFromVelocity(motion));
     }
 
+    public static Optional<Direction> resolveTrackedDirection(@Nullable BlockPos trackedRail,
+                                                              @Nullable Direction stableDirection,
+                                                              BlockPos queriedRail) {
+        if (trackedRail != null && !trackedRail.equals(queriedRail)) {
+            Optional<Direction> transition = directionBetween(trackedRail, queriedRail);
+            if (transition.isPresent()) return transition;
+        }
+        return Optional.ofNullable(stableDirection);
+    }
+
     public static RailShape resolveJunctionShape(@Nullable Direction stableTravelDirection,
                                                  Vec3 motion,
                                                  Vec3 position,

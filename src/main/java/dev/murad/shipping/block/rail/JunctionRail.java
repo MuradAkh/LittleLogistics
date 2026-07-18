@@ -88,7 +88,7 @@ public class JunctionRail extends BaseRailBlock implements MultiShapeRail {
         }
 
         Direction stableDirection = cart instanceof AbstractTrainCarEntity trainCar
-                ? trainCar.getStableRailTravelDirection().orElse(null)
+                ? trainCar.getRailTravelDirectionAt(pos).orElse(null)
                 : null;
         return RailDirectionResolver.resolveJunctionShape(
                 stableDirection,
