@@ -73,6 +73,10 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     private List<UUID> consistUUIDs = new ArrayList<>();
     private final Map<UUID, Integer> reconnectAttempts = new HashMap<>();
 
+    public List<UUID> getExpectedConsistUUIDs() {
+        return List.copyOf(consistUUIDs);
+    }
+
     @Setter
     protected boolean engineOn = false;
 
@@ -261,6 +265,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     @Override
     public void tick(){
         linkingHandler.tickLoad();
+        tickRailTravelDirection();
 
         if (!this.level().isClientSide) {
             tickOldBlockPos();

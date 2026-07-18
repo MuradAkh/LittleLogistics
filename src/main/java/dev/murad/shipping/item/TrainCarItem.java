@@ -1,8 +1,10 @@
 package dev.murad.shipping.item;
 
 import com.mojang.datafixers.util.Function4;
+import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
+import dev.murad.shipping.util.RailHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.BlockSource;
@@ -40,7 +42,8 @@ public class TrainCarItem extends Item {
             double d2 = vec3.z() + (double)direction.getStepZ() * 1.125D;
             BlockPos blockpos = p_42949_.pos().relative(direction);
             BlockState blockstate = level.getBlockState(blockpos);
-            RailShape railshape = blockstate.getBlock() instanceof BaseRailBlock ? ((BaseRailBlock)blockstate.getBlock()).getRailDirection(blockstate, level, blockpos, null) : RailShape.NORTH_SOUTH;
+            RailShape railshape = getPlacementShape(blockstate, level, blockpos,
+                    direction.getAxis().isHorizontal() ? direction : null);
             double d3;
             if (blockstate.is(BlockTags.RAILS)) {
                 if (railshape.isAscending()) {
@@ -54,7 +57,8 @@ public class TrainCarItem extends Item {
                 }
 
                 BlockState blockstate1 = level.getBlockState(blockpos.below());
-                RailShape railshape1 = blockstate1.getBlock() instanceof BaseRailBlock ? blockstate1.getValue(((BaseRailBlock)blockstate1.getBlock()).getShapeProperty()) : RailShape.NORTH_SOUTH;
+                RailShape railshape1 = getPlacementShape(blockstate1, level, blockpos.below(),
+                        direction.getAxis().isHorizontal() ? direction : null);
                 if (direction != Direction.DOWN && railshape1.isAscending()) {
                     d3 = -0.4D;
                 } else {
@@ -63,6 +67,7 @@ public class TrainCarItem extends Item {
             }
 
             AbstractMinecart abstractminecart = ((TrainCarItem)p_42950_.getItem()).constructor.apply(level, d0, d1 + d3, d2);
+            initializeDirection(abstractminecart, direction, railshape);
             if (p_42950_.has(DataComponents.CUSTOM_NAME)) {
                 abstractminecart.setCustomName(p_42950_.getHoverName());
             }
@@ -99,13 +104,18 @@ public class TrainCarItem extends Item {
         } else {
             ItemStack itemstack = pContext.getItemInHand();
             if (!level.isClientSide) {
-                RailShape railshape = blockstate.getBlock() instanceof BaseRailBlock ? ((BaseRailBlock)blockstate.getBlock()).getRailDirection(blockstate, level, blockpos, null) : RailShape.NORTH_SOUTH;
+                Direction preferredDirection = pContext.getPlayer() == null
+                        ? null
+                        : pContext.getPlayer().getDirection().getOpposite();
+                RailShape railshape = getPlacementShape(
+                        blockstate, level, blockpos, preferredDirection);
                 double d0 = 0.0D;
                 if (railshape.isAscending()) {
                     d0 = 0.5D;
                 }
 
                 AbstractMinecart abstractminecart = constructor.apply(level, (double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.0625D + d0, (double)blockpos.getZ() + 0.5D);
+                initializeDirection(abstractminecart, preferredDirection, railshape);
                 if (itemstack.has(DataComponents.CUSTOM_NAME)) {
                     abstractminecart.setCustomName(itemstack.getHoverName());
                 }
@@ -128,5 +138,30 @@ public class TrainCarItem extends Item {
             itemstack.shrink(1);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
+    }
+
+    private static RailShape getPlacementShape(BlockState state, Level level, BlockPos pos,
+                                               Direction preferredDirection) {
+        if (!(state.getBlock() instanceof BaseRailBlock rail)) return RailShape.NORTH_SOUTH;
+        if (preferredDirection != null && state.getBlock() instanceof MultiShapeRail multiShapeRail) {
+            return multiShapeRail.getVanillaRailShapeFromDirection(
+                    state, pos, level, preferredDirection);
+        }
+        return rail.getRailDirection(state, level, pos, null);
+    }
+
+    private static void initializeDirection(AbstractMinecart minecart, Direction preferredDirection,
+                                            RailShape shape) {
+        if (!(minecart instanceof AbstractTrainCarEntity trainCar)) return;
+
+        var exits = RailHelper.EXITS_DIRECTION.get(shape);
+        if (exits == null) return;
+        Direction direction = preferredDirection != null
+                && (exits.getFirst().horizontal == preferredDirection
+                    || exits.getSecond().horizontal == preferredDirection)
+                ? preferredDirection
+                : exits.getFirst().horizontal;
+        trainCar.initializeRailTravelDirection(direction);
+        trainCar.setYRot(direction.toYRot());
     }
 }

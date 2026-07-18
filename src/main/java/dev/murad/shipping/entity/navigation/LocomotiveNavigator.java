@@ -1,6 +1,7 @@
 package dev.murad.shipping.entity.navigation;
 
 import dev.murad.shipping.block.rail.MultiShapeRail;
+import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.util.LocoRoute;
 import dev.murad.shipping.util.LocoRouteSegment;
@@ -13,12 +14,20 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.LinkedHashSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
 /** Executes the directed, precompiled rail traversal stored in a locomotive route item. */
 public class LocomotiveNavigator {
+    private static final int AUTOMATIC_RAIL_LOOKAHEAD = 3;
+    private static final long RESERVATION_TIMEOUT_TICKS = 1200L;
     private static final String SEGMENT_TAG = "segment";
     private static final String STEP_TAG = "step";
     private static final String SYNCHRONIZED_TAG = "synchronized";
@@ -30,6 +39,17 @@ public class LocomotiveNavigator {
     private int stepIndex;
     private boolean synchronizedToRoute;
     private boolean invalidRoute;
+    private final Map<BlockPos, ActiveReservation> activeReservations = new HashMap<>();
+
+    private static final class ActiveReservation {
+        private final Set<UUID> waitingFor;
+        private long expiresAt;
+
+        private ActiveReservation(Set<UUID> waitingFor, long expiresAt) {
+            this.waitingFor = waitingFor;
+            this.expiresAt = expiresAt;
+        }
+    }
 
     public LocomotiveNavigator(AbstractLocomotiveEntity locomotive) {
         this.locomotive = locomotive;
@@ -72,6 +92,7 @@ public class LocomotiveNavigator {
     }
 
     public void serverTick() {
+        tickReservations();
         if (!route.isUsable()) return;
         if (invalidRoute) {
             locomotive.stall();
@@ -82,6 +103,11 @@ public class LocomotiveNavigator {
             Direction travelDirection = getTravelDirection();
             LocoRouteStep step = locateCurrentStep(railPos, travelDirection);
             if (step == null) return;
+
+            if (!reserveAndConfigureUpcomingAutomaticRails()) {
+                locomotive.stall();
+                return;
+            }
 
             BlockState state = locomotive.level().getBlockState(railPos);
             if (state.getBlock() instanceof MultiShapeRail rail) {
@@ -96,6 +122,68 @@ public class LocomotiveNavigator {
                 }
             }
         });
+    }
+
+    private boolean reserveAndConfigureUpcomingAutomaticRails() {
+        long expiresAt = locomotive.level().getGameTime() + RESERVATION_TIMEOUT_TICKS;
+        for (LocoRouteStep step : getUpcomingSteps(AUTOMATIC_RAIL_LOOKAHEAD)) {
+            BlockState state = locomotive.level().getBlockState(step.railPos());
+            if (!(state.getBlock() instanceof MultiShapeRail rail) || !rail.isAutomaticSwitching()) {
+                continue;
+            }
+
+            if (!AutomaticRailReservations.acquire(
+                    locomotive.level(), step.railPos(), locomotive.getUUID(), expiresAt)) {
+                return false;
+            }
+
+            activeReservations.computeIfAbsent(step.railPos().immutable(), ignored ->
+                    new ActiveReservation(currentConsistIds(), expiresAt)).expiresAt = expiresAt;
+
+            Direction input = step.incomingDirection().getOpposite();
+            if (!rail.setRailState(state, locomotive.level(), step.railPos(), input, step.outgoingDirection())) {
+                invalidate();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private Set<UUID> currentConsistIds() {
+        Set<UUID> ids = new HashSet<>(locomotive.getExpectedConsistUUIDs());
+        locomotive.getTrain().asList().forEach(car -> ids.add(car.getUUID()));
+        return ids;
+    }
+
+    private void tickReservations() {
+        if (activeReservations.isEmpty()) return;
+
+        long now = locomotive.level().getGameTime();
+        List<AbstractTrainCarEntity> cars = locomotive.getTrain().asList();
+        Iterator<Map.Entry<BlockPos, ActiveReservation>> iterator =
+                activeReservations.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<BlockPos, ActiveReservation> entry = iterator.next();
+            BlockPos reservedRail = entry.getKey();
+            ActiveReservation reservation = entry.getValue();
+            boolean occupiedByConsist = false;
+
+            for (AbstractTrainCarEntity car : cars) {
+                boolean onReservedRail = RailHelper.getRail(car.getOnPos().above(), car.level())
+                        .map(reservedRail::equals)
+                        .orElse(false);
+                if (onReservedRail) {
+                    occupiedByConsist = true;
+                    reservation.waitingFor.remove(car.getUUID());
+                }
+            }
+
+            if ((reservation.waitingFor.isEmpty() && !occupiedByConsist) || now >= reservation.expiresAt) {
+                AutomaticRailReservations.release(
+                        locomotive.level(), reservedRail, locomotive.getUUID());
+                iterator.remove();
+            }
+        }
     }
 
     private Direction getTravelDirection() {

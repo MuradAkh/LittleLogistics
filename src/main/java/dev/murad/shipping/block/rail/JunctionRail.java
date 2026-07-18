@@ -2,7 +2,8 @@ package dev.murad.shipping.block.rail;
 
 import com.mojang.serialization.MapCodec;
 import dev.murad.shipping.util.RailShapeUtil;
-import dev.murad.shipping.util.RailHelper;
+import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
+import dev.murad.shipping.util.RailDirectionResolver;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
@@ -86,7 +87,15 @@ public class JunctionRail extends BaseRailBlock implements MultiShapeRail {
             return state.getValue(getShapeProperty());
         }
 
-        return RailHelper.directionFromVelocity(cart.getDeltaMovement()).getAxis() == Direction.Axis.X ? RailShape.EAST_WEST : RailShape.NORTH_SOUTH;
+        Direction stableDirection = cart instanceof AbstractTrainCarEntity trainCar
+                ? trainCar.getStableRailTravelDirection().orElse(null)
+                : null;
+        return RailDirectionResolver.resolveJunctionShape(
+                stableDirection,
+                cart.getDeltaMovement(),
+                cart.position(),
+                pos,
+                state.getValue(getShapeProperty()));
     }
 
     public BlockState rotate(BlockState pState, Rotation pRot) {
@@ -129,7 +138,10 @@ public class JunctionRail extends BaseRailBlock implements MultiShapeRail {
     public Set<Direction> getPreferredExits(BlockState state, Direction entrance) {
         if(entrance.equals(Direction.EAST) || entrance.equals(Direction.WEST)){
             return Set.of(Direction.NORTH, Direction.SOUTH);
-        } else return Set.of();
+        } else if (entrance.equals(Direction.NORTH) || entrance.equals(Direction.SOUTH)) {
+            return Set.of(Direction.EAST, Direction.WEST);
+        }
+        return Set.of();
     }
 
     @Override

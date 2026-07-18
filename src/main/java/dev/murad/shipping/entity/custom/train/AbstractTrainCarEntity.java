@@ -10,6 +10,7 @@ import dev.murad.shipping.entity.custom.vessel.VesselEntity;
 import dev.murad.shipping.setup.ModItems;
 import dev.murad.shipping.util.LinkableEntity;
 import dev.murad.shipping.util.LinkingHandler;
+import dev.murad.shipping.util.RailDirectionResolver;
 import dev.murad.shipping.util.RailHelper;
 import dev.murad.shipping.util.Train;
 import lombok.Getter;
@@ -57,6 +58,7 @@ import java.util.stream.Stream;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class AbstractTrainCarEntity extends AbstractMinecart implements IAbstractMinecartExtension, LinkableEntity<AbstractTrainCarEntity>, Colorable {
+    private static final String RAIL_TRAVEL_DIRECTION_TAG = "rail_travel_direction";
 
     public static final EntityDataAccessor<Integer> COLOR_DATA = SynchedEntityData.defineId(AbstractTrainCarEntity.class, EntityDataSerializers.INT);
 
@@ -65,9 +67,23 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
     protected final LinkingHandler<AbstractTrainCarEntity> linkingHandler = new LinkingHandler<>(this, AbstractTrainCarEntity.class, DOMINANT_ID, DOMINATED_ID);
     protected static double TRAIN_SPEED = ShippingConfig.Server.TRAIN_MAX_SPEED.get();
     protected final RailHelper railHelper;
+    @Nullable
+    private BlockPos lastRailPosition;
+    @Nullable
+    private Direction stableRailTravelDirection;
 
     public RailHelper getRailHelper() {
         return railHelper;
+    }
+
+    public Optional<Direction> getStableRailTravelDirection() {
+        return Optional.ofNullable(stableRailTravelDirection);
+    }
+
+    public void initializeRailTravelDirection(Direction direction) {
+        if (direction.getAxis().isHorizontal()) {
+            stableRailTravelDirection = direction;
+        }
     }
 
     private boolean frozen = false;
@@ -193,6 +209,10 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         if (compound.contains("Color", Tag.TAG_INT)) {
             setColor(compound.getInt("Color"));
         }
+        if (compound.contains(RAIL_TRAVEL_DIRECTION_TAG, Tag.TAG_INT)) {
+            initializeRailTravelDirection(
+                    Direction.from2DDataValue(compound.getInt(RAIL_TRAVEL_DIRECTION_TAG)));
+        }
 
         linkingHandler.readAdditionalSaveData(compound);
     }
@@ -202,6 +222,9 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         super.addAdditionalSaveData(compound);
 
         compound.putInt("Color", getColor());
+        if (stableRailTravelDirection != null) {
+            compound.putInt(RAIL_TRAVEL_DIRECTION_TAG, stableRailTravelDirection.get2DDataValue());
+        }
 
         linkingHandler.addAdditionalSaveData(compound);
     }
@@ -226,6 +249,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
 
     public void tick() {
         linkingHandler.tickLoad();
+        tickRailTravelDirection();
         tickYRot();
         var yrot = this.getYRot();
         tickVanilla();
@@ -233,6 +257,29 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         if (!level().isClientSide) {
             doChainMath();
         }
+    }
+
+    /**
+     * Records the direction in which this car crossed into its current rail block. The value
+     * remains stable while the car is stopped or receives coupling corrections on that rail.
+     */
+    protected void tickRailTravelDirection() {
+        Optional<BlockPos> currentRail = RailHelper.getRail(getOnPos().above(), level());
+        if (currentRail.isEmpty()) {
+            lastRailPosition = null;
+            return;
+        }
+
+        BlockPos current = currentRail.get().immutable();
+        if (lastRailPosition != null && !lastRailPosition.equals(current)) {
+            RailDirectionResolver.directionBetween(lastRailPosition, current)
+                    .ifPresent(this::initializeRailTravelDirection);
+        } else if (stableRailTravelDirection == null) {
+            RailDirectionResolver.directionFromMotion(getDeltaMovement())
+                    .or(() -> Optional.ofNullable(getDirection()).filter(d -> d.getAxis().isHorizontal()))
+                    .ifPresent(this::initializeRailTravelDirection);
+        }
+        lastRailPosition = current;
     }
 
     @Override
@@ -390,7 +437,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
         Direction hordir = null;
         if(r.getSecond() == 0) {
             Vec3 dirvec = new Vec3(e.xo - this.xo,0, e.zo - this.zo);
-            hordir = Direction.fromDelta((int) dirvec.normalize().x, 0, (int) dirvec.normalize().z); // may fail
+            hordir = RailDirectionResolver.directionFromMotion(dirvec).orElse(null);
         }
         // if still null
         if (hordir == null){
@@ -546,6 +593,7 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
             if (distance <= 6) {
                 Vec3 euclideanDir = parent.position().subtract(position()).normalize();
                 Vec3 parentDirection = railDirDis
+                        .filter(pair -> pair.getSecond() > 0)
                         .map(Pair::getFirst)
                         .map(Direction::getNormal)
                         .map(Vec3::atLowerCornerOf)
@@ -566,7 +614,14 @@ public abstract class AbstractTrainCarEntity extends AbstractMinecart implements
                     this.moveTo(Math.floor(getX()) + 0.5, getY(), Math.floor(getZ()) + 0.5);
                     setDeltaMovement(Vec3.ZERO);
                 } else {
-                    setDeltaMovement(Vec3.ZERO);
+                    double parentSpeed = parentVelocity.horizontalDistance();
+                    if (parentSpeed < 0.01D) {
+                        setDeltaMovement(Vec3.ZERO);
+                    } else {
+                        double spacingError = parent.distanceTo(this) - 1.1D;
+                        double correction = Mth.clamp(spacingError * 0.15D, -0.05D, 0.10D);
+                        setDeltaMovement(parentDirection.scale(Math.max(0.01D, parentSpeed + correction)));
+                    }
                 }
             } else {
                 linkingHandler.leader.ifPresent(LinkableEntity::removeDominated);
