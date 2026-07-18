@@ -52,26 +52,21 @@ public class LocomotiveNavigator {
         return route.isUsable();
     }
 
-    public List<ChunkPos> getUpcomingChunks(int maxSteps) {
-        if (!route.isUsable() || invalidRoute || !synchronizedToRoute || maxSteps <= 0) {
+    /**
+     * Returns the exact directed route steps ahead of the locomotive. An empty result tells callers
+     * to fall back to live rail geometry because the navigator is not synchronized to its route.
+     */
+    public List<LocoRouteStep> getUpcomingSteps(int maxSteps) {
+        if (!route.isUsable() || invalidRoute || !synchronizedToRoute) {
             return List.of();
         }
+        return route.getUpcomingSteps(segmentIndex, stepIndex, maxSteps);
+    }
 
+    public List<ChunkPos> getUpcomingChunks(int maxSteps) {
         LinkedHashSet<ChunkPos> chunks = new LinkedHashSet<>();
-        int segment = segmentIndex;
-        int step = stepIndex;
-        int visited = 0;
-        int safety = Math.max(maxSteps, 1) + route.getSegments().size() * 2;
-        while (visited < maxSteps && safety-- > 0) {
-            LocoRouteSegment current = route.getSegments().get(segment);
-            if (step < current.getSteps().size()) {
-                chunks.add(new ChunkPos(current.getSteps().get(step).railPos()));
-                step++;
-                visited++;
-            } else {
-                segment = (segment + 1) % route.getSegments().size();
-                step = 0;
-            }
+        for (LocoRouteStep step : getUpcomingSteps(maxSteps)) {
+            chunks.add(new ChunkPos(step.railPos()));
         }
         return List.copyOf(chunks);
     }

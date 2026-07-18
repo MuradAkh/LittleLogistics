@@ -94,4 +94,37 @@ class LocoRouteTest {
         assertEquals(Direction.SOUTH, split.after().getArrivalDirection());
         assertEquals(new BlockPos(1, 64, 0), split.after().getSteps().getFirst().railPos());
     }
+
+    @Test
+    void upcomingStepsFollowCompiledBranchAcrossSegmentBoundary() {
+        LocoRouteStep current = new LocoRouteStep(new BlockPos(0, 64, 0), Direction.EAST, Direction.EAST);
+        LocoRouteStep selectedBranch = new LocoRouteStep(new BlockPos(1, 64, 0), Direction.EAST, Direction.NORTH);
+        LocoRouteStep afterBranch = new LocoRouteStep(new BlockPos(1, 64, -1), Direction.NORTH, Direction.NORTH);
+        LocoRouteStep returnStep = new LocoRouteStep(new BlockPos(1, 64, -2), Direction.NORTH, Direction.SOUTH);
+        LocoRoute route = new LocoRoute(null, null, List.of(
+            new LocoRouteNode(null, 0, 64, 0),
+            new LocoRouteNode(null, 1, 64, -2)
+        ), List.of(
+            new LocoRouteSegment(List.of(current, selectedBranch, afterBranch), Direction.NORTH),
+            new LocoRouteSegment(List.of(returnStep), Direction.SOUTH)
+        ), LocoRoute.State.COMPLETE, -1);
+
+        assertEquals(List.of(selectedBranch, afterBranch, returnStep, current),
+            route.getUpcomingSteps(0, 1, 4));
+    }
+
+    @Test
+    void upcomingStepsSkipEmptySegmentsAndRemainBounded() {
+        LocoRouteStep onlyStep = new LocoRouteStep(new BlockPos(4, 64, 4), Direction.WEST, Direction.WEST);
+        LocoRoute route = new LocoRoute(null, null, List.of(
+            new LocoRouteNode(null, 4, 64, 4),
+            new LocoRouteNode(null, 3, 64, 4)
+        ), List.of(
+            new LocoRouteSegment(List.of(), Direction.WEST),
+            new LocoRouteSegment(List.of(onlyStep), Direction.WEST)
+        ), LocoRoute.State.COMPLETE, -1);
+
+        assertEquals(List.of(onlyStep, onlyStep, onlyStep), route.getUpcomingSteps(0, 0, 3));
+        assertTrue(route.getUpcomingSteps(0, 0, 0).isEmpty());
+    }
 }

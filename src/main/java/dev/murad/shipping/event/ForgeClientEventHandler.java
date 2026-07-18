@@ -86,6 +86,33 @@ public class ForgeClientEventHandler {
     private record RouteColour(float red, float green, float blue) {
     }
 
+    private record CompositeStrokeKey(Vec3 first, Vec3 second, boolean doubleLine) {
+        private static CompositeStrokeKey of(Vec3 from, Vec3 to, boolean doubleLine) {
+            return comparePositions(from, to) <= 0
+                ? new CompositeStrokeKey(from, to, doubleLine)
+                : new CompositeStrokeKey(to, from, doubleLine);
+        }
+    }
+
+    private static final class CompositeStrokeMember {
+        private final RouteColour colour;
+        private boolean arrowForward;
+        private boolean arrowReverse;
+
+        private CompositeStrokeMember(RouteColour colour) {
+            this.colour = colour;
+        }
+    }
+
+    private static final class CompositeStroke {
+        private final CompositeStrokeKey key;
+        private final Map<Integer, CompositeStrokeMember> members = new HashMap<>();
+
+        private CompositeStroke(CompositeStrokeKey key) {
+            this.key = key;
+        }
+    }
+
     private record LocoRenderPoint(Vec3 position, boolean isWaypoint) {
     }
 
@@ -1304,6 +1331,207 @@ public class ForgeClientEventHandler {
         RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, right, tip, red, green, blue, alpha);
     }
 
+    private static int comparePositions(Vec3 first, Vec3 second) {
+        int comparison = Double.compare(first.x, second.x);
+        if (comparison != 0) return comparison;
+        comparison = Double.compare(first.y, second.y);
+        return comparison != 0 ? comparison : Double.compare(first.z, second.z);
+    }
+
+    private static void addCompositeStroke(Map<CompositeStrokeKey, CompositeStroke> strokes,
+                                           Vec3 from, Vec3 to, boolean doubleLine, int entityId,
+                                           RouteColour colour, boolean drawArrow) {
+        if (from.distanceToSqr(to) <= 1.0E-8D) return;
+        CompositeStrokeKey key = CompositeStrokeKey.of(from, to, doubleLine);
+        CompositeStroke stroke = strokes.computeIfAbsent(key, CompositeStroke::new);
+        CompositeStrokeMember member = stroke.members.computeIfAbsent(entityId,
+            ignored -> new CompositeStrokeMember(colour));
+        if (drawArrow) {
+            if (from.equals(key.first())) member.arrowForward = true;
+            else member.arrowReverse = true;
+        }
+    }
+
+    private static void addCompositeTugRoute(Map<CompositeStrokeKey, CompositeStroke> strokes,
+                                             TugRouteTrackerData route, RouteColour colour) {
+        Set<BlockPos> waypoints = new HashSet<>(route.waypointPositions());
+        List<PreviewPoint> points = RouteOverlayPath.expandStraightSegments(route.pathVertices()).stream()
+            .map(point -> new PreviewPoint(toWaterSurface(Vec3.atCenterOf(point)), waypoints.contains(point), false))
+            .toList();
+        points = markCornerPoints(points);
+
+        double travelled = 0.0D;
+        double nextArrowDistance = TUG_ROUTE_ARROW_SPACING * 0.5D;
+        for (int index = 1; index < points.size(); index++) {
+            PreviewSegment segment = trimPreviewSegment(points.get(index - 1), points.get(index));
+            if (segment == null) continue;
+            double length = segment.length();
+            boolean drawArrow = length > 1.0E-6D && travelled + length >= nextArrowDistance;
+            addCompositeStroke(strokes, segment.from(), segment.to(), true, route.entityId(), colour, drawArrow);
+            travelled += length;
+            while (nextArrowDistance <= travelled) nextArrowDistance += TUG_ROUTE_ARROW_SPACING;
+        }
+
+        for (int index = 1; index < points.size() - 1; index++) {
+            PreviewPoint corner = points.get(index);
+            if (!corner.isCorner() || corner.isNode()) continue;
+            RailPort incoming = getCornerEntryPort(points.get(index - 1), corner);
+            RailPort outgoing = getCornerExitPort(corner, points.get(index + 1));
+            if (incoming == null || outgoing == null) continue;
+            addCompositeStroke(strokes,
+                incoming.position().add(incoming.side().scale(TUG_ROUTE_RAIL_OFFSET)),
+                outgoing.position().add(outgoing.side().scale(TUG_ROUTE_RAIL_OFFSET)),
+                false, route.entityId(), colour, false);
+            addCompositeStroke(strokes,
+                incoming.position().subtract(incoming.side().scale(TUG_ROUTE_RAIL_OFFSET)),
+                outgoing.position().subtract(outgoing.side().scale(TUG_ROUTE_RAIL_OFFSET)),
+                false, route.entityId(), colour, false);
+        }
+
+        for (BlockPos waypoint : route.waypointPositions()) {
+            addTugWaypointStrokes(strokes, waypoint, route.entityId(), colour);
+        }
+    }
+
+    private static void addCompositeLocoRoute(Map<CompositeStrokeKey, CompositeStroke> strokes,
+                                              List<LocoRenderPoint> points, int entityId, RouteColour colour) {
+        List<PreviewSegment> segments = new ArrayList<>(Math.max(0, points.size() - 1));
+        for (int index = 1; index < points.size(); index++) {
+            PreviewSegment segment = trimLocoRouteSegment(points, index);
+            segments.add(segment);
+            if (segment != null) {
+                addCompositeStroke(strokes, segment.from(), segment.to(), true, entityId, colour, index % 4 == 0);
+            }
+        }
+
+        for (int pointIndex = 1; pointIndex < points.size() - 1; pointIndex++) {
+            if (!isLocoRouteCorner(points, pointIndex)) continue;
+            PreviewSegment incoming = segments.get(pointIndex - 1);
+            PreviewSegment outgoing = segments.get(pointIndex);
+            if (incoming == null || outgoing == null) continue;
+            addCompositeStroke(strokes,
+                incoming.to().add(incoming.side().scale(TUG_ROUTE_RAIL_OFFSET)),
+                outgoing.from().add(outgoing.side().scale(TUG_ROUTE_RAIL_OFFSET)),
+                false, entityId, colour, false);
+            addCompositeStroke(strokes,
+                incoming.to().subtract(incoming.side().scale(TUG_ROUTE_RAIL_OFFSET)),
+                outgoing.from().subtract(outgoing.side().scale(TUG_ROUTE_RAIL_OFFSET)),
+                false, entityId, colour, false);
+        }
+    }
+
+    private static void addTugWaypointStrokes(Map<CompositeStrokeKey, CompositeStroke> strokes,
+                                              BlockPos pos, int entityId, RouteColour colour) {
+        double y = pos.getY() + TUG_ROUTE_SURFACE_Y_OFFSET;
+        Vec3 northWest = new Vec3(pos.getX(), y, pos.getZ());
+        Vec3 northEast = new Vec3(pos.getX() + 1.0D, y, pos.getZ());
+        Vec3 southEast = new Vec3(pos.getX() + 1.0D, y, pos.getZ() + 1.0D);
+        Vec3 southWest = new Vec3(pos.getX(), y, pos.getZ() + 1.0D);
+        addCompositeStroke(strokes, northWest, northEast, false, entityId, colour, false);
+        addCompositeStroke(strokes, northEast, southEast, false, entityId, colour, false);
+        addCompositeStroke(strokes, southEast, southWest, false, entityId, colour, false);
+        addCompositeStroke(strokes, southWest, northWest, false, entityId, colour, false);
+    }
+
+    private static void addLocoWaypointStrokes(Map<CompositeStrokeKey, CompositeStroke> strokes,
+                                               Level level, BlockPos pos, int entityId, RouteColour colour) {
+        double y = locoRailCenter(level, pos).y + 0.01D;
+        Vec3 northWest = new Vec3(pos.getX() + 0.1D, y, pos.getZ() + 0.1D);
+        Vec3 northEast = new Vec3(pos.getX() + 0.9D, y, pos.getZ() + 0.1D);
+        Vec3 southEast = new Vec3(pos.getX() + 0.9D, y, pos.getZ() + 0.9D);
+        Vec3 southWest = new Vec3(pos.getX() + 0.1D, y, pos.getZ() + 0.9D);
+        addCompositeStroke(strokes, northWest, northEast, false, entityId, colour, false);
+        addCompositeStroke(strokes, northEast, southEast, false, entityId, colour, false);
+        addCompositeStroke(strokes, southEast, southWest, false, entityId, colour, false);
+        addCompositeStroke(strokes, southWest, northWest, false, entityId, colour, false);
+    }
+
+    private static int renderCompositeStrokes(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos,
+                                              Map<CompositeStrokeKey, CompositeStroke> strokes, int remainingVertices) {
+        List<CompositeStroke> ordered = new ArrayList<>(strokes.values());
+        ordered.sort((first, second) -> {
+            double firstDistance = first.key.first().lerp(first.key.second(), 0.5D).distanceToSqr(camPos);
+            double secondDistance = second.key.first().lerp(second.key.second(), 0.5D).distanceToSqr(camPos);
+            int comparison = Double.compare(firstDistance, secondDistance);
+            if (comparison != 0) return comparison;
+            comparison = comparePositions(first.key.first(), second.key.first());
+            if (comparison != 0) return comparison;
+            comparison = comparePositions(first.key.second(), second.key.second());
+            if (comparison != 0) return comparison;
+            return Boolean.compare(first.key.doubleLine(), second.key.doubleLine());
+        });
+
+        var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
+        for (CompositeStroke stroke : ordered) {
+            if (remainingVertices < 2) break;
+            Vec3 from = stroke.key.first();
+            Vec3 to = stroke.key.second();
+            float alpha = RouteMarkerRenderer.computeAlpha(from.lerp(to, 0.5D), camPos);
+            if (alpha <= 0.0F) continue;
+
+            List<Map.Entry<Integer, CompositeStrokeMember>> members = new ArrayList<>(stroke.members.entrySet());
+            members.sort(Map.Entry.comparingByKey());
+            Vec3 side = null;
+            if (stroke.key.doubleLine()) {
+                Vec3 delta = to.subtract(from);
+                Vec3 horizontal = new Vec3(delta.x, 0.0D, delta.z);
+                if (horizontal.lengthSqr() <= 1.0E-6D) continue;
+                Vec3 forward = horizontal.normalize();
+                side = new Vec3(-forward.z, 0.0D, forward.x);
+            }
+
+            for (int index = 0; index < members.size(); index++) {
+                int vertices = stroke.key.doubleLine() ? 4 : 2;
+                if (remainingVertices < vertices) return remainingVertices;
+                double start = index / (double) members.size();
+                double end = (index + 1) / (double) members.size();
+                Vec3 bandFrom = from.lerp(to, start);
+                Vec3 bandTo = from.lerp(to, end);
+                RouteColour colour = members.get(index).getValue().colour;
+                if (stroke.key.doubleLine()) {
+                    Vec3 offset = side.scale(TUG_ROUTE_RAIL_OFFSET);
+                    RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos,
+                        bandFrom.add(offset), bandTo.add(offset), colour.red(), colour.green(), colour.blue(), alpha);
+                    RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos,
+                        bandFrom.subtract(offset), bandTo.subtract(offset), colour.red(), colour.green(), colour.blue(), alpha);
+                } else {
+                    RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, bandFrom, bandTo,
+                        colour.red(), colour.green(), colour.blue(), alpha);
+                }
+                remainingVertices -= vertices;
+            }
+
+            if (!stroke.key.doubleLine() || from.distanceTo(to) < 0.5D || remainingVertices < 4) continue;
+            boolean forwardArrow = members.stream().anyMatch(entry -> entry.getValue().arrowForward);
+            boolean reverseArrow = members.stream().anyMatch(entry -> entry.getValue().arrowReverse);
+            if (!forwardArrow && !reverseArrow) continue;
+            Vec3 forward = to.subtract(from).normalize();
+            if (forwardArrow && remainingVertices >= 4) {
+                RouteColour arrowColour = members.stream()
+                    .map(Map.Entry::getValue)
+                    .filter(member -> member.arrowForward)
+                    .findFirst()
+                    .orElseThrow()
+                    .colour;
+                renderTugRouteArrow(pose, lineBuffer, camPos, from.lerp(to, reverseArrow ? 0.35D : 0.5D),
+                    forward, side, arrowColour.red(), arrowColour.green(), arrowColour.blue(), alpha);
+                remainingVertices -= 4;
+            }
+            if (reverseArrow && remainingVertices >= 4) {
+                RouteColour arrowColour = members.stream()
+                    .map(Map.Entry::getValue)
+                    .filter(member -> member.arrowReverse)
+                    .findFirst()
+                    .orElseThrow()
+                    .colour;
+                renderTugRouteArrow(pose, lineBuffer, camPos, from.lerp(to, forwardArrow ? 0.65D : 0.5D),
+                    forward.scale(-1.0D), side, arrowColour.red(), arrowColour.green(), arrowColour.blue(), alpha);
+                remainingVertices -= 4;
+            }
+        }
+        return remainingVertices;
+    }
+
     /** Draws cached, render-only route snapshots. The route-item editor overlay remains separate. */
     private static void renderTrackedTugRoutes(RenderLevelStageEvent event, Player player, Vec3 camPos) {
         if (!ShippingConfig.Client.SHOW_WRENCH_TUG_ROUTES.get()
@@ -1326,13 +1554,17 @@ public class ForgeClientEventHandler {
         routes.sort(Comparator.comparingDouble(route -> positions.get(route.entityId()).pos().distanceToSqr(camPos)));
 
         MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(new ByteBufferBuilder(16_384));
-        int remainingVertices = MAX_TRACKED_TUG_ROUTE_VERTICES_PER_FRAME;
+        Map<CompositeStrokeKey, CompositeStroke> strokes = new HashMap<>();
         for (TugRouteTrackerData route : routes) {
-            remainingVertices = renderTrackedTugRoute(event.getPoseStack(), buffer, camPos, route, remainingVertices);
-            if (remainingVertices <= 0) {
-                break;
-            }
+            int colourValue = DyeColor.byId(route.dyeColorId()).getTextureDiffuseColor();
+            RouteColour colour = new RouteColour(
+                ((colourValue >> 16) & 0xFF) / 255.0F,
+                ((colourValue >> 8) & 0xFF) / 255.0F,
+                (colourValue & 0xFF) / 255.0F
+            );
+            addCompositeTugRoute(strokes, route, colour);
         }
+        renderCompositeStrokes(event.getPoseStack(), buffer, camPos, strokes, MAX_TRACKED_TUG_ROUTE_VERTICES_PER_FRAME);
         buffer.endBatch();
     }
 
@@ -1361,116 +1593,6 @@ public class ForgeClientEventHandler {
         return dx * dx + dy * dy + dz * dz <= 128.0D * 128.0D;
     }
 
-    private static int renderTrackedTugRoute(PoseStack pose, MultiBufferSource.BufferSource buffer, Vec3 camPos,
-                                               TugRouteTrackerData route, int remainingVertices) {
-        if (route.pathVertices().size() < 2) {
-            return remainingVertices;
-        }
-
-        Set<BlockPos> waypointPositions = new HashSet<>(route.waypointPositions());
-        List<PreviewPoint> points = new ArrayList<>(route.pathVertices().size());
-        for (BlockPos point : route.pathVertices()) {
-            points.add(new PreviewPoint(toWaterSurface(Vec3.atCenterOf(point)), waypointPositions.contains(point), false));
-        }
-        points = markCornerPoints(points);
-
-        int colour = DyeColor.byId(route.dyeColorId()).getTextureDiffuseColor();
-        float red = ((colour >> 16) & 0xFF) / 255.0F;
-        float green = ((colour >> 8) & 0xFF) / 255.0F;
-        float blue = (colour & 0xFF) / 255.0F;
-
-        for (int pointIndex = 1; pointIndex < points.size() && remainingVertices >= 4; pointIndex++) {
-            PreviewSegment segment = trimPreviewSegment(points.get(pointIndex - 1), points.get(pointIndex));
-            if (segment == null) {
-                continue;
-            }
-
-            float alpha = getTrackedSegmentAlpha(segment, camPos);
-            if (alpha <= 0.0F) {
-                continue;
-            }
-
-            var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
-            Vec3 leftFrom = segment.from().add(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
-            Vec3 leftTo = segment.to().add(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
-            Vec3 rightFrom = segment.from().subtract(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
-            Vec3 rightTo = segment.to().subtract(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
-            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, leftFrom, leftTo, red, green, blue, alpha);
-            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, rightFrom, rightTo, red, green, blue, alpha);
-            remainingVertices -= 4;
-            remainingVertices = renderTrackedTugRouteArrows(pose, lineBuffer, camPos, segment, red, green, blue, remainingVertices);
-        }
-
-        for (int index = 1; index < points.size() - 1 && remainingVertices >= 4; index++) {
-            PreviewPoint corner = points.get(index);
-            if (!corner.isCorner() || corner.isNode()) {
-                continue;
-            }
-            RailPort incoming = getCornerEntryPort(points.get(index - 1), corner);
-            RailPort outgoing = getCornerExitPort(corner, points.get(index + 1));
-            if (incoming == null || outgoing == null) {
-                continue;
-            }
-            float alpha = RouteMarkerRenderer.computeAlpha(corner.position(), camPos);
-            if (alpha <= 0.0F) {
-                continue;
-            }
-            var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
-            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos,
-                incoming.position().add(incoming.side().scale(TUG_ROUTE_RAIL_OFFSET)),
-                outgoing.position().add(outgoing.side().scale(TUG_ROUTE_RAIL_OFFSET)), red, green, blue, alpha);
-            RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos,
-                incoming.position().subtract(incoming.side().scale(TUG_ROUTE_RAIL_OFFSET)),
-                outgoing.position().subtract(outgoing.side().scale(TUG_ROUTE_RAIL_OFFSET)), red, green, blue, alpha);
-            remainingVertices -= 4;
-        }
-
-        for (BlockPos waypoint : route.waypointPositions()) {
-            if (remainingVertices < 8) {
-                break;
-            }
-            float alpha = RouteMarkerRenderer.computeAlpha(toWaterSurface(Vec3.atCenterOf(waypoint)), camPos);
-            if (alpha <= 0.0F) {
-                continue;
-            }
-            renderTugRouteNodeBounds(pose, buffer.getBuffer(ModRenderType.LINES), camPos, waypoint, red, green, blue, alpha);
-            remainingVertices -= 8;
-        }
-        return remainingVertices;
-    }
-
-    private static float getTrackedSegmentAlpha(PreviewSegment segment, Vec3 camPos) {
-        Vec3 direction = segment.to().subtract(segment.from());
-        double lengthSqr = direction.lengthSqr();
-        if (lengthSqr <= 1.0E-6D) {
-            return 0.0F;
-        }
-        double progress = Math.clamp(camPos.subtract(segment.from()).dot(direction) / lengthSqr, 0.0D, 1.0D);
-        Vec3 closest = segment.from().add(direction.scale(progress));
-        return RouteMarkerRenderer.computeAlpha(closest, camPos);
-    }
-
-    private static int renderTrackedTugRouteArrows(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer lineBuffer,
-                                                    Vec3 camPos, PreviewSegment segment, float red, float green, float blue,
-                                                    int remainingVertices) {
-        double projection = camPos.subtract(segment.from()).dot(segment.forward());
-        double firstVisible = Math.max(0.0D, projection - 128.0D);
-        double lastVisible = Math.min(segment.length(), projection + 128.0D);
-        double firstArrow = Math.ceil((firstVisible - TUG_ROUTE_ARROW_SPACING * 0.5D) / TUG_ROUTE_ARROW_SPACING)
-            * TUG_ROUTE_ARROW_SPACING + TUG_ROUTE_ARROW_SPACING * 0.5D;
-
-        for (double distance = firstArrow; distance <= lastVisible && remainingVertices >= 4; distance += TUG_ROUTE_ARROW_SPACING) {
-            Vec3 center = segment.from().add(segment.forward().scale(distance));
-            float alpha = RouteMarkerRenderer.computeAlpha(center, camPos);
-            if (alpha <= 0.0F) {
-                continue;
-            }
-            renderTugRouteArrow(pose, lineBuffer, camPos, center, segment.forward(), segment.side(), red, green, blue, alpha);
-            remainingVertices -= 4;
-        }
-        return remainingVertices;
-    }
-
     private static void renderTrackedLocoRoutes(RenderLevelStageEvent event, Vec3 camPos) {
         if (!ShippingConfig.Client.SHOW_WRENCH_LOCO_ROUTES.get()
             || !Minecraft.getInstance().level.dimension().toString().equals(VehicleTrackerPacketHandler.locoRouteDimension)
@@ -1478,21 +1600,25 @@ public class ForgeClientEventHandler {
             return;
         }
         MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(new ByteBufferBuilder(16_384));
-        for (LocoRouteTrackerData route : VehicleTrackerPacketHandler.locoRoutes.values()) {
+        Map<CompositeStrokeKey, CompositeStroke> strokes = new HashMap<>();
+        List<LocoRouteTrackerData> routes = new ArrayList<>(VehicleTrackerPacketHandler.locoRoutes.values());
+        routes.sort(Comparator.comparingInt(LocoRouteTrackerData::entityId));
+        Level level = Minecraft.getInstance().level;
+        for (LocoRouteTrackerData route : routes) {
             int colour = DyeColor.byId(route.dyeColorId()).getTextureDiffuseColor();
             RouteColour routeColour = new RouteColour(
                 ((colour >> 16) & 0xFF) / 255.0F,
                 ((colour >> 8) & 0xFF) / 255.0F,
                 (colour & 0xFF) / 255.0F
             );
-            Level level = Minecraft.getInstance().level;
-            renderLocoRoutePolyline(event.getPoseStack(), buffer, camPos,
-                getTrackedLocoRenderPoints(level, route.pathVertices(), route.waypointPositions()), routeColour);
+            addCompositeLocoRoute(strokes,
+                getTrackedLocoRenderPoints(level, route.pathVertices(), route.waypointPositions()),
+                route.entityId(), routeColour);
             for (BlockPos waypoint : route.waypointPositions()) {
-                renderLocoRouteNodeBounds(event.getPoseStack(), buffer.getBuffer(ModRenderType.LINES), camPos,
-                    level, waypoint, routeColour);
+                addLocoWaypointStrokes(strokes, level, waypoint, route.entityId(), routeColour);
             }
         }
+        renderCompositeStrokes(event.getPoseStack(), buffer, camPos, strokes, Integer.MAX_VALUE);
         buffer.endBatch();
     }
 

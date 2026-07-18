@@ -67,6 +67,8 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
 
     private static final String CONSIST_TAG = "consist";
     private static final int CONSIST_RECONNECT_TIMEOUT = 600;
+    private static final int COLLISION_LOOKAHEAD_STEPS = 5;
+    private static final int LEGACY_COLLISION_TRAVERSE_LIMIT = COLLISION_LOOKAHEAD_STEPS - 1;
 
     private List<UUID> consistUUIDs = new ArrayList<>();
     private final Map<UUID, Integer> reconnectAttempts = new HashMap<>();
@@ -331,10 +333,7 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                 forceStallCheck = true;
         } else{
             if (collisionCheckCooldown <= 0 || forceStallCheck){
-               var result = railHelper.traverse(getOnPos().above(), this.level(), this.getDirection(), (dir, pos)
-                       -> checkCollision(pos) || checkStopSign(pos, dir),
-                       4);
-               if(result.isPresent()){
+               if (hasCollisionAhead()){
                    remainingStallTime = 40;
                }
                collisionCheckCooldown = 4;
@@ -364,6 +363,23 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         if (shouldFreezeTrain()) {
             linkingHandler.train.asList().forEach(t -> t.setDeltaMovement(0, 0, 0));
         }
+    }
+
+    /**
+     * A synchronized compiled route is authoritative at upcoming switches. Walking the switch's
+     * current block state can follow a different branch and permanently stall before the navigator
+     * gets close enough to configure that switch.
+     */
+    private boolean hasCollisionAhead() {
+        List<LocoRouteStep> upcoming = navigator.getUpcomingSteps(COLLISION_LOOKAHEAD_STEPS);
+        if (!upcoming.isEmpty()) {
+            return upcoming.stream().anyMatch(step ->
+                    checkCollision(step.railPos()) || checkStopSign(step.railPos(), step.incomingDirection()));
+        }
+
+        return railHelper.traverse(getOnPos().above(), this.level(), this.getDirection(),
+                (dir, pos) -> checkCollision(pos) || checkStopSign(pos, dir),
+                LEGACY_COLLISION_TRAVERSE_LIMIT).isPresent();
     }
 
     private boolean checkStopSign(BlockPos pos, Direction prevExitTaken){

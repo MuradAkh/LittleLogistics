@@ -141,6 +141,34 @@ public class LocoRoute extends ArrayList<LocoRouteNode> {
         return isComplete() && size() >= 2 && segments.size() == size();
     }
 
+    /**
+     * Returns a cyclic slice of compiled traversal steps beginning at the supplied navigator position.
+     * Empty segments are skipped so adjacent/duplicate waypoints cannot prevent route lookahead.
+     */
+    public List<LocoRouteStep> getUpcomingSteps(int segmentIndex, int stepIndex, int maxSteps) {
+        if (!isUsable() || maxSteps <= 0) return List.of();
+
+        List<LocoRouteStep> upcoming = new ArrayList<>(maxSteps);
+        int segment = Math.floorMod(segmentIndex, segments.size());
+        int step = Math.max(0, stepIndex);
+        int segmentsVisitedWithoutStep = 0;
+
+        while (upcoming.size() < maxSteps && segmentsVisitedWithoutStep < segments.size()) {
+            LocoRouteSegment current = segments.get(segment);
+            if (step < current.getSteps().size()) {
+                upcoming.add(current.getSteps().get(step));
+                step++;
+                segmentsVisitedWithoutStep = 0;
+            } else {
+                segment = (segment + 1) % segments.size();
+                step = 0;
+                segmentsVisitedWithoutStep = current.getSteps().isEmpty()
+                    ? segmentsVisitedWithoutStep + 1 : 0;
+            }
+        }
+        return List.copyOf(upcoming);
+    }
+
     public void beginAppending() {
         state = isEmpty() ? State.BLANK : State.IN_PROGRESS;
         nextInsertionIndex = size();
