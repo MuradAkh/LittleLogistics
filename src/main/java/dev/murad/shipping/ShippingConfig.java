@@ -126,7 +126,7 @@ public class ShippingConfig {
                 BUILDER.push("barge");
                 FISHING_TREASURE_CHANCE_MODIFIER =
                         BUILDER.comment("Modify the chance of using the treasure loot table with the auto fishing barge, other factors such as depth and overfishing still play a role. " +
-                                        "Default 0.02.")
+                                        "Default 0.04.")
                                 .define("fishingTreasureChance", 0.04);
                 FISHING_LOOT_TABLE =
                         BUILDER.comment("Loot table to use when fishing barge catches a fish. Change to 'minecraft:gameplay/fishing' if some modded fish aren't being caught. Defaults to 'minecraft:gameplay/fishing/fish'.")
@@ -172,7 +172,7 @@ public class ShippingConfig {
             {
                 BUILDER.push("general");
                 TRAIN_MAX_SPEED =
-                        BUILDER.comment("Max speed that trains can be accelerated to. High speed may cause chunk loading lag or issues, not advised for servers or packs. Default 0.25, max is 1")
+                        BUILDER.comment("Max speed that trains can be accelerated to. High speed may cause chunk loading lag or issues, not advised for servers or packs. Default 0.6, max is 1")
                                 .defineInRange("trainMaxSpeed", 0.6, 0.01, 1);
 
                 TRAIN_EXEMPT_DAMAGE_SOURCES = BUILDER.comment("Damage sources that trains are invulnerable to")
@@ -185,7 +185,7 @@ public class ShippingConfig {
             {
                 BUILDER.push("locomotive");
                 LOCO_BASE_SPEED =
-                        BUILDER.comment("Locomotive base speed. High speed may cause chunk loading lag or issues, not advised for servers or packs. Default 0.2, max is 0.9")
+                        BUILDER.comment("Locomotive base speed. High speed may cause chunk loading lag or issues, not advised for servers or packs. Default 0.5, max is 0.9")
                                 .defineInRange("locoBaseSpeed", 0.5, 0.01, 0.9);
 
                 STEAM_LOCO_FUEL_MULTIPLIER =

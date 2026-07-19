@@ -41,7 +41,6 @@ public class VesselDetectorTileEntity extends BlockEntity  {
                 (e) -> e instanceof VesselEntity || e instanceof AbstractTrainCarEntity).isEmpty();
         boolean previousPowered = this.getBlockState().getValue(VesselDetectorBlock.POWERED);
 
-        this.getBlockState().setValue(VesselDetectorBlock.POWERED, found);
         level.setBlockAndUpdate(getBlockPos(), getBlockState().setValue(VesselDetectorBlock.POWERED, found));
 
         if (found != previousPowered) {

@@ -117,9 +117,6 @@ public abstract class AbstractVesselRenderer<T extends VesselEntity> extends Ent
             if(p_225626_1_.getLeader().get().shouldRender(p_225626_3_, p_225626_5_, p_225626_7_)){
                 return true;
             }
-            if(p_225626_1_.getLeader().get().shouldRender(p_225626_3_, p_225626_5_, p_225626_7_)){
-                return true;
-            }
         }
         return super.shouldRender(p_225626_1_, p_225626_2_, p_225626_3_, p_225626_5_, p_225626_7_);
     }

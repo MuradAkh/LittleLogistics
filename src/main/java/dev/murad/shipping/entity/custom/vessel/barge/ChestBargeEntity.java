@@ -40,7 +40,7 @@ public class ChestBargeEntity extends AbstractBargeEntity implements Container, 
 
     @Override
     public void remove(RemovalReason r) {
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide && r != RemovalReason.UNLOADED_TO_CHUNK) {
             Containers.dropContents(this.level(), this, this);
         }
         super.remove(r);

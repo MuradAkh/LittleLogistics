@@ -50,6 +50,8 @@ public final class VehicleRegistrationData extends SavedData {
     private static final double TRACKING_DISTANCE_SQR = 160.0D * 160.0D;
     private static final int ROUTE_SNAPSHOT_INTERVAL = 10;
     private static final int MAX_TRACKED_VERTICES = 16_384;
+    // Mirrors MAX_TRACKED_TUGS / MAX_TRACKED_LOCOS enforced in the tracker packets' canonical constructors.
+    private static final int MAX_TRACKED_ROUTES = 1_000;
 
     private record RouteState(int entityId, int dyeColor, long revision, int distanceBucket) {}
 
@@ -228,6 +230,7 @@ public final class VehicleRegistrationData extends SavedData {
         int remaining = MAX_TRACKED_VERTICES;
         List<TugRouteTrackerData> routes = new ArrayList<>();
         for (AbstractTugEntity tug : tugs) {
+            if (routes.size() >= MAX_TRACKED_ROUTES) break;
             var route = TugRouteTrackerData.fromTug(tug);
             if (route.isPresent() && route.get().pathVertices().size() <= remaining) {
                 routes.add(route.get());
@@ -257,6 +260,7 @@ public final class VehicleRegistrationData extends SavedData {
         int remaining = MAX_TRACKED_VERTICES;
         List<LocoRouteTrackerData> routes = new ArrayList<>();
         for (AbstractLocomotiveEntity locomotive : locomotives) {
+            if (routes.size() >= MAX_TRACKED_ROUTES) break;
             var route = LocoRouteTrackerData.fromLocomotive(locomotive);
             if (route.isPresent() && route.get().pathVertices().size() <= remaining) {
                 routes.add(route.get());
