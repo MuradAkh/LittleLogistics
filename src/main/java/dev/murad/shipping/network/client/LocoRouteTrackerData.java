@@ -43,7 +43,7 @@ public record LocoRouteTrackerData(int entityId, int dyeColorId, List<BlockPos> 
             for (LocoRouteStep step : route.getSegments().get(segmentIndex).getSteps()) append(path, step.railPos());
             append(path, route.get((segmentIndex + 1) % route.size()).toBlockPos());
         }
-        if (path.size() < 2 || path.size() > MAX_PATH_VERTICES) return Optional.empty();
+        if (path.size() < 2 || path.size() > MAX_PATH_VERTICES || route.size() > MAX_WAYPOINTS) return Optional.empty();
         return Optional.of(new LocoRouteTrackerData(locomotive.getId(), locomotive.getColor(), path,
             route.stream().map(node -> node.toBlockPos().immutable()).toList()));
     }
