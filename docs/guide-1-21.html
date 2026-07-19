@@ -45,6 +45,7 @@
           <li><a href="#vessels">Tugs and barges</a></li>
           <li><a href="#tug-routing">Tug routes</a></li>
           <li><a href="#trains">Locomotives and cars</a></li>
+          <li><a href="#chunk-loading">Vehicle chunk loading</a></li>
           <li><a href="#rail-network">Rail networks</a></li>
           <li><a href="#train-routing">Locomotive routes</a></li>
           <li><a href="#docking">Docking stations</a></li>
@@ -92,6 +93,10 @@
             <li>Hold <strong>W</strong> when the item tooltip says it can be pondered.</li>
             <li>Use the controls on the Ponder screen to pause, replay, or move between scenes.</li>
           </ol>
+          <figure>
+            <img src="screenshots/ponder.png" alt="The in-game Ponder screen demonstrating how a train docks automatically" loading="lazy">
+            <figcaption>A Docking Station tutorial in the in-game Ponder viewer.</figcaption>
+          </figure>
 
           <h3>Available tutorials</h3>
           <ul>
@@ -198,6 +203,14 @@
             <li>Place waypoints around islands, shorelines, tight entrances, and other obstacles to guide pathfinding.</li>
             <li>After adding at least two waypoints, click the first waypoint again to close and compile the repeating loop.</li>
           </ol>
+          <figure>
+            <img src="screenshots/tug_path_new.png" alt="The first section of a new tug route highlighted over water" loading="lazy">
+            <figcaption>Starting a new tug route.</figcaption>
+          </figure>
+          <figure>
+            <img src="screenshots/tug_path_complete.png" alt="A completed four-waypoint tug route highlighted over water" loading="lazy">
+            <figcaption>A completed tug route with its full path and direction visible.</figcaption>
+          </figure>
           <p>Each new segment must be navigable and within the server's configured maximum waypoint distance. If compilation fails, the route item reports the problem without saving the invalid change.</p>
 
           <h3>Edit an existing route</h3>
@@ -206,6 +219,10 @@
             <li><strong>Insert a waypoint:</strong> right-click a highlighted compiled segment, then right-click the new water waypoint.</li>
             <li><strong>Append to an open route:</strong> continue selecting navigable water.</li>
           </ul>
+          <figure>
+            <img src="screenshots/tug_path_edit.png" alt="A tug route with one section selected and a new waypoint being inserted" loading="lazy">
+            <figcaption>Editing a section of an existing tug route.</figcaption>
+          </figure>
           <p>While holding the route item, in-world markers and highlighted route lines show its nodes and compiled path. These markers can be disabled in the client configuration.</p>
 
           <h3>Run the route</h3>
@@ -256,6 +273,13 @@
           <p>Right-click a locomotive or train car with dye to recolour it. Match those colours when assigning Docking Stations.</p>
         </section>
 
+        <section id="chunk-loading">
+          <h2>Vehicle chunk loading</h2>
+          <p>Little Logistics automatically keeps the parts of the world needed by an active tug convoy or train available while its owning player is online. It loads the area around the linked vehicles and a limited section of the route ahead, rather than fully loading every chunk along the complete route.</p>
+          <p>These chunks are not treated like normal player-loaded chunks. Only the Little Logistics vehicles receive ticks from this system. Mobs, crops, machines, block entities, and other world systems do not continue running just because a tug or train is passing through.</p>
+          <p>This allows tug convoys and trains to travel beyond a player's normal simulation distance while minimising server load. It also prevents the system from being used as a general-purpose chunk loader for remote farms or machinery. Automatic vehicle chunk loading stops when the owning player is offline and can be adjusted or disabled in the server configuration.</p>
+        </section>
+
         <section id="rail-network">
           <h2>Building a rail network</h2>
           <p>Normal track can use vanilla rails. Little Logistics adds junction blocks for branching networks.</p>
@@ -278,6 +302,10 @@
 
           <h3>Conductor's Wrench</h3>
           <p>Use the Conductor's Wrench to cycle flat vanilla rail shapes when laying out track. Holding it also reveals nearby registered tug and locomotive routes when route overlays are enabled in the client configuration.</p>
+          <figure>
+            <img src="screenshots/conductors_wrench_view.png" alt="Nearby water and rail routes displayed while holding the Conductor's Wrench" loading="lazy">
+            <figcaption>The Conductor's Wrench view showing nearby registered routes.</figcaption>
+          </figure>
         </section>
 
         <section id="train-routing">
@@ -292,6 +320,14 @@
             <li>Put waypoints beyond automatic junctions so the chosen branch is unambiguous.</li>
             <li>After at least two connected waypoints, click the first waypoint again to compile the return segment and complete the repeating loop.</li>
           </ol>
+          <figure>
+            <img src="screenshots/train_path_new.png" alt="The first section of a new locomotive route highlighted on rails" loading="lazy">
+            <figcaption>Starting a new locomotive route.</figcaption>
+          </figure>
+          <figure>
+            <img src="screenshots/train_path_complete.png" alt="A completed locomotive route highlighted around a rail loop" loading="lazy">
+            <figcaption>A completed locomotive route with its path and direction visible.</figcaption>
+          </figure>
           <p>If no valid directed rail path exists, the item reports an error and keeps the previous valid route.</p>
 
           <h3>Edit an existing route</h3>
@@ -300,6 +336,10 @@
             <li><strong>Insert a waypoint:</strong> click a highlighted route segment, then click the rail that should become the new waypoint.</li>
             <li><strong>Cancel an edit:</strong> sneak-right-click after selecting a route section.</li>
           </ul>
+          <figure>
+            <img src="screenshots/train_path_edit.png" alt="A locomotive route with one rail section selected for editing" loading="lazy">
+            <figcaption>Editing a section of an existing locomotive route.</figcaption>
+          </figure>
           <p>The route markers show waypoint order and the highlighted compiled path. Because the compiled steps are directional, changing rails after creating a route may invalidate it. Re-edit or recreate the affected route after changing the network.</p>
 
           <h3>Run the route</h3>
@@ -328,9 +368,19 @@
             <li>Choose a straight section of canal or track.</li>
             <li>Place a Docking Station beside the vehicle path. It forms a five-block gantry over the path and needs clear space for the complete structure.</li>
             <li>Place more Docking Stations directly beside it, all facing the same direction. Adjacent controllers join into one named station.</li>
-            <li>Include one dock position for the tug or locomotive and one for every follower that needs service.</li>
+            <li>Include one dock position for the tug or locomotive and one for every barge or train car that needs service.</li>
             <li>Keep the controller faces pointing away from the canal or track so automation can connect from the outside.</li>
           </ol>
+          <div class="media-pair">
+            <figure>
+              <img src="screenshots/tugdock.png" alt="A tug and three barges aligned with matching coloured Docking Stations" loading="lazy">
+              <figcaption>A Docking Station beside a water route.</figcaption>
+            </figure>
+            <figure>
+              <img src="screenshots/traindock.png" alt="A locomotive and train cars aligned with matching coloured Docking Stations" loading="lazy">
+              <figcaption>A Docking Station beside a rail route.</figcaption>
+            </figure>
+          </div>
 
           <h3>Match vehicle colours</h3>
           <p>New vehicles and docks are red by default. Right-click a vehicle with dye to recolour it. Right-click any part of a Docking Station with dye to recolour that dock. A dock accepts only a vehicle of the same colour.</p>
