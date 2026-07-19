@@ -101,7 +101,7 @@ public class LinkingHandler<T extends Entity & LinkableEntity<T>> {
         if (leader.isPresent()) {
             writeNBT(leader.get(), compound);
         } else if (dominantNBT != null) {
-            compound.put(LinkableEntity.LinkSide.DOMINANT.name(), dominantNBT);
+            compound.put("dominant", dominantNBT);
         }
 
         compound.putBoolean("hasChild", follower.isPresent());
