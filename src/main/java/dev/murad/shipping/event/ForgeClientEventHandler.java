@@ -588,15 +588,17 @@ public class ForgeClientEventHandler {
             }
             var camPos = Minecraft.getInstance().getEntityRenderDispatcher().camera.getPosition();
             var pose = event.getPoseStack();
-            var buffer = MultiBufferSource.immediate(new ByteBufferBuilder(16_384));
-            LocoRoute locoRoute = LocoRouteItem.getRoute(stack);
+            try (ByteBufferBuilder byteBufferBuilder = new ByteBufferBuilder(16_384)) {
+                var buffer = MultiBufferSource.immediate(byteBufferBuilder);
+                LocoRoute locoRoute = LocoRouteItem.getRoute(stack);
 
-            renderLocoRoutePath(pose, buffer, camPos, player.level(), locoRoute);
-            renderLocoRouteNodes(pose, buffer, camPos, player.level(), locoRoute, new RouteColour(1.0F, 0.6F, 0.2F));
-            renderPendingLocoRoutePreview(pose, buffer, camPos, locoRoute, player.level());
-            renderLocoRouteTarget(pose, buffer, camPos, player, locoRoute);
+                renderLocoRoutePath(pose, buffer, camPos, player.level(), locoRoute);
+                renderLocoRouteNodes(pose, buffer, camPos, player.level(), locoRoute, new RouteColour(1.0F, 0.6F, 0.2F));
+                renderPendingLocoRoutePreview(pose, buffer, camPos, locoRoute, player.level());
+                renderLocoRouteTarget(pose, buffer, camPos, player, locoRoute);
 
-            buffer.endBatch();
+                buffer.endBatch();
+            }
         } else if (stack.getItem().equals(ModItems.TUG_ROUTE.get())){
             if(ShippingConfig.Client.DISABLE_ROUTE_MARKERS.get()){
                 return false;
@@ -838,85 +840,87 @@ public class ForgeClientEventHandler {
         var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
         var camPos = camera.getPosition();
         var pose = event.getPoseStack();
-        var buffer = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
-        TugRoute route = TugRouteItem.getRoute(stack);
-        List<PreviewPoint> previewPoints = flattenTugRoutePreviewPoints(route);
-        Set<BlockPos> replacedSegmentPoints = getReplacedSegmentPoints(route);
-        boolean completionTarget = isCompletionTarget(route);
-        float routeRed = completionTarget ? 0.2f : 1.0f;
-        float routeGreen = completionTarget ? 1.0f : 0.6f;
-        float routeBlue = 0.2f;
+        try (ByteBufferBuilder byteBufferBuilder = new ByteBufferBuilder(1536)) {
+            var buffer = MultiBufferSource.immediate(byteBufferBuilder);
+            TugRoute route = TugRouteItem.getRoute(stack);
+            List<PreviewPoint> previewPoints = flattenTugRoutePreviewPoints(route);
+            Set<BlockPos> replacedSegmentPoints = getReplacedSegmentPoints(route);
+            boolean completionTarget = isCompletionTarget(route);
+            float routeRed = completionTarget ? 0.2f : 1.0f;
+            float routeGreen = completionTarget ? 1.0f : 0.6f;
+            float routeBlue = 0.2f;
 
-        double travelled = 0.0D;
-        double nextArrowDistance = TUG_ROUTE_ARROW_SPACING * 0.5D;
-        for (int pointIndex = 1; pointIndex < previewPoints.size(); pointIndex++) {
-            PreviewPoint from = previewPoints.get(pointIndex - 1);
-            PreviewPoint to = previewPoints.get(pointIndex);
-            PreviewSegment segment = trimPreviewSegment(from, to);
-            if (segment == null) {
-                travelled += from.position().distanceTo(to.position());
-                continue;
-            }
-
-            Vec3 leftFrom = segment.from().add(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
-            Vec3 leftTo = segment.to().add(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
-            Vec3 rightFrom = segment.from().subtract(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
-            Vec3 rightTo = segment.to().subtract(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
-            boolean isReplacedSegment = replacedSegmentPoints.contains(toBlockPos(from.position()))
-                && replacedSegmentPoints.contains(toBlockPos(to.position()));
-            float segmentRed = isReplacedSegment ? 0.0f : routeRed;
-            float segmentGreen = isReplacedSegment ? 0.0f : routeGreen;
-            float segmentBlue = isReplacedSegment ? 0.0f : routeBlue;
-            float railAlpha = RouteMarkerRenderer.computeAlpha(segment.from().add(segment.to()).scale(0.5D), camPos);
-            if (railAlpha > 0.0f) {
-                var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
-                RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, leftFrom, leftTo, segmentRed, segmentGreen, segmentBlue, railAlpha);
-                RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, rightFrom, rightTo, segmentRed, segmentGreen, segmentBlue, railAlpha);
-            }
-
-            double segmentLength = segment.length();
-            while (segmentLength > 1.0E-6D && travelled + segmentLength >= nextArrowDistance) {
-                double ratio = (nextArrowDistance - travelled) / segmentLength;
-                Vec3 arrowCenter = segment.from().lerp(segment.to(), ratio);
-                float arrowAlpha = RouteMarkerRenderer.computeAlpha(arrowCenter, camPos);
-                if (arrowAlpha > 0.0f && isArrowClearOfCorners(arrowCenter, segment.forward(), segment.side(), previewPoints)) {
-                    renderTugRouteArrow(pose, buffer.getBuffer(ModRenderType.LINES), camPos, arrowCenter, segment.forward(), segment.side(), segmentRed, segmentGreen, segmentBlue, arrowAlpha);
+            double travelled = 0.0D;
+            double nextArrowDistance = TUG_ROUTE_ARROW_SPACING * 0.5D;
+            for (int pointIndex = 1; pointIndex < previewPoints.size(); pointIndex++) {
+                PreviewPoint from = previewPoints.get(pointIndex - 1);
+                PreviewPoint to = previewPoints.get(pointIndex);
+                PreviewSegment segment = trimPreviewSegment(from, to);
+                if (segment == null) {
+                    travelled += from.position().distanceTo(to.position());
+                    continue;
                 }
-                nextArrowDistance += TUG_ROUTE_ARROW_SPACING;
+
+                Vec3 leftFrom = segment.from().add(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+                Vec3 leftTo = segment.to().add(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+                Vec3 rightFrom = segment.from().subtract(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+                Vec3 rightTo = segment.to().subtract(segment.side().scale(TUG_ROUTE_RAIL_OFFSET));
+                boolean isReplacedSegment = replacedSegmentPoints.contains(toBlockPos(from.position()))
+                    && replacedSegmentPoints.contains(toBlockPos(to.position()));
+                float segmentRed = isReplacedSegment ? 0.0f : routeRed;
+                float segmentGreen = isReplacedSegment ? 0.0f : routeGreen;
+                float segmentBlue = isReplacedSegment ? 0.0f : routeBlue;
+                float railAlpha = RouteMarkerRenderer.computeAlpha(segment.from().add(segment.to()).scale(0.5D), camPos);
+                if (railAlpha > 0.0f) {
+                    var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
+                    RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, leftFrom, leftTo, segmentRed, segmentGreen, segmentBlue, railAlpha);
+                    RouteMarkerRenderer.renderLine(pose, lineBuffer, camPos, rightFrom, rightTo, segmentRed, segmentGreen, segmentBlue, railAlpha);
+                }
+
+                double segmentLength = segment.length();
+                while (segmentLength > 1.0E-6D && travelled + segmentLength >= nextArrowDistance) {
+                    double ratio = (nextArrowDistance - travelled) / segmentLength;
+                    Vec3 arrowCenter = segment.from().lerp(segment.to(), ratio);
+                    float arrowAlpha = RouteMarkerRenderer.computeAlpha(arrowCenter, camPos);
+                    if (arrowAlpha > 0.0f && isArrowClearOfCorners(arrowCenter, segment.forward(), segment.side(), previewPoints)) {
+                        renderTugRouteArrow(pose, buffer.getBuffer(ModRenderType.LINES), camPos, arrowCenter, segment.forward(), segment.side(), segmentRed, segmentGreen, segmentBlue, arrowAlpha);
+                    }
+                    nextArrowDistance += TUG_ROUTE_ARROW_SPACING;
+                }
+
+                travelled += segmentLength;
             }
 
-            travelled += segmentLength;
-        }
+            renderNonNodeCorners(pose, buffer, camPos, previewPoints, routeRed, routeGreen, routeBlue);
 
-        renderNonNodeCorners(pose, buffer, camPos, previewPoints, routeRed, routeGreen, routeBlue);
-
-        if (route.isInserting() && route.getNextInsertionIndex() > 0) {
-            int replacedSegmentIndex = route.getNextInsertionIndex() - 1;
-            if (replacedSegmentIndex < route.getSegments().size()) {
-                renderTugRouteSegment(pose, buffer, camPos, route.getSegments().get(replacedSegmentIndex), 0.0f, 0.0f, 0.0f);
+            if (route.isInserting() && route.getNextInsertionIndex() > 0) {
+                int replacedSegmentIndex = route.getNextInsertionIndex() - 1;
+                if (replacedSegmentIndex < route.getSegments().size()) {
+                    renderTugRouteSegment(pose, buffer, camPos, route.getSegments().get(replacedSegmentIndex), 0.0f, 0.0f, 0.0f);
+                }
             }
-        }
 
-        for (int i = 0, routeSize = route.size(); i < routeSize; i++) {
-            TugRouteNode node = route.get(i);
-            Vec3 nodePos = toWaterSurface(Vec3.atCenterOf(node.toBlockPos()));
-            float alpha = RouteMarkerRenderer.computeAlpha(nodePos, camPos);
-            if (alpha <= 0.0f) {
-                continue;
+            for (int i = 0, routeSize = route.size(); i < routeSize; i++) {
+                TugRouteNode node = route.get(i);
+                Vec3 nodePos = toWaterSurface(Vec3.atCenterOf(node.toBlockPos()));
+                float alpha = RouteMarkerRenderer.computeAlpha(nodePos, camPos);
+                if (alpha <= 0.0f) {
+                    continue;
+                }
+                var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
+                renderTugRouteNodeBounds(pose, lineBuffer, camPos, node.toBlockPos(), routeRed, routeGreen, routeBlue, alpha);
+                RouteMarkerRenderer.renderLabelAtY(pose, buffer, camera, camPos,
+                        nodePos.x, nodePos.y + TUG_ROUTE_LABEL_Y_OFFSET, nodePos.z,
+                        node.getDisplayName(i), alpha);
             }
-            var lineBuffer = buffer.getBuffer(ModRenderType.LINES);
-            renderTugRouteNodeBounds(pose, lineBuffer, camPos, node.toBlockPos(), routeRed, routeGreen, routeBlue, alpha);
-            RouteMarkerRenderer.renderLabelAtY(pose, buffer, camera, camPos,
-                    nodePos.x, nodePos.y + TUG_ROUTE_LABEL_Y_OFFSET, nodePos.z,
-                    node.getDisplayName(i), alpha);
-        }
 
-        if (!renderedTugRouteTargetPreview) {
-            renderTargetedTugRouteWater(pose, buffer, camPos, route);
-            renderedTugRouteTargetPreview = true;
-        }
+            if (!renderedTugRouteTargetPreview) {
+                renderTargetedTugRouteWater(pose, buffer, camPos, route);
+                renderedTugRouteTargetPreview = true;
+            }
 
-        buffer.endBatch();
+            buffer.endBatch();
+        }
     }
 
     private static boolean isCompletionTarget(TugRoute route) {
@@ -1553,19 +1557,21 @@ public class ForgeClientEventHandler {
         }
         routes.sort(Comparator.comparingDouble(route -> positions.get(route.entityId()).pos().distanceToSqr(camPos)));
 
-        MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(new ByteBufferBuilder(16_384));
-        Map<CompositeStrokeKey, CompositeStroke> strokes = new HashMap<>();
-        for (TugRouteTrackerData route : routes) {
-            int colourValue = DyeColor.byId(route.dyeColorId()).getTextureDiffuseColor();
-            RouteColour colour = new RouteColour(
-                ((colourValue >> 16) & 0xFF) / 255.0F,
-                ((colourValue >> 8) & 0xFF) / 255.0F,
-                (colourValue & 0xFF) / 255.0F
-            );
-            addCompositeTugRoute(strokes, route, colour);
+        try (ByteBufferBuilder byteBufferBuilder = new ByteBufferBuilder(16_384)) {
+            MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(byteBufferBuilder);
+            Map<CompositeStrokeKey, CompositeStroke> strokes = new HashMap<>();
+            for (TugRouteTrackerData route : routes) {
+                int colourValue = DyeColor.byId(route.dyeColorId()).getTextureDiffuseColor();
+                RouteColour colour = new RouteColour(
+                    ((colourValue >> 16) & 0xFF) / 255.0F,
+                    ((colourValue >> 8) & 0xFF) / 255.0F,
+                    (colourValue & 0xFF) / 255.0F
+                );
+                addCompositeTugRoute(strokes, route, colour);
+            }
+            renderCompositeStrokes(event.getPoseStack(), buffer, camPos, strokes, MAX_TRACKED_TUG_ROUTE_VERTICES_PER_FRAME);
+            buffer.endBatch();
         }
-        renderCompositeStrokes(event.getPoseStack(), buffer, camPos, strokes, MAX_TRACKED_TUG_ROUTE_VERTICES_PER_FRAME);
-        buffer.endBatch();
     }
 
     private static boolean isTrackedRouteNearCamera(TugRouteTrackerData route, Vec3 camPos) {
@@ -1599,27 +1605,29 @@ public class ForgeClientEventHandler {
             || VehicleTrackerPacketHandler.locoRoutes.isEmpty()) {
             return;
         }
-        MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(new ByteBufferBuilder(16_384));
-        Map<CompositeStrokeKey, CompositeStroke> strokes = new HashMap<>();
-        List<LocoRouteTrackerData> routes = new ArrayList<>(VehicleTrackerPacketHandler.locoRoutes.values());
-        routes.sort(Comparator.comparingInt(LocoRouteTrackerData::entityId));
-        Level level = Minecraft.getInstance().level;
-        for (LocoRouteTrackerData route : routes) {
-            int colour = DyeColor.byId(route.dyeColorId()).getTextureDiffuseColor();
-            RouteColour routeColour = new RouteColour(
-                ((colour >> 16) & 0xFF) / 255.0F,
-                ((colour >> 8) & 0xFF) / 255.0F,
-                (colour & 0xFF) / 255.0F
-            );
-            addCompositeLocoRoute(strokes,
-                getTrackedLocoRenderPoints(level, route.pathVertices(), route.waypointPositions()),
-                route.entityId(), routeColour);
-            for (BlockPos waypoint : route.waypointPositions()) {
-                addLocoWaypointStrokes(strokes, level, waypoint, route.entityId(), routeColour);
+        try (ByteBufferBuilder byteBufferBuilder = new ByteBufferBuilder(16_384)) {
+            MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(byteBufferBuilder);
+            Map<CompositeStrokeKey, CompositeStroke> strokes = new HashMap<>();
+            List<LocoRouteTrackerData> routes = new ArrayList<>(VehicleTrackerPacketHandler.locoRoutes.values());
+            routes.sort(Comparator.comparingInt(LocoRouteTrackerData::entityId));
+            Level level = Minecraft.getInstance().level;
+            for (LocoRouteTrackerData route : routes) {
+                int colour = DyeColor.byId(route.dyeColorId()).getTextureDiffuseColor();
+                RouteColour routeColour = new RouteColour(
+                    ((colour >> 16) & 0xFF) / 255.0F,
+                    ((colour >> 8) & 0xFF) / 255.0F,
+                    (colour & 0xFF) / 255.0F
+                );
+                addCompositeLocoRoute(strokes,
+                    getTrackedLocoRenderPoints(level, route.pathVertices(), route.waypointPositions()),
+                    route.entityId(), routeColour);
+                for (BlockPos waypoint : route.waypointPositions()) {
+                    addLocoWaypointStrokes(strokes, level, waypoint, route.entityId(), routeColour);
+                }
             }
+            renderCompositeStrokes(event.getPoseStack(), buffer, camPos, strokes, Integer.MAX_VALUE);
+            buffer.endBatch();
         }
-        renderCompositeStrokes(event.getPoseStack(), buffer, camPos, strokes, Integer.MAX_VALUE);
-        buffer.endBatch();
     }
 
     @SubscribeEvent
@@ -1629,6 +1637,9 @@ public class ForgeClientEventHandler {
         }
 
         Player player = Minecraft.getInstance().player;
+        if (player == null) {
+            return;
+        }
 
         renderedTugRouteTargetPreview = false;
 
@@ -1646,67 +1657,69 @@ public class ForgeClientEventHandler {
             renderTrackedTugRoutes(event, player, camPos);
             renderTrackedLocoRoutes(event, camPos);
 
-            MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
+            try (ByteBufferBuilder byteBufferBuilder = new ByteBufferBuilder(1536)) {
+                MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(byteBufferBuilder);
 
-            for(EntityPosition position : VehicleTrackerPacketHandler.toRender){
-                @Nullable
-                Entity entity = player.level().getEntity(position.id());
+                for(EntityPosition position : VehicleTrackerPacketHandler.toRender){
+                    @Nullable
+                    Entity entity = player.level().getEntity(position.id());
 
-                Vec3 entityPos = entity != null ? entity.getPosition(event.getPartialTick().getGameTimeDeltaPartialTick(false)) : position.pos();
-                Vec3 iconRenderPos = computeFixedDistance(entityPos, camPos, 1.0);
-                Vec3 textRenderPos = computeFixedDistance(entityPos, camPos, 0.9);
-                PoseStack matrixStack = event.getPoseStack();
+                    Vec3 entityPos = entity != null ? entity.getPosition(event.getPartialTick().getGameTimeDeltaPartialTick(false)) : position.pos();
+                    Vec3 iconRenderPos = computeFixedDistance(entityPos, camPos, 1.0);
+                    Vec3 textRenderPos = computeFixedDistance(entityPos, camPos, 0.9);
+                    PoseStack matrixStack = event.getPoseStack();
 
-                matrixStack.pushPose();
-                {
-                    matrixStack.translate(iconRenderPos.x - camPos.x, iconRenderPos.y  - camPos.y, iconRenderPos.z - camPos.z);
-                    matrixStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
-                    matrixStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+                    matrixStack.pushPose();
+                    {
+                        matrixStack.translate(iconRenderPos.x - camPos.x, iconRenderPos.y  - camPos.y, iconRenderPos.z - camPos.z);
+                        matrixStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
+                        matrixStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
 
-                    Minecraft.getInstance().getItemRenderer().renderStatic(
-                            new ItemStack(EntityItemMap.get(position.type())),
-                            ItemDisplayContext.GROUND,
-                            150,
-                            OverlayTexture.NO_OVERLAY,
-                            matrixStack,
-                            renderTypeBuffer,
-                            player.level(),
-                            position.id());
-                }
-                matrixStack.popPose();
-                matrixStack.pushPose();
-                {
-                    matrixStack.translate(textRenderPos.x - camPos.x, textRenderPos.y - camPos.y, textRenderPos.z - camPos.z);
-                    matrixStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
-                    matrixStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+                        Minecraft.getInstance().getItemRenderer().renderStatic(
+                                new ItemStack(EntityItemMap.get(position.type())),
+                                ItemDisplayContext.GROUND,
+                                150,
+                                OverlayTexture.NO_OVERLAY,
+                                matrixStack,
+                                renderTypeBuffer,
+                                player.level(),
+                                position.id());
+                    }
+                    matrixStack.popPose();
+                    matrixStack.pushPose();
+                    {
+                        matrixStack.translate(textRenderPos.x - camPos.x, textRenderPos.y - camPos.y, textRenderPos.z - camPos.z);
+                        matrixStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
+                        matrixStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
 
-                    matrixStack.scale(-0.025F, -0.025F, -0.025F);
+                        matrixStack.scale(-0.025F, -0.025F, -0.025F);
 
-                    Font fontRenderer = Minecraft.getInstance().font;
-                    String text = String.format("%.1fm", position.pos().distanceTo(player.position()));
+                        Font fontRenderer = Minecraft.getInstance().font;
+                        String text = String.format("%.1fm", position.pos().distanceTo(player.position()));
 
-                    fontRenderer.drawInBatch(text,
-                            (-fontRenderer.width(text) / (float) 2), 0.0F,
-                            -1, true,
-                            matrixStack.last().pose(), renderTypeBuffer,
-                            Font.DisplayMode.NORMAL,
-                            0, 15728880);
-
-                    if (entity != null && entity.hasCustomName()) {
-                        var name = entity.getCustomName();
-                        matrixStack.translate(0, -20, 0);
-                        fontRenderer.drawInBatch(name,
-                                (-fontRenderer.width(name) / (float) 2), 0.0F,
+                        fontRenderer.drawInBatch(text,
+                                (-fontRenderer.width(text) / (float) 2), 0.0F,
                                 -1, true,
                                 matrixStack.last().pose(), renderTypeBuffer,
                                 Font.DisplayMode.NORMAL,
                                 0, 15728880);
-                    }
-                }
-                matrixStack.popPose();
-            }
 
-            renderTypeBuffer.endBatch();
+                        if (entity != null && entity.hasCustomName()) {
+                            var name = entity.getCustomName();
+                            matrixStack.translate(0, -20, 0);
+                            fontRenderer.drawInBatch(name,
+                                    (-fontRenderer.width(name) / (float) 2), 0.0F,
+                                    -1, true,
+                                    matrixStack.last().pose(), renderTypeBuffer,
+                                    Font.DisplayMode.NORMAL,
+                                    0, 15728880);
+                        }
+                    }
+                    matrixStack.popPose();
+                }
+
+                renderTypeBuffer.endBatch();
+            }
         }
     }
 
