@@ -1,6 +1,5 @@
 package dev.murad.shipping.setup;
 
-import com.google.common.collect.ImmutableList;
 import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.entity.custom.train.locomotive.EnergyLocomotiveEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.SteamLocomotiveEntity;
@@ -17,7 +16,6 @@ import dev.murad.shipping.util.MultiMap;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
@@ -46,14 +44,14 @@ public class ModItems {
      * COMMON
      */
     public static final DeferredHolder<Item, Item> CONDUCTORS_WRENCH = register("conductors_wrench",
-            () -> new WrenchItem(new Item.Properties().stacksTo(1)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new WrenchItem(new Item.Properties().stacksTo(1)));
 
 
     public static final DeferredHolder<Item, Item> SPRING = register("spring",
-            () -> new SpringItem(new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new SpringItem(new Item.Properties().stacksTo(64)));
 
     public static final DeferredHolder<Item, Item> CREATIVE_CAPACITOR = register("creative_capacitor",
-            () -> new CreativeCapacitor(new Item.Properties().stacksTo(1)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new CreativeCapacitor(new Item.Properties().stacksTo(1)));
 
     /**
      * Vessels
@@ -62,75 +60,71 @@ public class ModItems {
     public static final DeferredHolder<Item, Item> CHEST_BARGE = register("barge",
             () -> new VesselItem(
                     new Item.Properties(),
-                    (level, x, y, z) -> new ChestBargeEntity(ModEntityTypes.CHEST_BARGE.get(), level, x, y, z)),
-            ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+                    (level, x, y, z) -> new ChestBargeEntity(ModEntityTypes.CHEST_BARGE.get(), level, x, y, z)));
 
     public static final DeferredHolder<Item, Item> BARREL_BARGE = register("barrel_barge",
             () -> new VesselItem(
                     new Item.Properties(),
-                    (level, x, y, z) -> new ChestBargeEntity(ModEntityTypes.BARREL_BARGE.get(), level, x, y, z)),
-            ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+                    (level, x, y, z) -> new ChestBargeEntity(ModEntityTypes.BARREL_BARGE.get(), level, x, y, z)));
 
 //    public static final DeferredHolder<Item, Item> CHUNK_LOADER_BARGE = register("chunk_loader_barge",
-//            () -> new VesselItem(new Item.Properties(), ChunkLoaderBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+//            () -> new VesselItem(new Item.Properties(), ChunkLoaderBargeEntity::new));
 
     public static final DeferredHolder<Item, Item> FISHING_BARGE = register("fishing_barge",
-            () -> new VesselItem(new Item.Properties(), FishingBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new VesselItem(new Item.Properties(), FishingBargeEntity::new));
 
     public static final DeferredHolder<Item, Item> FLUID_BARGE = register("fluid_barge",
-            () -> new VesselItem(new Item.Properties(), FluidTankBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new VesselItem(new Item.Properties(), FluidTankBargeEntity::new));
 
     public static final DeferredHolder<Item, Item> SEATER_BARGE = register("seater_barge",
-            () -> new VesselItem(new Item.Properties(), SeaterBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new VesselItem(new Item.Properties(), SeaterBargeEntity::new));
 
     public static final DeferredHolder<Item, Item> VACUUM_BARGE = register("vacuum_barge",
-            () -> new VesselItem(new Item.Properties(), VacuumBargeEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new VesselItem(new Item.Properties(), VacuumBargeEntity::new));
 
     public static final DeferredHolder<Item, Item> STEAM_TUG = register("tug",
-            () -> new VesselItem(new Item.Properties(), SteamTugEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new VesselItem(new Item.Properties(), SteamTugEntity::new));
 
     public static final DeferredHolder<Item, Item> ENERGY_TUG = register("energy_tug",
-            () -> new VesselItem(new Item.Properties(), EnergyTugEntity::new), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new VesselItem(new Item.Properties(), EnergyTugEntity::new));
 
     /**
      * Trains
      */
 
     public static final DeferredHolder<Item, Item> TUG_ROUTE = register("tug_route",
-            () -> new TugRouteItem(new Item.Properties().stacksTo(16)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new TugRouteItem(new Item.Properties().stacksTo(16)));
 
     public static final DeferredHolder<Item, Item> CHEST_CAR = register("chest_car",
             () -> new TrainCarItem((level, x, y, z) ->
                     new ChestCarEntity(ModEntityTypes.CHEST_CAR.get(), level, x, y, z),
-                    new Item.Properties().stacksTo(64)),
-            ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+                    new Item.Properties().stacksTo(64)));
 
     public static final DeferredHolder<Item, Item> BARREL_CAR = register("barrel_car",
             () -> new TrainCarItem((level, x, y, z) ->
                     new ChestCarEntity(ModEntityTypes.BARREL_CAR.get(), level, x, y, z),
-                    new Item.Properties().stacksTo(64)),
-            ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+                    new Item.Properties().stacksTo(64)));
 
     public static final DeferredHolder<Item, Item> FLUID_CAR = register("fluid_car",
-            () -> new TrainCarItem(FluidTankCarEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new TrainCarItem(FluidTankCarEntity::new, new Item.Properties().stacksTo(64)));
 
     public static final DeferredHolder<Item, Item> SEATER_CAR = register("seater_car",
-            () -> new TrainCarItem(SeaterCarEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new TrainCarItem(SeaterCarEntity::new, new Item.Properties().stacksTo(64)));
 
     public static final DeferredHolder<Item, Item> STEAM_LOCOMOTIVE = register("steam_locomotive",
-            () -> new TrainCarItem(SteamLocomotiveEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new TrainCarItem(SteamLocomotiveEntity::new, new Item.Properties().stacksTo(64)));
 
     public static final DeferredHolder<Item, Item> ENERGY_LOCOMOTIVE = register("energy_locomotive",
-            () -> new TrainCarItem(EnergyLocomotiveEntity::new, new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new TrainCarItem(EnergyLocomotiveEntity::new, new Item.Properties().stacksTo(64)));
 
     public static final DeferredHolder<Item, Item> RECEIVER_COMPONENT = register("receiver_component",
-            () -> new Item(new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new Item(new Item.Properties().stacksTo(64)));
 
     public static final DeferredHolder<Item, Item> TRANSMITTER_COMPONENT = register("transmitter_component",
-            () -> new Item(new Item.Properties().stacksTo(64)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new Item(new Item.Properties().stacksTo(64)));
 
     public static final DeferredHolder<Item, Item> LOCO_ROUTE = register("locomotive_route",
-            () -> new LocoRouteItem(new Item.Properties().stacksTo(16)), ImmutableList.of(CreativeModeTabs.TOOLS_AND_UTILITIES));
+            () -> new LocoRouteItem(new Item.Properties().stacksTo(16)));
 
 
     public static void buildCreativeTab(BuildCreativeModeTabContentsEvent event) {
@@ -138,15 +132,10 @@ public class ModItems {
                 .forEach(holder -> event.accept(holder.get()));
     }
 
-    private static <T extends Item> DeferredHolder<Item, T> register(String name, Supplier<T> itemSupplier, List<ResourceKey<CreativeModeTab>> tabs) {
+    private static <T extends Item> DeferredHolder<Item, T> register(String name, Supplier<T> itemSupplier) {
         var res = Registration.ITEMS.register(name, itemSupplier);
-
-        for (var tab : tabs) {
-            PRIVATE_TAB_REGISTRY.putInsert(tab, res);
-        }
-        // Every registered item also appears in the mod's own creative tab.
+        // Every registered item lives solely in the mod's own creative tab.
         PRIVATE_TAB_REGISTRY.putInsert(ModCreativeTabs.LITTLE_LOGISTICS_KEY, res);
-
         return res;
     }
 

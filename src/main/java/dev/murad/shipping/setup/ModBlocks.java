@@ -1,7 +1,6 @@
 package dev.murad.shipping.setup;
 
 
-import com.google.common.collect.ImmutableList;
 import dev.murad.shipping.block.dockingstation.DockingStationBlock;
 import dev.murad.shipping.block.rail.*;
 import dev.murad.shipping.block.vesseldetector.VesselDetectorBlock;
@@ -9,7 +8,6 @@ import dev.murad.shipping.util.MultiMap;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -39,52 +37,31 @@ public class ModBlocks {
 
     public static final DeferredHolder<Block, Block> VESSEL_DETECTOR = register(
             "vessel_detector",
-            () -> new VesselDetectorBlock(METAL_BLOCK_BEHAVIOUR),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
+            () -> new VesselDetectorBlock(METAL_BLOCK_BEHAVIOUR));
 
     public static final DeferredHolder<Block, Block> SWITCH_RAIL = register(
             "switch_rail",
-            () -> new SwitchRail(RAIL_BLOCK_BEHAVIOUR, false),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
+            () -> new SwitchRail(RAIL_BLOCK_BEHAVIOUR, false));
 
     public static final DeferredHolder<Block, Block> AUTOMATIC_SWITCH_RAIL = register(
             "automatic_switch_rail",
-            () -> new SwitchRail(RAIL_BLOCK_BEHAVIOUR, true),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
+            () -> new SwitchRail(RAIL_BLOCK_BEHAVIOUR, true));
 
     public static final DeferredHolder<Block, Block> TEE_JUNCTION_RAIL = register(
             "tee_junction_rail",
-            () -> new TeeJunctionRail(RAIL_BLOCK_BEHAVIOUR, false),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
+            () -> new TeeJunctionRail(RAIL_BLOCK_BEHAVIOUR, false));
 
     public static final DeferredHolder<Block, Block> AUTOMATIC_TEE_JUNCTION_RAIL = register(
             "automatic_tee_junction_rail",
-            () -> new TeeJunctionRail(RAIL_BLOCK_BEHAVIOUR, true),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
+            () -> new TeeJunctionRail(RAIL_BLOCK_BEHAVIOUR, true));
 
     public static final DeferredHolder<Block, Block> JUNCTION_RAIL = register(
             "junction_rail",
-            () -> new JunctionRail(RAIL_BLOCK_BEHAVIOUR),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
+            () -> new JunctionRail(RAIL_BLOCK_BEHAVIOUR));
 
     public static final DeferredHolder<Block, Block> DOCKING_STATION = register(
             "docking_station",
-            () -> new DockingStationBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion()),
-            ImmutableList.of(
-                    CreativeModeTabs.TOOLS_AND_UTILITIES,
-                    CreativeModeTabs.REDSTONE_BLOCKS));
+            () -> new DockingStationBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion()));
 
     public static void buildCreativeTab(BuildCreativeModeTabContentsEvent event) {
         PRIVATE_TAB_REGISTRY.getOrDefault(event.getTabKey(), new ArrayList<>())
@@ -95,16 +72,11 @@ public class ModBlocks {
         return Registration.BLOCKS.register(name, block);
     }
 
-    private static <T extends Block> DeferredHolder<Block, T> register(String name, Supplier<T> block, List<ResourceKey<CreativeModeTab>> tabs){
+    private static <T extends Block> DeferredHolder<Block, T> register(String name, Supplier<T> block){
         DeferredHolder<Block, T> ret = registerNoItem(name, block);
         DeferredHolder<Item, BlockItem> item = Registration.ITEMS.register(name, () -> new BlockItem(ret.get(), new Item.Properties()));
-
-        for (var tab : tabs) {
-            PRIVATE_TAB_REGISTRY.putInsert(tab, item);
-        }
-        // Every registered block item also appears in the mod's own creative tab.
+        // Every registered block item lives solely in the mod's own creative tab.
         PRIVATE_TAB_REGISTRY.putInsert(ModCreativeTabs.LITTLE_LOGISTICS_KEY, item);
-
         return ret;
     }
 
