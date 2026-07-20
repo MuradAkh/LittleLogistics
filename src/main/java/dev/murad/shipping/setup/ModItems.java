@@ -144,6 +144,8 @@ public class ModItems {
         for (var tab : tabs) {
             PRIVATE_TAB_REGISTRY.putInsert(tab, res);
         }
+        // Every registered item also appears in the mod's own creative tab.
+        PRIVATE_TAB_REGISTRY.putInsert(ModCreativeTabs.LITTLE_LOGISTICS_KEY, res);
 
         return res;
     }

@@ -102,6 +102,8 @@ public class ModBlocks {
         for (var tab : tabs) {
             PRIVATE_TAB_REGISTRY.putInsert(tab, item);
         }
+        // Every registered block item also appears in the mod's own creative tab.
+        PRIVATE_TAB_REGISTRY.putInsert(ModCreativeTabs.LITTLE_LOGISTICS_KEY, item);
 
         return ret;
     }
