@@ -3,6 +3,7 @@ package dev.murad.shipping.entity.custom.train.locomotive;
 import dev.murad.shipping.ShippingConfig;
 import dev.murad.shipping.block.dockingstation.DockingStationBlock;
 import dev.murad.shipping.block.dockingstation.DockingStationBlockEntity;
+import dev.murad.shipping.block.rail.JunctionRail;
 import dev.murad.shipping.block.rail.MultiShapeRail;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.accessor.DataAccessor;
@@ -70,6 +71,9 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     private static final int LOAD_RECOVERY_TICKS = 5;
     private static final int COLLISION_LOOKAHEAD_STEPS = 5;
     private static final int LEGACY_COLLISION_TRAVERSE_LIMIT = COLLISION_LOOKAHEAD_STEPS - 1;
+    private static final int JUNCTION_EXIT_CLEARANCE_STEPS = 3;
+    private static final int JUNCTION_ROUTE_SEARCH_STEPS =
+            COLLISION_LOOKAHEAD_STEPS + JUNCTION_EXIT_CLEARANCE_STEPS;
 
     private List<UUID> consistUUIDs = new ArrayList<>();
     private final Map<UUID, Integer> reconnectAttempts = new HashMap<>();
@@ -412,9 +416,11 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
             if(level().getBlockState(block).getBlock() instanceof MultiShapeRail r){
                 if(!this.level().getEntitiesOfClass(Entity.class, new AABB(pos), e -> e.equals(this) || e.equals(frontHitbox)).isEmpty())
                     return Optional.empty();
+                boolean arbitrateRightOfWay = r instanceof JunctionRail;
                 return r.getPreferredExits(level().getBlockState(block), prevExitTaken.getOpposite())
                         .stream()
-                        .map(p -> railHelper.traverse(pos.relative(p), this.level(), p, (dir, f) -> checkLocoCollision(f), 2))
+                        .map(p -> railHelper.traverse(pos.relative(p), this.level(), p,
+                                (dir, f) -> shouldYieldToLocomotive(f, block, arbitrateRightOfWay), 2))
                         .map(Optional::isPresent)
                         .reduce(Boolean::logicalOr);
             } else return Optional.of(false);
@@ -423,27 +429,116 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     }
 
     private boolean checkCollision(BlockPos pos) {
-        AABB aabb = new AABB(pos);
-        return !this.level().getEntitiesOfClass(Entity.class, aabb, e -> {
-            if(e instanceof AbstractTrainCarEntity t) {
-                return t.getTrain().getTug().map(f -> !f.getUUID().equals(this.getUUID())).orElse(true);
-            } else if (e instanceof AbstractMinecart ) return true;
-            else if(e instanceof VehicleFrontPart p) {
-                return !p.is(this);
-            } else return false;
-        }).isEmpty();
+        BlockPos scannedRail = RailHelper.getRail(pos, this.level()).orElse(pos);
+        AABB aabb = new AABB(scannedRail);
+        return !this.level().getEntitiesOfClass(Entity.class, aabb,
+                entity -> occupiesScannedRail(entity, scannedRail)).isEmpty();
     }
 
-    // to avoid deadlock for stopsign, you only care about incoming "heads"
-    private boolean checkLocoCollision(BlockPos pos) {
-        AABB aabb = new AABB(pos);
-        return !this.level().getEntitiesOfClass(Entity.class, aabb, e -> {
-            if(e instanceof AbstractLocomotiveEntity t) {
-                return t.getTrain().getTug().map(f -> !f.getUUID().equals(this.getUUID())).orElse(true);
-            } else if(e instanceof VehicleFrontPart p) {
-                return !p.is(this);
-            } else return false;
-        }).isEmpty();
+    /**
+     * Bounding boxes may extend into a neighboring route block at curves. Resolve multipart hits
+     * to their parent and require the rail vehicle itself to report the rail currently being
+     * scanned, so a train on a parallel track is not treated as route occupancy.
+     */
+    private boolean occupiesScannedRail(Entity entity, BlockPos scannedRail) {
+        Entity vehicle = entity instanceof VehicleFrontPart part ? part.getParent() : entity;
+        if (!(vehicle instanceof AbstractMinecart minecart)) {
+            return false;
+        }
+        if (vehicle instanceof AbstractTrainCarEntity trainCar) {
+            boolean sameConsist = trainCar.getTrain().getTug()
+                    .map(head -> head.getUUID().equals(this.getUUID()))
+                    .orElse(false);
+            if (sameConsist) {
+                return false;
+            }
+        }
+        return RailHelper.getRail(minecart.getOnPos().above(), this.level())
+                .map(scannedRail::equals)
+                .orElse(false);
+    }
+
+    /**
+     * Stop-sign scans only consider incoming locomotive heads. Four-way junctions arbitrate
+     * symmetrically; switch and tee rails retain their existing one-way merge priority.
+     */
+    private boolean shouldYieldToLocomotive(BlockPos pos, BlockPos junctionRail,
+                                            boolean arbitrateRightOfWay) {
+        BlockPos scannedRail = RailHelper.getRail(pos, this.level()).orElse(pos);
+        AABB aabb = new AABB(scannedRail);
+        Map<UUID, AbstractLocomotiveEntity> contenders = new HashMap<>();
+        this.level().getEntitiesOfClass(Entity.class, aabb).forEach(entity -> {
+            AbstractLocomotiveEntity contender = null;
+            if (entity instanceof AbstractLocomotiveEntity locomotive) {
+                contender = locomotive;
+            } else if (entity instanceof VehicleFrontPart part
+                    && part.getParent() instanceof AbstractLocomotiveEntity locomotive) {
+                contender = locomotive;
+            }
+            if (contender == null) return;
+
+            boolean onScannedRail = RailHelper.getRail(
+                    contender.getOnPos().above(), this.level()).map(scannedRail::equals).orElse(false);
+            if (!onScannedRail) return;
+
+            boolean foreignConsist = contender.getTrain().getTug()
+                    .map(head -> !head.getUUID().equals(this.getUUID()))
+                    .orElse(true);
+            if (foreignConsist) {
+                contenders.put(contender.getUUID(), contender);
+            }
+        });
+
+        return contenders.values().stream().anyMatch(contender ->
+                shouldYieldTo(contender, junctionRail, arbitrateRightOfWay));
+    }
+
+    private boolean shouldYieldTo(AbstractLocomotiveEntity contender, BlockPos junctionRail,
+                                  boolean arbitrateRightOfWay) {
+        Optional<UUID> reservationOwner = navigator.getAutomaticRailReservationOwner(junctionRail);
+        if (reservationOwner.isPresent()) {
+            boolean selfOwnsReservation = reservationOwner.get().equals(this.getUUID());
+            boolean contenderOwnsReservation = reservationOwner.get().equals(contender.getUUID());
+            if (!selfOwnsReservation && !contenderOwnsReservation) {
+                return true;
+            }
+            JunctionRightOfWay.Claim self = new JunctionRightOfWay.Claim(
+                    selfOwnsReservation, false, this.getUUID());
+            JunctionRightOfWay.Claim other = new JunctionRightOfWay.Claim(
+                    contenderOwnsReservation, false, contender.getUUID());
+            return JunctionRightOfWay.wins(other, self);
+        }
+        if (!arbitrateRightOfWay) {
+            return true;
+        }
+
+        JunctionRightOfWay.Claim self = new JunctionRightOfWay.Claim(
+                false, isJunctionExitClear(junctionRail), this.getUUID());
+        JunctionRightOfWay.Claim other = new JunctionRightOfWay.Claim(
+                false, contender.isJunctionExitClear(junctionRail), contender.getUUID());
+        return JunctionRightOfWay.wins(other, self);
+    }
+
+    private boolean isJunctionExitClear(BlockPos junctionRail) {
+        List<LocoRouteStep> upcoming = navigator.getUpcomingSteps(JUNCTION_ROUTE_SEARCH_STEPS);
+        int junctionIndex = -1;
+        for (int index = 0; index < upcoming.size(); index++) {
+            if (upcoming.get(index).railPos().equals(junctionRail)) {
+                junctionIndex = index;
+                break;
+            }
+        }
+        if (junctionIndex < 0) return false;
+
+        int checked = 0;
+        for (int index = junctionIndex + 1;
+             index < upcoming.size() && checked < JUNCTION_EXIT_CLEARANCE_STEPS;
+             index++, checked++) {
+            if (checkCollision(upcoming.get(index).railPos())) {
+                return false;
+            }
+        }
+        return checked == JUNCTION_EXIT_CLEARANCE_STEPS;
     }
 
     @Override
