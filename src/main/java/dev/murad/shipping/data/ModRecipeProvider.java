@@ -4,6 +4,7 @@ import dev.murad.shipping.ShippingMod;
 import dev.murad.shipping.setup.ModBlocks;
 import dev.murad.shipping.setup.ModEntityTypes;
 import dev.murad.shipping.setup.ModItems;
+import dev.murad.shipping.setup.ModRecipeSerializers;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
@@ -266,5 +267,12 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("-  ")
                 .unlockedBy("has_item", has(ModItems.SPRING.get()))
                 .save(output);
+
+        // Special recipes: copy/clear a route onto blank route items of the same type.
+        SpecialRecipeBuilder.special(ModRecipeSerializers.TUG_ROUTE_COPY_FACTORY::create)
+                .save(output, ShippingMod.MOD_ID + ":tug_route_copy");
+
+        SpecialRecipeBuilder.special(ModRecipeSerializers.LOCO_ROUTE_COPY_FACTORY::create)
+                .save(output, ShippingMod.MOD_ID + ":loco_route_copy");
     }
 }
