@@ -2,6 +2,7 @@ package dev.murad.shipping.recipe;
 
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -87,14 +88,35 @@ public abstract class AbstractRouteCopyRecipe extends CustomRecipe {
         int num = match.getSecond();
 
         if (num == 0) {
-            // clear!
+            // clear! (no blanks present: consume the route and hand back a fresh blank)
             return new ItemStack(item, 1);
         } else {
-            // copy
+            // copy: produce a single copy per craft. The source route itself is preserved
+            // in the grid via getRemainingItems, and one blank is consumed per craft, so
+            // one filled route + a stack of n blanks yields n copies (shift-click supported).
             ItemStack output = filled.copy();
-            output.setCount(num + 1);
+            output.setCount(1);
             return output;
         }
+    }
+
+    @Nonnull
+    @Override
+    public NonNullList<ItemStack> getRemainingItems(@Nonnull CraftingInput inventory) {
+        NonNullList<ItemStack> remaining = NonNullList.withSize(inventory.size(), ItemStack.EMPTY);
+        // Only preserve the source route in copy mode; in clear mode (no blanks) it is consumed.
+        boolean copyMode = checkTugRoutes(inventory).map(Pair::getSecond).orElse(0) > 0;
+        if (copyMode) {
+            for (int i = 0; i < remaining.size(); i++) {
+                ItemStack stack = inventory.getItem(i);
+                if (isRouteWithNodes(stack, true)) {
+                    ItemStack keep = stack.copy();
+                    keep.setCount(1);
+                    remaining.set(i, keep);
+                }
+            }
+        }
+        return remaining;
     }
 
     @Override
