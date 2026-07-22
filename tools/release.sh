@@ -101,8 +101,12 @@ release_exists()    { gh release view "$TAG" >/dev/null 2>&1; }
 watch_run_for_sha() {
   local workflow="$1" sha="$2" tries=0 id=""
   info "locating '$workflow' run for commit ${sha:0:8} ..."
+  # NOTE: do not filter by --branch. A release-triggered run (publish-release.yml)
+  # reports its headBranch as the tag name, not the release branch, so a --branch
+  # filter would hide it. Matching on headSha alone is unambiguous for both the
+  # push-triggered verify-pr run and the release-triggered publish run.
   while :; do
-    id="$(gh run list --workflow "$workflow" --branch "$BRANCH" --limit 30 \
+    id="$(gh run list --workflow "$workflow" --limit 40 \
             --json databaseId,headSha \
             -q "[.[] | select(.headSha==\"$sha\")][0].databaseId" 2>/dev/null || true)"
     [[ -n "$id" && "$id" != "null" ]] && break
