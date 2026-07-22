@@ -1,0 +1,4 @@
+[tools]
+# Little Logistics builds against Java 21 (see build.gradle toolchain + CI).
+# mise auto-provisions this JDK and sets JAVA_HOME/PATH when you cd into the repo.
+java = "temurin-21"

@@ -247,7 +247,7 @@ public class ModClientEventHandler {
      */
     @SubscribeEvent
     public static void buildTabContents(BuildCreativeModeTabContentsEvent event) {
-        ModBlocks.buildCreativeTab(event);
         ModItems.buildCreativeTab(event);
+        ModBlocks.buildCreativeTab(event);
     }
 }

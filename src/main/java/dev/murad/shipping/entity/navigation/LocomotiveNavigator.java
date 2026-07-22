@@ -94,6 +94,10 @@ public class LocomotiveNavigator {
         return List.copyOf(chunks);
     }
 
+    public Optional<UUID> getAutomaticRailReservationOwner(BlockPos railPos) {
+        return AutomaticRailReservations.owner(locomotive.level(), railPos);
+    }
+
     public void serverTick() {
         tickReservations();
         if (!route.isUsable()) return;

@@ -42,11 +42,13 @@ public class ChunkLoaderBargeEntity extends AbstractBargeEntity {
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag p_213281_1_) {
+        super.addAdditionalSaveData(p_213281_1_);
         mobileChunkLoader.addAdditionalSaveData(p_213281_1_);
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag p_70037_1_) {
+        super.readAdditionalSaveData(p_70037_1_);
         mobileChunkLoader.readAdditionalSaveData(p_70037_1_);
     }
 

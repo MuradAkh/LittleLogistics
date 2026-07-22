@@ -5,6 +5,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.WeakHashMap;
 
@@ -31,6 +32,22 @@ final class AutomaticRailReservations {
         }
         reservations.put(pos.immutable(), new Reservation(owner, expiresAt));
         return true;
+    }
+
+    static Optional<UUID> owner(Level level, BlockPos pos) {
+        Map<BlockPos, Reservation> reservations = BY_LEVEL.get(level);
+        if (reservations == null) return Optional.empty();
+
+        Reservation existing = reservations.get(pos);
+        if (existing == null) return Optional.empty();
+        if (existing.expiresAt() <= level.getGameTime()) {
+            reservations.remove(pos);
+            if (reservations.isEmpty()) {
+                BY_LEVEL.remove(level);
+            }
+            return Optional.empty();
+        }
+        return Optional.of(existing.owner());
     }
 
     static void release(Level level, BlockPos pos, UUID owner) {
