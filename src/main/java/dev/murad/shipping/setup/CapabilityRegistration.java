@@ -10,6 +10,7 @@ import dev.murad.shipping.entity.custom.train.wagon.ChestCarEntity;
 import dev.murad.shipping.entity.custom.train.wagon.FluidTankCarEntity;
 import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.item.creative.CreativeCapacitor;
+import net.minecraft.core.Direction;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -116,14 +117,14 @@ public class CapabilityRegistration {
 
         // === BlockEntity capabilities ===
 
-        // Docking station port capabilities — exposed on the FACING (port) face only
+        // Docking station port capabilities — exposed on the rear and bottom faces
         event.registerBlockEntity(
             Capabilities.ItemHandler.BLOCK,
             ModTileEntitiesTypes.DOCKING_STATION.get(),
             (be, direction) -> {
                 if (direction == null) return be.getItemHandler();
                 var facing = be.getBlockState().getValue(dev.murad.shipping.block.dockingstation.DockingStationBlock.FACING);
-                return direction == facing ? be.getItemHandler() : null;
+                return direction == facing || direction == Direction.DOWN ? be.getItemHandler() : null;
             }
         );
         event.registerBlockEntity(
@@ -132,7 +133,7 @@ public class CapabilityRegistration {
             (be, direction) -> {
                 if (direction == null) return be.getFluidHandler();
                 var facing = be.getBlockState().getValue(dev.murad.shipping.block.dockingstation.DockingStationBlock.FACING);
-                return direction == facing ? be.getFluidHandler() : null;
+                return direction == facing || direction == Direction.DOWN ? be.getFluidHandler() : null;
             }
         );
         event.registerBlockEntity(
@@ -141,7 +142,7 @@ public class CapabilityRegistration {
             (be, direction) -> {
                 if (direction == null) return be.getEnergyStorage();
                 var facing = be.getBlockState().getValue(dev.murad.shipping.block.dockingstation.DockingStationBlock.FACING);
-                return direction == facing ? be.getEnergyStorage() : null;
+                return direction == facing || direction == Direction.DOWN ? be.getEnergyStorage() : null;
             }
         );
 
