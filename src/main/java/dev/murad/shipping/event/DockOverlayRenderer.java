@@ -45,7 +45,7 @@ public class DockOverlayRenderer {
         int startY = screenH / 2 + 16;
 
         String line1 = occupied ? "Status: Vehicle docked" : "Status: Empty";
-        String line2 = "Redstone: " + modeStr;
+        String line2 = modeStr;
         String line3 = "Right-click to configure";
 
         int maxWidth = Math.max(font.width(line1), Math.max(font.width(line2), font.width(line3)));
@@ -74,10 +74,6 @@ public class DockOverlayRenderer {
     }
 
     private static String formatRedstoneMode(DockingStationBlockEntity.RedstoneMode mode) {
-        return switch (mode) {
-            case IGNORE -> "Ignore";
-            case HOLD_WHILE_POWERED -> "Hold";
-            case DISABLE_WHILE_POWERED -> "Disable";
-        };
+        return mode.getDisplayName().getString();
     }
 }

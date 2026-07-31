@@ -22,7 +22,7 @@ public class DockingStationScreen extends AbstractContainerScreen<DockingStation
     private static final int TEXT_COLOR        = 0xFFDDDDDD;
     private static final int LABEL_COLOR       = 0xFF999999;
 
-    private static final String[] MODE_LABELS    = {"Ignore", "Hold (on)", "Off (on)"};
+    private static final int      MODE_COUNT     = DockingStationBlockEntity.RedstoneMode.values().length;
     private static final String[] TIMEOUT_LABELS = {"1s", "2s", "5s", "10s", "20s"};
 
     private EditBox nameField;
@@ -58,19 +58,19 @@ public class DockingStationScreen extends AbstractContainerScreen<DockingStation
         int modeY = this.topPos + 97;
         addRenderableWidget(Button.builder(Component.literal("<"),
                 btn -> {
-                    currentModeOrd = (currentModeOrd + MODE_LABELS.length - 1) % MODE_LABELS.length;
+                    currentModeOrd = (currentModeOrd + MODE_COUNT - 1) % MODE_COUNT;
                     PacketDistributor.sendToServer(
                             new SetDockRedstoneModePacket(menu.getControllerPos(), currentModeOrd));
                 })
-                .pos(this.leftPos + 60, modeY).size(14, 14).build());
+                .pos(this.leftPos + 6, modeY).size(14, 14).build());
 
         addRenderableWidget(Button.builder(Component.literal(">"),
                 btn -> {
-                    currentModeOrd = (currentModeOrd + 1) % MODE_LABELS.length;
+                    currentModeOrd = (currentModeOrd + 1) % MODE_COUNT;
                     PacketDistributor.sendToServer(
                             new SetDockRedstoneModePacket(menu.getControllerPos(), currentModeOrd));
                 })
-                .pos(this.leftPos + 148, modeY).size(14, 14).build());
+                .pos(this.leftPos + 156, modeY).size(14, 14).build());
 
         // Idle timeout cycle buttons  (row at absolute y = topPos + 114)
         int timeoutY = this.topPos + 114;
@@ -181,12 +181,13 @@ public class DockingStationScreen extends AbstractContainerScreen<DockingStation
         int labelX = this.imageWidth - 8 - this.font.width(dockLabel);
         g.drawString(this.font, dockLabel, labelX, 5, LABEL_COLOR, false);
 
-        // Config labels + current values (centred between the < > buttons at x=60-162)
-        g.drawString(this.font, "Redstone:", lx, 100, LABEL_COLOR, false);
-        drawCycleValue(g, modeLabel(currentModeOrd), 100);
+        // Redstone mode — the value is self-descriptive (see lang keys), so it spans the full
+        // width between edge arrows (x=20..156) instead of carrying a separate left-hand label.
+        drawCycleValue(g, modeLabel(currentModeOrd), 20, 156, 100);
 
+        // Timeout — compact stepper: left label + short value between the arrows (x=74..148).
         g.drawString(this.font, "Timeout:", lx, 117, LABEL_COLOR, false);
-        drawCycleValue(g, TIMEOUT_LABELS[currentPresetIdx], 117);
+        drawCycleValue(g, TIMEOUT_LABELS[currentPresetIdx], 74, 148, 117);
     }
 
     /**
@@ -201,16 +202,21 @@ public class DockingStationScreen extends AbstractContainerScreen<DockingStation
         return y + 10;
     }
 
-    /** Draws a value string centred in the space between the < and > buttons (x=74..148). */
-    private void drawCycleValue(GuiGraphics g, String value, int y) {
-        int availX = 74; // width of the gap: from (60+14)=74 to 148
-        int valW   = this.font.width(value);
-        int valX   = 74 + (availX - valW) / 2;
+    /** Draws a value string centred in the horizontal span [leftX, rightX]. */
+    private void drawCycleValue(GuiGraphics g, String value, int leftX, int rightX, int y) {
+        int valX = leftX + (rightX - leftX - this.font.width(value)) / 2;
         g.drawString(this.font, value, valX, y, TEXT_COLOR, false);
     }
 
-    private static String modeLabel(int ord) {
-        return (ord >= 0 && ord < MODE_LABELS.length) ? MODE_LABELS[ord] : "?";
+    /** Component variant, so translatable labels can be centred the same way. */
+    private void drawCycleValue(GuiGraphics g, Component value, int leftX, int rightX, int y) {
+        int valX = leftX + (rightX - leftX - this.font.width(value)) / 2;
+        g.drawString(this.font, value, valX, y, TEXT_COLOR, false);
+    }
+
+    private static Component modeLabel(int ord) {
+        DockingStationBlockEntity.RedstoneMode[] modes = DockingStationBlockEntity.RedstoneMode.values();
+        return (ord >= 0 && ord < modes.length) ? modes[ord].getDisplayName() : Component.literal("?");
     }
 
     private static int presetIndexFor(int ticks) {

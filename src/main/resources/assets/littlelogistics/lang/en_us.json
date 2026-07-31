@@ -45,6 +45,9 @@
 
   "block.littlelogistics.docking_station": "Docking Station",
   "block.littlelogistics.docking_station.no_space": "Not enough space to place Docking Station",
+  "block.littlelogistics.docking_station.redstone.ignore": "Ignore Redstone",
+  "block.littlelogistics.docking_station.redstone.hold": "Hold while powered",
+  "block.littlelogistics.docking_station.redstone.release": "Release while powered",
   "block.littlelogistics.tug_dock": "Tug Dock",
   "block.littlelogistics.barge_dock": "Barge Dock",
   "block.littlelogistics.vessel_charger": "Vehicle Charger",

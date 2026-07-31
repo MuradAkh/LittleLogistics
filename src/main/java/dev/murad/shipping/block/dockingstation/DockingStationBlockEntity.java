@@ -45,10 +45,19 @@ public class DockingStationBlockEntity extends BlockEntity {
     // =========================================================================
 
     public enum RedstoneMode {
-        IGNORE,
-        HOLD_WHILE_POWERED,
-        DISABLE_WHILE_POWERED;
+        IGNORE("ignore"),
+        HOLD_WHILE_POWERED("hold"),
+        DISABLE_WHILE_POWERED("release");
 
+        private final String translationKey;
+
+        RedstoneMode(String key) {
+            this.translationKey = "block.littlelogistics.docking_station.redstone." + key;
+        }
+
+        public Component getDisplayName() {
+            return Component.translatable(translationKey);
+        }
     }
 
     // =========================================================================
