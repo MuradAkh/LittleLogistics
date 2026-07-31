@@ -62,9 +62,17 @@ dependencies {
     compileOnly "net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${mc_version}"
 
     jarJar("net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${mc_version}") {
+        version {
+            strictly "[${ponder_version}+mc${mc_version},)"
+            prefer "${ponder_version}+mc${mc_version}"
+        }
         transitive = false
     }
     jarJar("dev.engine-room.flywheel:flywheel-neoforge-${mc_version}:${flywheel_version}") {
+        version {
+            strictly '[1.0,2.0)'
+            prefer flywheel_version
+        }
         transitive = false
     }
 
