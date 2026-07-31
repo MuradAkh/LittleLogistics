@@ -1,5 +1,6 @@
 package ca.edtoaster.littlecontraptions.item;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
@@ -79,6 +80,11 @@ public class BargeAssemblerItem extends BlockItem {
         if (hit == null) {
             return null;
         }
-        return this.place(new BlockPlaceContext(player, hand, player.getItemInHand(hand), hit));
+        // Place in the block above the water surface (sitting on top of the water) rather than
+        // replacing the surface water block. Aiming the hit at the air block above makes
+        // BlockPlaceContext resolve the placement position there.
+        BlockPos placePos = hit.getBlockPos().above();
+        BlockHitResult raised = new BlockHitResult(hit.getLocation(), hit.getDirection(), placePos, hit.isInside());
+        return this.place(new BlockPlaceContext(player, hand, player.getItemInHand(hand), raised));
     }
 }

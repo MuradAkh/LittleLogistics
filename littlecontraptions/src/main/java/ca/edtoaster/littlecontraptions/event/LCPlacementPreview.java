@@ -23,7 +23,7 @@ import org.joml.Vector3f;
 @EventBusSubscriber(modid = LCMod.MOD_ID, value = Dist.CLIENT)
 public class LCPlacementPreview {
 
-    private static final Vector3f HIGHLIGHT_COLOR = new Vector3f(0.25f, 0.6f, 1.0f);
+    private static final Vector3f HIGHLIGHT_COLOR = new Vector3f(0.3f, 1.0f, 0.3f);
     // Only emit the outline every few ticks so it reads as a steady frame, not a dense cloud.
     private static final int EMIT_INTERVAL_TICKS = 3;
     private static final int POINTS_PER_EDGE = 4;
