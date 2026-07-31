@@ -1,0 +1,10 @@
+{
+  "parent": "create:block/cart_assembler/block",
+  "textures": {
+    "4": "littlecontraptions:block/barge_assembler_top",
+    "6": "littlecontraptions:block/barge_assembler_side_on",
+    "particle": "littlecontraptions:block/barge_assembler_side",
+    "rail": "littlecontraptions:block/blank",
+    "translation_chassis_side": "littlecontraptions:block/barge_assembler_side"
+  }
+}

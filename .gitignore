@@ -44,6 +44,9 @@ forge*changelog.txt
 
 # runs
 /runs
+/littlecontraptions/runs
+/littlecontraptions/src/generated/resources/.cache
+logs/
 
 # Vibe coding stuff
 .hive

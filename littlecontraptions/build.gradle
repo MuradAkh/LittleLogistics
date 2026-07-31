@@ -31,6 +31,7 @@ runs {
         arguments.addAll '--mod', lc_mod_id, '--all',
                 '--existing', file('src/main/resources').absolutePath,
                 '--existing', file('src/generated/resources').absolutePath,
+                '--existing-mod', 'create',
                 '--output', file('src/generated/resources').absolutePath
     }
 }
