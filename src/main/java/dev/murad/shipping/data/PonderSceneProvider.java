@@ -164,10 +164,8 @@ public final class PonderSceneProvider implements DataProvider {
         palette.add(railBlockState("east_west"));
         palette.add(dockingStationBlockState("controller", "14"));
         palette.add(dockingStationBlockState("left_top", "14"));
-        palette.add(dockingStationBlockState("bridge", "14"));
         palette.add(dockingStationBlockState("controller", "11"));
         palette.add(dockingStationBlockState("left_top", "11"));
-        palette.add(dockingStationBlockState("bridge", "11"));
 
         CompoundTag hopper = blockState("minecraft:hopper");
         CompoundTag hopperProperties = new CompoundTag();
@@ -206,10 +204,8 @@ public final class PonderSceneProvider implements DataProvider {
         palette.add(waterBlockState());
         palette.add(dockingStationBlockState("controller", "14"));
         palette.add(dockingStationBlockState("left_top", "14"));
-        palette.add(dockingStationBlockState("bridge", "14"));
         palette.add(dockingStationBlockState("controller", "11"));
         palette.add(dockingStationBlockState("left_top", "11"));
-        palette.add(dockingStationBlockState("bridge", "11"));
 
         CompoundTag hopper = blockState("minecraft:hopper");
         CompoundTag hopperProperties = new CompoundTag();
@@ -277,14 +273,13 @@ public final class PonderSceneProvider implements DataProvider {
         }
 
         for (int x : new int[] {6, 7}) {
-            int paletteOffset = x == 6 ? 3 : 0;
+            int paletteOffset = x == 6 ? 2 : 0;
             blocks.add(block(x, 1, 2, 2 + paletteOffset));
             blocks.add(block(x, 2, 2, 3 + paletteOffset));
-            blocks.add(block(x, 2, 3, 4 + paletteOffset));
         }
 
-        blocks.add(block(6, 1, 1, 8));
-        blocks.add(block(6, 2, 1, 9));
+        blocks.add(block(6, 1, 1, 6));
+        blocks.add(block(6, 2, 1, 7));
         return blocks;
     }
 
@@ -328,14 +323,13 @@ public final class PonderSceneProvider implements DataProvider {
         }
 
         for (int x : new int[] {6, 7}) {
-            int paletteOffset = x == 6 ? 3 : 0;
+            int paletteOffset = x == 6 ? 2 : 0;
             blocks.add(block(x, 2, 2, 2 + paletteOffset));
             blocks.add(block(x, 3, 2, 3 + paletteOffset));
-            blocks.add(block(x, 3, 3, 4 + paletteOffset));
         }
 
-        blocks.add(block(6, 2, 1, 8));
-        blocks.add(block(6, 3, 1, 9));
+        blocks.add(block(6, 2, 1, 6));
+        blocks.add(block(6, 3, 1, 7));
         return blocks;
     }
 

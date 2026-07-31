@@ -5,22 +5,24 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.StringRepresentable;
 
 /**
- * The three positions that make up a docking station's crane structure.
+ * The two positions that make up a docking station's crane structure.
  * All positions are defined relative to the CONTROLLER block, using:
  *   inwardSteps = steps in the direction FACING.getOpposite()
  *   upSteps     = steps upward
  *
  * Layout (viewed from the side, inward direction going right):
  *
- *   Y+1:  LEFT_TOP   BRIDGE
+ *   Y+1:  LEFT_TOP
  *   Y+0:  CONTROLLER
  *                   (vehicle lane)
+ *
+ * The crane arm rendered by the CONTROLLER model still visually overhangs the
+ * inward vehicle lane; it is drawn by the model, not backed by a block.
  */
 public enum DockingStationPart implements StringRepresentable {
 
     CONTROLLER ("controller",  0, 0),
-    LEFT_TOP   ("left_top",    0, 1),
-    BRIDGE     ("bridge",      1, 1);
+    LEFT_TOP   ("left_top",    0, 1);
 
     private final String serializedName;
     /** Steps in the FACING.getOpposite() (inward) direction from the controller. */

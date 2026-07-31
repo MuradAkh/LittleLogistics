@@ -31,11 +31,13 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 import javax.annotation.Nullable;
+import java.util.EnumMap;
+import java.util.Map;
 
 /**
  * The single placeable block for a docking station.
- * When placed as CONTROLLER, automatically forms a 5-block gantry crane structure.
- * Breaking any part of the structure removes all 5 blocks and drops one item.
+ * When placed as CONTROLLER, automatically forms a 2-block gantry crane structure.
+ * Breaking either part of the structure removes both blocks and drops one item.
  */
 public class DockingStationBlock extends Block implements EntityBlock {
 
@@ -228,22 +230,70 @@ public class DockingStationBlock extends Block implements EntityBlock {
     }
 
     // =========================================================================
-    // Shape (BRIDGE has a raised floor so vehicles can pass underneath)
+    // Shape — refined per part to follow the crane model instead of full cubes.
+    // The whole crane is drawn by the CONTROLLER model (docking_station_crane);
+    // shapes below are authored for the un-rotated (FACING=SOUTH) model and
+    // rotated to match the block state, which maps SOUTH=0/WEST=90/NORTH=180/EAST=270.
     // =========================================================================
 
-    /** Crossbeam cap starts at y=12/16; hanging strut below is visual-only with no collision. */
-    private static final VoxelShape BRIDGE_SHAPE = Block.box(0, 12, 0, 16, 16, 16);
+    /** CONTROLLER cell: base plates, corner legs, longitudinal beam, central column, rear socket. */
+    private static final VoxelShape CONTROLLER_SOUTH = Shapes.or(
+            Block.box(1, 0, 0, 15, 4, 16),        // base plate (full depth)
+            Block.box(4, 0, 0, 12, 8, 3),         // front legs
+            Block.box(4, 0, 13, 12, 8, 16),       // back legs
+            Block.box(6, 4, 0, 10, 9, 16),        // longitudinal beam
+            Block.box(5, 4, 5, 11, 16, 11),       // central column
+            Block.box(4.5, 4, 10, 11.5, 11.5, 16) // rear socket panel
+    );
+
+    /** LEFT_TOP cell: top of the column, the swing housing, the mast, and the jib stub. */
+    private static final VoxelShape LEFT_TOP_SOUTH = Shapes.or(
+            Block.box(5, 0, 5, 11, 3, 11),        // column top
+            Block.box(4, 2, 4, 12, 9, 16),        // swing housing
+            Block.box(6, 3, 6, 10, 15, 9),        // mast
+            Block.box(7, 4, 0, 9, 7, 8)           // jib stub
+    );
+
+    private static final Map<Direction, VoxelShape> CONTROLLER_SHAPES = facingShapes(CONTROLLER_SOUTH);
+    private static final Map<Direction, VoxelShape> LEFT_TOP_SHAPES = facingShapes(LEFT_TOP_SOUTH);
+
+    /** Rotate a SOUTH-authored shape into all four horizontal facings (SOUTH=identity). */
+    private static Map<Direction, VoxelShape> facingShapes(VoxelShape south) {
+        Map<Direction, VoxelShape> map = new EnumMap<>(Direction.class);
+        for (Direction d : Direction.Plane.HORIZONTAL) {
+            map.put(d, rotateY(south, d.get2DDataValue()));
+        }
+        return map;
+    }
+
+    /** Rotate a shape clockwise (viewed from above) by quarterTurns * 90°, matching block-state y. */
+    private static VoxelShape rotateY(VoxelShape shape, int quarterTurns) {
+        VoxelShape result = shape;
+        for (int i = 0; i < quarterTurns; i++) {
+            final VoxelShape src = result;
+            final VoxelShape[] acc = {Shapes.empty()};
+            src.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) ->
+                    acc[0] = Shapes.or(acc[0], Shapes.box(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX)));
+            result = acc[0];
+        }
+        return result;
+    }
+
+    private VoxelShape shapeFor(BlockState state) {
+        return switch (state.getValue(PART)) {
+            case CONTROLLER -> CONTROLLER_SHAPES.get(state.getValue(FACING));
+            case LEFT_TOP -> LEFT_TOP_SHAPES.get(state.getValue(FACING));
+        };
+    }
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        if (state.getValue(PART) == DockingStationPart.BRIDGE) return BRIDGE_SHAPE;
-        return super.getShape(state, level, pos, context);
+        return shapeFor(state);
     }
 
     @Override
     public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        if (state.getValue(PART) == DockingStationPart.BRIDGE) return Shapes.empty();
-        return super.getCollisionShape(state, level, pos, context);
+        return shapeFor(state);
     }
 
     // =========================================================================

@@ -120,10 +120,6 @@ public class ModBlockStateProvider extends BlockStateProvider {
                         .modelFile(craneModel)
                         .rotationY(portRot)
                         .build();
-                case BRIDGE -> ConfiguredModel.builder()
-                        .modelFile(emptyModel)
-                        .rotationY(portRot)
-                        .build();
                 case LEFT_TOP -> ConfiguredModel.builder()
                         .modelFile(emptyModel)
                         .build();
