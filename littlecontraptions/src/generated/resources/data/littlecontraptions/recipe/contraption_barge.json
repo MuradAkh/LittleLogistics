@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "$": {
+      "item": "minecraft:iron_ingot"
+    },
+    "A": {
+      "item": "create:brass_ingot"
+    },
+    "B": {
+      "item": "create:andesite_alloy"
+    }
+  },
+  "pattern": [
+    "ABA",
+    "$$$"
+  ],
+  "result": {
+    "count": 1,
+    "id": "littlecontraptions:contraption_barge"
+  }
+}
