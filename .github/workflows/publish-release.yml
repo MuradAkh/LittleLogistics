@@ -8,6 +8,9 @@ on:
 jobs:
   publish-release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - uses: actions/checkout@v4
@@ -20,8 +23,6 @@ jobs:
       - name: Publish artifact
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EDTOASTER_MAVEN_USER: ${{ secrets.EDTOASTER_MAVEN_USER }}
-          EDTOASTER_MAVEN_PASS: ${{ secrets.EDTOASTER_MAVEN_PASS }}
 
         # The GITHUB_REF tag comes in the format 'refs/tags/xxx'.
         # If we split on '/' and take the 3rd value,
@@ -33,7 +34,6 @@ jobs:
           echo "Truncated version: ${NEW_VERSION_TRUNC}"
           [ -z "${NEW_VERSION_TRUNC}" ] && exit 1
           echo "Github username: ${GITHUB_ACTOR}"
-          echo "maven.edtoaster.ca username: ${EDTOASTER_MAVEN_USER}"
           ./gradlew wrapper
           ./gradlew runData
           ./gradlew -Pmod_version=${NEW_VERSION_TRUNC} publish
