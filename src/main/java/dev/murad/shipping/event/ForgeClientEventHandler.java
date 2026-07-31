@@ -1650,8 +1650,10 @@ public class ForgeClientEventHandler {
         renderRouteOnStack(event, player, mainStack);
         renderRouteOnStack(event, player, offStack);
 
-        // Only render registered vehicles when conductors wrench is on the mainhand
-        if (mainStack.getItem().equals(ModItems.CONDUCTORS_WRENCH.get()) && player.level().dimension().toString().equals(VehicleTrackerPacketHandler.toRenderDimension)){
+        // Render registered vehicles when the conductor's wrench is held in either hand
+        boolean holdingWrench = mainStack.is(ModItems.CONDUCTORS_WRENCH.get())
+                || offStack.is(ModItems.CONDUCTORS_WRENCH.get());
+        if (holdingWrench && player.level().dimension().toString().equals(VehicleTrackerPacketHandler.toRenderDimension)){
             var camera = Minecraft.getInstance().getEntityRenderDispatcher().camera;
             Vec3 camPos = camera.getPosition();
             renderTrackedTugRoutes(event, player, camPos);

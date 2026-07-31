@@ -183,7 +183,8 @@ public final class VehicleRegistrationData extends SavedData {
     private void tickWrenchTracking(ServerLevel level, List<Registration> dimensionRecords) {
         for (ServerPlayer player : level.players()) {
             UUID playerId = player.getUUID();
-            if (!player.getItemInHand(InteractionHand.MAIN_HAND).is(ModItems.CONDUCTORS_WRENCH.get())) {
+            if (!player.getItemInHand(InteractionHand.MAIN_HAND).is(ModItems.CONDUCTORS_WRENCH.get())
+                    && !player.getItemInHand(InteractionHand.OFF_HAND).is(ModItems.CONDUCTORS_WRENCH.get())) {
                 lastTugRoutes.remove(playerId);
                 lastLocoRoutes.remove(playerId);
                 routeSnapshotTimers.remove(playerId);
