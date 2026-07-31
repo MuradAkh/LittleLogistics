@@ -19,3 +19,7 @@ plugins {
 }
 
 rootProject.name = mod_id
+
+// Optional companion mod: Little Contraptions (Create integration).
+// Produces a second, separate mod jar from the same repo.
+include 'littlecontraptions'
