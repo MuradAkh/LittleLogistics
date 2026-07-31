@@ -1,8 +1,8 @@
 package ca.edtoaster.littlecontraptions.setup;
 
 import ca.edtoaster.littlecontraptions.entity.ContraptionBargeEntity;
+import ca.edtoaster.littlecontraptions.item.BargeAssemblerItem;
 import dev.murad.shipping.item.VesselItem;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
@@ -14,7 +14,7 @@ public class LCItems {
             () -> new VesselItem(new Item.Properties(), ContraptionBargeEntity::new));
 
     public static final DeferredHolder<Item, Item> BARGE_ASSEMBLER = Registration.ITEMS.register("barge_assembler",
-            () -> new BlockItem(LCBlocks.BARGE_ASSEMBLER.get(), new Item.Properties()));
+            () -> new BargeAssemblerItem(LCBlocks.BARGE_ASSEMBLER.get(), new Item.Properties()));
 
     public static void register () {
     }
