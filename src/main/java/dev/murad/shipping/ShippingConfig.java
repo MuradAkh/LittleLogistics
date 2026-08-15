@@ -143,8 +143,8 @@ public class ShippingConfig {
             {
                 BUILDER.push("tug");
                 TUG_BASE_SPEED =
-                        BUILDER.comment("Base speed of the tugs. Default 2.4.")
-                                .defineInRange("tugBaseSpeed", 2.4, 0.1, 10);
+                        BUILDER.comment("Base speed of the tugs. Default 4.8.")
+                                .defineInRange("tugBaseSpeed", 4.8, 0.1, 10);
 
                 TUG_PATHFINDING_MULTIPLIER =
                         BUILDER.comment("Multiplier for tug pathfinding search space, high values may impact performance. Default 1.")
