@@ -85,7 +85,12 @@ public class SpringPhysicsUtil {
 
         double excess = dist - targetDistance;
         double leaderSpeed = dominant.getDeltaMovement().length();
-        double pullSpeed = Math.min(0.25D, Math.max(0.03D, leaderSpeed) + excess * 0.35D);
+        // Follower matches the leader's pace, plus a distance-proportional catch-up term
+        // so a stretched gap actually closes. The cap must scale with the leader's speed --
+        // a flat cap lets a fast leader permanently out-run its followers (and eventually
+        // sever the link at 20 blocks), which is what made barges fail to keep up.
+        double maxPull = Math.max(0.5D, leaderSpeed * 1.5D);
+        double pullSpeed = Math.min(maxPull, Math.max(0.03D, leaderSpeed) + excess * 0.35D);
         dominated.setDeltaMovement(pullSpeed * dx, pullSpeed * dy, pullSpeed * dz);
     }
 }
