@@ -216,6 +216,49 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
         super.dropLeash(p_110160_1_, p_110160_2_);
     }
 
+    // Custom leash physics. Vanilla PathfinderMob follows a lead via the block-grid
+    // water navigation, but our always-on MovementGoal calls navigation.stop() every
+    // tick, which suppresses it -- leaving only vanilla's axis-squared elastic pull.
+    // That drags the tug along grid cardinals and makes it spin. Instead we apply a
+    // smooth pull pointed straight at the holder and face the tug that way.
+    @Override
+    public void closeRangeLeashBehaviour(@NotNull Entity holder) {
+        pullTowardLeashHolder(holder);
+    }
+
+    @Override
+    public void elasticRangeLeashBehaviour(@NotNull Entity holder, float distance) {
+        pullTowardLeashHolder(holder);
+    }
+
+    private void pullTowardLeashHolder(Entity holder) {
+        // Server drives the motion; the client just interpolates the synced position/yaw.
+        if (this.level().isClientSide) {
+            return;
+        }
+        // Route/dock driving owns the tug's motion; leave it alone when engaged so the
+        // lead can't fight active navigation.
+        if (this.docked || this.independentMotion) {
+            return;
+        }
+        Vec3 toHolder = new Vec3(holder.getX() - this.getX(), 0.0D, holder.getZ() - this.getZ());
+        double dist = toHolder.length();
+        // Keep ~2 blocks of slack so it doesn't jitter right under the holder.
+        double pull = dist - 2.0D;
+        if (dist < 1.0E-4D || pull <= 0.0D) {
+            return;
+        }
+        // Linear direction (no per-axis squaring), with a capped, distance-scaled magnitude.
+        double strength = Math.min(pull * 0.06D, 0.18D);
+        Vec3 accel = toHolder.scale(strength / dist);
+        this.setDeltaMovement(this.getDeltaMovement().add(accel.x, 0.0D, accel.z));
+        // Face the pull direction so the hull tracks its travel instead of spinning.
+        float yaw = computeRouteYaw(accel);
+        this.setYRot(yaw);
+        this.yRotO = yaw;
+        this.setYHeadRot(yaw);
+    }
+
 
     public abstract DataAccessor getDataAccessor();
 
