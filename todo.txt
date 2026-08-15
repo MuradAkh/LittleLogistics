@@ -1,0 +1,21 @@
+new ponders
+
+1. item collection and connected inventories
+
+bugs
+
+1. barges lag behind too much
+2. as soon as you place the route in the tug, it snaps the positions of the barges to the start of the route
+3. barges in ponders are very jittery
+4. chain links in bargers flicker
+5. barges bounce around
+6. Routes try to route around barge assemblers
+7. routes stack to 16 in tug/loco
+4. Fix UI inconsistency in redstone mode
+5. Barges/carts that are undocked because of the wrong color look weird (they are too far away)3. change dock rendering to show that it's powered
+
+enhancements
+
+1. done - UI/UX changes on placing barge assembler
+2. done - wrench on offhand renders routes
+3. dock should show when powered on the model/texture

@@ -69,6 +69,8 @@
   "screen.littlelogistics.fishing_barge": "Auto-Fishing Barge",
   "screen.littlelogistics.energy_tug": "Energy Tug",
   "screen.littlelogistics.energy_tug.energy": "%s/%s FE",
+  "screen.littlelogistics.steam.fuel_time": "Fuel: %1$sm %2$ss left",
+  "screen.littlelogistics.steam.no_fuel": "Out of fuel",
 
   "screen.littlelogistics.locomotive.route": "Visited:",
   "screen.littlelogistics.locomotive.on": "Start Engine",

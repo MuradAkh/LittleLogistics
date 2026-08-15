@@ -25,5 +25,12 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
         tag(BlockTags.RAILS).add(ModBlocks.TEE_JUNCTION_RAIL.get());
         tag(BlockTags.RAILS).add(ModBlocks.AUTOMATIC_TEE_JUNCTION_RAIL.get());
         tag(BlockTags.RAILS).add(ModBlocks.JUNCTION_RAIL.get());
+
+        // Non-rail blocks are mineable with a pickaxe or an axe (they copy iron-block
+        // properties, which require the correct tool for drops).
+        tag(BlockTags.MINEABLE_WITH_PICKAXE)
+                .add(ModBlocks.DOCKING_STATION.get(), ModBlocks.VESSEL_DETECTOR.get());
+        tag(BlockTags.MINEABLE_WITH_AXE)
+                .add(ModBlocks.DOCKING_STATION.get(), ModBlocks.VESSEL_DETECTOR.get());
     }
 }

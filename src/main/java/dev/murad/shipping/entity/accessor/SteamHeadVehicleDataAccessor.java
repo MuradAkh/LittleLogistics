@@ -13,6 +13,10 @@ public class SteamHeadVehicleDataAccessor extends HeadVehicleDataAccessor{
         return this.data.get(15);
     }
 
+    public int getBurnTime() {
+        return this.data.get(16);
+    }
+
     public static class Builder extends HeadVehicleDataAccessor.Builder{
 
         public Builder() {
@@ -21,6 +25,11 @@ public class SteamHeadVehicleDataAccessor extends HeadVehicleDataAccessor{
 
         public Builder withBurnProgress(IntSupplier burnProgress) {
             this.arr.setSupplier(15, burnProgress);
+            return this;
+        }
+
+        public Builder withBurnTime(IntSupplier burnTime) {
+            this.arr.setSupplier(16, burnTime);
             return this;
         }
 

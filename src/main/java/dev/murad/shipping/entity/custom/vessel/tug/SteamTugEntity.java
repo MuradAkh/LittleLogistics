@@ -71,6 +71,7 @@ public class SteamTugEntity extends AbstractTugEntity {
     public SteamHeadVehicleDataAccessor getDataAccessor() {
         return (SteamHeadVehicleDataAccessor) new SteamHeadVehicleDataAccessor.Builder()
                 .withBurnProgress(this::getBurnProgress)
+                .withBurnTime(() -> burnTime / 20)
                 .withId(this.getId())
                 .withLit(this::isLit)
                 .withVisitedSize(this::getVisitedRouteNodeCount)

@@ -27,4 +27,11 @@ public class SteamHeadVehicleContainer<T extends Entity & HeadVehicle> extends A
         return data.getBurnProgress();
     }
 
+    /**
+     * @return remaining fuel burn time in seconds (synced from the entity).
+     */
+    public int getBurnTime(){
+        return data.getBurnTime();
+    }
+
 }

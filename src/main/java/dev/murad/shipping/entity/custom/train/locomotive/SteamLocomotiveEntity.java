@@ -61,6 +61,7 @@ public class SteamLocomotiveEntity extends AbstractLocomotiveEntity implements I
     public SteamHeadVehicleDataAccessor getDataAccessor() {
         return (SteamHeadVehicleDataAccessor) new SteamHeadVehicleDataAccessor.Builder()
                 .withBurnProgress(this::getBurnProgress)
+                .withBurnTime(() -> burnTime / 20)
                 .withId(this.getId())
                 .withOn(() -> engineOn)
                 .withRouteSize(() -> navigator.getRouteSize())
