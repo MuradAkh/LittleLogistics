@@ -32,6 +32,10 @@ public class EnergyTugEntity extends AbstractTugEntity {
     private static final int MAX_ENERGY = ShippingConfig.Server.ENERGY_TUG_BASE_CAPACITY.get();
     private static final int MAX_TRANSFER = ShippingConfig.Server.ENERGY_TUG_BASE_MAX_CHARGE_RATE.get();
     private static final int ENERGY_USAGE = ShippingConfig.Server.ENERGY_TUG_BASE_ENERGY_USAGE.get();
+    private static final int ENERGY_USAGE_INTERVAL = ShippingConfig.Server.ENERGY_TUG_BASE_ENERGY_USAGE_INTERVAL.get();
+
+    // Counts active (moving) ticks since the last energy drain.
+    private int energyUsageTicks = 0;
 
     private final ReadWriteEnergyStorage internalBattery = new ReadWriteEnergyStorage(MAX_ENERGY, MAX_TRANSFER, Integer.MAX_VALUE);
 
@@ -152,6 +156,12 @@ public class EnergyTugEntity extends AbstractTugEntity {
 
     @Override
     protected boolean tickFuel() {
+        // Only actually drain once every ENERGY_USAGE_INTERVAL active ticks; on the other
+        // ticks we still report "has power" so long as the battery isn't empty.
+        if (++energyUsageTicks < ENERGY_USAGE_INTERVAL) {
+            return internalBattery.getEnergyStored() > 0;
+        }
+        energyUsageTicks = 0;
         return internalBattery.extractEnergy(ENERGY_USAGE, false) > 0;
     }
 

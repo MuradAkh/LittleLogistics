@@ -73,6 +73,7 @@ public class ShippingConfig {
         public static final ModConfigSpec.ConfigValue<Integer> TUG_ROUTE_MAX_SEGMENT_LENGTH;
         public static final ModConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_CAPACITY;
         public static final ModConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_ENERGY_USAGE;
+        public static final ModConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_ENERGY_USAGE_INTERVAL;
         public static final ModConfigSpec.ConfigValue<Integer> ENERGY_TUG_BASE_MAX_CHARGE_RATE;
 
         public static final ModConfigSpec.ConfigValue<Double> TRAIN_MAX_SPEED;
@@ -81,6 +82,7 @@ public class ShippingConfig {
         public static final ModConfigSpec.ConfigValue<Double> STEAM_LOCO_FUEL_MULTIPLIER;
         public static final ModConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_CAPACITY;
         public static final ModConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_ENERGY_USAGE;
+        public static final ModConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_ENERGY_USAGE_INTERVAL;
         public static final ModConfigSpec.ConfigValue<Integer> ENERGY_LOCO_BASE_MAX_CHARGE_RATE;
 
         public static final ModConfigSpec.ConfigValue<List<? extends String>> TRAIN_EXEMPT_DAMAGE_SOURCES;
@@ -160,8 +162,11 @@ public class ShippingConfig {
                         BUILDER.comment("Base maximum capacity of the Energy tug in FE, must be an integer >= 1. Default 10000.")
                                 .defineInRange("energyTugBaseCapacity", 10000, 1, Integer.MAX_VALUE);
                 ENERGY_TUG_BASE_ENERGY_USAGE =
-                        BUILDER.comment("Base energy usage of the Energy tug in FE/tick, must be an integer >= 1. Default 1.")
+                        BUILDER.comment("Base energy usage of the Energy tug in FE per drain, must be an integer >= 1. Default 1.")
                                 .defineInRange("energyTugBaseEnergyUsage", 1, 1, Integer.MAX_VALUE);
+                ENERGY_TUG_BASE_ENERGY_USAGE_INTERVAL =
+                        BUILDER.comment("How many active ticks between each energy drain of the Energy tug, must be an integer >= 1. E.g. 4 means drain energyTugBaseEnergyUsage FE once every 4 ticks. Default 4.")
+                                .defineInRange("energyTugBaseEnergyUsageInterval", 4, 1, Integer.MAX_VALUE);
                 ENERGY_TUG_BASE_MAX_CHARGE_RATE =
                         BUILDER.comment("Base max charge rate of the Energy tug in FE/tick, must be an integer >= 1. Default 100.")
                                 .defineInRange("energyTugBaseMaxChargeRate", 100, 1, Integer.MAX_VALUE);
@@ -196,8 +201,11 @@ public class ShippingConfig {
                         BUILDER.comment("Base maximum capacity of the Energy locomotive in FE, must be an integer >= 1. Default 10000.")
                                 .defineInRange("energyLocoBaseCapacity", 10000, 1, Integer.MAX_VALUE);
                 ENERGY_LOCO_BASE_ENERGY_USAGE =
-                        BUILDER.comment("Base energy usage of the Energy locomotive in FE/tick, must be an integer >= 1. Default 1.")
+                        BUILDER.comment("Base energy usage of the Energy locomotive in FE per drain, must be an integer >= 1. Default 1.")
                                 .defineInRange("energyLocoBaseEnergyUsage", 1, 1, Integer.MAX_VALUE);
+                ENERGY_LOCO_BASE_ENERGY_USAGE_INTERVAL =
+                        BUILDER.comment("How many active ticks between each energy drain of the Energy locomotive, must be an integer >= 1. E.g. 4 means drain energyLocoBaseEnergyUsage FE once every 4 ticks. Default 4.")
+                                .defineInRange("energyLocoBaseEnergyUsageInterval", 4, 1, Integer.MAX_VALUE);
                 ENERGY_LOCO_BASE_MAX_CHARGE_RATE =
                         BUILDER.comment("Base max charge rate of the Energy locomotive in FE/tick, must be an integer >= 1. Default 100.")
                                 .defineInRange("energyLocoBaseMaxChargeRate", 100, 1, Integer.MAX_VALUE);BUILDER.pop();
