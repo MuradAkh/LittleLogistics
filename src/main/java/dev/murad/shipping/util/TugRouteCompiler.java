@@ -233,6 +233,7 @@ public final class TugRouteCompiler {
 
         List<TugRouteSegment> segments = new ArrayList<>();
         Set<BlockPos> occupied = new HashSet<>();
+        RouteHeading incomingDirection = null;
         for (int i = 0; i < compiled.size() - 1; i++) {
             BlockPos start = compiled.get(i).toBlockPos();
             BlockPos goal = compiled.get(i + 1).toBlockPos();
@@ -243,12 +244,16 @@ public final class TugRouteCompiler {
             blockedWaypoints.remove(start);
             blockedWaypoints.remove(goal);
 
-            Optional<PathResult> segment = pathfind(level, start, goal, null, null, null, occupied, blockedWaypoints);
+            // Thread the previous leg's arrival heading into this search so the join at the
+            // shared waypoint also obeys the 45-degree turn limit, matching the full-loop
+            // compiler. Without this, an in-progress route can bend sharply at a waypoint.
+            Optional<PathResult> segment = pathfind(level, start, goal, incomingDirection, null, null, occupied, blockedWaypoints);
             if (segment.isEmpty()) {
                 return CompileResult.failure("Could not find a water path between waypoint " + (i + 1) + " and waypoint " + (i + 2) + ".");
             }
             TugRouteSegment compiledSegment = segment.get().segment();
             segments.add(compiledSegment);
+            incomingDirection = segment.get().arrivalDirection();
             for (TugRoutePoint point : compiledSegment.getPoints()) {
                 occupied.add(point.toBlockPos());
             }
@@ -801,15 +806,18 @@ public final class TugRouteCompiler {
     }
 
     /**
-     * An eight-way grid needs 45-degree transitions to combine cardinal and diagonal
-     * travel.  They are discouraged by {@link #getTurnPenalty(RouteHeading, RouteHeading)},
-     * rather than forbidden; only immediate reversals are invalid.
+     * The tug may never turn more than 45 degrees in a single step, so the route bends
+     * gently instead of making hard corners.  On the eight-way grid a heading transition
+     * with a positive dot product is a 45-degree turn, zero is 90 degrees, and negative is
+     * 135/180 degrees; only the 45-degree (and straight-ahead) transitions are permitted.
+     * Sharper overall turns are still achievable, but only as several chained 45-degree
+     * steps (e.g. N -&gt; NE -&gt; E for a right angle), each of which needs navigable water.
      */
     static boolean isHeadingTransitionAllowed(@Nullable RouteHeading incomingDirection, RouteHeading nextDirection) {
         if (incomingDirection == null || incomingDirection == nextDirection) {
             return true;
         }
-        return incomingDirection.opposite() != nextDirection;
+        return headingDotProduct(incomingDirection, nextDirection) > 0;
     }
 
     private static int headingDotProduct(RouteHeading first, RouteHeading second) {
