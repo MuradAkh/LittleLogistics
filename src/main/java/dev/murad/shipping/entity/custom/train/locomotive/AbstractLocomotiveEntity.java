@@ -208,7 +208,10 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
     private ItemStackHandler createLocoRouteItemHandler() {
         return new ItemStackHandler() {
             @Override
-            protected int getStackLimit(int slot, @Nonnull ItemStack stack) {
+            public int getSlotLimit(int slot) {
+                // Governs both insertItem (shift-click/hopper) and the GUI's manual
+                // placement via SlotItemHandler#getMaxStackSize. Overriding getStackLimit
+                // alone only covers the former, letting up to 16 be placed by hand.
                 return 1;
             }
 
