@@ -30,5 +30,12 @@ done - make energy loco/tug more energy efficient
 enhancements
 
 * dock should show when holding/redstone on the model/texture
+* wrench should pick up docks
+* wrench should pick up barge/carts
 done - UI/UX changes on placing barge assembler
 done - wrench on offhand renders routes
+
+LITTLE CONTRAPTIONS
+* contraptions sit too high
+* stalling doesn't work anymore
+* push/pull inventories from contraptions
