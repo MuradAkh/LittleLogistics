@@ -115,6 +115,10 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
     private static final EntityDataAccessor<Boolean> INDEPENDENT_MOTION = SynchedEntityData.defineId(AbstractTugEntity.class, EntityDataSerializers.BOOLEAN);
     private static final String ROUTE_PROGRESS_TAG = "route_progress";
     private static final double ROUTE_LOOKAHEAD = 0.8D;
+    // Fraction of the remaining heading error the tug turns through each tick while
+    // cruising a route. Easing toward the track's own direction (rather than snapping to
+    // the noisy tug-to-lookahead vector) keeps straights steady and corners smooth.
+    private static final float ROUTE_YAW_SMOOTHING = 0.3F;
     private static final double FOLLOWER_CORRECTION_BLEND = 0.65D;
     private static final double FOLLOWER_HARD_SNAP_DISTANCE = 4.0D;
     private static final double DOCK_SETTLE_STEP = 0.08D;
@@ -978,8 +982,19 @@ public abstract class AbstractTugEntity extends VesselEntity implements Linkable
             if (horizontalDirection.lengthSqr() > 1.0E-4D) {
                 Vec3 desiredVelocity = horizontalDirection.normalize().scale(speed);
                 Vec3 currentVelocity = this.getDeltaMovement();
-                this.setDeltaMovement(currentVelocity.scale(0.55D).add(desiredVelocity.scale(0.45D)));
-                this.setYRot(computeRouteYaw(desiredVelocity));
+                Vec3 blendedVelocity = currentVelocity.scale(0.55D).add(desiredVelocity.scale(0.45D));
+                this.setDeltaMovement(blendedVelocity);
+
+                // Face the direction the tug is actually moving. The blended velocity already
+                // leads into corners (via the lookahead) and is smoothed by the 55/45 blend,
+                // so the heading tracks velocity instead of lagging behind the track tangent.
+                Vec3 horizontalVelocity = new Vec3(blendedVelocity.x, 0.0D, blendedVelocity.z);
+                if (horizontalVelocity.lengthSqr() > 1.0E-4D) {
+                    float targetYaw = computeRouteYaw(horizontalVelocity);
+                    float yaw = Mth.wrapDegrees(this.getYRot()
+                        + Mth.degreesDifference(this.getYRot(), targetYaw) * ROUTE_YAW_SMOOTHING);
+                    this.setYRot(yaw);
+                }
             }
 
             if (approachingRoute && approachProgress >= activeTrack.getTotalLength()
