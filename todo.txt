@@ -4,34 +4,31 @@ new ponders
 
 bugs
 
-* barges lag behind too much
-* as soon as you place the route in the tug, it snaps the positions of the barges to the start of the route
+* barges lag behind too much the tug
+* as soon as you place the route in the tug, it snaps the positions of the barges to the start of the route (inconsistent?)
 * barges in ponders are very jittery
-* chain links in barges flicker
-* barges bounce around
-* Routes try to route around barge assemblers
+* chain links in barges flicker as the distance between barge/tug bounces around (I think we can add an extra link)
+* barges bounce around behind tug
+* Routes try to route around barge assemblers from LC
 * Barges/carts that are undocked because of the wrong color look weird (they are too far away)
-* change dock rendering to show that it's docked
+	* Try Red/Green/Red tug train on Red/Red/Red dock.
 
 * Difficult to see why a locomotive is stuck when pathfinding, we should show some sort of error when hover
-
-* pulling tug with leads is difficult
-* forge config integration
+* forge config menu integration
 * a halted locomotive and tug keeps docking and undocking
+	* Docking a halted locomotive is useful when first energizing the energy tugs/locos
 * cannot tug locomotive with lead
-
-done - tugs can spin too fast when cornering
-
-* Tugs turn despite following a straight line
-
 * when the route gets blocked by blocks, the tug tails keep going and following the route.
 
+done - pulling tug with leads is difficult
+done - tugs can spin too fast when cornering
+done - Tugs turn despite following a straight line
 done - routes stack to 16 in tug/loco
 done - Fix UI inconsistency in redstone mode
 done - make energy loco/tug more energy efficient
 
 enhancements
 
+* dock should show when holding/redstone on the model/texture
 done - UI/UX changes on placing barge assembler
 done - wrench on offhand renders routes
-3. dock should show when powered on the model/texture
