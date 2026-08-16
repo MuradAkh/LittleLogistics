@@ -4,6 +4,8 @@ import dev.murad.shipping.capability.StallingCapability;
 import dev.murad.shipping.entity.custom.train.AbstractTrainCarEntity;
 import dev.murad.shipping.entity.custom.train.locomotive.AbstractLocomotiveEntity;
 import dev.murad.shipping.util.Train;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -68,6 +70,14 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity impleme
                 dominated.setTrain(train);
             }
         });
+    }
+
+    @Override
+    protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dims, float partialTick) {
+        // Use vanilla minecart height (0.7) as the attachment Y so Create's OrientedContraptionEntity
+        // lands at the same relative height it would on a standard minecart. Without this, our taller
+        // bounding box (0.9) pushes contraptions 0.2 blocks too high.
+        return new Vec3(0.0, 0.7, 0.0);
     }
 
     // hack to disable hoppers
