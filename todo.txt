@@ -39,4 +39,4 @@ done - wrench on offhand renders routes
 LITTLE CONTRAPTIONS
 done - contraptions sit too high
 done - stalling doesn't work anymore
-* push/pull inventories from contraptions
+done - push/pull inventories from contraptions

@@ -77,7 +77,7 @@ public abstract class AbstractWagonEntity extends AbstractTrainCarEntity impleme
         // Use vanilla minecart height (0.7) as the attachment Y so Create's OrientedContraptionEntity
         // lands at the same relative height it would on a standard minecart. Without this, our taller
         // bounding box (0.9) pushes contraptions 0.2 blocks too high.
-        return new Vec3(0.0, 0.0, 0.0);
+        return new Vec3(0.0, 0.125, 0.0);
     }
 
     // hack to disable hoppers
