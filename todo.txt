@@ -20,6 +20,9 @@ bugs
 * cannot tug locomotive with lead
 * when the route gets blocked by blocks, the tug tails keep going and following the route.
 
+* passing cart that's moving fast doesn't actually pick up the created contraption
+* when reloading, sometimes the locomotive or tug will restart at node 0 and just do nothing
+
 done - pulling tug with leads is difficult
 done - tugs can spin too fast when cornering
 done - Tugs turn despite following a straight line
