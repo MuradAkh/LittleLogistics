@@ -144,10 +144,14 @@ public class LocomotiveNavigator {
         return RailHelper.getRail(locomotive.getOnPos().above(), locomotive.level())
                 .map(railPos -> {
                     boolean wasSynchronized = synchronizedToRoute;
+                    // Anchor the re-lock to the persisted progress so a route that crosses this rail
+                    // in this direction more than once resumes at the correct pass instead of the first.
+                    LocoRoute.RoutePosition anchor = new LocoRoute.RoutePosition(segmentIndex, stepIndex);
                     Direction travelDirection = locomotive.getRailTravelDirectionAt(railPos)
                             .orElse(locomotive.getDirection());
                     synchronizedToRoute = false;
-                    synchronizeAt(railPos, travelDirection);
+                    synchronizeAt(railPos, travelDirection,
+                            wasSynchronized ? Optional.of(anchor) : Optional.empty());
                     if (wasSynchronized && !synchronizedToRoute) {
                         invalidate();
                         return true;
@@ -381,31 +385,16 @@ public class LocomotiveNavigator {
     }
 
     private void synchronizeAt(BlockPos railPos, Direction travelDirection) {
-        for (int segment = 0; segment < route.getSegments().size(); segment++) {
-            ListLoop:
-            for (int step = 0; step < route.getSegments().get(segment).getSteps().size(); step++) {
-                LocoRouteStep candidate = route.getSegments().get(segment).getSteps().get(step);
-                if (candidate.railPos().equals(railPos) && candidate.incomingDirection() == travelDirection) {
-                    segmentIndex = segment;
-                    stepIndex = step;
-                    synchronizedToRoute = true;
-                    break ListLoop;
-                }
-            }
-            if (synchronizedToRoute) return;
-        }
+        synchronizeAt(railPos, travelDirection, Optional.empty());
+    }
 
-        // A train can be parked precisely at a waypoint before it enters the next segment.
-        for (int segment = 0; segment < route.getSegments().size(); segment++) {
-            LocoRouteSegment candidate = route.getSegments().get(segment);
-            if (!route.get(segment).toBlockPos().equals(railPos) || candidate.getSteps().isEmpty()) continue;
-            if (candidate.getStartIncomingDirection() == travelDirection) {
-                segmentIndex = segment;
-                stepIndex = 0;
-                synchronizedToRoute = true;
-                return;
-            }
-        }
+    private void synchronizeAt(BlockPos railPos, Direction travelDirection,
+                               Optional<LocoRoute.RoutePosition> anchor) {
+        route.synchronize(railPos, travelDirection, anchor).ifPresent(position -> {
+            segmentIndex = position.segmentIndex();
+            stepIndex = position.stepIndex();
+            synchronizedToRoute = true;
+        });
     }
 
     private void invalidate() {

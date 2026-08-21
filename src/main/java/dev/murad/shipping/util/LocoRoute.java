@@ -2,6 +2,8 @@ package dev.murad.shipping.util;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -167,6 +169,83 @@ public class LocoRoute extends ArrayList<LocoRouteNode> {
             }
         }
         return List.copyOf(upcoming);
+    }
+
+    /** A resolved traversal position: which compiled segment and which step within it. */
+    public record RoutePosition(int segmentIndex, int stepIndex) {}
+
+    /**
+     * Locates where a locomotive sitting on {@code railPos} while travelling {@code travelDirection}
+     * currently is within this route.
+     *
+     * <p>A route may cross the same rail in the same direction more than once (shared straightaways,
+     * figure-eights, nested loops).  When it does, position and direction alone are ambiguous.  The
+     * optional {@code anchor} — the last persisted {@link RoutePosition} — disambiguates by selecting
+     * the candidate closest (cyclically) to where the train previously was; without an anchor the
+     * earliest match wins, matching a fresh synchronization from the start of the route.</p>
+     */
+    public Optional<RoutePosition> synchronize(BlockPos railPos, Direction travelDirection,
+                                               Optional<RoutePosition> anchor) {
+        if (!isUsable()) return Optional.empty();
+
+        List<RoutePosition> candidates = new ArrayList<>();
+        for (int segment = 0; segment < segments.size(); segment++) {
+            List<LocoRouteStep> steps = segments.get(segment).getSteps();
+            for (int step = 0; step < steps.size(); step++) {
+                LocoRouteStep candidate = steps.get(step);
+                if (candidate.railPos().equals(railPos)
+                        && candidate.incomingDirection() == travelDirection) {
+                    candidates.add(new RoutePosition(segment, step));
+                }
+            }
+        }
+
+        // A train can be parked precisely at a waypoint before it enters the next segment.
+        if (candidates.isEmpty()) {
+            for (int segment = 0; segment < segments.size(); segment++) {
+                LocoRouteSegment candidate = segments.get(segment);
+                if (candidate.getSteps().isEmpty()) continue;
+                if (!get(segment).toBlockPos().equals(railPos)) continue;
+                if (candidate.getStartIncomingDirection() == travelDirection) {
+                    candidates.add(new RoutePosition(segment, 0));
+                }
+            }
+        }
+
+        if (candidates.isEmpty()) return Optional.empty();
+        if (anchor.isEmpty()) return Optional.of(candidates.getFirst());
+
+        int total = totalStepCount();
+        int anchorOrdinal = ordinalOf(anchor.get());
+        RoutePosition best = candidates.getFirst();
+        int bestDistance = Integer.MAX_VALUE;
+        for (RoutePosition candidate : candidates) {
+            int distance = cyclicDistance(ordinalOf(candidate), anchorOrdinal, total);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                best = candidate;
+            }
+        }
+        return Optional.of(best);
+    }
+
+    private int totalStepCount() {
+        int total = 0;
+        for (LocoRouteSegment segment : segments) total += segment.getSteps().size();
+        return total;
+    }
+
+    private int ordinalOf(RoutePosition position) {
+        int segment = Math.floorMod(position.segmentIndex(), segments.size());
+        int ordinal = 0;
+        for (int index = 0; index < segment; index++) ordinal += segments.get(index).getSteps().size();
+        return ordinal + Math.clamp(position.stepIndex(), 0, segments.get(segment).getSteps().size());
+    }
+
+    private static int cyclicDistance(int a, int b, int total) {
+        if (total <= 0) return Math.abs(a - b);
+        int diff = Math.floorMod(a - b, total);
+        return Math.min(diff, total - diff);
     }
 
     public void beginAppending() {
