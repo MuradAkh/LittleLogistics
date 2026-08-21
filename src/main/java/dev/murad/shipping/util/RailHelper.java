@@ -141,6 +141,48 @@ public class RailHelper {
 
     }
 
+    public static boolean isStraight(RailShape shape){
+        return shape == RailShape.NORTH_SOUTH || shape == RailShape.EAST_WEST;
+    }
+
+    public static boolean isFlatCurve(RailShape shape){
+        return shape == RailShape.SOUTH_EAST || shape == RailShape.SOUTH_WEST
+                || shape == RailShape.NORTH_WEST || shape == RailShape.NORTH_EAST;
+    }
+
+    /**
+     * Whether the flat-curve rail reached at {@code railPos} (entered while travelling in
+     * {@code travelDir}) is part of a diagonal run rather than an isolated 90-degree corner.
+     * A diagonal is a chain of flat curves, so the rail counts as diagonal when the neighbour
+     * either ahead of or behind it along the path is also a flat curve. A lone corner (a single
+     * curve flanked by straights) returns false so it still slows the train down.
+     */
+    public boolean isDiagonalCurve(BlockPos railPos, Direction travelDir){
+        var level = minecart.level();
+        var railOpt = getRail(railPos, level);
+        if (railOpt.isEmpty()) {
+            return false;
+        }
+        var pos = railOpt.get();
+        if (!isFlatCurve(getShape(pos, travelDir))) {
+            return false;
+        }
+        // Rail we just came from.
+        boolean prevIsCurve = getRail(pos.relative(travelDir.getOpposite()), level)
+                .map(this::getShape)
+                .filter(RailHelper::isFlatCurve)
+                .isPresent();
+        if (prevIsCurve) {
+            return true;
+        }
+        // Rail we are about to enter.
+        return getOtherExit(travelDir.getOpposite(), getShape(pos, travelDir))
+                .flatMap(exit -> getRail(pos.relative(exit.horizontal), level))
+                .map(this::getShape)
+                .filter(RailHelper::isFlatCurve)
+                .isPresent();
+    }
+
     public static Optional<RailDir> getOtherExit(Direction direction, RailShape shape){
         var dirs = EXITS_DIRECTION.get(shape);
         if(dirs.getFirst().horizontal.equals(direction)){

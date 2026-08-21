@@ -757,9 +757,14 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
         }
         return getRailShape().map(shape -> switch (shape) {
             case NORTH_SOUTH, EAST_WEST -> 0.07;
-            case SOUTH_WEST, NORTH_WEST, SOUTH_EAST, NORTH_EAST -> 0.03;
+            // Curves on a long diagonal push like a straightaway; isolated corners stay slow.
+            case SOUTH_WEST, NORTH_WEST, SOUTH_EAST, NORTH_EAST -> isOnDiagonalRun() ? 0.07 : 0.03;
             default -> 0.07; //TODO lower if descending
         }).orElse(0d);
+    }
+
+    private boolean isOnDiagonalRun(){
+        return railHelper.isDiagonalCurve(getOnPos().above(), this.getDirection());
     }
 
     private void tickSpeedLimit(){
@@ -773,10 +778,16 @@ public abstract class AbstractLocomotiveEntity extends AbstractTrainCarEntity im
                                         if (railoc.isEmpty()) {
                                             return true;
                                         }
-                                        var shape = railHelper.getShape(railoc.get());
                                         var block = this.level().getBlockState(railoc.get());
-                                        return !(shape.equals(RailShape.EAST_WEST) || shape.equals(RailShape.NORTH_SOUTH))
-                                                || block.getBlock() instanceof MultiShapeRail;
+                                        if (block.getBlock() instanceof MultiShapeRail) {
+                                            return true;
+                                        }
+                                        var shape = railHelper.getShape(railoc.get());
+                                        if (RailHelper.isStraight(shape)) {
+                                            return false;
+                                        }
+                                        // Long diagonal runs stay fast; lone corners and slopes still stop the run.
+                                        return !railHelper.isDiagonalCurve(p, direction);
                                     },
                                     12))
                     .orElse(12);
